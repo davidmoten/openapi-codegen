@@ -1,19 +1,20 @@
 package org.davidmoten.openapi.v3;
 
 import java.io.File;
+import java.util.Map;
 
 public final class Definition {
     
     private final String definition;
-    private final String modelPackage;
-    private final String clientPackage;
     private final File generatedSourceDirectory;
+    private final Packages packages;
+    private final Map<String, Packages> externalPackages;
     
-    public Definition(String definition, String modelPackage, String clientPackage, File generatedSourceDirectory) {
+    public Definition(String definition, Packages packages, File generatedSourceDirectory, Map<String, Packages> externalPackages) {
         this.definition = definition;
-        this.modelPackage = modelPackage;
-        this.clientPackage = clientPackage;
+        this.packages = packages;
         this.generatedSourceDirectory = generatedSourceDirectory;
+        this.externalPackages = externalPackages;
     }
     
     public String definition() {

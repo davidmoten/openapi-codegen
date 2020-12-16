@@ -18,7 +18,10 @@ public final class Generator {
         OpenAPI api = result.getOpenAPI();
         System.out.println(api);
 
+        // Names object 
+        
         // generate methods on singleton client object in client package
+        
         // generate model classes for schema definitions 
 
     }
