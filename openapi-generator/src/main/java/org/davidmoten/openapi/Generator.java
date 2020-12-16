@@ -9,17 +9,21 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
-public class Generator {
+public final class Generator {
+
+    private final OpenAPI api;
+
+    public Generator(String definition) {
+        SwaggerParseResult result = new OpenAPIParser().readContents(definition, null, null);
+        result.getMessages().stream().forEach(System.out::println);
+        api = result.getOpenAPI();
+        System.out.println(api);
+    }
 
     public static void main(String[] args) throws IOException {
         String definition = new String(Files.readAllBytes(new File("src/test/resources/openapi.yml").toPath()),
                 StandardCharsets.UTF_8);
 
-        SwaggerParseResult result = new OpenAPIParser().readContents(definition, null, null);
-        result.getMessages().stream().forEach(System.out::println);
-        OpenAPI a = result.getOpenAPI();
-        System.out.println(a);
-        a.getComponents().getSchemas().keySet().forEach(System.out::println);;
     }
 
 }
