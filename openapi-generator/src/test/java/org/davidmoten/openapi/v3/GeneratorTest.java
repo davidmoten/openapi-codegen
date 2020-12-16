@@ -13,7 +13,7 @@ public final class GeneratorTest {
     public void testGenerate() throws IOException {
         String definition = new String(Files.readAllBytes(new File("src/test/resources/openapi.yml").toPath()),
                 StandardCharsets.UTF_8);
-        Definition d = new Definition(definition, "test.model", "test.client");
+        Definition d = new Definition(definition, "test.model", "test.client", new File("target/generated-source/java"));
         new Generator(d).generate();
     }
 
