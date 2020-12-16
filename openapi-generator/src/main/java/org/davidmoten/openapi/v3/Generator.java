@@ -18,7 +18,7 @@ public final class Generator {
         OpenAPI api = result.getOpenAPI();
         System.out.println(api);
 
-        // Names object 
+        // Names object for each Packages object
         
         // generate methods on singleton client object in client package
         
