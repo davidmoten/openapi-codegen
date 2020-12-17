@@ -2,6 +2,7 @@ package org.davidmoten.openapi.v3;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -43,12 +44,12 @@ public final class Generator {
     private static void writeSchemaClasses(OpenAPI api, Names names) {
         @SuppressWarnings("unchecked")
         Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api.getComponents().getSchemas();
-        for (String schemaName : schemas.keySet()) {
-            writeSchemaClass(names, schemaName);
+        for (Entry<String, Schema<?>> entry : schemas.entrySet()) {
+            writeSchemaClass(names, entry.getKey(), entry.getValue());
         }
     }
 
-    private static void writeSchemaClass(Names names, String schemaName) {
+    private static void writeSchemaClass(Names names, String schemaName, Schema<?> schema) {
         String className = names.schemaNameToClassName(schemaName);
         File file = names.schemaNameToJavaFile(schemaName);
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
