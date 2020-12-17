@@ -1,19 +1,20 @@
 package org.davidmoten.openapi.v3;
 
+import java.util.Map;
+
 import com.google.common.base.Function;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 public final class Generator {
 
     private final Definition definition;
-    private final Function<String, String> externalRefToClassName;
 
-    public Generator(Definition definition, Function<String, String> externalRefToClassName) {
+    public Generator(Definition definition) {
         this.definition = definition;
-        this.externalRefToClassName = externalRefToClassName;
     }
 
     public void generate() {
@@ -23,11 +24,16 @@ public final class Generator {
         System.out.println(api);
 
         // Names object for each Packages object
+        Names names = new Names(definition);
         
         // generate methods on singleton client object in client package
         
         // generate model classes for schema definitions 
-
+        Map<String, Schema> schemas = api.getComponents().getSchemas();
+        for (String schemaName: schemas.keySet()) {
+            String className = names.schemaNameToClassName(schemaName);
+            String simpleClassName =  Names.simpleClassName(className);
+        }
     }
 
 }
