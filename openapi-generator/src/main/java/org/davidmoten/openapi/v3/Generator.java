@@ -34,8 +34,21 @@ public final class Generator {
         Names names = new Names(definition);
 
         // generate methods on singleton client object in client package
+        writeClientClass(api, names);
 
         // generate model classes for schema definitions
+        writeSchemaClasses(api, names);
+    }
+
+    private static void writeClientClass(OpenAPI api, Names names) {
+        String className = names.clientClassName();
+        File file = names.clientClassJavaFile();
+        write(file, className, (indent, imports, p) -> {
+            p.format("%s// TODO\n", indent);
+        });
+    }
+
+    private static void writeSchemaClasses(OpenAPI api, Names names) {
         @SuppressWarnings("unchecked")
         Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api.getComponents().getSchemas();
         for (String schemaName : schemas.keySet()) {
@@ -56,7 +69,7 @@ public final class Generator {
             Indent indent = new Indent();
             p.format("%spackage %s;", indent, Names.pkg(className));
             addImportsToken(p);
-            p.format("\n%spublic final class %s {\n", indent, simpleClassName);
+            p.format("\npublic final class %s {\n", simpleClassName);
             writer.write(indent.right(), imports, p);
             p.format("}");
         }

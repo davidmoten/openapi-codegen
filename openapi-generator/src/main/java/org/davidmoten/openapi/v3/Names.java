@@ -68,4 +68,13 @@ public final class Names {
         }
     }
 
+    public String clientClassName() {
+        return definition.packages().clientPackage() + ".Client.java";
+    }
+
+    public File clientClassJavaFile() {
+        return new File(definition.generatedSourceDirectory(),
+                clientClassName().replace(".", File.separator) + ".java");
+    }
+
 }
