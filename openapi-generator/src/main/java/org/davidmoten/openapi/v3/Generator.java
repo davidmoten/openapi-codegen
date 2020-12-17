@@ -1,6 +1,10 @@
 package org.davidmoten.openapi.v3;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -54,14 +58,59 @@ public final class Generator {
         File file = names.schemaNameToJavaFile(schemaName);
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
             if (schema.getType() != null) {
-                if (schema.getType().equals("string")) {
-                    p.format("\n%sprivate %s value;\n", indent, imports.add(String.class));
-                    p.format("\n%spublic %s getValue() {\n", indent, imports.add(String.class));
-                    p.format("%sreturn value;\n", indent.right());
-                    p.format("%s}\n", indent.left());
+                Class<?> cls = toClass(schema.getType(), schema.getFormat());
+                final String t;
+                if (cls.equals(Byte.class)) {
+                    t = "byte[]";
+                } else {
+                    t = imports.add(cls);
                 }
+                p.format("\n%sprivate %s value;\n", indent, t);
+                p.format("\n%spublic %s getValue() {\n", indent, t);
+                p.format("%sreturn value;\n", indent.right());
+                p.format("%s}\n", indent.left());
             }
         });
+    }
+
+    private static Class<?> toClass(String type, String format) {
+        if ("string".equals(type)) {
+            if ("date-time".equals(format)) {
+                return OffsetDateTime.class;
+            } else if ("date".equals(format)) {
+                return null;
+            } else if ("byte".equals(format)) {
+                return Byte.class;
+            } else if ("binary".equals(format)) {
+                return Byte.class;
+            } else {
+                return String.class;
+            }
+        } else if ("boolean".equals(type)) {
+            return Boolean.class;
+        } else if ("integer".equals(type)) {
+            if ("int32".equals(format)) {
+                return Integer.class;
+            } else if ("int64".equals(format)) {
+                return Long.class;
+            } else {
+                return BigInteger.class;
+            }
+        } else if ("number".equals(type)) {
+            if ("float".equals(format)) {
+                return Float.class;
+            } else if ("double".equals(format)) {
+                return Double.class;
+            } else {
+                return BigDecimal.class;
+            }
+        } else if ("array".equals(type)) {
+            return List.class;
+        } else if ("object".equals(type)) {
+            return Object.class;
+        } else {
+            return null;
+        }
     }
 
 }

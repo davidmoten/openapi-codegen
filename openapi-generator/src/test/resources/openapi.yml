@@ -220,6 +220,37 @@ components:
     surname: 
       type: string
       
+    person:
+      properties:
+        name: 
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        addresses:
+          type: array
+          items:
+            type: object
+            properties:
+              number:
+                type: string
+              street:
+                type: string
+              suburb:
+                type: string
+              state:
+                type: string
+                enum:
+                - ACT
+                - NSW
+                - QLD
+                - TAS
+                - NT
+                - WA
+                - VIC
+                - SA                
+      
     agents:
       properties:
         agents:
