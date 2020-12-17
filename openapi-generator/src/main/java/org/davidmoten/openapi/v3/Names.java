@@ -1,6 +1,18 @@
 package org.davidmoten.openapi.v3;
 
+import java.io.File;
+import java.util.Set;
+
+import com.github.davidmoten.guavamini.Sets;
+
 public final class Names {
+
+    private static final Set<String> javaReservedWords = Sets.newHashSet("abstract", "assert", "boolean", "break",
+            "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
+            "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
+            "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
+            "true", "try", "void", "volatile", "while", "var");
 
     private final Definition definition;
 
@@ -9,13 +21,47 @@ public final class Names {
     }
 
     public String schemaNameToClassName(String schemaName) {
-        // TODO Auto-generated method stub
-        return null;
+        return definition.packages().modelPackage() + "." + schemaNameToSimpleClassName(schemaName);
+    }
+
+    public String schemaNameToSimpleClassName(String schemaName) {
+        return upperFirst(toIdentifier(schemaName));
+    }
+
+    public File schemaNameToJavaFile(String schemaName) {
+        return new File(definition.generatedSourceDirectory(),
+                schemaNameToClassName(schemaName).replace(".", File.separator) + ".java");
     }
 
     public static String simpleClassName(String className) {
-        // TODO Auto-generated method stub
-        return null;
+        return getLastItemInDotDelimitedString(className);
+    }
+
+    private static String toIdentifier(String s) {
+        if (javaReservedWords.contains(s.toLowerCase())) {
+            return s.toLowerCase() + "_";
+        } else if (s.toUpperCase().equals(s)) {
+            return s;
+        } else {
+            return lowerFirst(s);
+        }
+    }
+
+    private static String upperFirst(String name) {
+        return name.substring(0, 1).toUpperCase() + name.substring(1);
+    }
+
+    private static String lowerFirst(String name) {
+        return name.substring(0, 1).toLowerCase() + name.substring(1);
+    }
+
+    private static String getLastItemInDotDelimitedString(String name) {
+        int i = name.lastIndexOf(".");
+        if (i == -1) {
+            return name;
+        } else {
+            return name.substring(i + 1);
+        }
     }
 
 }

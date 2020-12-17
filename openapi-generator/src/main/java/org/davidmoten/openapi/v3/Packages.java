@@ -9,5 +9,13 @@ public final class Packages {
         this.modelPackage = modelPackage;
         this.clientPackage = clientPackage;
     }
+    
+    public String modelPackage() {
+        return modelPackage;
+    }
+    
+    public String clientPackage() {
+        return clientPackage;
+    }
 
 }

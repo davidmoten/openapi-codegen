@@ -20,5 +20,17 @@ public final class Definition {
     public String definition() {
         return definition;
     }
+    
+    public Packages packages() {
+        return packages;
+    }
+    
+    public File generatedSourceDirectory() {
+        return generatedSourceDirectory;
+    }
+    
+    public String externalRefClassName(String ref) {
+        return externalRefClassNames.apply(ref);
+    }
 
 }
