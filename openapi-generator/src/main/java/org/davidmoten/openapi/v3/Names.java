@@ -69,7 +69,7 @@ public final class Names {
     }
 
     public String clientClassName() {
-        return definition.packages().clientPackage() + ".Client.java";
+        return definition.packages().clientPackage() + ".Client";
     }
 
     public File clientClassJavaFile() {

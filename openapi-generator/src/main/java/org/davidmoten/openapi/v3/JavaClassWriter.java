@@ -29,7 +29,9 @@ public interface JavaClassWriter {
             p.format("}");
         }
         try {
-            Files.write(w.toString().replace(importsToken, imports.toString()).getBytes(StandardCharsets.UTF_8), file);
+            String content = w.toString().replace(importsToken, imports.toString());
+            System.out.println(content);
+            Files.write(content.getBytes(StandardCharsets.UTF_8), file);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
