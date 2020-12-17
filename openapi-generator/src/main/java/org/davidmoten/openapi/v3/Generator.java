@@ -44,12 +44,16 @@ public final class Generator {
         @SuppressWarnings("unchecked")
         Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api.getComponents().getSchemas();
         for (String schemaName : schemas.keySet()) {
-            String className = names.schemaNameToClassName(schemaName);
-            File file = names.schemaNameToJavaFile(schemaName);
-            JavaClassWriter.write(file, className, (indent, imports, p) -> {
-                p.format("%s// TODO\n", indent);
-            });
+            writeSchemaClass(names, schemaName);
         }
+    }
+
+    private static void writeSchemaClass(Names names, String schemaName) {
+        String className = names.schemaNameToClassName(schemaName);
+        File file = names.schemaNameToJavaFile(schemaName);
+        JavaClassWriter.write(file, className, (indent, imports, p) -> {
+            p.format("%s// TODO\n", indent);
+        });
     }
 
 }
