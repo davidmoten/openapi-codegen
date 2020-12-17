@@ -1,5 +1,7 @@
 package org.davidmoten.openapi.v3;
 
+import com.google.common.base.Function;
+
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -7,9 +9,11 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 public final class Generator {
 
     private final Definition definition;
+    private final Function<String, String> externalRefToClassName;
 
-    public Generator(Definition definition) {
+    public Generator(Definition definition, Function<String, String> externalRefToClassName) {
         this.definition = definition;
+        this.externalRefToClassName = externalRefToClassName;
     }
 
     public void generate() {
