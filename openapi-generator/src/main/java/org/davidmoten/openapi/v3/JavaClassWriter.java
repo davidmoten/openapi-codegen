@@ -22,9 +22,9 @@ public interface JavaClassWriter {
         String simpleClassName = Names.simpleClassName(className);
         try (PrintWriter p = new PrintWriter(w)) {
             Indent indent = new Indent();
-            p.format("%spackage %s;", indent, Names.pkg(className));
+            p.format("%spackage %s;\n", indent, Names.pkg(className));
             p.format("\n" + importsToken);
-            p.format("\npublic final class %s {\n", simpleClassName);
+            p.format("public final class %s {\n", simpleClassName);
             writer.write(indent.right(), imports, p);
             p.format("}");
         }

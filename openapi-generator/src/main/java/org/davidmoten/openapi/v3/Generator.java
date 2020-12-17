@@ -53,9 +53,12 @@ public final class Generator {
         String className = names.schemaNameToClassName(schemaName);
         File file = names.schemaNameToJavaFile(schemaName);
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
-            if (schema.getType()!= null) {
+            if (schema.getType() != null) {
                 if (schema.getType().equals("string")) {
-                    p.format("%sprivate %s value;\n", indent, imports.add(String.class));
+                    p.format("\n%sprivate %s value;\n", indent, imports.add(String.class));
+                    p.format("\n%spublic %s getValue() {\n", indent, imports.add(String.class));
+                    p.format("%sreturn value;\n", indent.right());
+                    p.format("%s}\n", indent.left());
                 }
             }
         });

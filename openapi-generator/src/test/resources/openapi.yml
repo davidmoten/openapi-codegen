@@ -217,6 +217,9 @@ paths:
 components:
   schemas:
   
+    surname: 
+      type: string
+      
     agents:
       properties:
         agents:
