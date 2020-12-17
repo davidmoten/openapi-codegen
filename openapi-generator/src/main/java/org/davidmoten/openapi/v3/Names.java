@@ -36,6 +36,10 @@ public final class Names {
     public static String simpleClassName(String className) {
         return getLastItemInDotDelimitedString(className);
     }
+    
+    public static String pkg(String className) {
+        return className.substring(0, className.lastIndexOf("."));
+    }
 
     private static String toIdentifier(String s) {
         if (javaReservedWords.contains(s.toLowerCase())) {
