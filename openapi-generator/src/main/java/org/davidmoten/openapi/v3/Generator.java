@@ -85,6 +85,8 @@ public final class Generator {
                 if (entry.getValue().get$ref() == null) {
                     String memberClassSimpleName = Names
                             .propertyNameToClassSimpleName(entry.getKey());
+                    String fieldName = Names.propertyNameToFieldName(entry.getKey());
+                    p.format("\n%sprivate %s %s;\n", indent, memberClassSimpleName, fieldName);
                     p.format("\n%spublic static final class %s {\n", indent, memberClassSimpleName);
                     writeSchemaClassContent(entry.getValue(), indent.right(), imports, p);
                     p.format("%s}\n", indent.left());

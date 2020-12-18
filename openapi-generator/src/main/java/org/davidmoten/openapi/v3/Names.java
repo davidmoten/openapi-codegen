@@ -81,4 +81,8 @@ public final class Names {
                 clientClassName().replace(".", File.separator) + ".java");
     }
 
+    public static String propertyNameToFieldName(String propertyName) {
+        return lowerFirst(toIdentifier(propertyName));
+    }
+
 }
