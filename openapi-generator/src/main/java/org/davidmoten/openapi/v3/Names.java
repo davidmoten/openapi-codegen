@@ -41,7 +41,7 @@ public final class Names {
         return className.substring(0, className.lastIndexOf("."));
     }
 
-    private static String toIdentifier(String s) {
+    public static String toIdentifier(String s) {
         if (javaReservedWords.contains(s.toLowerCase())) {
             return s.toLowerCase() + "_";
         } else if (s.toUpperCase().equals(s)) {
@@ -50,8 +50,12 @@ public final class Names {
             return lowerFirst(s);
         }
     }
+    
+    public static String propertyNameToClassSimpleName(String propertyName) {
+        return upperFirst(toIdentifier(propertyName));
+    }
 
-    private static String upperFirst(String name) {
+    public static String upperFirst(String name) {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 

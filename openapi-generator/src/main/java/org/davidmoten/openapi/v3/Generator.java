@@ -1,6 +1,7 @@
 package org.davidmoten.openapi.v3;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
@@ -22,7 +23,8 @@ public final class Generator {
     }
 
     public void generate() {
-        SwaggerParseResult result = new OpenAPIParser().readContents(definition.definition(), null, null);
+        SwaggerParseResult result = new OpenAPIParser().readContents(definition.definition(), null,
+                null);
         result.getMessages().stream().forEach(System.out::println);
         OpenAPI api = result.getOpenAPI();
         System.out.println(api);
@@ -47,30 +49,48 @@ public final class Generator {
 
     private static void writeSchemaClasses(OpenAPI api, Names names) {
         @SuppressWarnings("unchecked")
-        Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api.getComponents().getSchemas();
+        Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api
+                .getComponents().getSchemas();
         for (Entry<String, Schema<?>> entry : schemas.entrySet()) {
-            writeSchemaClass(names, entry.getKey(), entry.getValue());
+            writeSchemaClass(names, entry.getKey(), 0, entry.getValue());
         }
     }
 
-    private static void writeSchemaClass(Names names, String schemaName, Schema<?> schema) {
+    private static void writeSchemaClass(Names names, String schemaName, int number,
+            Schema<?> schema) {
         String className = names.schemaNameToClassName(schemaName);
-        File file = names.schemaNameToJavaFile(schemaName);
+        File file = names.schemaNameToJavaFile(schemaName + (number == 0 ? "" : "_" + number + ""));
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
-            if (schema.getType() != null) {
-                Class<?> cls = toClass(schema.getType(), schema.getFormat());
-                final String t;
-                if (cls.equals(Byte.class)) {
-                    t = "byte[]";
-                } else {
-                    t = imports.add(cls);
-                }
-                p.format("\n%sprivate %s value;\n", indent, t);
-                p.format("\n%spublic %s getValue() {\n", indent, t);
-                p.format("%sreturn value;\n", indent.right());
-                p.format("%s}\n", indent.left());
-            }
+            writeSchemaClassContent(schema, indent, imports, p);
         });
+    }
+
+    private static void writeSchemaClassContent(Schema<?> schema, Indent indent, Imports imports,
+            PrintWriter p) {
+        if (schema.getType() != null) {
+            Class<?> cls = toClass(schema.getType(), schema.getFormat());
+            final String t;
+            if (cls.equals(Byte.class)) {
+                t = "byte[]";
+            } else {
+                t = imports.add(cls);
+            }
+            p.format("\n%sprivate %s value;\n", indent, t);
+            p.format("\n%spublic %s getValue() {\n", indent, t);
+            p.format("%sreturn value;\n", indent.right());
+            p.format("%s}\n", indent.left());
+        } else if (schema.getProperties() != null) {
+            for (@SuppressWarnings("rawtypes")
+            Entry<String, Schema> entry : schema.getProperties().entrySet()) {
+                if (entry.getValue().get$ref() == null) {
+                    String memberClassSimpleName = Names
+                            .propertyNameToClassSimpleName(entry.getKey());
+                    p.format("\n%spublic static final class %s {\n", indent, memberClassSimpleName);
+                    writeSchemaClassContent(entry.getValue(), indent.right(), imports, p);
+                    p.format("%s}\n", indent.left());
+                }
+            }
+        }
     }
 
     private static Class<?> toClass(String type, String format) {
