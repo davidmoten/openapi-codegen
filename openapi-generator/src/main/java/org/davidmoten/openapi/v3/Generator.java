@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.github.davidmoten.guavamini.Preconditions;
+
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -27,7 +29,7 @@ public final class Generator {
                 null);
         result.getMessages().stream().forEach(System.out::println);
         OpenAPI api = result.getOpenAPI();
-        System.out.println(api);
+//        System.out.println(api);
 
         // Names object for each Packages object
         Names names = new Names(definition);
@@ -52,21 +54,20 @@ public final class Generator {
         Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api
                 .getComponents().getSchemas();
         for (Entry<String, Schema<?>> entry : schemas.entrySet()) {
-            writeSchemaClass(names, entry.getKey(), 0, entry.getValue());
+            writeSchemaClass(names, entry.getKey(), entry.getValue());
         }
     }
 
-    private static void writeSchemaClass(Names names, String schemaName, int number,
-            Schema<?> schema) {
+    private static void writeSchemaClass(Names names, String schemaName, Schema<?> schema) {
         String className = names.schemaNameToClassName(schemaName);
-        File file = names.schemaNameToJavaFile(schemaName + (number == 0 ? "" : "_" + number + ""));
+        File file = names.schemaNameToJavaFile(schemaName);
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
-            writeSchemaClassContent(schema, indent, imports, p);
+            writeSchemaClassContent(schema, true, indent, imports, p);
         });
     }
 
-    private static void writeSchemaClassContent(Schema<?> schema, Indent indent, Imports imports,
-            PrintWriter p) {
+    private static void writeSchemaClassContent(Schema<?> schema, boolean isRoot, Indent indent,
+            Imports imports, PrintWriter p) {
         if (schema.getType() != null) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             final String t;
@@ -82,17 +83,31 @@ public final class Generator {
         } else if (schema.getProperties() != null) {
             for (@SuppressWarnings("rawtypes")
             Entry<String, Schema> entry : schema.getProperties().entrySet()) {
-                if (entry.getValue().get$ref() == null) {
-                    String memberClassSimpleName = Names
-                            .propertyNameToClassSimpleName(entry.getKey());
+                Schema<?> sch = entry.getValue();
+                if (sch.get$ref() == null) {
                     String fieldName = Names.propertyNameToFieldName(entry.getKey());
-                    p.format("\n%sprivate %s %s;\n", indent, memberClassSimpleName, fieldName);
-                    p.format("\n%spublic static final class %s {\n", indent, memberClassSimpleName);
-                    writeSchemaClassContent(entry.getValue(), indent.right(), imports, p);
-                    p.format("%s}\n", indent.left());
+                    if (sch.getType() != null
+                            && isPrimitive(sch.getType())) {
+                        Class<?> cls = toClass(sch.getType(), sch.getFormat());
+                        p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), fieldName);
+                    } else {
+                        String memberClassSimpleName = Names
+                                .propertyNameToClassSimpleName(entry.getKey());
+                        p.format("\n%sprivate %s %s;\n", indent, memberClassSimpleName, fieldName);
+                        p.format("\n%spublic static final class %s {\n", indent,
+                                memberClassSimpleName);
+                        writeSchemaClassContent(sch, false, indent.right(), imports,
+                                p);
+                        p.format("%s}\n", indent.left());
+                    }
                 }
             }
         }
+    }
+
+    private static boolean isPrimitive(String type) {
+        Preconditions.checkNotNull(type);
+        return !"array".equals(type) && !"object".equals(type);
     }
 
     private static Class<?> toClass(String type, String format) {
