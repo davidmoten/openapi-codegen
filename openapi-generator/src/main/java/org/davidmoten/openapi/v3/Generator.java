@@ -112,50 +112,49 @@ public final class Generator {
 
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
             PrintWriter p, Optional<String> name) {
-        if (schema.getType() != null) {
-            if (isPrimitive(schema.getType())) {
-                Class<?> cls = toClass(schema.getType(), schema.getFormat());
-                p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), Names.toFieldName(
-                        name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
-                return cls.getName();
-            } else if (isArray(schema.getType())) {
-                ArraySchema as = (ArraySchema) schema;
-                Schema<?> arraySchema = as.getItems();
-                String type = writeClassForType(arraySchema, indent, imports, p, name);
-                p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class),
-                        imports.add(type), Names.schemaNameToFieldName(schema.getName()));
-                return imports.add(List.class) + "<" + imports.add(type) + ">";
-            } else if (isObject(schema.getType())) {
-                Preconditions.checkNotNull(schema.getProperties());
-                // type == object
-                p.format("\n%spublic static final class %s {\n", indent,
-                        name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon")));
-                for (@SuppressWarnings("rawtypes")
-                Entry<String, Schema> entry : schema.getProperties().entrySet()) {
-                    Schema<?> sch = entry.getValue();
-                    if (sch.get$ref() == null) {
-                        String type = writeClassForType(sch, indent, imports, p,
-                                Optional.of(entry.getKey()));
-                        String fieldName = Names.propertyNameToFieldName(entry.getKey());
-                        p.format("\n%sprivate %s %s;\n", indent, imports.add(type), fieldName);
-                    }
+        if (isPrimitive(schema.getType())) {
+            Class<?> cls = toClass(schema.getType(), schema.getFormat());
+            p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), Names.toFieldName(
+                    name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
+            return cls.getName();
+        } else if (isArray(schema.getType())) {
+            ArraySchema as = (ArraySchema) schema;
+            Schema<?> arraySchema = as.getItems();
+            String type = writeClassForType(arraySchema, indent, imports, p, Optional.of(name.orElse("Item")));
+            p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class), imports.add(type),
+                    Names.schemaNameToFieldName(schema.getName()));
+            return imports.add(List.class) + "<" + imports.add(type) + ">";
+        } else if (isObject(schema)) {
+            Preconditions.checkNotNull(schema.getProperties());
+            String clsName = name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon"));
+            // type == object
+            p.format("\n%spublic static final class %s {\n", indent,
+                    clsName );
+            for (@SuppressWarnings("rawtypes")
+            Entry<String, Schema> entry : schema.getProperties().entrySet()) {
+                Schema<?> sch = entry.getValue();
+                if (sch.get$ref() == null) {
+                    String type = writeClassForType(sch, indent, imports, p,
+                            Optional.of(entry.getKey()));
+                    String fieldName = Names.propertyNameToFieldName(entry.getKey());
+                    p.format("\n%sprivate %s %s;\n", indent, imports.add(type), fieldName);
                 }
-                p.format("%s}\n", indent.left());
             }
+            p.format("%s}\n", indent.left());
+            return clsName;
         } else {
             System.out.println("schema not implemented for " + schema);
-            return "java.lang.String";
+            throw new RuntimeException("not implemented");
         }
-        throw new RuntimeException("not implemented");
     }
 
     private static boolean isArray(String type) {
-        Preconditions.checkNotNull(type);
         return "array".equals(type);
     }
 
-    private static boolean isObject(String type) {
-        return type == null || "object".equals(type);
+    private static boolean isObject(Schema<?> schema) {
+        return (schema.getType() == null && schema.getProperties() != null)
+                || "object".equals(schema.getType());
     }
 
     private static void writeSchemaClassContent(Schema<?> schema, boolean isRoot, Indent indent,
@@ -197,8 +196,7 @@ public final class Generator {
     }
 
     private static boolean isPrimitive(String type) {
-        Preconditions.checkNotNull(type);
-        return !"array".equals(type) && !"object".equals(type);
+        return type!= null && !"array".equals(type) && !"object".equals(type);
     }
 
     private static Class<?> toClass(String type, String format) {
