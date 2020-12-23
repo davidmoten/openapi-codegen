@@ -7,12 +7,13 @@ import com.github.davidmoten.guavamini.Sets;
 
 public final class Names {
 
-    private static final Set<String> javaReservedWords = Sets.newHashSet("abstract", "assert", "boolean", "break",
-            "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
-            "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
-            "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
-            "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
-            "true", "try", "void", "volatile", "while", "var");
+    private static final Set<String> javaReservedWords = Sets.newHashSet("abstract", "assert",
+            "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue",
+            "default", "do", "double", "else", "extends", "false", "final", "finally", "float",
+            "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
+            "native", "new", "null", "package", "private", "protected", "public", "return", "short",
+            "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws",
+            "transient", "true", "try", "void", "volatile", "while", "var");
 
     private final Definition definition;
 
@@ -36,7 +37,7 @@ public final class Names {
     public static String simpleClassName(String className) {
         return getLastItemInDotDelimitedString(className);
     }
-    
+
     public static String pkg(String className) {
         return className.substring(0, className.lastIndexOf("."));
     }
@@ -50,7 +51,7 @@ public final class Names {
             return lowerFirst(s);
         }
     }
-    
+
     public static String propertyNameToClassSimpleName(String propertyName) {
         return upperFirst(toIdentifier(propertyName));
     }
@@ -83,6 +84,15 @@ public final class Names {
 
     public static String propertyNameToFieldName(String propertyName) {
         return lowerFirst(toIdentifier(propertyName));
+    }
+
+    public static String schemaNameToFieldName(String schemaName) {
+        return lowerFirst(toIdentifier(schemaName));
+    }
+
+    public static String toFieldName(String name) {
+        return lowerFirst(toIdentifier(name));
+
     }
 
 }
