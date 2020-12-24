@@ -31,6 +31,7 @@ public interface JavaClassWriter {
         try {
             String content = w.toString().replace(importsToken, imports.toString());
             System.out.println(content);
+            System.out.println("//////////////////////////////////////////");
             Files.write(content.getBytes(StandardCharsets.UTF_8), file);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
