@@ -64,12 +64,14 @@ public final class Generator {
         String className = names.schemaNameToClassName(schemaName);
         File file = names.schemaNameToJavaFile(schemaName);
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
-            String typ = writeClassForType(schema, indent, imports, p, Optional.of("value"), true, false);
+            String typ = writeClassForType(schema, indent, imports, p, Optional.of("value"), true,
+                    false, className);
         });
     }
 
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
-            PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem) {
+            PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem,
+            String parentClassName) {
         if (isPrimitive(schema.getType())) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             if (!isArrayItem) {
@@ -81,7 +83,8 @@ public final class Generator {
             ArraySchema as = (ArraySchema) schema;
             Schema<?> itemSchema = as.getItems();
             Optional<String> nm = Optional.of(name.orElse("") + "Item");
-            String type = writeClassForType(itemSchema, indent, imports, p, nm, false, true);
+            String type = writeClassForType(itemSchema, indent, imports, p, nm, false, true,
+                    parentClassName);
             p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class), imports.add(type),
                     Names.toFieldName(nm.get()));
             return imports.add(List.class) + "<" + imports.add(type) + ">";
@@ -89,6 +92,7 @@ public final class Generator {
             Preconditions.checkNotNull(schema.getProperties());
             String clsName = Names.toClassSimpleName(
                     name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon")));
+            String fullClsName = parentClassName + "." + clsName;
             // type == object
             if (!isRoot) {
                 p.format("\n%spublic static final class %s {\n", indent, clsName);
@@ -99,13 +103,14 @@ public final class Generator {
                 Schema<?> sch = entry.getValue();
                 if (sch.get$ref() == null) {
                     String type = writeClassForType(sch, indent, imports, p,
-                            Optional.of(Names.propertyNameToFieldName(entry.getKey())), false, false);
+                            Optional.of(Names.propertyNameToFieldName(entry.getKey())), false,
+                            false, fullClsName);
                 }
             }
             if (!isRoot) {
                 p.format("%s}\n", indent.left());
             }
-            return clsName;
+            return fullClsName;
         } else {
             System.out.println("schema not implemented for " + schema);
             throw new RuntimeException("not implemented");
