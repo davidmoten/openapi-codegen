@@ -68,48 +68,6 @@ public final class Generator {
         });
     }
 
-    // is root schema with nameless content (so call the content `value`)
-    // is root schema with
-    //
-//    private static String writeSchemaClassContent2(Schema<?> schema, boolean isRoot, Indent indent,
-//            Imports imports, PrintWriter p) {
-//        if (schema.getType() != null) {
-//            String fullClassName = writeClassForType(schema, indent, imports, p);
-//            Class<?> cls = toClass(schema.getType(), schema.getFormat());
-//            final String t;
-//            if (cls.equals(Byte.class)) {
-//                t = "byte[]";
-//            } else {
-//                t = imports.add(cls);
-//            }
-//            p.format("\n%sprivate %s value;\n", indent, t);
-//            p.format("\n%spublic %s getValue() {\n", indent, t);
-//            p.format("%sreturn value;\n", indent.right());
-//            p.format("%s}\n", indent.left());
-//        } else if (schema.getProperties() != null) {
-//            // type == object
-//            for (@SuppressWarnings("rawtypes")
-//            Entry<String, Schema> entry : schema.getProperties().entrySet()) {
-//                Schema<?> sch = entry.getValue();
-//                if (sch.get$ref() == null) {
-//                    String fieldName = Names.propertyNameToFieldName(entry.getKey());
-//                    if (sch.getType() != null && isPrimitive(sch.getType())) {
-//                        Class<?> cls = toClass(sch.getType(), sch.getFormat());
-//                        p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), fieldName);
-//                    } else {
-//                        String memberClassSimpleName = Names
-//                                .propertyNameToClassSimpleName(entry.getKey());
-//                        p.format("\n%sprivate %s %s;\n", indent, memberClassSimpleName, fieldName);
-//                        p.format("\n%spublic static final class %s {\n", indent,
-//                                memberClassSimpleName);
-//                        writeSchemaClassContent(sch, false, indent.right(), imports, p);
-//                        p.format("%s}\n", indent.left());
-//                    }
-//                }
-//            }
-//        }
-//    }
-
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
             PrintWriter p, Optional<String> name) {
         if (isPrimitive(schema.getType())) {
@@ -120,24 +78,24 @@ public final class Generator {
         } else if (isArray(schema.getType())) {
             ArraySchema as = (ArraySchema) schema;
             Schema<?> arraySchema = as.getItems();
-            String type = writeClassForType(arraySchema, indent, imports, p, Optional.of(name.orElse("Item")));
+            Optional<String> nm = Optional.of(name.orElse("")+ "Item");
+            String type = writeClassForType(arraySchema, indent, imports, p, nm);
             p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class), imports.add(type),
-                    Names.schemaNameToFieldName(schema.getName()));
+                    Names.toFieldName(nm.get()));
             return imports.add(List.class) + "<" + imports.add(type) + ">";
         } else if (isObject(schema)) {
             Preconditions.checkNotNull(schema.getProperties());
-            String clsName = name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon"));
+            String clsName = Names.toClassSimpleName(name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon")));
             // type == object
             p.format("\n%spublic static final class %s {\n", indent,
                     clsName );
+            indent.right();
             for (@SuppressWarnings("rawtypes")
             Entry<String, Schema> entry : schema.getProperties().entrySet()) {
                 Schema<?> sch = entry.getValue();
                 if (sch.get$ref() == null) {
                     String type = writeClassForType(sch, indent, imports, p,
-                            Optional.of(entry.getKey()));
-                    String fieldName = Names.propertyNameToFieldName(entry.getKey());
-                    p.format("\n%sprivate %s %s;\n", indent, imports.add(type), fieldName);
+                            Optional.of(Names.propertyNameToFieldName(entry.getKey())));
                 }
             }
             p.format("%s}\n", indent.left());
@@ -155,44 +113,6 @@ public final class Generator {
     private static boolean isObject(Schema<?> schema) {
         return (schema.getType() == null && schema.getProperties() != null)
                 || "object".equals(schema.getType());
-    }
-
-    private static void writeSchemaClassContent(Schema<?> schema, boolean isRoot, Indent indent,
-            Imports imports, PrintWriter p) {
-        if (schema.getType() != null) {
-            Class<?> cls = toClass(schema.getType(), schema.getFormat());
-            final String t;
-            if (cls.equals(Byte.class)) {
-                t = "byte[]";
-            } else {
-                t = imports.add(cls);
-            }
-            p.format("\n%sprivate %s value;\n", indent, t);
-            p.format("\n%spublic %s getValue() {\n", indent, t);
-            p.format("%sreturn value;\n", indent.right());
-            p.format("%s}\n", indent.left());
-        } else if (schema.getProperties() != null) {
-            // type == object
-            for (@SuppressWarnings("rawtypes")
-            Entry<String, Schema> entry : schema.getProperties().entrySet()) {
-                Schema<?> sch = entry.getValue();
-                if (sch.get$ref() == null) {
-                    String fieldName = Names.propertyNameToFieldName(entry.getKey());
-                    if (sch.getType() != null && isPrimitive(sch.getType())) {
-                        Class<?> cls = toClass(sch.getType(), sch.getFormat());
-                        p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), fieldName);
-                    } else {
-                        String memberClassSimpleName = Names
-                                .propertyNameToClassSimpleName(entry.getKey());
-                        p.format("\n%sprivate %s %s;\n", indent, memberClassSimpleName, fieldName);
-                        p.format("\n%spublic static final class %s {\n", indent,
-                                memberClassSimpleName);
-                        writeSchemaClassContent(sch, false, indent.right(), imports, p);
-                        p.format("%s}\n", indent.left());
-                    }
-                }
-            }
-        }
     }
 
     private static boolean isPrimitive(String type) {

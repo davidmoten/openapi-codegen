@@ -95,4 +95,8 @@ public final class Names {
 
     }
 
+    public static String toClassSimpleName(String name) {
+        return upperFirst(toIdentifier(name));
+    }
+
 }
