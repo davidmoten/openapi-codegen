@@ -64,7 +64,7 @@ public final class Generator {
         String className = names.schemaNameToClassName(schemaName);
         File file = names.schemaNameToJavaFile(schemaName);
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
-            String typ = writeClassForType(schema, indent, imports, p, Optional.of("value"), true,
+            String typ = writeClassForType(schema, indent, imports, p, Optional.empty(), true,
                     false, className);
         });
     }
@@ -86,15 +86,18 @@ public final class Generator {
             String type = writeClassForType(itemSchema, indent, imports, p, nm, false, true,
                     parentClassName);
             p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class), imports.add(type),
-                    Names.toFieldName(nm.get()));
+                    Names.toFieldName(name.get()));
             return imports.add(List.class) + "<" + imports.add(type) + ">";
         } else if (isObject(schema)) {
-            Preconditions.checkNotNull(schema.getProperties());
-            String clsName = Names.toClassSimpleName(
-                    name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon")));
-            String fullClsName = parentClassName + "." + clsName;
             // type == object
-            if (!isRoot) {
+            Preconditions.checkNotNull(schema.getProperties());
+            String fullClsName;
+            if (isRoot) {
+                fullClsName = parentClassName;
+            } else {
+                String clsName = Names.toClassSimpleName(
+                        name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon")));
+                fullClsName = parentClassName + "." + clsName;
                 p.format("\n%spublic static final class %s {\n", indent, clsName);
                 indent.right();
             }
