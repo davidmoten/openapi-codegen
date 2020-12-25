@@ -401,6 +401,7 @@ components:
             name: 'time'
         lat: 
           type: number
+          format: double
           minimum: -90.0
           maximum: 90.0
           example: -34.2
@@ -409,6 +410,7 @@ components:
             name: 'lat'
         lon: 
           type: number
+          format: double
           minimum: -180
           maximum: 180
           example: 140.0
@@ -417,11 +419,13 @@ components:
             name: 'lon'
         altitudeMetres: 
           type: number
+          format: double
           xml:
             attribute: true
             name: 'altitudeMetres'
         cog: 
           type: number
+          format: double
           minimum: 0
           maximum: 360
           example: 345.0
@@ -430,6 +434,7 @@ components:
             name: 'cog'
         speedKots: 
           type: number
+          format: double
           minimum: 0.0
           example: 10.5
           xml: 
