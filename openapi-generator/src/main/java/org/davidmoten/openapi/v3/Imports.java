@@ -1,17 +1,9 @@
 package org.davidmoten.openapi.v3;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Imports {
 

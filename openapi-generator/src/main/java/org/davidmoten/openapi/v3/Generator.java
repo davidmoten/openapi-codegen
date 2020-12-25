@@ -70,6 +70,7 @@ public final class Generator {
         });
     }
 
+    // returns an imported type (using imports.add), type may include generics
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
             PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem,
             String parentClassName, Definition definition, Names names) {
@@ -119,7 +120,7 @@ public final class Generator {
                     parentClassName, definition, names);
             if (!isArrayItem) {
                 p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class),
-                        imports.add(type), Names.toFieldName(name.orElse("value")));
+                        type, Names.toFieldName(name.orElse("value")));
             }
             return imports.add(List.class) + "<" + type + ">";
         } else if (isRef(schema)) {
@@ -131,11 +132,12 @@ public final class Generator {
                 String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
                 type = names.schemaNameToClassName(schemaName);
             }
+            String importedType = imports.add(type);
             if (!isArrayItem) {
-                p.format("\n%sprivate %s %s;\n", indent, imports.add(type), Names.toFieldName(
+                p.format("\n%sprivate %s %s;\n", indent, importedType, Names.toFieldName(
                         name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
-            return imports.add(type);
+            return importedType;
         } else if (isObject(schema)) {
             // type == object
             Preconditions.checkNotNull(schema.getProperties());
