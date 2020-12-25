@@ -73,7 +73,31 @@ public final class Generator {
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
             PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem,
             String parentClassName, Definition definition, Names names) {
-        if (isPrimitive(schema.getType())) {
+        if (isEnum(schema)) {
+            String clsName = Names.toClassSimpleName(
+                    name.orElse(Optional.ofNullable(schema.getName()).orElse("Enum")));
+            p.format("\n%spublic enum %s {\n", indent, clsName);
+            indent.right();
+            for (int i = 0; i < schema.getEnum().size(); i++) {
+                if (i > 0 && i < schema.getEnum().size()) {
+                    p.format(",\n");
+                }
+                String s = (String) schema.getEnum().get(i);
+                p.format("%s%s(\"%s\")", indent, Names.enumNameToEnumConstant(s), s);
+            }
+            p.format(";\n");
+            indent.left();
+            p.format("\n%sprivate %s(String name) {\n", indent.right(), clsName);
+            p.format("%sthis.name = name;\n", indent.right());
+            p.format("%s}\n", indent.left());
+            p.format("%s}\n", indent.left());
+            String fullClsName = parentClassName + "." + clsName;
+            if (!isArrayItem) {
+                p.format("\n%sprivate %s %s;\n", indent, imports.add(fullClsName), Names.toFieldName(
+                        name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
+            }
+            return fullClsName;
+        } else if (isPrimitive(schema.getType())) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             if (!isArrayItem) {
                 p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), Names.toFieldName(
@@ -133,6 +157,10 @@ public final class Generator {
             System.out.println("schema not implemented for " + schema);
             throw new RuntimeException("not implemented");
         }
+    }
+
+    private static boolean isEnum(Schema<?> schema) {
+        return schema.getEnum() != null && !schema.getEnum().isEmpty();
     }
 
     private static boolean isRef(Schema<?> schema) {

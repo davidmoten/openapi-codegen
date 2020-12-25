@@ -99,4 +99,8 @@ public final class Names {
         return upperFirst(toIdentifier(name));
     }
 
+    public static String enumNameToEnumConstant(String s) {
+        return toIdentifier(s);
+    }
+
 }
