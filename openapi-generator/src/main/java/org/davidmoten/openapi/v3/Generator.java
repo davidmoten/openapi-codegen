@@ -74,6 +74,7 @@ public final class Generator {
             PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem,
             String parentClassName, Definition definition, Names names) {
         if (isEnum(schema)) {
+            Preconditions.checkArgument("string".equals(schema.getType()));
             String clsName = Names.toClassSimpleName(
                     name.orElse(Optional.ofNullable(schema.getName()).orElse("Enum")));
             p.format("\n%spublic enum %s {\n", indent, clsName);
