@@ -40,7 +40,7 @@ public final class Generator {
         writeClientClass(api, names);
 
         // generate model classes for schema definitions
-        writeSchemaClasses(api, names);
+        writeSchemaClasses(api, definition, names);
     }
 
     private static void writeClientClass(OpenAPI api, Names names) {
@@ -51,27 +51,28 @@ public final class Generator {
         });
     }
 
-    private static void writeSchemaClasses(OpenAPI api, Names names) {
+    private static void writeSchemaClasses(OpenAPI api, Definition definition, Names names) {
         @SuppressWarnings("unchecked")
         Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api
                 .getComponents().getSchemas();
         for (Entry<String, Schema<?>> entry : schemas.entrySet()) {
-            writeSchemaClass(names, entry.getKey(), entry.getValue());
+            writeSchemaClass(names, entry.getKey(), entry.getValue(), definition);
         }
     }
 
-    private static void writeSchemaClass(Names names, String schemaName, Schema<?> schema) {
+    private static void writeSchemaClass(Names names, String schemaName, Schema<?> schema,
+            Definition definition) {
         String className = names.schemaNameToClassName(schemaName);
         File file = names.schemaNameToJavaFile(schemaName);
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
-            String typ = writeClassForType(schema, indent, imports, p, Optional.empty(), true,
-                    false, className);
+            writeClassForType(schema, indent, imports, p, Optional.empty(), true, false, className,
+                    definition, names);
         });
     }
 
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
             PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem,
-            String parentClassName) {
+            String parentClassName, Definition definition, Names names) {
         if (isPrimitive(schema.getType())) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             if (!isArrayItem) {
@@ -84,12 +85,26 @@ public final class Generator {
             Schema<?> itemSchema = as.getItems();
             Optional<String> nm = Optional.of(name.orElse("") + "Item");
             String type = writeClassForType(itemSchema, indent, imports, p, nm, false, true,
-                    parentClassName);
+                    parentClassName, definition, names);
             if (!isArrayItem) {
                 p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class),
                         imports.add(type), Names.toFieldName(name.orElse("value")));
             }
             return imports.add(List.class) + "<" + imports.add(type) + ">";
+        } else if (isRef(schema)) {
+            String ref = schema.get$ref();
+            final String type;
+            if (!ref.startsWith("#")) {
+                type = definition.externalRefClassName(ref);
+            } else {
+                String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
+                type = names.schemaNameToClassName(schemaName);
+            }
+            if (!isArrayItem) {
+                p.format("\n%sprivate %s %s;\n", indent, imports.add(type), Names.toFieldName(
+                        name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
+            }
+            return type;
         } else if (isObject(schema)) {
             // type == object
             Preconditions.checkNotNull(schema.getProperties());
@@ -106,11 +121,9 @@ public final class Generator {
             for (@SuppressWarnings("rawtypes")
             Entry<String, Schema> entry : schema.getProperties().entrySet()) {
                 Schema<?> sch = entry.getValue();
-                if (sch.get$ref() == null) {
-                    String type = writeClassForType(sch, indent, imports, p,
-                            Optional.of(Names.propertyNameToFieldName(entry.getKey())), false,
-                            false, fullClsName);
-                }
+                writeClassForType(sch, indent, imports, p,
+                        Optional.of(Names.propertyNameToFieldName(entry.getKey())), false, false,
+                        fullClsName, definition, names);
             }
             if (!isRoot) {
                 p.format("%s}\n", indent.left());
@@ -120,6 +133,10 @@ public final class Generator {
             System.out.println("schema not implemented for " + schema);
             throw new RuntimeException("not implemented");
         }
+    }
+
+    private static boolean isRef(Schema<?> schema) {
+        return schema.get$ref() != null;
     }
 
     private static boolean isArray(String type) {

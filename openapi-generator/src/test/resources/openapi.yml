@@ -220,6 +220,9 @@ components:
     surname: 
       type: string
       
+    personName:
+      $ref: "#/components/schemas/surname"
+      
     person:
       properties:
         name: 
