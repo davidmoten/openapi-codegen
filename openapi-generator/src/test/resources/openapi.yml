@@ -251,6 +251,13 @@ components:
                 - VIC
                 - SA                
       
+    table:
+      type: array
+      items: 
+        type: array
+        items: 
+          type: integer
+          
   securitySchemes:
     basicAuth:     # <-- arbitrary name for the security scheme
       type: http
