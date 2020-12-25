@@ -1,9 +1,17 @@
 package org.davidmoten.openapi.v3;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Imports {
 
@@ -61,18 +69,19 @@ public final class Imports {
                 .filter(c -> !c.equals("byte")) //
                 .filter(c -> !c.equals(fullClassName))
                 // ensure that if in same pkg as fullClassName that we don't need
-                // to specify an import 
+                // to specify an import
                 .filter(c -> !pkg(c).equals(pkgFullClassName)) //
-                .map(new Function<String,String>() {
+                .map(new Function<String, String>() {
 
                     String previous;
-                    
+
                     @Override
                     public String apply(String c) {
                         String firstSegment = firstSegment(c);
-                        boolean insertBlankLine  = previous != null && !firstSegment.equals(previous);
+                        boolean insertBlankLine = previous != null
+                                && !firstSegment.equals(previous);
                         previous = firstSegment;
-                        return (insertBlankLine? "\n" : "") + "import " + c + ";";
+                        return (insertBlankLine ? "\n" : "") + "import " + c + ";";
                     }
                 }) //
                 .collect(Collectors.joining("\n"));
@@ -81,7 +90,7 @@ public final class Imports {
         }
         return x;
     }
-    
+
     private static String pkg(String fullClassName) {
         int i = fullClassName.lastIndexOf('.');
         if (i == -1) {
@@ -90,7 +99,7 @@ public final class Imports {
             return fullClassName.substring(0, i);
         }
     }
-    
+
     private static String firstSegment(String s) {
         int i = s.indexOf('.');
         if (i == -1) {

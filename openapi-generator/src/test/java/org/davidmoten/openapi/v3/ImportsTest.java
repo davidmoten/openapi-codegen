@@ -46,4 +46,5 @@ public class ImportsTest {
                 + "import java.net.HttpURLConnection;\n\n", //
                 imports.toString());
     }
+    
 }

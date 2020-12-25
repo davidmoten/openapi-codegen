@@ -103,14 +103,14 @@ public final class Generator {
                         Names.toFieldName(name
                                 .orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
-            return fullClsName;
+            return imports.add(fullClsName);
         } else if (isPrimitive(schema.getType())) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             if (!isArrayItem) {
                 p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), Names.toFieldName(
                         name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
-            return cls.getName();
+            return imports.add(cls);
         } else if (isArray(schema.getType())) {
             ArraySchema as = (ArraySchema) schema;
             Schema<?> itemSchema = as.getItems();
@@ -121,7 +121,7 @@ public final class Generator {
                 p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class),
                         imports.add(type), Names.toFieldName(name.orElse("value")));
             }
-            return imports.add(List.class) + "<" + imports.add(type) + ">";
+            return imports.add(List.class) + "<" + type + ">";
         } else if (isRef(schema)) {
             String ref = schema.get$ref();
             final String type;
@@ -135,7 +135,7 @@ public final class Generator {
                 p.format("\n%sprivate %s %s;\n", indent, imports.add(type), Names.toFieldName(
                         name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
-            return type;
+            return imports.add(type);
         } else if (isObject(schema)) {
             // type == object
             Preconditions.checkNotNull(schema.getProperties());
@@ -159,7 +159,7 @@ public final class Generator {
             if (!isRoot) {
                 p.format("%s}\n", indent.left());
             }
-            return fullClsName;
+            return imports.add(fullClsName);
         } else {
             System.out.println("schema not implemented for " + schema);
             throw new RuntimeException("not implemented");
