@@ -85,8 +85,10 @@ public final class Generator {
             Optional<String> nm = Optional.of(name.orElse("") + "Item");
             String type = writeClassForType(itemSchema, indent, imports, p, nm, false, true,
                     parentClassName);
-            p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class), imports.add(type),
-                    Names.toFieldName(name.get()));
+            if (!isArrayItem) {
+                p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class),
+                        imports.add(type), Names.toFieldName(name.orElse("value")));
+            }
             return imports.add(List.class) + "<" + imports.add(type) + ">";
         } else if (isObject(schema)) {
             // type == object
