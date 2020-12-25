@@ -90,11 +90,17 @@ public final class Generator {
             p.format("\n%sprivate %s(String name) {\n", indent.right(), clsName);
             p.format("%sthis.name = name;\n", indent.right());
             p.format("%s}\n", indent.left());
+
+            p.format("\n%spublic String getName() {\n", indent);
+            p.format("%sreturn name;\n", indent.right());
+            p.format("%s}\n", indent.left());
+
             p.format("%s}\n", indent.left());
             String fullClsName = parentClassName + "." + clsName;
             if (!isArrayItem) {
-                p.format("\n%sprivate %s %s;\n", indent, imports.add(fullClsName), Names.toFieldName(
-                        name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
+                p.format("\n%sprivate %s %s;\n", indent, imports.add(fullClsName),
+                        Names.toFieldName(name
+                                .orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
             return fullClsName;
         } else if (isPrimitive(schema.getType())) {
