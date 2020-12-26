@@ -70,6 +70,16 @@ public final class Generator {
         });
     }
 
+    private static final class Field {
+        final String importedType;
+        final String fieldName;
+
+        Field(String importedType, String fieldName) {
+            this.importedType = importedType;
+            this.fieldName = fieldName;
+        }
+    }
+
     // returns an imported type (using imports.add), type may include generics
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
             PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem,
@@ -100,7 +110,7 @@ public final class Generator {
             p.format("%s}\n", indent.left());
             String fullClsName = parentClassName + "." + clsName;
             if (!isArrayItem) {
-                p.format("\n%sprivate %s %s;\n", indent, imports.add(fullClsName),
+                p.format("\n%sprivate final %s %s;\n", indent, imports.add(fullClsName),
                         Names.toFieldName(name
                                 .orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
@@ -108,7 +118,7 @@ public final class Generator {
         } else if (isPrimitive(schema.getType())) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             if (!isArrayItem) {
-                p.format("\n%sprivate %s %s;\n", indent, imports.add(cls), Names.toFieldName(
+                p.format("\n%sprivate final %s %s;\n", indent, imports.add(cls), Names.toFieldName(
                         name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
             return imports.add(cls);
@@ -119,8 +129,8 @@ public final class Generator {
             String type = writeClassForType(itemSchema, indent, imports, p, nm, false, true,
                     parentClassName, definition, names);
             if (!isArrayItem) {
-                p.format("\n%sprivate %s<%s> %s;\n", indent, imports.add(List.class),
-                        type, Names.toFieldName(name.orElse("value")));
+                p.format("\n%sprivate final %s<%s> %s;\n", indent, imports.add(List.class), type,
+                        Names.toFieldName(name.orElse("value")));
             }
             return imports.add(List.class) + "<" + type + ">";
         } else if (isRef(schema)) {
@@ -134,7 +144,7 @@ public final class Generator {
             }
             String importedType = imports.add(type);
             if (!isArrayItem) {
-                p.format("\n%sprivate %s %s;\n", indent, importedType, Names.toFieldName(
+                p.format("\n%sprivate final %s %s;\n", indent, importedType, Names.toFieldName(
                         name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
             }
             return importedType;
