@@ -263,47 +263,24 @@ components:
           format: int32
           
     agents:
-      properties:
-        agents:
-          type: array
-          items:
-            type: string
-            xml: 
-              name: 'agent'
-          xml:
-            wrapped: true
-            name: 'agents'
+      type: array
+      items:
+        type: string
             
     craftTypes:
-      properties:
-        craftTypes:
-          type: array
-          items:
-            type: string
-            xml:
-              name: 'craftType'
-          xml: 
-            wrapped: true
-            name: 'craftTypes'
+      type: array
+      items:
+        type: string
 
     tracks: 
-      properties:
-        tracks: 
-          type: array
-          items:
+        type: array
+        items:
             $ref: '#/components/schemas/craftFixes'
-          xml:
-            wrapped: true 
-            name: 'tracks'
           
     craftpic:
-      properties:
-        craftFixes:
-          type: array
-          items: 
-            $ref: '#/components/schemas/craftFix'
-          xml:
-            name: 'craftFix'
+      type: array
+      items: 
+        $ref: '#/components/schemas/craftFix'
           
     craftFix:
       properties:

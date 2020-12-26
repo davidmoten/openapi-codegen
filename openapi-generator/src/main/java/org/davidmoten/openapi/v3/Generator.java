@@ -70,16 +70,6 @@ public final class Generator {
         });
     }
 
-    private static final class Field {
-        final String importedType;
-        final String fieldName;
-
-        Field(String importedType, String fieldName) {
-            this.importedType = importedType;
-            this.fieldName = fieldName;
-        }
-    }
-
     // returns an imported type (using imports.add), type may include generics
     private static String writeClassForType(Schema<?> schema, Indent indent, Imports imports,
             PrintWriter p, Optional<String> name, boolean isRoot, boolean isArrayItem,
