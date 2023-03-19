@@ -105,10 +105,10 @@ public final class Generator {
         } else if (isPrimitive(schema.getType())) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             if (!isArrayItem) {
-                String fieldName = Names.toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
+                String fieldName = Names
+                        .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
                 String fieldType = imports.add(cls);
-                p.format("\n%sprivate final %s %s;\n", indent, fieldType,
-                        fieldName);
+                p.format("\n%sprivate final %s %s;\n", indent, fieldType, fieldName);
             }
             return imports.add(cls);
         } else if (isArray(schema.getType())) {
@@ -150,26 +150,38 @@ public final class Generator {
                 p.format("\n%spublic static final class %s {\n", indent, clsName);
                 indent.right();
             }
-            List<StringPair> fields = new ArrayList<>();
+            List<Field> fields = new ArrayList<>();
             for (@SuppressWarnings("rawtypes")
             Entry<String, Schema> entry : schema.getProperties().entrySet()) {
                 Schema<?> sch = entry.getValue();
                 String fieldName = Names.propertyNameToFieldName(entry.getKey());
                 String t = writeClassContentForType(sch, indent, imports, p, Optional.of(fieldName), false, false,
                         fullClsName, definition, names);
-                fields.add(new StringPair(t, fieldName));
+                fields.add(new Field(entry.getKey(), fieldName, t));
             }
 
             // add constructor with fields
             indent.right();
             indent.right();
-            String constructorArgs = fields.stream().map(x -> String.format("\n%s%s %s", indent, x.a, x.b))
+            String constructorArgs = fields.stream()
+                    .map(x -> String.format("\n%s%s %s", indent, x.type, x.fieldName))
                     .collect(Collectors.joining(","));
             indent.left();
             indent.left();
             p.format("\n%spublic %s(%s) {\n", indent, simpleClassName(fullClsName), constructorArgs);
             indent.right();
-            fields.forEach(x -> p.format("%sthis.%s = %s;\n", indent, x.b, x.b));
+            fields.forEach(x -> {
+                boolean required = schema.getRequired() != null && schema.getRequired().contains(x.propertyName);
+                if (required) {
+                    p.format("%sif (%s == null) {\n", indent, x.fieldName);
+                    indent.right();
+                    p.format("%sthrow new %s(\"%s cannot be null\");\n", indent, 
+                            imports.add(IllegalArgumentException.class), x.fieldName);
+                    indent.left();
+                    p.format("%s}\n", indent);
+                }
+                p.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
+            });
             indent.left();
             p.format("%s}\n", indent);
 
@@ -192,14 +204,17 @@ public final class Generator {
         }
     }
 
-    private static final class StringPair {
-        final String a;
-        final String b;
+    private static final class Field {
+        final String propertyName;
+        final String fieldName;
+        final String type;
 
-        StringPair(String a, String b) {
-            this.a = a;
-            this.b = b;
+        public Field(String propertyName, String fieldName, String type) {
+            this.propertyName = propertyName;
+            this.fieldName = fieldName;
+            this.type = type;
         }
+
     }
 
     private static boolean isEnum(Schema<?> schema) {
