@@ -11,11 +11,11 @@ public final class GeneratorTest {
 
     @Test
     public void testGenerate() throws IOException {
-        String definition = new String(Files.readAllBytes(new File("src/test/resources/openapi.yml").toPath()),
+        String definition = new String(Files.readAllBytes(new File("src/test/resources/openapi2.yml").toPath()),
                 StandardCharsets.UTF_8);
         Packages packages = new Packages("test.model", "test.client");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x);
         new Generator(d).generate();
     }
-
+    
 }
