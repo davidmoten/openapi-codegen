@@ -105,8 +105,10 @@ public final class Generator {
         } else if (isPrimitive(schema.getType())) {
             Class<?> cls = toClass(schema.getType(), schema.getFormat());
             if (!isArrayItem) {
-                p.format("\n%sprivate final %s %s;\n", indent, imports.add(cls),
-                        Names.toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
+                String fieldName = Names.toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
+                String fieldType = imports.add(cls);
+                p.format("\n%sprivate final %s %s;\n", indent, fieldType,
+                        fieldName);
             }
             return imports.add(cls);
         } else if (isArray(schema.getType())) {
