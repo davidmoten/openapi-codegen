@@ -110,7 +110,7 @@ public final class Generator {
                 String fieldType = imports.add(cls);
                 p.format("\n%sprivate final %s %s;\n", indent, fieldType, fieldName);
 
-                addConstructorForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, fieldType);
+                addConstructorAndGetterForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, fieldType);
             }
             return imports.add(cls);
         } else if (isArray(schema.getType())) {
@@ -146,7 +146,7 @@ public final class Generator {
                 String fieldName = Names
                         .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
                 p.format("\n%sprivate final %s %s;\n", indent, importedType, fieldName);
-                addConstructorForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, importedType);
+                addConstructorAndGetterForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, importedType);
             }
             return importedType;
         } else if (isObject(schema)) {
@@ -206,7 +206,7 @@ public final class Generator {
         }
     }
 
-    private static void addConstructorForSingleFieldType(Indent indent, PrintWriter p, boolean isRoot,
+    private static void addConstructorAndGetterForSingleFieldType(Indent indent, PrintWriter p, boolean isRoot,
             String parentFullClassName, String fieldName, String fieldType) {
         if (isRoot) {
             p.format("\n%spublic %s(%s %s) {\n", indent, simpleClassName(parentFullClassName), fieldType, fieldName);
