@@ -71,8 +71,8 @@ public final class Generator {
 
     // returns an imported type (using imports.add), type may include generics
     private static String writeClassContentForType(Schema<?> schema, Indent indent, Imports imports, PrintWriter p,
-            Optional<String> name, boolean isRoot, boolean isArrayItem, String parentClassName, Definition definition,
-            Names names) {
+            Optional<String> name, boolean isRoot, boolean isArrayItem, String parentFullClassName,
+            Definition definition, Names names) {
         if (isEnum(schema)) {
             Preconditions.checkArgument("string".equals(schema.getType()));
             String clsName = Names.toClassSimpleName(name.orElse(Optional.ofNullable(schema.getName()).orElse("Enum")));
@@ -96,7 +96,7 @@ public final class Generator {
             p.format("%s}\n", indent.left());
 
             p.format("%s}\n", indent.left());
-            String fullClsName = parentClassName + "." + clsName;
+            String fullClsName = parentFullClassName + "." + clsName;
             if (!isArrayItem) {
                 p.format("\n%sprivate final %s %s;\n", indent, imports.add(fullClsName),
                         Names.toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
@@ -109,17 +109,27 @@ public final class Generator {
                         .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
                 String fieldType = imports.add(cls);
                 p.format("\n%sprivate final %s %s;\n", indent, fieldType, fieldName);
+
+                addConstructorForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, fieldType);
             }
             return imports.add(cls);
         } else if (isArray(schema.getType())) {
             ArraySchema as = (ArraySchema) schema;
             Schema<?> itemSchema = as.getItems();
             Optional<String> nm = Optional.of(name.orElse("") + "Item");
-            String type = writeClassContentForType(itemSchema, indent, imports, p, nm, false, true, parentClassName,
+            String type = writeClassContentForType(itemSchema, indent, imports, p, nm, false, true, parentFullClassName,
                     definition, names);
             if (!isArrayItem) {
-                p.format("\n%sprivate final %s<%s> %s;\n", indent, imports.add(List.class), type,
-                        Names.toFieldName(name.orElse("value")));
+                String fieldName = Names.toFieldName(name.orElse("value"));
+                p.format("\n%sprivate final %s<%s> %s;\n", indent, imports.add(List.class), type, fieldName);
+                if (isRoot) {
+                    p.format("\n%spublic %s(%s<%s> %s) {\n", indent, simpleClassName(parentFullClassName),
+                            imports.add(List.class), type, fieldName);
+                    indent.right();
+                    p.format("%sthis.%s = %s;\n", indent, fieldName, fieldName);
+                    indent.left();
+                    p.format("%s}\n", indent);
+                }
             }
             return imports.add(List.class) + "<" + type + ">";
         } else if (isRef(schema)) {
@@ -133,8 +143,10 @@ public final class Generator {
             }
             String importedType = imports.add(type);
             if (!isArrayItem) {
-                p.format("\n%sprivate final %s %s;\n", indent, importedType,
-                        Names.toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value"))));
+                String fieldName = Names
+                        .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
+                p.format("\n%sprivate final %s %s;\n", indent, importedType, fieldName);
+                addConstructorForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, importedType);
             }
             return importedType;
         } else if (isObject(schema)) {
@@ -142,11 +154,11 @@ public final class Generator {
             Preconditions.checkNotNull(schema.getProperties());
             String fullClsName;
             if (isRoot) {
-                fullClsName = parentClassName;
+                fullClsName = parentFullClassName;
             } else {
                 String clsName = Names
                         .toClassSimpleName(name.orElse(Optional.ofNullable(schema.getName()).orElse("Anon")));
-                fullClsName = parentClassName + "." + clsName;
+                fullClsName = parentFullClassName + "." + clsName;
                 p.format("\n%spublic static final class %s {\n", indent, clsName);
                 indent.right();
             }
@@ -163,8 +175,7 @@ public final class Generator {
             // add constructor with fields
             indent.right();
             indent.right();
-            String constructorArgs = fields.stream()
-                    .map(x -> String.format("\n%s%s %s", indent, x.type, x.fieldName))
+            String constructorArgs = fields.stream().map(x -> String.format("\n%s%s %s", indent, x.type, x.fieldName))
                     .collect(Collectors.joining(","));
             indent.left();
             indent.left();
@@ -175,7 +186,7 @@ public final class Generator {
                 if (required) {
                     p.format("%sif (%s == null) {\n", indent, x.fieldName);
                     indent.right();
-                    p.format("%sthrow new %s(\"%s cannot be null\");\n", indent, 
+                    p.format("%sthrow new %s(\"%s cannot be null\");\n", indent,
                             imports.add(IllegalArgumentException.class), x.fieldName);
                     indent.left();
                     p.format("%s}\n", indent);
@@ -192,6 +203,23 @@ public final class Generator {
         } else {
             System.out.println("schema not implemented for " + schema);
             throw new RuntimeException("not implemented");
+        }
+    }
+
+    private static void addConstructorForSingleFieldType(Indent indent, PrintWriter p, boolean isRoot,
+            String parentFullClassName, String fieldName, String fieldType) {
+        if (isRoot) {
+            p.format("\n%spublic %s(%s %s) {\n", indent, simpleClassName(parentFullClassName), fieldType, fieldName);
+            indent.right();
+            p.format("%sthis.%s = %s;\n", indent, fieldName, fieldName);
+            indent.left();
+            p.format("%s}\n", indent);
+
+            p.format("\n%spublic %s %s() {\n", indent, fieldType, fieldName);
+            indent.right();
+            p.format("%sreturn %s;\n", indent, fieldName);
+            indent.left();
+            p.format("%s}\n", indent);
         }
     }
 
