@@ -108,7 +108,7 @@ public final class Generator {
                 String fieldName = Names
                         .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
                 String fieldType = imports.add(cls);
-                p.format("\n%sprivate final %s %s;\n", indent, fieldType, fieldName);
+                p.format("%sprivate final %s %s;\n", indent, fieldType, fieldName);
 
                 addConstructorAndGetterForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, fieldType);
             }
@@ -121,12 +121,18 @@ public final class Generator {
                     definition, names);
             if (!isArrayItem) {
                 String fieldName = Names.toFieldName(name.orElse("value"));
-                p.format("\n%sprivate final %s<%s> %s;\n", indent, imports.add(List.class), type, fieldName);
+                p.format("%sprivate final %s<%s> %s;\n", indent, imports.add(List.class), type, fieldName);
                 if (isRoot) {
                     p.format("\n%spublic %s(%s<%s> %s) {\n", indent, simpleClassName(parentFullClassName),
                             imports.add(List.class), type, fieldName);
                     indent.right();
                     p.format("%sthis.%s = %s;\n", indent, fieldName, fieldName);
+                    indent.left();
+                    p.format("%s}\n", indent);
+                    
+                    p.format("\n%spublic %s<%s> %s() {\n", indent, imports.add(List.class), type, fieldName);
+                    indent.right();
+                    p.format("%sreturn %s;\n", indent, fieldName);
                     indent.left();
                     p.format("%s}\n", indent);
                 }
@@ -145,7 +151,7 @@ public final class Generator {
             if (!isArrayItem) {
                 String fieldName = Names
                         .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
-                p.format("\n%sprivate final %s %s;\n", indent, importedType, fieldName);
+                p.format("%sprivate final %s %s;\n", indent, importedType, fieldName);
                 addConstructorAndGetterForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, importedType);
             }
             return importedType;
@@ -195,6 +201,15 @@ public final class Generator {
             });
             indent.left();
             p.format("%s}\n", indent);
+            
+            fields.forEach(x -> {
+                p.format("\n%spublic %s %s() {\n", indent, x.type, x.fieldName);
+                indent.right();
+                p.format("%sreturn %s;\n", indent, x.fieldName);
+                indent.left();
+                p.format("%s}\n", indent);
+            });
+            
 
             if (!isRoot) {
                 p.format("%s}\n", indent.left());

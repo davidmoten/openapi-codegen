@@ -24,7 +24,7 @@ public interface JavaClassWriter {
             Indent indent = new Indent();
             p.format("%spackage %s;\n", indent, Names.pkg(className));
             p.format("\n" + importsToken);
-            p.format("public final class %s {\n", simpleClassName);
+            p.format("public final class %s {\n\n", simpleClassName);
             writer.write(indent.right(), imports, p);
             p.format("}");
         }
