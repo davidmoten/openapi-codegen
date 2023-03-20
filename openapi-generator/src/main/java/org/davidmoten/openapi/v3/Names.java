@@ -125,7 +125,7 @@ public final class Names {
 
     }
 
-    public static String toClassSimpleName(String name) {
+    public static String simpleClassNameFromSimpleName(String name) {
         return upperFirst(toIdentifier(name));
     }
 
