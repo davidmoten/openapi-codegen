@@ -14,7 +14,7 @@ public interface JavaClassWriter {
 
     void write(Indent indent, Imports imports, PrintWriter p);
 
-    public static void write(File file, String className, JavaClassWriter writer) {
+    public static void write(File file, String className, JavaClassWriter writer, boolean isInterface) {
         String importsToken = "<<IMPORTS>>";
         file.getParentFile().mkdirs();
         Imports imports = new Imports(className);
@@ -24,7 +24,13 @@ public interface JavaClassWriter {
             Indent indent = new Indent();
             p.format("%spackage %s;\n", indent, Names.pkg(className));
             p.format("\n" + importsToken);
-            p.format("public final class %s {\n\n", simpleClassName);
+            final String declaration;
+            if (isInterface) {
+                declaration = "public interface";
+            } else {
+                declaration = "public final class";
+            }
+            p.format("%s %s {\n\n", declaration, simpleClassName);
             writer.write(indent.right(), imports, p);
             p.format("}");
         }

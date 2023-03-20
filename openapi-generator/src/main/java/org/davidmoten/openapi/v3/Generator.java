@@ -50,7 +50,7 @@ public final class Generator {
         File file = names.clientClassJavaFile();
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
             p.format("%s// TODO\n", indent);
-        });
+        }, false);
     }
 
     private static void writeSchemaClasses(OpenAPI api, Definition definition, Names names) {
@@ -67,7 +67,7 @@ public final class Generator {
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
             writeClassContentForType(schema, indent, imports, p, Optional.empty(), true, false, className, definition,
                     names);
-        });
+        }, isOneOf(schema));
     }
 
     // returns an imported type (using imports.add), type may include generics
@@ -82,7 +82,7 @@ public final class Generator {
             indent.right();
             Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
             String valueType = imports.add(valueCls);
-            
+
             p.format("\n%sprivate %s value;\n", indent, valueType);
             p.format("\n");
             for (int i = 0; i < schema.getEnum().size(); i++) {
@@ -90,7 +90,7 @@ public final class Generator {
                     p.format(",\n");
                 }
                 Object o = schema.getEnum().get(i);
-                String delim = o instanceof String? "\"":"";
+                String delim = o instanceof String ? "\"" : "";
                 p.format("%s%s(%s%s%s)", indent, Names.enumNameToEnumConstant(o.toString()), delim, o, delim);
             }
             p.format(";\n");
@@ -106,9 +106,9 @@ public final class Generator {
             p.format("%s}\n", indent.left());
             String fullClsName = parentFullClassName + "." + clsName;
             if (!isArrayItem) {
-                String fieldName = Names.toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
-                p.format("\n%sprivate final %s %s;\n", indent, imports.add(fullClsName),
-                        fieldName);
+                String fieldName = Names
+                        .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
+                p.format("\n%sprivate final %s %s;\n", indent, imports.add(fullClsName), fieldName);
                 p.format("\n%spublic %s %s() {\n", indent, imports.add(fullClsName), fieldName);
                 indent.right();
                 p.format("%sreturn %s;\n", indent, fieldName);
@@ -143,7 +143,7 @@ public final class Generator {
                     p.format("%sthis.%s = %s;\n", indent, fieldName, fieldName);
                     indent.left();
                     p.format("%s}\n", indent);
-                    
+
                     p.format("\n%spublic %s<%s> %s() {\n", indent, imports.add(List.class), type, fieldName);
                     indent.right();
                     p.format("%sreturn %s;\n", indent, fieldName);
@@ -166,7 +166,8 @@ public final class Generator {
                 String fieldName = Names
                         .toFieldName(name.orElse(Optional.ofNullable(schema.getName()).orElse("value")));
                 p.format("%sprivate final %s %s;\n", indent, importedType, fieldName);
-                addConstructorAndGetterForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName, importedType);
+                addConstructorAndGetterForSingleFieldType(indent, p, isRoot, parentFullClassName, fieldName,
+                        importedType);
             }
             return importedType;
         } else if (isObject(schema)) {
@@ -215,7 +216,7 @@ public final class Generator {
             });
             indent.left();
             p.format("%s}\n", indent);
-            
+
             fields.forEach(x -> {
                 p.format("\n%spublic %s %s() {\n", indent, x.type, x.fieldName);
                 indent.right();
@@ -228,13 +229,25 @@ public final class Generator {
                 p.format("%s}\n", indent.left());
             }
             return imports.add(fullClsName);
-        } if (isOneOf(schema)) {
-            String clsName = Names
-                    .toClassSimpleName(name.orElse("Anon"));
-            String fullClsName = parentFullClassName + "." + clsName;
-            p.format("\n$spublic interface %s {\n", indent, clsName);
-            p.format("%s}\n", indent);
-            return imports.add(fullClsName);
+        }
+        if (isOneOf(schema)) {
+            final String fullClassName;
+            if (!isRoot) {
+                String clsName = Names.toClassSimpleName(name.orElse("Anon"));
+                fullClassName = parentFullClassName + "." + clsName;
+                p.format("%spublic interface %s {\n", indent, clsName);
+                indent.right();
+            } else {
+                fullClassName = parentFullClassName;
+            }
+            // TODO confirm String discriminator is reasonable assumption
+            p.format("%s%s %s();\n", indent, imports.add(String.class),
+                    Names.propertyNameToFieldName(schema.getDiscriminator().getPropertyName()));
+            if (!isRoot) {
+                indent.left();
+                p.format("%s}\n", indent);
+            }
+            return imports.add(fullClassName);
         } else {
             System.out.println("schema not implemented for " + schema);
             throw new RuntimeException("not implemented");
@@ -295,11 +308,12 @@ public final class Generator {
     private static boolean isObject(Schema<?> schema) {
         return (schema.getType() == null && schema.getProperties() != null) || "object".equals(schema.getType());
     }
-    
+
     private static boolean isOneOf(Schema<?> schema) {
         if (!(schema instanceof ComposedSchema)) {
             return false;
-        };
+        }
+        ;
         ComposedSchema sch = (ComposedSchema) schema;
         return sch.getOneOf() != null && !sch.getOneOf().isEmpty();
     }
