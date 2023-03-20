@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -366,6 +367,28 @@ public final class Generator {
         } else {
             return null;
         }
+    }
+
+    private static Map<Schema<?>, Set<Schema<?>>> superClasses(OpenAPI api) {
+        Predicate<Schema<?>> predicate = x -> x instanceof ComposedSchema && ((ComposedSchema) x).getOneOf() != null;
+        Map<Schema<?>, Set<Schema<?>>> map = new HashMap<>();
+        api.getComponents() //
+                .getSchemas() //
+                .values() //
+                .stream() //
+                .flatMap(x -> findSchemas(x, predicate).stream()) //
+                .map(x -> (ComposedSchema) x) //
+                .forEach(x -> {
+                    for (Schema<?> sch : x.getOneOf()) {
+                        Set<Schema<?>> set = map.get(sch);
+                        if (set == null) {
+                            set = new HashSet<>();
+                            map.put(sch, set);
+                        }
+                        set.add(x);
+                    }
+                });
+        return map;
     }
 
     private static List<Schema<?>> findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate) {
