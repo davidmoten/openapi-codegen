@@ -17,6 +17,7 @@ import com.github.davidmoten.guavamini.Preconditions;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -74,25 +75,32 @@ public final class Generator {
             Optional<String> name, boolean isRoot, boolean isArrayItem, String parentFullClassName,
             Definition definition, Names names) {
         if (isEnum(schema)) {
-            Preconditions.checkArgument("string".equals(schema.getType()));
+            System.out.println(schema.getType());
+            Preconditions.checkArgument(isPrimitive(schema.getType()));
             String clsName = Names.toClassSimpleName(name.orElse(Optional.ofNullable(schema.getName()).orElse("Enum")));
             p.format("\n%spublic enum %s {\n", indent, clsName);
             indent.right();
+            Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
+            String valueType = imports.add(valueCls);
+            
+            p.format("\n%sprivate %s value;\n", indent, valueType);
+            p.format("\n");
             for (int i = 0; i < schema.getEnum().size(); i++) {
                 if (i > 0 && i < schema.getEnum().size()) {
                     p.format(",\n");
                 }
-                String s = (String) schema.getEnum().get(i);
-                p.format("%s%s(\"%s\")", indent, Names.enumNameToEnumConstant(s), s);
+                Object o = schema.getEnum().get(i);
+                String delim = o instanceof String? "\"":"";
+                p.format("%s%s(%s%s%s)", indent, Names.enumNameToEnumConstant(o.toString()), delim, o, delim);
             }
             p.format(";\n");
             indent.left();
-            p.format("\n%sprivate %s(String name) {\n", indent.right(), clsName);
-            p.format("%sthis.name = name;\n", indent.right());
+            p.format("\n%sprivate %s(%s value) {\n", indent.right(), clsName, valueType);
+            p.format("%sthis.value = value;\n", indent.right());
             p.format("%s}\n", indent.left());
 
-            p.format("\n%spublic String getName() {\n", indent);
-            p.format("%sreturn name;\n", indent.right());
+            p.format("\n%spublic %s value() {\n", indent, valueType);
+            p.format("%sreturn value;\n", indent.right());
             p.format("%s}\n", indent.left());
 
             p.format("%s}\n", indent.left());
@@ -215,11 +223,17 @@ public final class Generator {
                 indent.left();
                 p.format("%s}\n", indent);
             });
-            
 
             if (!isRoot) {
                 p.format("%s}\n", indent.left());
             }
+            return imports.add(fullClsName);
+        } if (isOneOf(schema)) {
+            String clsName = Names
+                    .toClassSimpleName(name.orElse("Anon"));
+            String fullClsName = parentFullClassName + "." + clsName;
+            p.format("\n$spublic interface %s {\n", indent, clsName);
+            p.format("%s}\n", indent);
             return imports.add(fullClsName);
         } else {
             System.out.println("schema not implemented for " + schema);
@@ -280,6 +294,14 @@ public final class Generator {
 
     private static boolean isObject(Schema<?> schema) {
         return (schema.getType() == null && schema.getProperties() != null) || "object".equals(schema.getType());
+    }
+    
+    private static boolean isOneOf(Schema<?> schema) {
+        if (!(schema instanceof ComposedSchema)) {
+            return false;
+        };
+        ComposedSchema sch = (ComposedSchema) schema;
+        return sch.getOneOf() != null && !sch.getOneOf().isEmpty();
     }
 
     private static boolean isPrimitive(String type) {

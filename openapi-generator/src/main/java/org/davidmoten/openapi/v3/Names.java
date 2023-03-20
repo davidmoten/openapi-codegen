@@ -7,13 +7,12 @@ import com.github.davidmoten.guavamini.Sets;
 
 public final class Names {
 
-    private static final Set<String> javaReservedWords = Sets.newHashSet("abstract", "assert",
-            "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue",
-            "default", "do", "double", "else", "extends", "false", "final", "finally", "float",
-            "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
-            "native", "new", "null", "package", "private", "protected", "public", "return", "short",
-            "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws",
-            "transient", "true", "try", "void", "volatile", "while", "var");
+    private static final Set<String> javaReservedWords = Sets.newHashSet("abstract", "assert", "boolean", "break",
+            "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
+            "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
+            "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
+            "true", "try", "void", "volatile", "while", "var");
 
     private final Definition definition;
 
@@ -43,7 +42,9 @@ public final class Names {
     }
 
     public static String toIdentifier(String s) {
-        if (javaReservedWords.contains(s.toLowerCase())) {
+        if (Character.isDigit(s.charAt(0))) {
+            return "_" + s;
+        } else if (javaReservedWords.contains(s.toLowerCase())) {
             return s.toLowerCase() + "_";
         } else if (s.toUpperCase().equals(s)) {
             return s;
