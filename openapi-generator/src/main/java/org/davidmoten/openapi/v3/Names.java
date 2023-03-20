@@ -48,10 +48,15 @@ public final class Names {
         this.api = result.getOpenAPI();
         this.superClasses = superClasses(api);
         this.schemaFullClassNames = schemaFullClassNames(api);
-
     }
 
     private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
+        visitSchemas(api, (names, schema) -> {
+            if (schema.get$ref() != null) {
+                names = names.add(schema.get$ref());
+            }
+            System.out.println(names + ": " + schema.getClass().getSimpleName());   
+        });
         return null;
     }
 
@@ -203,16 +208,37 @@ public final class Names {
         public Iterator<T> iterator() {
             return list.iterator();
         }
+        
+        @Override
+        public String toString() {
+            return list.toString();
+        }
 
     }
 
+    private static void visitSchemas(OpenAPI api, BiConsumer<ImmutableList<String>, Schema<?>> consumer) {
+        api //
+                .getComponents() //
+                .getSchemas() //
+                .entrySet() //
+                .stream() //
+                .forEach(entry -> visitSchemas(ImmutableList.of(entry.getKey()), entry.getValue(), consumer));
+    }
+
     private static void visitSchemas(ImmutableList<String> names, Schema<?> schema,
+            BiConsumer<ImmutableList<String>, Schema<?>> consumer) {
+        Set<Schema<?>> visited = new HashSet<>();
+        visitSchemas(names, schema, consumer, visited);
+    }
+
+    private static void visitSchemas(ImmutableList<String> names0, Schema<?> schema,
             BiConsumer<ImmutableList<String>, Schema<?>> consumer, Set<Schema<?>> visited) {
         if (!visited.add(schema))
             return;
+        ImmutableList<String> names = names0;
         consumer.accept(names, schema);
         if (schema.getAdditionalProperties() instanceof Schema) {
-            visitSchemas(names, (Schema<?>) schema.getAdditionalProperties(), consumer, visited);
+            visitSchemas(names.add("map"), (Schema<?>) schema.getAdditionalProperties(), consumer, visited);
         }
         if (schema.getNot() != null) {
             visitSchemas(names.add("not"), schema.getNot(), consumer, visited);
