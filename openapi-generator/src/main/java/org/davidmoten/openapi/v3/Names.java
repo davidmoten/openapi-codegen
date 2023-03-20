@@ -1,9 +1,21 @@
 package org.davidmoten.openapi.v3;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.github.davidmoten.guavamini.Sets;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
 
 public final class Names {
 
@@ -15,6 +27,8 @@ public final class Names {
             "true", "try", "void", "volatile", "while", "var");
 
     private final Definition definition;
+
+    private final Map<Schema<?>, List<Schema<?>>> superSchemas = new HashMap<>();
 
     public Names(Definition definition) {
         this.definition = definition;

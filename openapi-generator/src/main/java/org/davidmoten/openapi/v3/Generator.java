@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -362,5 +365,46 @@ public final class Generator {
             return null;
         }
     }
+    
+    private static List<Schema<?>> findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate) {
+        List<Schema<?>> list = new ArrayList<>();
+        findSchemas(schema, predicate, list);
+        return list;
+    }
 
+    private static void findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate, List<Schema<?>> list) {
+        if (predicate.test(schema)) {
+            list.add(schema);
+        } else if (schema instanceof ArraySchema) {
+            ArraySchema a = (ArraySchema) schema;
+            if (a.getProperties() != null) {
+                a.getProperties().values().forEach(x -> findSchemas(x, predicate, list));
+            }
+        } else if (schema instanceof ComposedSchema) {
+            ComposedSchema a = (ComposedSchema) schema;
+            if (a.getAllOf() != null) {
+                a.getAllOf().forEach(x -> findSchemas(x, predicate, list));
+            }
+            if (a.getOneOf() != null) {
+                a.getOneOf().forEach(x -> findSchemas(x, predicate, list));
+            }
+            if (a.getAnyOf() != null) {
+                a.getAnyOf().forEach(x -> findSchemas(x, predicate, list));
+            }
+        } else if (schema instanceof MapSchema) {
+            MapSchema a = (MapSchema) schema;
+            Object o = a.getAdditionalProperties();
+            if (o != null && o instanceof Schema) {
+                findSchemas((Schema<?>) o, predicate, list);
+            }
+        } else if (schema instanceof ObjectSchema) {
+            ObjectSchema a = (ObjectSchema) schema;
+            @SuppressWarnings("rawtypes")
+            Map<String, Schema> o = a.getProperties();
+            if (o != null) {
+               o.values().forEach(x -> findSchemas(x, predicate, list));
+            }
+        }
+    }
+    
 }
