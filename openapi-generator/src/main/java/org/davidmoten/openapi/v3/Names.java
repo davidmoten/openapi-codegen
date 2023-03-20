@@ -247,7 +247,7 @@ public final class Names {
             } else {
                 s = schema.getClass().getSimpleName();
             }
-            return "(" + name + ", " + s + ")";
+            return "(" + name + ": " + s + ")";
         }
         
     }
