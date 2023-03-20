@@ -6,11 +6,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.github.davidmoten.guavamini.Preconditions;
@@ -365,20 +367,25 @@ public final class Generator {
             return null;
         }
     }
-    
+
     private static List<Schema<?>> findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
-        findSchemas(schema, predicate, list);
+        Set<Schema<?>> visited = new HashSet<>();
+        findSchemas(schema, predicate, list, visited);
         return list;
     }
 
-    private static void findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate, List<Schema<?>> list) {
+    private static void findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate, List<Schema<?>> list,
+            Set<Schema<?>> visited) {
+        if (!visited.add(schema))
+            return;
         if (predicate.test(schema)) {
             list.add(schema);
-        } else if (schema instanceof ArraySchema) {
+        }
+        if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
             if (a.getProperties() != null) {
-                a.getProperties().values().forEach(x -> findSchemas(x, predicate, list));
+                a.getProperties().values().forEach(x -> findSchemas(x, predicate, list, visited));
             }
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;
@@ -402,9 +409,9 @@ public final class Generator {
             @SuppressWarnings("rawtypes")
             Map<String, Schema> o = a.getProperties();
             if (o != null) {
-               o.values().forEach(x -> findSchemas(x, predicate, list));
+                o.values().forEach(x -> findSchemas(x, predicate, list));
             }
         }
     }
-    
+
 }
