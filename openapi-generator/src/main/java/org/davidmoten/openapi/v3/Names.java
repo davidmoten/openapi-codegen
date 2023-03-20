@@ -2,11 +2,14 @@ package org.davidmoten.openapi.v3;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import com.github.davidmoten.guavamini.Sets;
@@ -36,6 +39,7 @@ public final class Names {
     private final OpenAPI api;
 
     private final Map<Schema<?>, Set<Schema<?>>> superClasses;
+    private final Map<Schema<?>, String> schemaFullClassNames;
 
     public Names(Definition definition) {
         this.definition = definition;
@@ -43,8 +47,14 @@ public final class Names {
         result.getMessages().stream().forEach(System.out::println);
         this.api = result.getOpenAPI();
         this.superClasses = superClasses(api);
+        this.schemaFullClassNames = schemaFullClassNames(api);
+
     }
-    
+
+    private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
+        return null;
+    }
+
     public OpenAPI api() {
         return api;
     }
@@ -122,7 +132,6 @@ public final class Names {
 
     public static String toFieldName(String name) {
         return lowerFirst(toIdentifier(name));
-
     }
 
     public static String simpleClassNameFromSimpleName(String name) {
@@ -138,9 +147,9 @@ public final class Names {
         Map<Schema<?>, Set<Schema<?>>> map = new HashMap<>();
         api.getComponents() //
                 .getSchemas() //
-                .values() //
+                .entrySet() //
                 .stream() //
-                .flatMap(x -> findSchemas(x, predicate).stream()) //
+                .flatMap(x -> findSchemas(x.getKey(), x.getValue(), predicate).stream()) //
                 .map(x -> (ComposedSchema) x) //
                 .forEach(x -> {
                     for (Schema<?> sch : x.getOneOf()) {
@@ -155,49 +164,83 @@ public final class Names {
         return map;
     }
 
-    private static List<Schema<?>> findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate) {
+    private static List<Schema<?>> findSchemas(String name, Schema<?> schema, Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
         Set<Schema<?>> visited = new HashSet<>();
-        findSchemas(schema, predicate, list, visited);
+        visitSchemas(ImmutableList.of(name), schema, (names, sch) -> {
+            if (predicate.test(sch)) {
+                list.add(sch);
+            }
+        }, visited);
         return list;
     }
 
-    private static void findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate, List<Schema<?>> list,
-            Set<Schema<?>> visited) {
+    static final class ImmutableList<T> implements Iterable<T> {
+
+        private final List<T> list;
+
+        ImmutableList() {
+            this(new ArrayList<>());
+        }
+
+        ImmutableList(List<T> list) {
+            this.list = list;
+        }
+
+        ImmutableList<T> add(T value) {
+            List<T> list2 = new ArrayList<>(list);
+            list2.add(value);
+            return new ImmutableList<T>(list2);
+        }
+
+        @SafeVarargs
+        static <T> ImmutableList<T> of(T... values) {
+            List<T> list = Arrays.asList(values);
+            return new ImmutableList<>(list);
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return list.iterator();
+        }
+
+    }
+
+    private static void visitSchemas(ImmutableList<String> names, Schema<?> schema,
+            BiConsumer<ImmutableList<String>, Schema<?>> consumer, Set<Schema<?>> visited) {
         if (!visited.add(schema))
             return;
-        if (predicate.test(schema)) {
-            list.add(schema);
+        consumer.accept(names, schema);
+        if (schema.getAdditionalProperties() instanceof Schema) {
+            visitSchemas(names, (Schema<?>) schema.getAdditionalProperties(), consumer, visited);
+        }
+        if (schema.getNot() != null) {
+            visitSchemas(names.add("not"), schema.getNot(), consumer, visited);
+        }
+        if (schema.getProperties() != null) {
+            schema.getProperties().entrySet()
+                    .forEach(x -> visitSchemas(names.add(x.getKey()), x.getValue(), consumer, visited));
         }
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
-            if (a.getProperties() != null) {
-                a.getProperties().values().forEach(x -> findSchemas(x, predicate, list, visited));
+            if (a.getItems() != null) {
+                visitSchemas(names, a.getItems(), consumer, visited);
             }
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;
             if (a.getAllOf() != null) {
-                a.getAllOf().forEach(x -> findSchemas(x, predicate, list, visited));
+                a.getAllOf().forEach(x -> visitSchemas(names, x, consumer, visited));
             }
             if (a.getOneOf() != null) {
-                a.getOneOf().forEach(x -> findSchemas(x, predicate, list, visited));
+                a.getOneOf().forEach(x -> visitSchemas(names, x, consumer, visited));
             }
             if (a.getAnyOf() != null) {
-                a.getAnyOf().forEach(x -> findSchemas(x, predicate, list, visited));
+                a.getAnyOf().forEach(x -> visitSchemas(names, x, consumer, visited));
             }
         } else if (schema instanceof MapSchema) {
-            MapSchema a = (MapSchema) schema;
-            Object o = a.getAdditionalProperties();
-            if (o != null && o instanceof Schema) {
-                findSchemas((Schema<?>) o, predicate, list, visited);
-            }
+            // nothing to add here
         } else if (schema instanceof ObjectSchema) {
-            ObjectSchema a = (ObjectSchema) schema;
-            @SuppressWarnings("rawtypes")
-            Map<String, Schema> o = a.getProperties();
-            if (o != null) {
-                o.values().forEach(x -> findSchemas(x, predicate, list, visited));
-            }
+            // nothing to add here
         }
     }
 }
