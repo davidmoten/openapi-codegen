@@ -6,26 +6,17 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.github.davidmoten.guavamini.Preconditions;
 
-import io.swagger.parser.OpenAPIParser;
-import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 public final class Generator {
 
@@ -36,22 +27,21 @@ public final class Generator {
     }
 
     public void generate() {
-        SwaggerParseResult result = new OpenAPIParser().readContents(definition.definition(), null, null);
-        result.getMessages().stream().forEach(System.out::println);
-        OpenAPI api = result.getOpenAPI();
-//        System.out.println(api);
 
         // Names object for each Packages object
         Names names = new Names(definition);
 
         // generate methods on singleton client object in client package
-        writeClientClass(api, names);
-
+        writeClientClass(names);
+        
         // generate model classes for schema definitions
-        writeSchemaClasses(api, definition, names);
+        writeSchemaClasses(definition, names);
+
+//        superClasses(api).entrySet().forEach(x -> System.out.println(x.getKey().get$ref() + "->"
+//                + x.getValue().stream().map(y -> y.toString()).collect(Collectors.toList())));
     }
 
-    private static void writeClientClass(OpenAPI api, Names names) {
+    private static void writeClientClass(Names names) {
         String className = names.clientClassName();
         File file = names.clientClassJavaFile();
         JavaClassWriter.write(file, className, (indent, imports, p) -> {
@@ -59,9 +49,9 @@ public final class Generator {
         }, false);
     }
 
-    private static void writeSchemaClasses(OpenAPI api, Definition definition, Names names) {
+    private static void writeSchemaClasses(Definition definition, Names names) {
         @SuppressWarnings("unchecked")
-        Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) api.getComponents().getSchemas();
+        Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) names.api().getComponents().getSchemas();
         for (Entry<String, Schema<?>> entry : schemas.entrySet()) {
             writeSchemaClass(names, entry.getKey(), entry.getValue(), definition);
         }
@@ -366,74 +356,6 @@ public final class Generator {
             return Object.class;
         } else {
             return null;
-        }
-    }
-
-    private static Map<Schema<?>, Set<Schema<?>>> superClasses(OpenAPI api) {
-        Predicate<Schema<?>> predicate = x -> x instanceof ComposedSchema && ((ComposedSchema) x).getOneOf() != null;
-        Map<Schema<?>, Set<Schema<?>>> map = new HashMap<>();
-        api.getComponents() //
-                .getSchemas() //
-                .values() //
-                .stream() //
-                .flatMap(x -> findSchemas(x, predicate).stream()) //
-                .map(x -> (ComposedSchema) x) //
-                .forEach(x -> {
-                    for (Schema<?> sch : x.getOneOf()) {
-                        Set<Schema<?>> set = map.get(sch);
-                        if (set == null) {
-                            set = new HashSet<>();
-                            map.put(sch, set);
-                        }
-                        set.add(x);
-                    }
-                });
-        return map;
-    }
-
-    private static List<Schema<?>> findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate) {
-        List<Schema<?>> list = new ArrayList<>();
-        Set<Schema<?>> visited = new HashSet<>();
-        findSchemas(schema, predicate, list, visited);
-        return list;
-    }
-
-    private static void findSchemas(Schema<?> schema, Predicate<Schema<?>> predicate, List<Schema<?>> list,
-            Set<Schema<?>> visited) {
-        if (!visited.add(schema))
-            return;
-        if (predicate.test(schema)) {
-            list.add(schema);
-        }
-        if (schema instanceof ArraySchema) {
-            ArraySchema a = (ArraySchema) schema;
-            if (a.getProperties() != null) {
-                a.getProperties().values().forEach(x -> findSchemas(x, predicate, list, visited));
-            }
-        } else if (schema instanceof ComposedSchema) {
-            ComposedSchema a = (ComposedSchema) schema;
-            if (a.getAllOf() != null) {
-                a.getAllOf().forEach(x -> findSchemas(x, predicate, list, visited));
-            }
-            if (a.getOneOf() != null) {
-                a.getOneOf().forEach(x -> findSchemas(x, predicate, list, visited));
-            }
-            if (a.getAnyOf() != null) {
-                a.getAnyOf().forEach(x -> findSchemas(x, predicate, list, visited));
-            }
-        } else if (schema instanceof MapSchema) {
-            MapSchema a = (MapSchema) schema;
-            Object o = a.getAdditionalProperties();
-            if (o != null && o instanceof Schema) {
-                findSchemas((Schema<?>) o, predicate, list, visited);
-            }
-        } else if (schema instanceof ObjectSchema) {
-            ObjectSchema a = (ObjectSchema) schema;
-            @SuppressWarnings("rawtypes")
-            Map<String, Schema> o = a.getProperties();
-            if (o != null) {
-                o.values().forEach(x -> findSchemas(x, predicate, list, visited));
-            }
         }
     }
 
