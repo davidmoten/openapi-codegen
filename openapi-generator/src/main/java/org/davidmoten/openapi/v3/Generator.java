@@ -390,26 +390,26 @@ public final class Generator {
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;
             if (a.getAllOf() != null) {
-                a.getAllOf().forEach(x -> findSchemas(x, predicate, list));
+                a.getAllOf().forEach(x -> findSchemas(x, predicate, list, visited));
             }
             if (a.getOneOf() != null) {
-                a.getOneOf().forEach(x -> findSchemas(x, predicate, list));
+                a.getOneOf().forEach(x -> findSchemas(x, predicate, list, visited));
             }
             if (a.getAnyOf() != null) {
-                a.getAnyOf().forEach(x -> findSchemas(x, predicate, list));
+                a.getAnyOf().forEach(x -> findSchemas(x, predicate, list, visited));
             }
         } else if (schema instanceof MapSchema) {
             MapSchema a = (MapSchema) schema;
             Object o = a.getAdditionalProperties();
             if (o != null && o instanceof Schema) {
-                findSchemas((Schema<?>) o, predicate, list);
+                findSchemas((Schema<?>) o, predicate, list, visited);
             }
         } else if (schema instanceof ObjectSchema) {
             ObjectSchema a = (ObjectSchema) schema;
             @SuppressWarnings("rawtypes")
             Map<String, Schema> o = a.getProperties();
             if (o != null) {
-                o.values().forEach(x -> findSchemas(x, predicate, list));
+                o.values().forEach(x -> findSchemas(x, predicate, list, visited));
             }
         }
     }
