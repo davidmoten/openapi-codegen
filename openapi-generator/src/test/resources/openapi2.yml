@@ -1114,6 +1114,14 @@ components:
       - type: string
       - type: integer
       
+    Thing2:
+      type: object
+      properties:
+        stuff:
+          oneOf:
+          - type: string
+          - type: integer
+      
     Nested:
       type: object
       properties:
