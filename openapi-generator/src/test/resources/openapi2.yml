@@ -396,7 +396,6 @@ paths:
             a `continuationToken`.
           schema:
             type: integer
-            format: int32
             minimum: 1
             default: 10
         - in: query
@@ -633,7 +632,6 @@ components:
             token. The token should be refreshed before the expiry 
             time to avoid auth related failures.
           type: integer
-          format: int32
           minimum: 1
           example: 60
       required: [username, password]
@@ -711,6 +709,8 @@ components:
     Circle:
       type: object
       properties:
+        geometryType: 
+          type: string
         lat:
           $ref: '#/components/schemas/Latitude' 
         lon:
@@ -718,11 +718,13 @@ components:
         radiusNm:
           type: number
           format: float
-      required: [lat, lon, radiusNm]
+      required: [geometryType, lat, lon, radiusNm]
       
     Rectangle:
       type: object
       properties: 
+        geometryType:
+          type: string
         minLat: 
           $ref: '#/components/schemas/Latitude'
         leftLon: 
@@ -739,7 +741,7 @@ components:
           minimum: 0
           exclusiveMinimum: true
           maximum: 360
-      required: [minLat, leftLon, heightDegrees, widthDegrees]
+      required: [geometryType, minLat, leftLon, heightDegrees, widthDegrees]
                 
     Geometry:
       oneOf:
@@ -747,6 +749,9 @@ components:
       - $ref: '#/components/schemas/Circle'
       discriminator:
         propertyName: geometryType
+        mapping:
+          Circle: '#/components/schemas/Circle'
+          Rectangle: '#/components/schemas/Rectangle'
       example:
         geometryType: Circle
         lat: -42.5
@@ -762,21 +767,7 @@ components:
         present.
       properties:
         broadcast:
-          oneOf:
-          - $ref: '#/components/schemas/SARBroadcast'
-          - $ref: '#/components/schemas/MetBroadcast'
-          - $ref: '#/components/schemas/NavBroadcast'
-          - $ref: '#/components/schemas/PiracyBroadcast'
-          discriminator:
-            propertyName: msiType
-          example:
-            broadcastType: SARBroadcast
-            geometry: 
-              geometryType: Circle
-              lat: -34.5
-              lon: 145.44
-              radiusNm: 150
-            priority: SAFETY
+          $ref: '#/components/schemas/Broadcast'
         startTime:
           type: string
           format: datetime
@@ -810,6 +801,31 @@ components:
       ## repetition is optional
       required: [broadcast, payload]
         
+    Broadcast:
+      description: the details of the broadcast particular to the broadcast type
+      oneOf:
+      - $ref: '#/components/schemas/SARBroadcast'
+      - $ref: '#/components/schemas/MetBroadcast'
+      - $ref: '#/components/schemas/NavBroadcast'
+      - $ref: '#/components/schemas/PiracyBroadcast'
+      discriminator:
+        propertyName: broadcastType
+        mapping:
+          SARBroadcast: '#/components/schemas/SARBroadcast'
+          MetBroadcast: '#/components/schemas/MetBroadcast'
+          NavBroadcast: '#/components/schemas/NavBroadcast'
+          PiracyBroadcast: '#/components/schemas/PiracyBroadcast'
+      example:
+        broadcastType: SARBroadcast
+        area:
+          sarBroadcastAreaType: SARBroadcastGeometryArea
+          geometry:
+            geometryType: Circle
+            lat: -34.5
+            lon: 145.44
+            radiusNm: 150
+        priority: SAFETY
+      
     Msi:
       type: object
       description: |
@@ -822,22 +838,7 @@ components:
         id: 
           $ref: '#/components/schemas/MsiId'
         broadcast:
-          description: the details of the broadcast particular to the broadcast type
-          oneOf:
-          - $ref: '#/components/schemas/SARBroadcast'
-          - $ref: '#/components/schemas/MetBroadcast'
-          - $ref: '#/components/schemas/NavBroadcast'
-          - $ref: '#/components/schemas/PiracyBroadcast'
-          discriminator:
-            propertyName: broadcastType
-          example:
-            broadcastType: SARBroadcast
-            geometry: 
-              geometryType: Circle
-              lat: -34.5
-              lon: 145.44
-              radiusNm: 150
-            priority: SAFETY
+          $ref: '#/components/schemas/Broadcast'
         createdTime:
           type: string
           format: datetime
@@ -892,62 +893,144 @@ components:
         area is optional. If omitted then corresponds to the
         entire coverage area.
       properties: 
-        geometry:
+        broadcastType:
+          type: string 
+        area:
           $ref: '#/components/schemas/SARBroadcastArea'
         priority:
           $ref: '#/components/schemas/SARPriority'
-      required: [priority]
+      required: [broadcastType, area, priority]
           
     SARBroadcastArea:
       oneOf:
-      - $ref: '#/components/schemas/Geometry'
-      - $ref: '#/components/schemas/NavArea'
+      - $ref: '#/components/schemas/SARBroadcastGeometryArea'
+      - $ref: '#/components/schemas/SARBroadcastNavArea'
       discriminator:
         propertyName: sarBroadcastAreaType
+        mapping:
+          SARBroadcastGeometryArea: '#/components/schemas/SARBroadcastGeometryArea'
+          SARBroadcastNavArea: '#/components/schemas/SARBroadcastNavArea' 
+    
+    SARBroadcastGeometryArea:
+      type: object
+      properties:
+        sarBroadcastAreaType:
+          type: string
+        geometry: 
+          $ref: '#/components/schemas/Geometry'
+      required: [sarBroadcastAreaType, geometry]
+      
+    SARBroadcastNavArea:
+      type: object
+      properties:
+        sarBroadcastAreaType:
+          type: string
+        area: 
+          $ref: '#/components/schemas/NavArea'
+      required: [sarBroadcastAreaType, area]
          
     MetBroadcast:
       type: object
       properties:
+        broadcastType:
+          type: string
         area:
           $ref: '#/components/schemas/MetBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
-      required: [area]
+      required: [broadcastType, area]
       
     MetBroadcastArea:
       oneOf:
-      - $ref: '#/components/schemas/Geometry'
+      - $ref: '#/components/schemas/MetBroadcastGeometryArea'
       - $ref: '#/components/schemas/MetArea'
-      - $ref: '#/components/schemas/CoastalWarningArea'
+      - $ref: '#/components/schemas/MetBroadcastCoastalWarningArea'
       discriminator:
         propertyName: metBroadcastAreaType
+        mapping:
+          MetBroadcastGeometryArea: '#/components/schemas/MetBroadcastGeometryArea'
+          MetArea: '#/components/schemas/MetArea'
+          MetBroadcastCoastalWarningArea: '#/components/schemas/MetBroadcastCoastalWarningArea' 
+    
+    MetBroadcastGeometryArea:
+      type: object
+      properties:
+        metBroadcastAreaType:
+          type: string
+        geometry: 
+          $ref: '#/components/schemas/Geometry'
+      required: [metBroadcastAreaType, geometry]
+      
+    MetBroadcastCoastalWarningArea:
+      type: object
+      properties:
+        metBroadcastAreaType:
+          type: string
+        area: 
+          $ref: '#/components/schemas/CoastalWarningArea'
+      required: [metBroadcastAreaType, area]      
         
     NavBroadcast:
       type: object
       properties:
+        broadcastType:
+          type: string
         area:
           $ref: '#/components/schemas/NavOrPiracyBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
-      required: [area, isPiracyWarning]    
+      required: [broadcastType, area, priority]    
       
     PiracyBroadcast:
       type: object
       properties:
+        broadcastType:
+          type: string
         area:
           $ref: '#/components/schemas/NavOrPiracyBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
-      required: [area, isPiracyWarning]    
+      required: [broadcastType, area, priority]    
         
     NavOrPiracyBroadcastArea:
       oneOf:
-      - $ref: '#/components/schemas/Geometry'
-      - $ref: '#/components/schemas/NavArea'
-      - $ref: '#/components/schemas/CoastalWarningArea'
+      - $ref: '#/components/schemas/NavOrPiracyBroadcastGeometryArea'
+      - $ref: '#/components/schemas/NavOrPiracyBroadcastNavArea'
+      - $ref: '#/components/schemas/NavOrPiracyBroadcastCoastalWarningArea'
       discriminator:
         propertyName: navBroadcastAreaType
+        mapping:
+          NavOrPiracyBroadcastGeometryArea: '#/components/schemas/NavOrPiracyBroadcastGeometryArea'
+          NavOrPiracyBroadcastNavArea: '#/components/schemas/NavOrPiracyBroadcastNavArea'
+          NavOrPiracyBroadcastCoastalWarningArea: '#/components/schemas/NavOrPiracyBroadcastCoastalWarningArea' 
               
+    NavOrPiracyBroadcastGeometryArea:
+      type: object
+      properties:
+        navBroadcastAreaType:
+          type: string
+        geometry: 
+          $ref: '#/components/schemas/Geometry'
+      required: [navBroadcastAreaType, geometry]
+
+    NavOrPiracyBroadcastNavArea:
+      type: object
+      properties:
+        navBroadcastAreaType:
+          type: string
+        area: 
+          $ref: '#/components/schemas/NavArea'
+      required: [navBroadcastAreaType, navArea]
+      
+    NavOrPiracyBroadcastCoastalWarningArea:
+      type: object
+      properties:
+        navBroadcastAreaType:
+          type: string
+        area: 
+          $ref: '#/components/schemas/CoastalWarningArea'
+      required: [navBroadcastAreaType, area]      
+                    
     NavArea:
       properties: 
         navAreaCode:
@@ -956,7 +1039,6 @@ components:
           
     NavAreaCode:
       type: integer
-      format: int32
       minimum: 1
       maximum: 21
           
@@ -964,7 +1046,6 @@ components:
       properties: 
         metAreaCode:
           type: integer
-          format: int32
           minimum: 1
           maximum: 21
       required: [metAreaCode]
@@ -1013,7 +1094,6 @@ components:
             is the broadcast happens twice)
         intervalHours: 
           type: integer
-          format: int32
           enum: [1,2,3,4,5,6,12,18,24,30,36,48,60,72,96,120]  
           description: |
             the time gap between broadcasts of the same MSI   
@@ -1028,3 +1108,9 @@ components:
         of results. The token is not expected to be anywhere near as
         long as 4096 characters but good to put an upper bound on it. 
       example: 10
+      
+    Thing:
+      oneOf:
+      - type: string
+      - type: integer
+      

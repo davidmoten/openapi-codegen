@@ -246,9 +246,11 @@ public final class Generator {
             } else {
                 fullClassName = parentFullClassName;
             }
-            // TODO confirm String discriminator is reasonable assumption
-            p.format("%s%s %s();\n", indent, imports.add(String.class),
-                    Names.propertyNameToFieldName(schema.getDiscriminator().getPropertyName()));
+            if (schema.getDiscriminator() != null) {
+                // TODO confirm String discriminator is reasonable assumption
+                p.format("%s%s %s();\n", indent, imports.add(String.class),
+                        Names.propertyNameToFieldName(schema.getDiscriminator().getPropertyName()));
+            }
             if (!isRoot) {
                 indent.left();
                 p.format("%s}\n", indent);
