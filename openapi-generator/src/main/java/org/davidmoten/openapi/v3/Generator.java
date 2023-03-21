@@ -248,6 +248,7 @@ public final class Generator {
             }
             if (schema.getDiscriminator() != null) {
                 // TODO confirm String discriminator is reasonable assumption
+                // TODO use discriminator property mapping
                 p.format("%s%s %s();\n", indent, imports.add(String.class),
                         Names.propertyNameToFieldName(schema.getDiscriminator().getPropertyName()));
             }
