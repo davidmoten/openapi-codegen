@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.github.davidmoten.guavamini.Lists;
@@ -49,21 +48,21 @@ public final class Names {
     }
 
     @SuppressWarnings("unchecked")
-    private final static List<Class<? extends Schema<?>>> GROUPING_SCHEMA_CLASSES = Lists.newArrayList( //
+    private final static List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.newArrayList( //
             ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
 
     private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
-        visitSchemas(api, schemas -> {
-            if (!isGroupingSchema(schemas.last().schema)) {
-                System.out.println(schemas);
+        visitSchemas(api, schemaPath -> {
+            if (!isComplexSchema(schemaPath.last().schema)) {
+                System.out.println(schemaPath);
             }
         });
         System.out.println("////////////////////////////////////////////////");
         return null;
     }
 
-    private static final boolean isGroupingSchema(Schema<?> schema) {
-        for (Class<? extends Schema<?>> cls : GROUPING_SCHEMA_CLASSES) {
+    private static final boolean isComplexSchema(Schema<?> schema) {
+        for (Class<? extends Schema<?>> cls : COMPLEX_SCHEMA_CLASSES) {
             if (cls.isAssignableFrom(schema.getClass())) {
                 return true;
             }
@@ -182,9 +181,9 @@ public final class Names {
 
     private static List<Schema<?>> findSchemas(String name, Schema<?> schema, Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
-        visitSchemas(ImmutableList.of(new SchemaWithName(name, schema)), (schemas) -> {
-            if (predicate.test(schemas.last().schema)) {
-                list.add(schemas.last().schema);
+        visitSchemas(ImmutableList.of(new SchemaWithName(name, schema)), schemaPath -> {
+            if (predicate.test(schemaPath.last().schema)) {
+                list.add(schemaPath.last().schema);
             }
         });
         return list;
@@ -230,14 +229,14 @@ public final class Names {
 
     }
 
-    private static void visitSchemas(OpenAPI api, Consumer<ImmutableList<SchemaWithName>> consumer) {
+    private static void visitSchemas(OpenAPI api, Visitor visitor) {
         api //
                 .getComponents() //
                 .getSchemas() //
                 .entrySet() //
                 .stream() //
                 .forEach(entry -> visitSchemas(ImmutableList.of(new SchemaWithName(entry.getKey(), entry.getValue())),
-                        consumer));
+                        visitor));
     }
 
     private static final class SchemaWithName {
@@ -262,38 +261,46 @@ public final class Names {
 
     }
 
-    private static void visitSchemas(ImmutableList<SchemaWithName> schemaPath,
-            Consumer<ImmutableList<SchemaWithName>> consumer) {
+    @FunctionalInterface
+    private interface Visitor {
+        void startSchema(ImmutableList<SchemaWithName> schemaPath);
+
+        default void finishSchema() {
+            // do nothing
+        }
+    }
+
+    private static void visitSchemas(ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
-        consumer.accept(schemaPath);
+        visitor.startSchema(schemaPath);
         if (schema.getAdditionalProperties() instanceof Schema) {
             visitSchemas(
                     schemaPath.add(
                             new SchemaWithName("additionalProperties", (Schema<?>) schema.getAdditionalProperties())),
-                    consumer);
+                    visitor);
         }
         if (schema.getNot() != null) {
-            visitSchemas(schemaPath.add(new SchemaWithName("not", schema.getNot())), consumer);
+            visitSchemas(schemaPath.add(new SchemaWithName("not", schema.getNot())), visitor);
         }
         if (schema.getProperties() != null) {
-            schema.getProperties().entrySet().forEach(
-                    x -> visitSchemas(schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), consumer));
+            schema.getProperties().entrySet()
+                    .forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), visitor));
         }
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
             if (a.getItems() != null) {
-                visitSchemas(schemaPath.add(new SchemaWithName(null, a.getItems())), consumer);
+                visitSchemas(schemaPath.add(new SchemaWithName(null, a.getItems())), visitor);
             }
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;
             if (a.getAllOf() != null) {
-                a.getAllOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), consumer));
+                a.getAllOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
             if (a.getOneOf() != null) {
-                a.getOneOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), consumer));
+                a.getOneOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
             if (a.getAnyOf() != null) {
-                a.getAnyOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), consumer));
+                a.getAnyOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
         } else if (schema instanceof MapSchema) {
             // nothing to add here
