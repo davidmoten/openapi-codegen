@@ -1114,3 +1114,26 @@ components:
       - type: string
       - type: integer
       
+    Nested:
+      type: object
+      properties:
+        first: 
+          type: object
+          properties: 
+            first2: 
+              type: object
+              properties:
+                first3: 
+                  type: string
+            second2:
+              type: array
+              items: 
+                type: object
+                properties:
+                  partNumber: 
+                    type: integer
+        second:
+          type: string
+              
+              
+      
