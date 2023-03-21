@@ -9,10 +9,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.parser.OpenAPIParser;
@@ -48,11 +48,26 @@ public final class Names {
         this.schemaFullClassNames = schemaFullClassNames(api);
     }
 
+    @SuppressWarnings("unchecked")
+    private final static List<Class<? extends Schema<?>>> GROUPING_SCHEMA_CLASSES = Lists.newArrayList( //
+            ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
+
     private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
         visitSchemas(api, schemas -> {
-            System.out.println(schemas);
+            if (!isGroupingSchema(schemas.last().schema)) {
+                System.out.println(schemas);
+            }
         });
         return null;
+    }
+
+    private static final boolean isGroupingSchema(Schema<?> schema) {
+        for (Class<? extends Schema<?>> cls : GROUPING_SCHEMA_CLASSES) {
+            if (cls.isAssignableFrom(schema.getClass())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public OpenAPI api() {
@@ -221,7 +236,8 @@ public final class Names {
                 .getSchemas() //
                 .entrySet() //
                 .stream() //
-                .forEach(entry -> visitSchemas(ImmutableList.of(new SchemaWithName(entry.getKey(), entry.getValue())), consumer));
+                .forEach(entry -> visitSchemas(ImmutableList.of(new SchemaWithName(entry.getKey(), entry.getValue())),
+                        consumer));
     }
 
     private static void visitSchemas(ImmutableList<SchemaWithName> schemaPath,
@@ -249,7 +265,7 @@ public final class Names {
             }
             return "(" + name + ": " + s + ")";
         }
-        
+
     }
 
     private static void visitSchemas(ImmutableList<SchemaWithName> schemaPath,
@@ -260,14 +276,17 @@ public final class Names {
         }
         consumer.accept(schemaPath);
         if (schema.getAdditionalProperties() instanceof Schema) {
-            visitSchemas(schemaPath.add(new SchemaWithName("additionalProperties", (Schema<?>) schema.getAdditionalProperties())), consumer, visited);
+            visitSchemas(
+                    schemaPath.add(
+                            new SchemaWithName("additionalProperties", (Schema<?>) schema.getAdditionalProperties())),
+                    consumer, visited);
         }
         if (schema.getNot() != null) {
             visitSchemas(schemaPath.add(new SchemaWithName("not", schema.getNot())), consumer, visited);
         }
         if (schema.getProperties() != null) {
-            schema.getProperties().entrySet()
-                    .forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), consumer, visited));
+            schema.getProperties().entrySet().forEach(
+                    x -> visitSchemas(schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), consumer, visited));
         }
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
