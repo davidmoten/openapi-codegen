@@ -2,10 +2,8 @@ package org.davidmoten.openapi.v3;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,16 +33,14 @@ public final class Names {
     private final Definition definition;
 
     private final OpenAPI api;
-    private final Map<Schema<?>, Set<Schema<?>>> superSchemas;
-    private final Map<Schema<?>, String> schemaFullClassNames;
 
     public Names(Definition definition) {
         this.definition = definition;
         SwaggerParseResult result = new OpenAPIParser().readContents(definition.definition(), null, null);
         result.getMessages().stream().forEach(System.out::println);
         this.api = result.getOpenAPI();
-        this.superSchemas = superSchemas(api);
-        this.schemaFullClassNames = schemaFullClassNames(api);
+        superSchemas(api);
+        schemaFullClassNames(api);
     }
 
     @SuppressWarnings("unchecked")
@@ -52,7 +48,7 @@ public final class Names {
             ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
 
     private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
-        visitSchemas(api, schemaPath -> {
+        Apis.visitSchemas(api, schemaPath -> {
             if (!isComplexSchema(schemaPath.last().schema)) {
                 System.out.println(schemaPath);
             }
@@ -181,7 +177,7 @@ public final class Names {
 
     private static List<Schema<?>> findSchemas(String name, Schema<?> schema, Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
-        visitSchemas(ImmutableList.of(new SchemaWithName(name, schema)), schemaPath -> {
+        Apis.visitSchemas(ImmutableList.of(new SchemaWithName(name, schema)), schemaPath -> {
             if (predicate.test(schemaPath.last().schema)) {
                 list.add(schemaPath.last().schema);
             }
@@ -189,123 +185,4 @@ public final class Names {
         return list;
     }
 
-    static final class ImmutableList<T> implements Iterable<T> {
-
-        private final List<T> list;
-
-        ImmutableList() {
-            this(new ArrayList<>());
-        }
-
-        ImmutableList(List<T> list) {
-            this.list = list;
-        }
-
-        ImmutableList<T> add(T value) {
-            List<T> list2 = new ArrayList<>(list);
-            list2.add(value);
-            return new ImmutableList<T>(list2);
-        }
-
-        @SafeVarargs
-        static <T> ImmutableList<T> of(T... values) {
-            List<T> list = Arrays.asList(values);
-            return new ImmutableList<>(list);
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return list.iterator();
-        }
-
-        @Override
-        public String toString() {
-            return list.toString();
-        }
-
-        public T last() {
-            return list.get(list.size() - 1);
-        }
-
-    }
-
-    private static void visitSchemas(OpenAPI api, Visitor visitor) {
-        api //
-                .getComponents() //
-                .getSchemas() //
-                .entrySet() //
-                .stream() //
-                .forEach(entry -> visitSchemas(ImmutableList.of(new SchemaWithName(entry.getKey(), entry.getValue())),
-                        visitor));
-    }
-
-    private static final class SchemaWithName {
-        final String name;
-        final Schema<?> schema;
-
-        SchemaWithName(String name, Schema<?> schema) {
-            this.name = name;
-            this.schema = schema;
-        }
-
-        @Override
-        public String toString() {
-            final String s;
-            if (schema.get$ref() != null) {
-                s = schema.get$ref();
-            } else {
-                s = schema.getClass().getSimpleName();
-            }
-            return "(" + name + ": " + s + ")";
-        }
-
-    }
-
-    @FunctionalInterface
-    private interface Visitor {
-        void startSchema(ImmutableList<SchemaWithName> schemaPath);
-
-        default void finishSchema() {
-            // do nothing
-        }
-    }
-
-    private static void visitSchemas(ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
-        Schema<?> schema = schemaPath.last().schema;
-        visitor.startSchema(schemaPath);
-        if (schema.getAdditionalProperties() instanceof Schema) {
-            visitSchemas(
-                    schemaPath.add(
-                            new SchemaWithName("additionalProperties", (Schema<?>) schema.getAdditionalProperties())),
-                    visitor);
-        }
-        if (schema.getNot() != null) {
-            visitSchemas(schemaPath.add(new SchemaWithName("not", schema.getNot())), visitor);
-        }
-        if (schema.getProperties() != null) {
-            schema.getProperties().entrySet()
-                    .forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), visitor));
-        }
-        if (schema instanceof ArraySchema) {
-            ArraySchema a = (ArraySchema) schema;
-            if (a.getItems() != null) {
-                visitSchemas(schemaPath.add(new SchemaWithName(null, a.getItems())), visitor);
-            }
-        } else if (schema instanceof ComposedSchema) {
-            ComposedSchema a = (ComposedSchema) schema;
-            if (a.getAllOf() != null) {
-                a.getAllOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
-            }
-            if (a.getOneOf() != null) {
-                a.getOneOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
-            }
-            if (a.getAnyOf() != null) {
-                a.getAnyOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
-            }
-        } else if (schema instanceof MapSchema) {
-            // nothing to add here
-        } else if (schema instanceof ObjectSchema) {
-            // nothing to add here
-        }
-    }
 }
