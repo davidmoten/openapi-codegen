@@ -1,10 +1,10 @@
 package org.davidmoten.openapi.v3;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
@@ -50,7 +50,18 @@ public class Generator2 {
     }
 
     private static final class State {
+        List<Field> fields = new ArrayList<>();
+        
+    }
 
+    private final static class Field {
+        final String type;
+        final String name;
+
+        public Field(String type, String name) {
+            this.type = type;
+            this.name = name;
+        }
     }
 
     private static final class MyVisitor implements Visitor {
@@ -71,6 +82,7 @@ public class Generator2 {
 
         @Override
         public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
+            out.println(schemaPath);
             if (once) {
                 SchemaWithName first = schemaPath.first();
                 fullClassName = names.schemaNameToClassName(first.name);
