@@ -7,8 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -63,6 +61,7 @@ public class Generator2 {
         private Indent indent;
         private PrintStream out;
         private ByteArrayOutputStream bytes;
+        private String fullClassName;
 
         public MyVisitor(Names names) {
             this.names = names;
@@ -75,11 +74,11 @@ public class Generator2 {
         public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
             if (once) {
                 SchemaWithName first = schemaPath.first();
-                String fullClassName = names.schemaNameToClassName(first.name);
+                fullClassName = names.schemaNameToClassName(first.name);
                 imports = new Imports(fullClassName);
                 once = false;
                 final String classType = classType(first.schema);
-                out.format("\npublic final %s %s {\n", classType, Names.simpleClassName(fullClassName));
+                out.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
             }
             indent.right();
             State state = new State();
@@ -94,7 +93,10 @@ public class Generator2 {
                 out.format("}\n");
                 out.close();
                 System.out.println("////////////////////////////////////////");
+                String prefix = String.format("package %s;\n\n", names.pkg(fullClassName))
+                        + imports.toString();
                 try {
+                    System.out.print(prefix);
                     System.out.println(bytes.toString(StandardCharsets.UTF_8.name()));
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
