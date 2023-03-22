@@ -1,12 +1,12 @@
 package org.davidmoten.openapi.v3;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
 import java.util.LinkedList;
+
+import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -59,15 +59,14 @@ public class Generator2 {
         private boolean once = true;
         private Deque<State> stack = new LinkedList<>();
         private Indent indent;
-        private PrintStream out;
-        private ByteArrayOutputStream bytes;
+        private ByteArrayPrintStream out;
         private String fullClassName;
+        private String classType;
 
         public MyVisitor(Names names) {
             this.names = names;
             this.indent = new Indent();
-            this.bytes = new ByteArrayOutputStream();
-            this.out = new PrintStream(bytes);
+            this.out = ByteArrayPrintStream.create();
         }
 
         @Override
@@ -77,8 +76,7 @@ public class Generator2 {
                 fullClassName = names.schemaNameToClassName(first.name);
                 imports = new Imports(fullClassName);
                 once = false;
-                final String classType = classType(first.schema);
-                out.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
+                this.classType = classType(first.schema);
             }
             indent.right();
             State state = new State();
@@ -90,17 +88,15 @@ public class Generator2 {
             stack.pop();
             indent.left();
             if (stack.isEmpty()) {
-                out.format("}\n");
-                out.close();
                 System.out.println("////////////////////////////////////////");
-                String prefix = String.format("package %s;\n\n", names.pkg(fullClassName))
-                        + imports.toString();
-                try {
-                    System.out.print(prefix);
-                    System.out.println(bytes.toString(StandardCharsets.UTF_8.name()));
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
+                String prefix = String.format("package %s;\n\n", Names.pkg(fullClassName)) + imports.toString();
+                ByteArrayPrintStream o = ByteArrayPrintStream.create();
+                o.print(prefix);
+                o.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
+                o.print(out.text());
+                o.format("}\n");
+                o.close();
+                System.out.println(o.text());
             }
         }
 
