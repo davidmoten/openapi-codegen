@@ -52,10 +52,10 @@ public class Generator2 {
 
     private static final class State {
         final List<Field> fields = new ArrayList<>();
-        final SchemaWithName schema;
+        final SchemaWithName schemaAndName;
 
         State(SchemaWithName schema) {
-            this.schema = schema;
+            this.schemaAndName = schema;
         }
 
         public void addField(String fieldFullClassName, String fieldName) {
@@ -95,6 +95,7 @@ public class Generator2 {
             SchemaWithName last = schemaPath.last();
             State state = new State(last);
             stack.push(state);
+            indent.right();
             if (once) {
                 SchemaWithName first = schemaPath.first();
                 fullClassName = names.schemaNameToClassName(first.name);
@@ -102,7 +103,6 @@ public class Generator2 {
                 once = false;
                 this.classType = classType(first.schema);
             } else {
-                indent.right();
                 Schema<?> schema = last.schema;
 
                 // collect info about the various types of Schemas and accumulate that info in
@@ -110,7 +110,7 @@ public class Generator2 {
                 if (isObject(schema)) {
                     if (last.name != null) {
                         String simpleClassName;
-                        if (state.schema.name == null) {
+                        if (state.schemaAndName.name == null) {
                             simpleClassName = "Anonymous";
                         } else {
                             simpleClassName = Names.simpleClassNameFromSimpleName(last.name);
@@ -122,7 +122,7 @@ public class Generator2 {
                         prev.addField( //
                                 fullClassName + "." + simpleClassName, //
                                 Names.toFieldName(last.name));
-                        out.format("%spublic static final class %s {\n", indent, simpleClassName);
+                        out.format("\n\n%spublic static final class %s {\n", indent, simpleClassName);
                     }
                 }
             }
@@ -138,7 +138,8 @@ public class Generator2 {
                     o.print(prefix);
                     o.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
                     indent.right();
-                    state.fields.forEach(f -> o.format("%sprivate final %s %s;\n", indent, f.type, f.name));
+                    state.fields
+                            .forEach(f -> o.format("\n%sprivate final %s %s;", indent, imports.add(f.type), f.name));
                     indent.left();
                     o.print(out.text());
                     o.format("}\n");
@@ -148,16 +149,16 @@ public class Generator2 {
                     out.close();
                 }
             } else {
-                if (isObject(state.schema.schema)) {
+                if (Apis.isComplexSchema(state.schemaAndName.schema)) {
                     indent.right();
-                    state.fields.forEach(f -> out.format("%sprivate final %s %s;\n", indent, f.type, f.name));
+                    state.fields
+                            .forEach(f -> out.format("%sprivate final %s %s;\n", indent, imports.add(f.type), f.name));
                     indent.left();
                     out.format("%s}\n", indent);
                     indent.left();
                 } else {
                     indent.left();
                 }
-
             }
         }
 

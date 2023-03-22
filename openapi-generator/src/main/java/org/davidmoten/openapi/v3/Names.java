@@ -9,15 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -43,27 +39,14 @@ public final class Names {
         schemaFullClassNames(api);
     }
 
-    @SuppressWarnings("unchecked")
-    private final static List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.newArrayList( //
-            ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
-
     private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
         Apis.visitSchemas(api, schemaPath -> {
-            if (!isComplexSchema(schemaPath.last().schema)) {
+            if (!Apis.isComplexSchema(schemaPath.last().schema)) {
                 System.out.println(schemaPath);
             }
         });
         System.out.println("////////////////////////////////////////////////");
         return null;
-    }
-
-    private static final boolean isComplexSchema(Schema<?> schema) {
-        for (Class<? extends Schema<?>> cls : COMPLEX_SCHEMA_CLASSES) {
-            if (cls.isAssignableFrom(schema.getClass())) {
-                return true;
-            }
-        }
-        return schema.getProperties() != null;
     }
 
     public OpenAPI api() {

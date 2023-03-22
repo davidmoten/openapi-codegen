@@ -1,5 +1,8 @@
 package org.davidmoten.openapi.v3;
 
+import java.util.List;
+
+import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Preconditions;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -64,4 +67,17 @@ public class Apis {
         }
         visitor.finishSchema();
     }
+    
+    public static final boolean isComplexSchema(Schema<?> schema) {
+        for (Class<? extends Schema<?>> cls : COMPLEX_SCHEMA_CLASSES) {
+            if (cls.isAssignableFrom(schema.getClass())) {
+                return true;
+            }
+        }
+        return schema.getProperties() != null;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.newArrayList( //
+            ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
 }
