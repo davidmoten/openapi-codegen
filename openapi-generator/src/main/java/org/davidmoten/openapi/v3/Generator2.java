@@ -90,13 +90,16 @@ public class Generator2 {
             if (stack.isEmpty()) {
                 System.out.println("////////////////////////////////////////");
                 String prefix = String.format("package %s;\n\n", Names.pkg(fullClassName)) + imports.toString();
-                ByteArrayPrintStream o = ByteArrayPrintStream.create();
-                o.print(prefix);
-                o.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
-                o.print(out.text());
-                o.format("}\n");
-                o.close();
-                System.out.println(o.text());
+                try (ByteArrayPrintStream o = ByteArrayPrintStream.create()) {
+                    o.print(prefix);
+                    o.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
+                    o.print(out.text());
+                    o.format("}\n");
+                    o.flush();
+                    System.out.println(o.text());
+                } finally {
+                    out.close();
+                }
             }
         }
 
