@@ -53,7 +53,7 @@ public class Generator2 {
     private static final class State {
         final List<Field> fields = new ArrayList<>();
         final SchemaWithName schema;
-        
+
         State(SchemaWithName schema) {
             this.schema = schema;
         }
@@ -91,7 +91,7 @@ public class Generator2 {
 
         @Override
         public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
-            out.println(schemaPath);
+//            out.println(schemaPath);
             SchemaWithName last = schemaPath.last();
             State state = new State(last);
             stack.push(state);
@@ -104,12 +104,22 @@ public class Generator2 {
             } else {
                 indent.right();
                 Schema<?> schema = last.schema;
-                
-                //collect info about the various types of Schemas and accumulate that info in State on stack.
+
+                // collect info about the various types of Schemas and accumulate that info in
+                // State on stack.
                 if (isObject(schema)) {
                     if (last.name != null) {
-                        String simpleClassName = Names.simpleClassNameFromSimpleName(last.name);
-                        state.addField( //
+                        String simpleClassName;
+                        if (state.schema.name == null) {
+                            simpleClassName = "Anonymous";
+                        } else {
+                            simpleClassName = Names.simpleClassNameFromSimpleName(last.name);
+                        }
+                        stack.pop();
+                        State prev = stack.pop();
+                        stack.push(prev);
+                        stack.push(state);
+                        prev.addField( //
                                 fullClassName + "." + simpleClassName, //
                                 Names.toFieldName(last.name));
                         out.format("%spublic static final class %s {\n", indent, simpleClassName);
@@ -127,6 +137,9 @@ public class Generator2 {
                 try (ByteArrayPrintStream o = ByteArrayPrintStream.create()) {
                     o.print(prefix);
                     o.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
+                    indent.right();
+                    state.fields.forEach(f -> o.format("%sprivate final %s %s;\n", indent, f.type, f.name));
+                    indent.left();
                     o.print(out.text());
                     o.format("}\n");
                     o.flush();
@@ -137,13 +150,14 @@ public class Generator2 {
             } else {
                 if (isObject(state.schema.schema)) {
                     indent.right();
-                    state.fields.forEach(f -> out.format("%sfinal %s %s;\n", indent, f.type, f.name));
+                    state.fields.forEach(f -> out.format("%sprivate final %s %s;\n", indent, f.type, f.name));
                     indent.left();
                     out.format("%s}\n", indent);
+                    indent.left();
                 } else {
                     indent.left();
                 }
-                
+
             }
         }
 
