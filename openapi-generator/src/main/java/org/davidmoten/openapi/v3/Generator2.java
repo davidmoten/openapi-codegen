@@ -149,7 +149,7 @@ public class Generator2 {
                     out.close();
                 }
             } else {
-                if (Apis.isComplexSchema(state.schemaAndName.schema)) {
+                if (isObject(state.schemaAndName.schema)) {
                     indent.right();
                     state.fields
                             .forEach(f -> out.format("%sprivate final %s %s;\n", indent, imports.add(f.type), f.name));
