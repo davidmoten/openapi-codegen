@@ -9,6 +9,7 @@ import java.util.List;
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator2 {
@@ -50,8 +51,16 @@ public class Generator2 {
     }
 
     private static final class State {
-        List<Field> fields = new ArrayList<>();
+        final List<Field> fields = new ArrayList<>();
+        final SchemaWithName schema;
         
+        State(SchemaWithName schema) {
+            this.schema = schema;
+        }
+
+        public void addField(String fieldFullClassName, String fieldName) {
+            fields.add(new Field(fieldFullClassName, fieldName));
+        }
     }
 
     private final static class Field {
@@ -83,22 +92,35 @@ public class Generator2 {
         @Override
         public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
             out.println(schemaPath);
+            SchemaWithName last = schemaPath.last();
+            State state = new State(last);
+            stack.push(state);
             if (once) {
                 SchemaWithName first = schemaPath.first();
                 fullClassName = names.schemaNameToClassName(first.name);
                 imports = new Imports(fullClassName);
                 once = false;
                 this.classType = classType(first.schema);
+            } else {
+                indent.right();
+                Schema<?> schema = last.schema;
+                
+                //collect info about the various types of Schemas and accumulate that info in State on stack.
+                if (isObject(schema)) {
+                    if (last.name != null) {
+                        String simpleClassName = Names.simpleClassNameFromSimpleName(last.name);
+                        state.addField( //
+                                fullClassName + "." + simpleClassName, //
+                                Names.toFieldName(last.name));
+                        out.format("%spublic static final class %s {\n", indent, simpleClassName);
+                    }
+                }
             }
-            indent.right();
-            State state = new State();
-            stack.push(state);
         }
 
         @Override
         public void finishSchema() {
-            stack.pop();
-            indent.left();
+            State state = stack.pop();
             if (stack.isEmpty()) {
                 System.out.println("////////////////////////////////////////");
                 String prefix = String.format("package %s;\n\n", Names.pkg(fullClassName)) + imports.toString();
@@ -112,6 +134,16 @@ public class Generator2 {
                 } finally {
                     out.close();
                 }
+            } else {
+                if (isObject(state.schema.schema)) {
+                    indent.right();
+                    state.fields.forEach(f -> out.format("%sfinal %s %s;\n", indent, f.type, f.name));
+                    indent.left();
+                    out.format("%s}\n", indent);
+                } else {
+                    indent.left();
+                }
+                
             }
         }
 
