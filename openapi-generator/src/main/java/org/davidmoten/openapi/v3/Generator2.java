@@ -1,14 +1,20 @@
 package org.davidmoten.openapi.v3;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
 
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator2 {
-    
+
     private final Definition definition;
 
     public Generator2(Definition definition) {
@@ -21,7 +27,7 @@ public class Generator2 {
         Names names = new Names(definition);
 
         // generate methods on singleton client object in client package
-        writeClientClass(names);
+//        writeClientClass(names);
 
         // generate model classes for schema definitions
         writeSchemaClasses(definition, names);
@@ -39,21 +45,101 @@ public class Generator2 {
     }
 
     private static void writeSchemaClasses(Definition definition, Names names) {
-        @SuppressWarnings("unchecked")
-        Map<String, Schema<?>> schemas = (Map<String, Schema<?>>) (Map<String, ?>) names.api().getComponents()
-                .getSchemas();
-        for (Entry<String, Schema<?>> entry : schemas.entrySet()) {
-            writeSchemaClass(names, entry.getKey(), entry.getValue(), definition);
-        }
+        names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
+            MyVisitor v = new MyVisitor(names);
+            Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
+        });
     }
 
-    private static void writeSchemaClass(Names names, String schemaName, Schema<?> schema, Definition definition) {
-        String className = names.schemaNameToClassName(schemaName);
-        File file = names.schemaNameToJavaFile(schemaName);
-        JavaClassWriter.write(file, className, classType(schema), (indent, imports, p) -> {
-            writeClassContentForType(schema, indent, imports, p, Optional.empty(), true, false, className, definition,
-                    names);
-        });
+    private static final class State {
+
+    }
+
+    private static final class MyVisitor implements Visitor {
+        private final Names names;
+        private Imports imports;
+        private boolean once = true;
+        private Deque<State> stack = new LinkedList<>();
+        private Indent indent;
+        private PrintStream out;
+        private ByteArrayOutputStream bytes;
+
+        public MyVisitor(Names names) {
+            this.names = names;
+            this.indent = new Indent();
+            this.bytes = new ByteArrayOutputStream();
+            this.out = new PrintStream(bytes);
+        }
+
+        @Override
+        public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
+            if (once) {
+                SchemaWithName first = schemaPath.first();
+                String fullClassName = names.schemaNameToClassName(first.name);
+                imports = new Imports(fullClassName);
+                once = false;
+                final String classType = classType(first.schema);
+                out.format("\npublic final %s %s {\n", classType, Names.simpleClassName(fullClassName));
+            }
+            indent.right();
+            State state = new State();
+            stack.push(state);
+        }
+
+        @Override
+        public void finishSchema() {
+            stack.pop();
+            indent.left();
+            if (stack.isEmpty()) {
+                out.format("}\n");
+                out.close();
+                System.out.println("////////////////////////////////////////");
+                try {
+                    System.out.println(bytes.toString(StandardCharsets.UTF_8.name()));
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+    }
+
+    static boolean isEnum(Schema<?> schema) {
+        return schema.getEnum() != null && !schema.getEnum().isEmpty();
+    }
+
+    private static boolean isRef(Schema<?> schema) {
+        return schema.get$ref() != null;
+    }
+
+    private static boolean isArray(String type) {
+        return "array".equals(type);
+    }
+
+    private static boolean isObject(Schema<?> schema) {
+        return (schema.getType() == null && schema.getProperties() != null) || "object".equals(schema.getType());
+    }
+
+    static boolean isOneOf(Schema<?> schema) {
+        if (!(schema instanceof ComposedSchema)) {
+            return false;
+        }
+        ComposedSchema sch = (ComposedSchema) schema;
+        return sch.getOneOf() != null && !sch.getOneOf().isEmpty();
+    }
+
+    private static boolean isPrimitive(String type) {
+        return type != null && !"array".equals(type) && !"object".equals(type);
+    }
+
+    private static String classType(Schema<?> schema) {
+        if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
+            return "interface";
+        } else if (schema.getEnum() != null) {
+            return "enum";
+        } else {
+            return "class";
+        }
     }
 
 }

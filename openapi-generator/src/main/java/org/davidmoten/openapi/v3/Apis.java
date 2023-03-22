@@ -1,5 +1,7 @@
 package org.davidmoten.openapi.v3;
 
+import com.github.davidmoten.guavamini.Preconditions;
+
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -15,8 +17,12 @@ public class Apis {
                 .getSchemas() //
                 .entrySet() //
                 .stream() //
-                .forEach(entry -> visitSchemas(ImmutableList.of(new SchemaWithName(entry.getKey(), entry.getValue())),
-                        visitor));
+                .forEach(x -> visitSchemas(x.getKey(), x.getValue(), visitor));
+    }
+
+    static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
+        Preconditions.checkArgument(name != null);
+        visitSchemas(ImmutableList.of(new SchemaWithName(name, schema)), visitor);
     }
 
     static void visitSchemas(ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
@@ -56,5 +62,6 @@ public class Apis {
         } else if (schema instanceof ObjectSchema) {
             // nothing to add here
         }
+        visitor.finishSchema();
     }
 }

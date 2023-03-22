@@ -42,5 +42,9 @@ final class ImmutableList<T> implements Iterable<T> {
         public T last() {
             return list.get(list.size() - 1);
         }
+        
+        public T first() {
+            return list.get(0);
+        }
 
     }
