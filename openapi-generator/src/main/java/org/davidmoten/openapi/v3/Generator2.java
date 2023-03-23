@@ -83,6 +83,11 @@ public class Generator2 {
     private static class EnumMember {
         String name;
         Object parameter;
+
+        EnumMember(String name, Object parameter) {
+            this.name = name;
+            this.parameter = parameter;
+        }
     }
 
     private enum ClassType {
@@ -186,7 +191,21 @@ public class Generator2 {
                 cls = new Cls();
                 stack.push(cls);
                 previous.classes.add(cls);
-                if (isObject(schema)) {
+                if (isEnum(schema)) {
+                    String fieldName = last.name == null ? previous.nextAnonymousFieldName()
+                            : Names.toFieldName(last.name);
+                    String fullClassName = previous.fullClassName + "."
+                            + Names.simpleClassNameFromSimpleName(fieldName);
+                    cls.fullClassName = fullClassName;
+                    cls.classType = ClassType.ENUM;
+                    previous.addField(fullClassName, fieldName);
+                    Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
+                    cls.enumFullType = valueCls.getCanonicalName();
+                    for (int i = 0; i < schema.getEnum().size(); i++) {
+                        Object o = schema.getEnum().get(i);
+                        cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
+                    }
+                } else if (isObject(schema)) {
                     String fieldName = last.name == null ? previous.nextAnonymousFieldName()
                             : Names.toFieldName(last.name);
                     String fullClassName = previous.fullClassName + "."
@@ -195,8 +214,8 @@ public class Generator2 {
                     cls.classType = ClassType.CLASS;
                     previous.addField(fullClassName, fieldName);
                 } else {
-                   cls.fullClassName = previous + ".Unknown";
-                   cls.classType = ClassType.CLASS;
+                    cls.fullClassName = previous + ".Unknown";
+                    cls.classType = ClassType.CLASS;
                 }
             } else {
                 cls = stack.peek();
@@ -218,7 +237,7 @@ public class Generator2 {
                     Indent indent = new Indent();
                     out.format("package %s;\n", cls.pkg());
                     out.format(imports.toString());
-                    out.format("public %s %s {\n", cls.classType.word, cls.simpleName());
+                    writeClassDeclaration(out, imports, indent, cls);
                     indent.right();
                     cls.fields
                             .forEach(f -> out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name));
@@ -232,8 +251,18 @@ public class Generator2 {
         }
     }
 
+    private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        String modifier;
+        if (cls.classType == ClassType.INTERFACE || cls.classType == ClassType.ENUM) {
+            modifier = "";
+        } else {
+            modifier = "static final ";
+        }
+        out.format("\n%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
+    }
+
     private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        out.format("\n%spublic static %s %s {\n", indent, cls.classType.word(), cls.simpleName());
+        writeClassDeclaration(out, imports, indent, cls);
         indent.right();
         cls.fields.forEach(f -> {
             out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name);
