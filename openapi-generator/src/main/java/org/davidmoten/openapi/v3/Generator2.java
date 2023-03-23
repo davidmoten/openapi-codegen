@@ -229,7 +229,6 @@ public class Generator2 {
 
         @Override
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
-            System.out.println(schemaPath);
             final Cls cls = stack.peek();
             if (Apis.isComplexSchema(schemaPath.last().schema)) {
                 stack.pop();
@@ -243,6 +242,7 @@ public class Generator2 {
                     cls.classes.forEach(c -> writeMemberClass(out, imports, indent, c));
                     indent.left();
                     out.format("}\n");
+                    System.out.println("////////////////////////////////////////////////");
                     System.out.println(out.text().replace("IMPORTS_HERE", imports.toString()));
                     out.close();
                 }
