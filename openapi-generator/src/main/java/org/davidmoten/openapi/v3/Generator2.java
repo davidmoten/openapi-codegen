@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
@@ -186,25 +187,23 @@ public class Generator2 {
                 cls.fullClassName = names.schemaNameToClassName(last.name);
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
-            } else if (Apis.isComplexSchema(schema)) {
+            } else if (Apis.isComplexSchema(schema) || isEnum(schema)) {
                 Cls previous = stack.peek();
                 cls = new Cls();
                 stack.push(cls);
                 previous.classes.add(cls);
-                String fieldName = last.name == null ? previous.nextAnonymousFieldName()
-                        : Names.toFieldName(last.name);
-                String fullClassName = previous.fullClassName + "."
-                        + Names.simpleClassNameFromSimpleName(fieldName);
+                String fieldName = last.name == null ? previous.nextAnonymousFieldName() : Names.toFieldName(last.name);
+                String fullClassName = previous.fullClassName + "." + Names.simpleClassNameFromSimpleName(fieldName);
                 cls.fullClassName = fullClassName;
                 previous.addField(fullClassName, fieldName);
                 if (isEnum(schema)) {
                     cls.classType = ClassType.ENUM;
                     Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
                     cls.enumFullType = valueCls.getCanonicalName();
-                    for (int i = 0; i < schema.getEnum().size(); i++) {
-                        Object o = schema.getEnum().get(i);
+                    for (Object o : schema.getEnum()) {
                         cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
                     }
+                    cls.addField(cls.enumFullType, "value");
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
                     previous.addField(fullClassName, fieldName);
@@ -226,7 +225,7 @@ public class Generator2 {
         @Override
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
-            if (Apis.isComplexSchema(schemaPath.last().schema)) {
+            if (Apis.isComplexSchema(schemaPath.last().schema) || isEnum(schemaPath.last().schema)) {
                 stack.pop();
                 if (stack.isEmpty()) {
                     Indent indent = new Indent();
@@ -234,6 +233,7 @@ public class Generator2 {
                     out.format("\nIMPORTS_HERE");
                     writeClassDeclaration(out, imports, indent, cls);
                     indent.right();
+                    writeEnumMembers(out, imports, indent, cls);
                     writeFields(out, imports, indent, cls);
                     cls.classes.forEach(c -> writeMemberClass(out, imports, indent, c));
                     indent.left();
@@ -259,10 +259,22 @@ public class Generator2 {
     private static void writeMemberClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
         writeClassDeclaration(out, imports, indent, cls);
         indent.right();
+        writeEnumMembers(out, imports, indent, cls);
         writeFields(out, imports, indent, cls);
         writeMemberClasses(out, imports, indent, cls);
         indent.left();
         out.format("%s}\n", indent);
+    }
+
+    private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        System.out.println("enum members=" + cls.enumMembers);
+        String text = cls.enumMembers.stream().map(x -> {
+            String delim = x.parameter instanceof String ? "\"" : "";
+            return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);
+        }).collect(Collectors.joining(",\n"));
+        if (!text.isEmpty()) {
+            out.println(text + ";\n");
+        }
     }
 
     private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
