@@ -1,15 +1,17 @@
 package org.davidmoten.openapi.v3;
 
-import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
+import com.github.davidmoten.guavamini.Preconditions;
+
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator2 {
@@ -35,13 +37,13 @@ public class Generator2 {
 //                + x.getValue().stream().map(y -> y.toString()).collect(Collectors.toList())));
     }
 
-    private static void writeClientClass(Names names) {
-        String className = names.clientClassName();
-        File file = names.clientClassJavaFile();
-        JavaClassWriter.write(file, className, ClassType.CLASS, (indent, imports, p) -> {
-            p.format("%s// TODO\n", indent);
-        });
-    }
+//    private static void writeClientClass(Names names) {
+//        String className = names.clientClassName();
+//        File file = names.clientClassJavaFile();
+//        JavaClassWriter.write(file, className, ClassType.CLASS, (indent, imports, p) -> {
+//            p.format("%s// TODO\n", indent);
+//        });
+//    }
 
     private static void writeSchemaClasses(Definition definition, Names names) {
         names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
@@ -50,26 +52,104 @@ public class Generator2 {
         });
     }
 
-    private static final class State {
-        final List<Field> fields = new ArrayList<>();
-        final SchemaWithName schemaAndName;
+    private static class Cls {
+        String fullClassName;
+        ClassType classType;
+        List<Field> fields = new ArrayList<>();
+        List<EnumMember> enumMembers = new ArrayList<>();
+        List<Cls> classes = new ArrayList<>();;
+        String enumFullType;
+        private int num = 0;
 
-        State(SchemaWithName schema) {
-            this.schemaAndName = schema;
+        String nextAnonymousFieldName() {
+            num++;
+            return "anonymous" + num;
         }
 
-        public void addField(String fieldFullClassName, String fieldName) {
-            fields.add(new Field(fieldFullClassName, fieldName));
+        void addField(String fullType, String name) {
+            fields.add(new Field(fullType, name));
+        }
+
+        public String pkg() {
+            return Names.pkg(fullClassName);
+        }
+
+        public String simpleName() {
+            return Names.simpleClassName(fullClassName);
+        }
+    }
+
+    private static class EnumMember {
+        String name;
+        Object parameter;
+    }
+
+    private enum ClassType {
+        INTERFACE("interface"), CLASS("class"), ENUM("enum");
+
+        private final String word;
+
+        ClassType(String word) {
+            this.word = word;
+        }
+
+        String word() {
+            return word;
         }
     }
 
     private final static class Field {
-        final String type;
+        final String fullClassName;
         final String name;
 
-        public Field(String type, String name) {
-            this.type = type;
+        public Field(String fullClassName, String name) {
+            this.fullClassName = fullClassName;
             this.name = name;
+        }
+    }
+
+    private static final class LinkedStack<T> {
+        LinkedStackNode<T> last;
+
+        void push(T value) {
+            LinkedStackNode<T> node = new LinkedStackNode<>(value);
+            if (last == null) {
+                last = node;
+            } else {
+                node.previous = last;
+                last = node;
+            }
+        }
+
+        T pop() {
+            if (last == null) {
+                return null;
+            } else {
+                T v = last.value;
+                last = last.previous;
+                return v;
+            }
+        }
+
+        T peek() {
+            if (last == null) {
+                return null;
+            } else {
+                return last.value;
+            }
+        }
+
+        public boolean isEmpty() {
+            return last == null;
+        }
+    }
+
+    private static final class LinkedStackNode<T> {
+        final T value;
+        LinkedStackNode<T> previous;
+
+        LinkedStackNode(T value) {
+            this.value = value;
         }
     }
 
@@ -77,88 +157,70 @@ public class Generator2 {
         private final Names names;
         private Imports imports;
         private boolean once = true;
-        private Deque<State> stack = new LinkedList<>();
-        private Indent indent;
+        private LinkedStack<Cls> stack = new LinkedStack<>();
         private ByteArrayPrintStream out;
         private String fullClassName;
-        private String classType;
 
         public MyVisitor(Names names) {
             this.names = names;
-            this.indent = new Indent();
             this.out = ByteArrayPrintStream.create();
         }
 
         @Override
         public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
-//            out.println(schemaPath);
             SchemaWithName last = schemaPath.last();
-            State state = new State(last);
-            stack.push(state);
-            indent.right();
+//            System.out.println(last);
+            Schema<?> schema = last.schema;
+            Cls cls;
             if (once) {
-                SchemaWithName first = schemaPath.first();
-                fullClassName = names.schemaNameToClassName(first.name);
-                imports = new Imports(fullClassName);
+                // should be top-level class
                 once = false;
-                this.classType = classType(first.schema);
-            } else {
-                Schema<?> schema = last.schema;
-
-                // collect info about the various types of Schemas and accumulate that info in
-                // State on stack.
+                cls = new Cls();
+                stack.push(cls);
+                cls.fullClassName = names.schemaNameToClassName(last.name);
+                imports = new Imports(cls.fullClassName);
+                cls.classType = classType(schema);
+            } else if (Apis.isComplexSchema(schema)) {
+                Cls previous = stack.peek();
+                cls = new Cls();
+                stack.push(cls);
+                previous.classes.add(cls);
                 if (isObject(schema)) {
-                    if (last.name != null) {
-                        String simpleClassName;
-                        if (state.schemaAndName.name == null) {
-                            simpleClassName = "Anonymous";
-                        } else {
-                            simpleClassName = Names.simpleClassNameFromSimpleName(last.name);
-                        }
-                        stack.pop();
-                        State prev = stack.pop();
-                        stack.push(prev);
-                        stack.push(state);
-                        prev.addField( //
-                                fullClassName + "." + simpleClassName, //
-                                Names.toFieldName(last.name));
-                        out.format("\n\n%spublic static final class %s {\n", indent, simpleClassName);
-                    }
+                    String fieldName = last.name == null ? previous.nextAnonymousFieldName()
+                            : Names.toFieldName(last.name);
+                    String fullClassName = previous.fullClassName + "."
+                            + Names.simpleClassNameFromSimpleName(fieldName);
+                    previous.addField(fullClassName, fieldName);
+                }
+            } else {
+                cls = stack.peek();
+                if (isPrimitive(schema.getType())) {
+                    Class<?> c = toClass(schema.getType(), schema.getFormat());
+                    String fieldName = last.name == null ? cls.nextAnonymousFieldName() : Names.toFieldName(last.name);
+                    cls.addField(c.getCanonicalName(), fieldName);
                 }
             }
         }
 
         @Override
-        public void finishSchema() {
-            State state = stack.pop();
+        public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
+            final Cls cls = stack.peek();
+            if (Apis.isComplexSchema(schemaPath.last().schema)) {
+                stack.pop();
+            }
             if (stack.isEmpty()) {
-                System.out.println("////////////////////////////////////////");
-                String prefix = String.format("package %s;\n\n", Names.pkg(fullClassName)) + imports.toString();
-                try (ByteArrayPrintStream o = ByteArrayPrintStream.create()) {
-                    o.print(prefix);
-                    o.format("public final %s %s {\n", classType, Names.simpleClassName(fullClassName));
-                    indent.right();
-                    state.fields
-                            .forEach(f -> o.format("\n%sprivate final %s %s;", indent, imports.add(f.type), f.name));
-                    indent.left();
-                    o.print(out.text());
-                    o.format("}\n");
-                    o.flush();
-                    System.out.println(o.text());
-                } finally {
-                    out.close();
-                }
-            } else {
-                if (isObject(state.schemaAndName.schema)) {
-                    indent.right();
-                    state.fields
-                            .forEach(f -> out.format("%sprivate final %s %s;\n", indent, imports.add(f.type), f.name));
-                    indent.left();
-                    out.format("%s}\n", indent);
-                    indent.left();
-                } else {
-                    indent.left();
-                }
+                Indent indent = new Indent();
+                out.format("package %s;\n", cls.pkg());
+                out.format(imports.toString());
+                out.format("public %s %s {\n", cls.classType.word, cls.simpleName());
+                indent.right();
+                cls.fields.forEach(f -> {
+                    out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name);
+                });
+                indent.left();
+                out.format("}\n");
+                System.out.println(out.text());
+                out.close();
             }
         }
 
@@ -180,6 +242,10 @@ public class Generator2 {
         return (schema.getType() == null && schema.getProperties() != null) || "object".equals(schema.getType());
     }
 
+    private static boolean isArray(Schema<?> schema) {
+        return schema instanceof ArraySchema;
+    }
+
     static boolean isOneOf(Schema<?> schema) {
         if (!(schema instanceof ComposedSchema)) {
             return false;
@@ -192,14 +258,54 @@ public class Generator2 {
         return type != null && !"array".equals(type) && !"object".equals(type);
     }
 
-    private static String classType(Schema<?> schema) {
+    private static ClassType classType(Schema<?> schema) {
         if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
-            return "interface";
+            return ClassType.INTERFACE;
         } else if (schema.getEnum() != null) {
-            return "enum";
+            return ClassType.ENUM;
         } else {
-            return "class";
+            return ClassType.CLASS;
         }
     }
 
+    private static Class<?> toClass(String type, String format) {
+        Preconditions.checkNotNull(type);
+        if ("string".equals(type)) {
+            if ("date-time".equals(format)) {
+                return OffsetDateTime.class;
+            } else if ("date".equals(format)) {
+                return null;
+            } else if ("byte".equals(format)) {
+                return Byte.class;
+            } else if ("binary".equals(format)) {
+                return Byte.class;
+            } else {
+                return String.class;
+            }
+        } else if ("boolean".equals(type)) {
+            return Boolean.class;
+        } else if ("integer".equals(type)) {
+            if ("int32".equals(format)) {
+                return Integer.class;
+            } else if ("int64".equals(format)) {
+                return Long.class;
+            } else {
+                return BigInteger.class;
+            }
+        } else if ("number".equals(type)) {
+            if ("float".equals(format)) {
+                return Float.class;
+            } else if ("double".equals(format)) {
+                return Double.class;
+            } else {
+                return BigDecimal.class;
+            }
+        } else if ("array".equals(type)) {
+            return List.class;
+        } else if ("object".equals(type)) {
+            return Object.class;
+        } else {
+            return null;
+        }
+    }
 }

@@ -65,7 +65,7 @@ public class Apis {
         } else if (schema instanceof ObjectSchema) {
             // nothing to add here
         }
-        visitor.finishSchema();
+        visitor.finishSchema(schemaPath);
     }
     
     public static final boolean isComplexSchema(Schema<?> schema) {
