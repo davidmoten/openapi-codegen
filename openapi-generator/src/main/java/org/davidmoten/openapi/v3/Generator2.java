@@ -1,5 +1,6 @@
 package org.davidmoten.openapi.v3;
 
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
@@ -190,7 +191,12 @@ public class Generator2 {
                             : Names.toFieldName(last.name);
                     String fullClassName = previous.fullClassName + "."
                             + Names.simpleClassNameFromSimpleName(fieldName);
+                    cls.fullClassName = fullClassName;
+                    cls.classType = ClassType.CLASS;
                     previous.addField(fullClassName, fieldName);
+                } else {
+                   cls.fullClassName = previous + ".Unknown";
+                   cls.classType = ClassType.CLASS;
                 }
             } else {
                 cls = stack.peek();
@@ -204,26 +210,37 @@ public class Generator2 {
 
         @Override
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
+            System.out.println(schemaPath);
             final Cls cls = stack.peek();
             if (Apis.isComplexSchema(schemaPath.last().schema)) {
                 stack.pop();
-            }
-            if (stack.isEmpty()) {
-                Indent indent = new Indent();
-                out.format("package %s;\n", cls.pkg());
-                out.format(imports.toString());
-                out.format("public %s %s {\n", cls.classType.word, cls.simpleName());
-                indent.right();
-                cls.fields.forEach(f -> {
-                    out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name);
-                });
-                indent.left();
-                out.format("}\n");
-                System.out.println(out.text());
-                out.close();
+                if (stack.isEmpty()) {
+                    Indent indent = new Indent();
+                    out.format("package %s;\n", cls.pkg());
+                    out.format(imports.toString());
+                    out.format("public %s %s {\n", cls.classType.word, cls.simpleName());
+                    indent.right();
+                    cls.fields
+                            .forEach(f -> out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name));
+                    cls.classes.forEach(c -> writeMemberClasses(out, imports, indent, c));
+                    indent.left();
+                    out.format("}\n");
+                    System.out.println(out.text());
+                    out.close();
+                }
             }
         }
+    }
 
+    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        out.format("\n%spublic static %s %s {\n", indent, cls.classType.word(), cls.simpleName());
+        indent.right();
+        cls.fields.forEach(f -> {
+            out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name);
+        });
+        cls.classes.forEach(c -> writeMemberClasses(out, imports, indent, c));
+        indent.left();
+        out.format("%s}\n", indent);
     }
 
     static boolean isEnum(Schema<?> schema) {
