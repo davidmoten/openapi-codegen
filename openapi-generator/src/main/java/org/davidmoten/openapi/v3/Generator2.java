@@ -199,7 +199,7 @@ public class Generator2 {
                 if (isEnum(schema)) {
                     cls.classType = ClassType.ENUM;
                     Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
-                    cls.enumFullType = valueCls.getCanonicalName();
+                    cls.enumFullType = toPrimitive(valueCls).getCanonicalName();
                     for (Object o : schema.getEnum()) {
                         cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
                     }
@@ -245,6 +245,23 @@ public class Generator2 {
             }
         }
     }
+    
+    private static Class<?> toPrimitive(Class<?> c) {
+        if (c.equals(Integer.class)) {
+            return int.class;
+        } else if(c.equals(Long.class)) {
+            return long.class;
+        } else if (c.equals(Float.class)) {
+            return float.class;
+        } else if (c.equals(Boolean.class)) {
+            return boolean.class;
+        } else if (c.equals(BigInteger.class)) {
+            //TODO long might be safer?
+            return int.class;
+        } else {
+            return c;
+        }
+    }
 
     private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
         String modifier;
@@ -283,7 +300,7 @@ public class Generator2 {
 
     private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.fields.forEach(f -> {
-            out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name);
+            out.format("%sprivate final %s %s;\n", indent, imports.add(f.fullClassName), f.name);
         });
     }
 
