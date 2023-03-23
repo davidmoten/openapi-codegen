@@ -236,15 +236,14 @@ public class Generator2 {
                 if (stack.isEmpty()) {
                     Indent indent = new Indent();
                     out.format("package %s;\n", cls.pkg());
-                    out.format(imports.toString());
+                    out.format("\nIMPORTS_HERE");
                     writeClassDeclaration(out, imports, indent, cls);
                     indent.right();
-                    cls.fields
-                            .forEach(f -> out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name));
-                    cls.classes.forEach(c -> writeMemberClasses(out, imports, indent, c));
+                    writeFields(out, imports, indent, cls);
+                    cls.classes.forEach(c -> writeMemberClass(out, imports, indent, c));
                     indent.left();
                     out.format("}\n");
-                    System.out.println(out.text());
+                    System.out.println(out.text().replace("IMPORTS_HERE", imports.toString()));
                     out.close();
                 }
             }
@@ -261,15 +260,23 @@ public class Generator2 {
         out.format("\n%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
     }
 
-    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeMemberClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
         writeClassDeclaration(out, imports, indent, cls);
         indent.right();
+        writeFields(out, imports, indent, cls);
+        writeMemberClasses(out, imports, indent, cls);
+        indent.left();
+        out.format("%s}\n", indent);
+    }
+
+    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        cls.classes.forEach(c -> writeMemberClass(out, imports, indent, c));
+    }
+
+    private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.fields.forEach(f -> {
             out.format("%sfinal %s %s;\n", indent, imports.add(f.fullClassName), f.name);
         });
-        cls.classes.forEach(c -> writeMemberClasses(out, imports, indent, c));
-        indent.left();
-        out.format("%s}\n", indent);
     }
 
     static boolean isEnum(Schema<?> schema) {

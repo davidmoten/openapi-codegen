@@ -78,7 +78,7 @@ public final class Imports {
                 }) //
                 .collect(Collectors.joining("\n"));
         if (!x.isEmpty()) {
-            x = x + "\n\n";
+            x = x + "\n";
         }
         return x;
     }
