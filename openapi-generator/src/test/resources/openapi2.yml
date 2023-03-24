@@ -1140,6 +1140,8 @@ components:
                 properties:
                   partNumber: 
                     type: integer
+                    format: int32
+                required: [partNumber]
         second:
           type: string
               

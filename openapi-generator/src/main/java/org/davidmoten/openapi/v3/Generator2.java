@@ -251,26 +251,10 @@ public class Generator2 {
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
         writeFields(out, imports, indent, cls);
+        writeGetters(out, imports, indent, cls);
         writeMemberClasses(out, imports, indent, cls);
         indent.left();
         out.format("%s}\n", indent);
-    }
-
-    private static Class<?> toPrimitive(Class<?> c) {
-        if (c.equals(Integer.class)) {
-            return int.class;
-        } else if (c.equals(Long.class)) {
-            return long.class;
-        } else if (c.equals(Float.class)) {
-            return float.class;
-        } else if (c.equals(Boolean.class)) {
-            return boolean.class;
-        } else if (c.equals(BigInteger.class)) {
-            // TODO long might be safer?
-            return int.class;
-        } else {
-            return c;
-        }
     }
 
     private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
@@ -293,14 +277,24 @@ public class Generator2 {
         }
     }
 
-    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        cls.classes.forEach(c -> writeClass(out, imports, indent, c));
-    }
-
     private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.fields.forEach(f -> {
             out.format("%sprivate final %s %s;\n", indent, imports.add(f.fullClassName), f.name);
         });
+    }
+    
+    private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        cls.fields.forEach(f -> {
+            out.format("\n%spublic %s %s() {\n", indent, imports.add(f.fullClassName), f.name);
+            indent.right();
+            out.format("%sreturn %s;\n", indent, f.name);
+            indent.left();
+            out.format("%s}\n", indent);
+        });
+    }
+    
+    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        cls.classes.forEach(c -> writeClass(out, imports, indent, c));
     }
 
     static boolean isEnum(Schema<?> schema) {
@@ -383,6 +377,23 @@ public class Generator2 {
             return Object.class;
         } else {
             return null;
+        }
+    }
+    
+    private static Class<?> toPrimitive(Class<?> c) {
+        if (c.equals(Integer.class)) {
+            return int.class;
+        } else if (c.equals(Long.class)) {
+            return long.class;
+        } else if (c.equals(Float.class)) {
+            return float.class;
+        } else if (c.equals(Boolean.class)) {
+            return boolean.class;
+        } else if (c.equals(BigInteger.class)) {
+            // TODO long might be safer?
+            return int.class;
+        } else {
+            return c;
         }
     }
 }
