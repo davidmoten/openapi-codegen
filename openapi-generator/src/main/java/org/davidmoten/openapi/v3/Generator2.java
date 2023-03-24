@@ -264,6 +264,7 @@ public class Generator2 {
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
         writeFields(out, imports, indent, cls);
+        writeConstructor(out, imports, indent, cls);
         writeGetters(out, imports, indent, cls);
         writeMemberClasses(out, imports, indent, cls);
         indent.left();
@@ -294,6 +295,19 @@ public class Generator2 {
         cls.fields.forEach(f -> {
             out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.name);
         });
+    }
+
+    private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        indent.right().right();
+        String text = cls.fields.stream().map(x -> {
+            return String.format("\n%s%s %s", indent, x.resolvedType(imports), x.name);
+        }).collect(Collectors.joining(","));
+        indent.left().left();
+        out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), text);
+        indent.right();
+        cls.fields.stream().forEach(x -> out.format("%sthis.%s = %s;\n", indent, x.name, x.name));
+        indent.left();
+        out.format("%s}\n", indent);
     }
 
     private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls) {
