@@ -200,7 +200,6 @@ public class Generator2 {
     private static final class MyVisitor implements Visitor {
         private final Names names;
         private Imports imports;
-        private boolean once = true;
         private LinkedStack<Cls> stack = new LinkedStack<>();
         private ByteArrayPrintStream out;
 
@@ -212,36 +211,35 @@ public class Generator2 {
         @Override
         public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
             SchemaWithName last = schemaPath.last();
-//            System.out.println(last);
             Schema<?> schema = last.schema;
-            Cls cls;
-            if (once) {
+            final Cls cls = new Cls();
+            if (stack.isEmpty()) {
                 // should be top-level class
-                once = false;
-                cls = new Cls();
-                stack.push(cls);
                 cls.fullClassName = names.schemaNameToClassName(last.name);
                 imports = new Imports(cls.fullClassName);
-                cls.classType = classType(schema);
-                if (isEnum(schema)) {
-                    handleEnum(schema, cls);
-                } else if (isOneOf(schema)) {
-                    handleOneOf(last, schema, cls);
-                }
-            } else if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema)) {
-                Cls previous = stack.peek();
-                cls = new Cls();
                 stack.push(cls);
-                previous.classes.add(cls);
-                String fieldName = previous.nextFieldName(last.name);
-                String fullClassName = previous.fullClassName + "." + Names.simpleClassNameFromSimpleName(fieldName);
-                cls.fullClassName = fullClassName;
+                cls.classType = classType(schema);
+            }
+            if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema)) {
+                Optional<Cls> previous = Optional.ofNullable(stack.peek());
+                stack.push(cls);
+                previous.ifPresent(p -> p.classes.add(cls));
+                final Optional<String> fieldName;
+                if (previous.isPresent()) {
+                    fieldName = Optional.of(previous.get().nextFieldName(last.name));
+                    String fullClassName = previous.get().fullClassName + "."
+                            + Names.simpleClassNameFromSimpleName(fieldName.get());
+                    cls.fullClassName = fullClassName;
+                } else {
+                    cls.fullClassName = names.schemaNameToClassName(last.name);
+                    fieldName = Optional.empty();
+                }
                 if (isEnum(schema)) {
                     handleEnum(schema, cls);
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
-                    boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
-                    previous.addField(fullClassName, fieldName, required);
+                    boolean required = fieldIsRequired(schemaPath, last);
+                    previous.ifPresent(p -> p.addField(cls.fullClassName, fieldName.get(), required));
                 } else if (isOneOf(schema)) {
                     handleOneOf(last, schema, cls);
                 } else {
@@ -250,12 +248,12 @@ public class Generator2 {
                     cls.classType = ClassType.CLASS;
                 }
             } else {
-                cls = stack.peek();
+                Cls current = stack.peek();
                 if (isPrimitive(schema.getType())) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
-                    String fieldName = cls.nextFieldName(last.name);
-                    boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
-                    cls.addField(c.getCanonicalName(), fieldName, required);
+                    String fieldName = current.nextFieldName(last.name);
+                    boolean required = fieldIsRequired(schemaPath, last);
+                    current.addField(c.getCanonicalName(), fieldName, required);
                 } else if (isRef(schema)) {
                     String ref = schema.get$ref();
                     final String fullClassName;
@@ -265,10 +263,18 @@ public class Generator2 {
                         String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
                         fullClassName = names.schemaNameToClassName(schemaName);
                     }
-                    String fieldName = cls.nextFieldName(last.name);
-                    boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
-                    cls.addField(fullClassName, fieldName, required);
+                    String fieldName = current.nextFieldName(last.name);
+                    boolean required = fieldIsRequired(schemaPath, last);
+                    current.addField(fullClassName, fieldName, required);
                 }
+            }
+        }
+
+        private boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last) {
+            if (schemaPath.size() <= 1) {
+                return false;
+            } else {
+                return contains(schemaPath.secondLast().schema.getRequired(), last.name);
             }
         }
 

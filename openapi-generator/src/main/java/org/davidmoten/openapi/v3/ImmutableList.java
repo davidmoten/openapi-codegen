@@ -51,4 +51,8 @@ final class ImmutableList<T> implements Iterable<T> {
         return list.get(list.size() - 2);
     }
 
+    public int size() {
+        return list.size();
+    }
+
 }
