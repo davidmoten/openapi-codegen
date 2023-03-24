@@ -6,8 +6,10 @@ import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
@@ -65,18 +67,36 @@ public class Generator2 {
         List<String> interfaceMethods = new ArrayList<>();
         String enumFullType;
         private int num = 0;
+        private Set<String> fieldNames = new HashSet<String>();
 
         private String nextAnonymousFieldName() {
             num++;
             return "anonymous" + num;
         }
-        
+
         String nextFieldName(String name) {
+            final String next;
             if (name == null) {
-                return nextAnonymousFieldName();
+                next = nextAnonymousFieldName();
             } else {
-                return Names.toFieldName(name);
+                String s = Names.toFieldName(name);
+                String a;
+                int i = 0;
+                while (true) {
+                    if (i > 0) {
+                        a = s + i;
+                    } else {
+                        a = s;
+                    }
+                    if (!fieldNames.contains(s)) {
+                        break;
+                    }
+                    i++;
+                }
+                next = a;
             }
+            fieldNames.add(next);
+            return next;
         }
 
         void addField(String fullType, String name, boolean required) {
@@ -208,7 +228,7 @@ public class Generator2 {
                 } else if (isOneOf(schema)) {
                     handleOneOf(last, schema, cls);
                 }
-            } else if (Apis.isComplexSchema(schema) || isEnum(schema)||isOneOf(schema)) {
+            } else if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema)) {
                 Cls previous = stack.peek();
                 cls = new Cls();
                 stack.push(cls);
