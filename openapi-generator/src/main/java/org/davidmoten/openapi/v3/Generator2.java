@@ -5,7 +5,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
@@ -68,8 +70,8 @@ public class Generator2 {
             return "anonymous" + num;
         }
 
-        void addField(String fullType, String name) {
-            fields.add(new Field(fullType, name));
+        void addField(String fullType, String name, boolean required) {
+            fields.add(new Field(fullType, name, required));
         }
 
         public String pkg() {
@@ -106,12 +108,18 @@ public class Generator2 {
     }
 
     private final static class Field {
-        final String fullClassName;
+        private String fullClassName;
         final String name;
+        final boolean required;
 
-        public Field(String fullClassName, String name) {
+        public Field(String fullClassName, String name, boolean required) {
             this.fullClassName = fullClassName;
             this.name = name;
+            this.required = required;
+        }
+
+        public String resolvedType(Imports imports) {
+            return resolveType(this, imports);
         }
     }
 
@@ -166,7 +174,6 @@ public class Generator2 {
         private boolean once = true;
         private LinkedStack<Cls> stack = new LinkedStack<>();
         private ByteArrayPrintStream out;
-        private String fullClassName;
 
         public MyVisitor(Names names) {
             this.names = names;
@@ -202,7 +209,8 @@ public class Generator2 {
                     handleEnum(schema, cls);
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
-                    previous.addField(fullClassName, fieldName);
+                    boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
+                    previous.addField(fullClassName, fieldName, false);
                 } else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
@@ -213,7 +221,8 @@ public class Generator2 {
                 if (isPrimitive(schema.getType())) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
                     String fieldName = last.name == null ? cls.nextAnonymousFieldName() : Names.toFieldName(last.name);
-                    cls.addField(c.getCanonicalName(), fieldName);
+                    boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
+                    cls.addField(c.getCanonicalName(), fieldName, required);
                 }
             }
         }
@@ -221,11 +230,11 @@ public class Generator2 {
         private void handleEnum(Schema<?> schema, Cls cls) {
             cls.classType = ClassType.ENUM;
             Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
-            cls.enumFullType = toPrimitive(valueCls).getCanonicalName();
+            cls.enumFullType = valueCls.getCanonicalName();
             for (Object o : schema.getEnum()) {
                 cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
             }
-            cls.addField(cls.enumFullType, "value");
+            cls.addField(cls.enumFullType, "value", true);
         }
 
         @Override
@@ -244,6 +253,10 @@ public class Generator2 {
                 }
             }
         }
+    }
+
+    private static <T> boolean contains(Collection<? extends T> collection, T t) {
+        return collection != null && t != null && collection.contains(t);
     }
 
     private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
@@ -279,20 +292,28 @@ public class Generator2 {
 
     private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.fields.forEach(f -> {
-            out.format("%sprivate final %s %s;\n", indent, imports.add(f.fullClassName), f.name);
+            out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.name);
         });
     }
-    
+
     private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.fields.forEach(f -> {
-            out.format("\n%spublic %s %s() {\n", indent, imports.add(f.fullClassName), f.name);
+            out.format("\n%spublic %s %s() {\n", indent, f.resolvedType(imports), f.name);
             indent.right();
             out.format("%sreturn %s;\n", indent, f.name);
             indent.left();
             out.format("%s}\n", indent);
         });
     }
-    
+
+    private static String resolveType(Field f, Imports imports) {
+        if (f.required) {
+            return imports.add(toPrimitive(f.fullClassName));
+        } else {
+            return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
+        }
+    }
+
     private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.classes.forEach(c -> writeClass(out, imports, indent, c));
     }
@@ -379,19 +400,19 @@ public class Generator2 {
             return null;
         }
     }
-    
-    private static Class<?> toPrimitive(Class<?> c) {
-        if (c.equals(Integer.class)) {
-            return int.class;
-        } else if (c.equals(Long.class)) {
-            return long.class;
-        } else if (c.equals(Float.class)) {
-            return float.class;
-        } else if (c.equals(Boolean.class)) {
-            return boolean.class;
-        } else if (c.equals(BigInteger.class)) {
+
+    private static String toPrimitive(String c) {
+        if (c.equals(Integer.class.getCanonicalName())) {
+            return "int";
+        } else if (c.equals(Long.class.getCanonicalName())) {
+            return "long";
+        } else if (c.equals(Float.class.getCanonicalName())) {
+            return "float";
+        } else if (c.equals(Boolean.class.getCanonicalName())) {
+            return "boolean";
+        } else if (c.equals(BigInteger.class.getCanonicalName())) {
             // TODO long might be safer?
-            return int.class;
+            return "int";
         } else {
             return c;
         }
