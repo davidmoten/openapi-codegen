@@ -182,4 +182,8 @@ public final class Names {
         return list;
     }
 
+    public String externalRefClassName(String ref) {
+        return definition.externalRefClassName(ref);
+    }
+
 }

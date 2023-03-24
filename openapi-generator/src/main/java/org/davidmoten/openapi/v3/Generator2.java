@@ -211,7 +211,8 @@ public class Generator2 {
                     cls.classType = ClassType.CLASS;
                     boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
                     previous.addField(fullClassName, fieldName, false);
-                } else {
+                } 
+                else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
                     cls.classType = ClassType.CLASS;
@@ -223,6 +224,18 @@ public class Generator2 {
                     String fieldName = last.name == null ? cls.nextAnonymousFieldName() : Names.toFieldName(last.name);
                     boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
                     cls.addField(c.getCanonicalName(), fieldName, required);
+                } else if (isRef(schema)){
+                    String ref = schema.get$ref();
+                    final String fullClassName;
+                    if (!ref.startsWith("#")) {
+                        fullClassName = names.externalRefClassName(ref);
+                    } else {
+                        String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
+                        fullClassName = names.schemaNameToClassName(schemaName);
+                    }
+                    String fieldName = last.name == null ? cls.nextAnonymousFieldName() : Names.toFieldName(last.name);
+                    boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
+                    cls.addField(fullClassName, fieldName, required);
                 }
             }
         }
