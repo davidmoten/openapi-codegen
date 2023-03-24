@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
 import com.github.davidmoten.guavamini.Preconditions;
+import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -136,6 +137,9 @@ public class Generator2 {
         }
     }
 
+    private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "long", "byte", "float", "double",
+            "boolean");
+
     private final static class Field {
         private String fullClassName;
         final String name;
@@ -149,6 +153,10 @@ public class Generator2 {
 
         public String resolvedType(Imports imports) {
             return resolveType(this, imports);
+        }
+
+        public boolean isPrimitive() {
+            return PRIMITIVE_CLASS_NAMES.contains(toPrimitive(fullClassName));
         }
     }
 
@@ -382,7 +390,14 @@ public class Generator2 {
         indent.left().left();
         out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), text);
         indent.right();
-        cls.fields.stream().forEach(x -> out.format("%sthis.%s = %s;\n", indent, x.name, x.name));
+        cls.fields.stream().forEach(x -> {
+            if (!x.isPrimitive()) {
+                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.name, imports.add(Preconditions.class),
+                        x.name);
+            } else {
+                out.format("%sthis.%s = %s;\n", indent, x.name, x.name);
+            }
+        });
         indent.left();
         out.format("%s}\n", indent);
     }
