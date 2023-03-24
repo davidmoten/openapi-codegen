@@ -156,7 +156,7 @@ public class Generator2 {
         }
 
         public boolean isPrimitive() {
-            return PRIMITIVE_CLASS_NAMES.contains(toPrimitive(fullClassName));
+            return required && PRIMITIVE_CLASS_NAMES.contains(toPrimitive(fullClassName));
         }
     }
 
