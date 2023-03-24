@@ -299,7 +299,7 @@ public class Generator2 {
     }
 
     private static void handleOneOf(SchemaWithName last, Schema<?> schema, Cls cls) {
-        cls.classType = ClassType.CLASS;
+        cls.classType = ClassType.ONE_OF;
         if (schema.getDiscriminator() != null) {
             cls.interfaceMethods.add(Names.toFieldName(last.name));
         }
@@ -323,9 +323,22 @@ public class Generator2 {
         writeClassDeclaration(out, imports, indent, cls);
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
-        writeFields(out, imports, indent, cls);
-        writeConstructor(out, imports, indent, cls);
-        writeGetters(out, imports, indent, cls);
+        if (cls.classType == ClassType.ONE_OF) {
+            out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
+            // add constructor for each member of the oneOf (fieldTypes)
+            cls.fields.forEach(f -> {
+                out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
+                out.format("%sthis.value = value;\n", indent.right());
+                out.format("%s}\n", indent.left());
+            });
+            out.format("\n%spublic Object value() {\n", indent);
+            out.format("%sreturn value;\n", indent.right());
+            out.format("%s}\n", indent.left());
+        } else {
+            writeFields(out, imports, indent, cls);
+            writeConstructor(out, imports, indent, cls);
+            writeGetters(out, imports, indent, cls);
+        }
         writeMemberClasses(out, imports, indent, cls);
         indent.left();
         out.format("%s}\n", indent);
