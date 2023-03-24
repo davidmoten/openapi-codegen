@@ -56,18 +56,27 @@ public class Generator2 {
         });
     }
 
-    private static class Cls {
+    private static final class Cls {
         String fullClassName;
         ClassType classType;
         List<Field> fields = new ArrayList<>();
         List<EnumMember> enumMembers = new ArrayList<>();
-        List<Cls> classes = new ArrayList<>();;
+        List<Cls> classes = new ArrayList<>();
+        List<String> interfaceMethods = new ArrayList<>();
         String enumFullType;
         private int num = 0;
 
-        String nextAnonymousFieldName() {
+        private String nextAnonymousFieldName() {
             num++;
             return "anonymous" + num;
+        }
+        
+        String nextFieldName(String name) {
+            if (name == null) {
+                return nextAnonymousFieldName();
+            } else {
+                return Names.toFieldName(name);
+            }
         }
 
         void addField(String fullType, String name, boolean required) {
@@ -94,7 +103,7 @@ public class Generator2 {
     }
 
     private enum ClassType {
-        INTERFACE("interface"), CLASS("class"), ENUM("enum");
+        INTERFACE("interface"), CLASS("class"), ENUM("enum"), ONE_OF("class");
 
         private final String word;
 
@@ -196,13 +205,15 @@ public class Generator2 {
                 cls.classType = classType(schema);
                 if (isEnum(schema)) {
                     handleEnum(schema, cls);
+                } else if (isOneOf(schema)) {
+                    handleOneOf(last, schema, cls);
                 }
-            } else if (Apis.isComplexSchema(schema) || isEnum(schema)) {
+            } else if (Apis.isComplexSchema(schema) || isEnum(schema)||isOneOf(schema)) {
                 Cls previous = stack.peek();
                 cls = new Cls();
                 stack.push(cls);
                 previous.classes.add(cls);
-                String fieldName = last.name == null ? previous.nextAnonymousFieldName() : Names.toFieldName(last.name);
+                String fieldName = previous.nextFieldName(last.name);
                 String fullClassName = previous.fullClassName + "." + Names.simpleClassNameFromSimpleName(fieldName);
                 cls.fullClassName = fullClassName;
                 if (isEnum(schema)) {
@@ -210,9 +221,10 @@ public class Generator2 {
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
                     boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
-                    previous.addField(fullClassName, fieldName, false);
-                } 
-                else {
+                    previous.addField(fullClassName, fieldName, required);
+                } else if (isOneOf(schema)) {
+                    handleOneOf(last, schema, cls);
+                } else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
                     cls.classType = ClassType.CLASS;
@@ -221,10 +233,10 @@ public class Generator2 {
                 cls = stack.peek();
                 if (isPrimitive(schema.getType())) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
-                    String fieldName = last.name == null ? cls.nextAnonymousFieldName() : Names.toFieldName(last.name);
+                    String fieldName = cls.nextFieldName(last.name);
                     boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
                     cls.addField(c.getCanonicalName(), fieldName, required);
-                } else if (isRef(schema)){
+                } else if (isRef(schema)) {
                     String ref = schema.get$ref();
                     final String fullClassName;
                     if (!ref.startsWith("#")) {
@@ -233,10 +245,17 @@ public class Generator2 {
                         String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
                         fullClassName = names.schemaNameToClassName(schemaName);
                     }
-                    String fieldName = last.name == null ? cls.nextAnonymousFieldName() : Names.toFieldName(last.name);
+                    String fieldName = cls.nextFieldName(last.name);
                     boolean required = contains(schemaPath.secondLast().schema.getRequired(), last.name);
                     cls.addField(fullClassName, fieldName, required);
                 }
+            }
+        }
+
+        private void handleOneOf(SchemaWithName last, Schema<?> schema, Cls cls) {
+            cls.classType = ClassType.CLASS;
+            if (schema.getDiscriminator() != null) {
+                cls.interfaceMethods.add(Names.toFieldName(last.name));
             }
         }
 
@@ -379,7 +398,7 @@ public class Generator2 {
 
     private static ClassType classType(Schema<?> schema) {
         if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
-            return ClassType.INTERFACE;
+            return ClassType.ONE_OF;
         } else if (schema.getEnum() != null) {
             return ClassType.ENUM;
         } else {
