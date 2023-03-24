@@ -324,16 +324,7 @@ public class Generator2 {
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
         if (cls.classType == ClassType.ONE_OF) {
-            out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
-            // add constructor for each member of the oneOf (fieldTypes)
-            cls.fields.forEach(f -> {
-                out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
-                out.format("%sthis.value = value;\n", indent.right());
-                out.format("%s}\n", indent.left());
-            });
-            out.format("\n%spublic Object value() {\n", indent);
-            out.format("%sreturn value;\n", indent.right());
-            out.format("%s}\n", indent.left());
+            writeOneOfClassContent(out, imports, indent, cls);
         } else {
             writeFields(out, imports, indent, cls);
             writeConstructor(out, imports, indent, cls);
@@ -342,6 +333,19 @@ public class Generator2 {
         writeMemberClasses(out, imports, indent, cls);
         indent.left();
         out.format("%s}\n", indent);
+    }
+
+    private static void writeOneOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
+        // add constructor for each member of the oneOf (fieldTypes)
+        cls.fields.forEach(f -> {
+            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
+            out.format("%sthis.value = value;\n", indent.right());
+            out.format("%s}\n", indent.left());
+        });
+        out.format("\n%spublic Object value() {\n", indent);
+        out.format("%sreturn value;\n", indent.right());
+        out.format("%s}\n", indent.left());
     }
 
     private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
