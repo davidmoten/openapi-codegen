@@ -237,13 +237,7 @@ public class Generator2 {
                     Indent indent = new Indent();
                     out.format("package %s;\n", cls.pkg());
                     out.format("\nIMPORTS_HERE");
-                    writeClassDeclaration(out, imports, indent, cls);
-                    indent.right();
-                    writeEnumMembers(out, imports, indent, cls);
-                    writeFields(out, imports, indent, cls);
-                    cls.classes.forEach(c -> writeMemberClass(out, imports, indent, c));
-                    indent.left();
-                    out.format("}\n");
+                    writeClass(out, imports, indent, cls);
                     System.out.println("////////////////////////////////////////////////");
                     System.out.println(out.text().replace("IMPORTS_HERE", imports.toString()));
                     out.close();
@@ -251,18 +245,28 @@ public class Generator2 {
             }
         }
     }
-    
+
+    private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        writeClassDeclaration(out, imports, indent, cls);
+        indent.right();
+        writeEnumMembers(out, imports, indent, cls);
+        writeFields(out, imports, indent, cls);
+        writeMemberClasses(out, imports, indent, cls);
+        indent.left();
+        out.format("%s}\n", indent);
+    }
+
     private static Class<?> toPrimitive(Class<?> c) {
         if (c.equals(Integer.class)) {
             return int.class;
-        } else if(c.equals(Long.class)) {
+        } else if (c.equals(Long.class)) {
             return long.class;
         } else if (c.equals(Float.class)) {
             return float.class;
         } else if (c.equals(Boolean.class)) {
             return boolean.class;
         } else if (c.equals(BigInteger.class)) {
-            //TODO long might be safer?
+            // TODO long might be safer?
             return int.class;
         } else {
             return c;
@@ -279,16 +283,6 @@ public class Generator2 {
         out.format("\n%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
     }
 
-    private static void writeMemberClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        writeClassDeclaration(out, imports, indent, cls);
-        indent.right();
-        writeEnumMembers(out, imports, indent, cls);
-        writeFields(out, imports, indent, cls);
-        writeMemberClasses(out, imports, indent, cls);
-        indent.left();
-        out.format("%s}\n", indent);
-    }
-
     private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
         String text = cls.enumMembers.stream().map(x -> {
             String delim = x.parameter instanceof String ? "\"" : "";
@@ -300,7 +294,7 @@ public class Generator2 {
     }
 
     private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        cls.classes.forEach(c -> writeMemberClass(out, imports, indent, c));
+        cls.classes.forEach(c -> writeClass(out, imports, indent, c));
     }
 
     private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
