@@ -187,6 +187,9 @@ public class Generator2 {
                 cls.fullClassName = names.schemaNameToClassName(last.name);
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
+                if (isEnum(schema)) {
+                    handleEnum(schema, cls);
+                }
             } else if (Apis.isComplexSchema(schema) || isEnum(schema)) {
                 Cls previous = stack.peek();
                 cls = new Cls();
@@ -195,15 +198,8 @@ public class Generator2 {
                 String fieldName = last.name == null ? previous.nextAnonymousFieldName() : Names.toFieldName(last.name);
                 String fullClassName = previous.fullClassName + "." + Names.simpleClassNameFromSimpleName(fieldName);
                 cls.fullClassName = fullClassName;
-                previous.addField(fullClassName, fieldName);
                 if (isEnum(schema)) {
-                    cls.classType = ClassType.ENUM;
-                    Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
-                    cls.enumFullType = toPrimitive(valueCls).getCanonicalName();
-                    for (Object o : schema.getEnum()) {
-                        cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
-                    }
-                    cls.addField(cls.enumFullType, "value");
+                    handleEnum(schema, cls);
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
                     previous.addField(fullClassName, fieldName);
@@ -220,6 +216,16 @@ public class Generator2 {
                     cls.addField(c.getCanonicalName(), fieldName);
                 }
             }
+        }
+
+        private void handleEnum(Schema<?> schema, Cls cls) {
+            cls.classType = ClassType.ENUM;
+            Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
+            cls.enumFullType = toPrimitive(valueCls).getCanonicalName();
+            for (Object o : schema.getEnum()) {
+                cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
+            }
+            cls.addField(cls.enumFullType, "value");
         }
 
         @Override
@@ -284,7 +290,6 @@ public class Generator2 {
     }
 
     private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        System.out.println("enum members=" + cls.enumMembers);
         String text = cls.enumMembers.stream().map(x -> {
             String delim = x.parameter instanceof String ? "\"" : "";
             return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);

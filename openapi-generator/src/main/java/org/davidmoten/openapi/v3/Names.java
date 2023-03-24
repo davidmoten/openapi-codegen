@@ -133,7 +133,19 @@ public final class Names {
     }
 
     public static String enumNameToEnumConstant(String s) {
-        return toIdentifier(s);
+        return camelToUpper(toIdentifier(s));
+    }
+
+    static String camelToUpper(String s) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            if (i > 0 && i < s.length() - 1 && Character.isUpperCase(s.charAt(i))
+                    && Character.isLowerCase(s.charAt(i + 1)) && s.charAt(i - 1) != '_') {
+                b.append("_");
+            }
+            b.append(Character.toUpperCase(s.charAt(i)));
+        }
+        return b.toString();
     }
 
     private static Map<Schema<?>, Set<Schema<?>>> superSchemas(OpenAPI api) {
