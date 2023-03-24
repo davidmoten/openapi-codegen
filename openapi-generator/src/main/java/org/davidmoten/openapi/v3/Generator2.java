@@ -217,7 +217,6 @@ public class Generator2 {
                 // should be top-level class
                 cls.fullClassName = names.schemaNameToClassName(last.name);
                 imports = new Imports(cls.fullClassName);
-                stack.push(cls);
                 cls.classType = classType(schema);
             }
             if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema)) {
@@ -248,6 +247,9 @@ public class Generator2 {
                     cls.classType = ClassType.CLASS;
                 }
             } else {
+                if (stack.isEmpty()) {
+                    stack.push(cls);
+                }
                 Cls current = stack.peek();
                 if (isPrimitive(schema.getType())) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
@@ -270,31 +272,6 @@ public class Generator2 {
             }
         }
 
-        private boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last) {
-            if (schemaPath.size() <= 1) {
-                return false;
-            } else {
-                return contains(schemaPath.secondLast().schema.getRequired(), last.name);
-            }
-        }
-
-        private void handleOneOf(SchemaWithName last, Schema<?> schema, Cls cls) {
-            cls.classType = ClassType.CLASS;
-            if (schema.getDiscriminator() != null) {
-                cls.interfaceMethods.add(Names.toFieldName(last.name));
-            }
-        }
-
-        private void handleEnum(Schema<?> schema, Cls cls) {
-            cls.classType = ClassType.ENUM;
-            Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
-            cls.enumFullType = valueCls.getCanonicalName();
-            for (Object o : schema.getEnum()) {
-                cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
-            }
-            cls.addField(cls.enumFullType, "value", true);
-        }
-
         @Override
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
@@ -311,6 +288,31 @@ public class Generator2 {
                 }
             }
         }
+    }
+
+    private static boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last) {
+        if (schemaPath.size() <= 1) {
+            return false;
+        } else {
+            return contains(schemaPath.secondLast().schema.getRequired(), last.name);
+        }
+    }
+
+    private static void handleOneOf(SchemaWithName last, Schema<?> schema, Cls cls) {
+        cls.classType = ClassType.CLASS;
+        if (schema.getDiscriminator() != null) {
+            cls.interfaceMethods.add(Names.toFieldName(last.name));
+        }
+    }
+
+    private static void handleEnum(Schema<?> schema, Cls cls) {
+        cls.classType = ClassType.ENUM;
+        Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
+        cls.enumFullType = valueCls.getCanonicalName();
+        for (Object o : schema.getEnum()) {
+            cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
+        }
+        cls.addField(cls.enumFullType, "value", true);
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
