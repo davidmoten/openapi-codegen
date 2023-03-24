@@ -388,7 +388,8 @@ public class Generator2 {
             return String.format("\n%s%s %s", indent, x.resolvedType(imports), x.name);
         }).collect(Collectors.joining(","));
         indent.left().left();
-        out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), text);
+        final String visibility = cls.classType == ClassType.ENUM? "private":"public";
+        out.format("\n%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), text);
         indent.right();
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive()) {
