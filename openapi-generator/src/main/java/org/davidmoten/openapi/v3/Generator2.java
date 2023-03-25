@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
@@ -332,7 +336,7 @@ public class Generator2 {
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
         if (cls.classType == ClassType.ONE_OR_ANY_OF) {
-            writeOneOfClassContent(out, imports, indent, cls);
+            writeOneOrAnyOfClassContent(out, imports, indent, cls);
         } else {
             writeFields(out, imports, indent, cls);
             writeConstructor(out, imports, indent, cls);
@@ -343,11 +347,11 @@ public class Generator2 {
         out.format("%s}\n", indent);
     }
 
-    private static void writeOneOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeOneOrAnyOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
         out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
         // add constructor for each member of the oneOf (fieldTypes)
         cls.fields.forEach(f -> {
-            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
+            out.format("%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
             out.format("%sthis.value = value;\n", indent.right());
             out.format("%s}\n", indent.left());
         });
@@ -363,7 +367,16 @@ public class Generator2 {
         } else {
             modifier = "static final ";
         }
-        out.format("\n%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
+        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
+            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
+            out.format("%s@%s({ %s })\n", indent, imports.add(JsonSubTypes.class),
+                    cls.fields.stream().map(
+                            x -> String.format("@%s(%s.class)", imports.add(Type.class), imports.add(x.fullClassName)))
+                            .collect(Collectors.joining(", ")));
+        } else {
+            out.println();
+        }
+        out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
     }
 
     private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
