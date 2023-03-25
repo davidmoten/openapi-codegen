@@ -351,7 +351,7 @@ public class Generator2 {
         out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
         // add constructor for each member of the oneOf (fieldTypes)
         cls.fields.forEach(f -> {
-            out.format("%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
+            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
             out.format("%sthis.value = value;\n", indent.right());
             out.format("%s}\n", indent.left());
         });
@@ -369,10 +369,12 @@ public class Generator2 {
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF) {
             out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
-            out.format("%s@%s({ %s })\n", indent, imports.add(JsonSubTypes.class),
-                    cls.fields.stream().map(
-                            x -> String.format("@%s(%s.class)", imports.add(Type.class), imports.add(x.fullClassName)))
-                            .collect(Collectors.joining(", ")));
+            indent.right().right();
+            String types = cls.fields.stream().map(x -> String.format("\n%s@%s(%s.class)", indent,
+                    imports.add(Type.class), imports.add(x.fullClassName))).collect(Collectors.joining(", "));
+            indent.left();
+            indent.left();
+            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
         } else {
             out.println();
         }
@@ -390,6 +392,9 @@ public class Generator2 {
     }
 
     private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        if (!cls.fields.isEmpty()) {
+            out.println();
+        }
         cls.fields.forEach(f -> {
             out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.name);
         });
