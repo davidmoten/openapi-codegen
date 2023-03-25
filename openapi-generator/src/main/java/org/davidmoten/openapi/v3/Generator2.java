@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -104,8 +106,8 @@ public class Generator2 {
             return next;
         }
 
-        void addField(String fullType, String name, boolean required) {
-            fields.add(new Field(fullType, name, required));
+        void addField(String fullType, String name, String fieldName, boolean required) {
+            fields.add(new Field(fullType, name, fieldName, required));
         }
 
         public String pkg() {
@@ -147,11 +149,13 @@ public class Generator2 {
     private final static class Field {
         private String fullClassName;
         final String name;
+        final String fieldName;
         final boolean required;
 
-        public Field(String fullClassName, String name, boolean required) {
+        public Field(String fullClassName, String name, String fieldName, boolean required) {
             this.fullClassName = fullClassName;
             this.name = name;
+            this.fieldName = fieldName;
             this.required = required;
         }
 
@@ -250,7 +254,7 @@ public class Generator2 {
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
                     boolean required = fieldIsRequired(schemaPath, last);
-                    previous.ifPresent(p -> p.addField(cls.fullClassName, fieldName.get(), required));
+                    previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required));
                 } else if (isOneOf(schema) || isAnyOf(schema)) {
                     handleOneOrAnyOf(last, schema, cls);
                 } else {
@@ -267,7 +271,7 @@ public class Generator2 {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath, last);
-                    current.addField(c.getCanonicalName(), fieldName, required);
+                    current.addField(c.getCanonicalName(), last.name, fieldName, required);
                 } else if (isRef(schema)) {
                     String ref = schema.get$ref();
                     final String fullClassName;
@@ -279,7 +283,7 @@ public class Generator2 {
                     }
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath, last);
-                    current.addField(fullClassName, fieldName, required);
+                    current.addField(fullClassName,last.name, fieldName, required);
                 }
             }
         }
@@ -324,7 +328,7 @@ public class Generator2 {
         for (Object o : schema.getEnum()) {
             cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
         }
-        cls.addField(cls.enumFullType, "value", true);
+        cls.addField(cls.enumFullType, "value", "value", true);
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
@@ -396,25 +400,26 @@ public class Generator2 {
             out.println();
         }
         cls.fields.forEach(f -> {
-            out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.name);
+            out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.fieldName);
         });
     }
 
     private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls) {
         indent.right().right();
-        String text = cls.fields.stream().map(x -> {
-            return String.format("\n%s%s %s", indent, x.resolvedType(imports), x.name);
-        }).collect(Collectors.joining(","));
+        String text = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s%s %s", indent,
+                imports.add(JsonProperty.class), x.name, x.fieldName, x.resolvedType(imports), x.fieldName))
+                .collect(Collectors.joining(","));
         indent.left().left();
+        out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
         final String visibility = cls.classType == ClassType.ENUM ? "private" : "public";
-        out.format("\n%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), text);
+        out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), text);
         indent.right();
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive()) {
-                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.name, imports.add(Preconditions.class),
-                        x.name);
+                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName, imports.add(Preconditions.class),
+                        x.fieldName);
             } else {
-                out.format("%sthis.%s = %s;\n", indent, x.name, x.name);
+                out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
             }
         });
         indent.left();
@@ -423,9 +428,9 @@ public class Generator2 {
 
     private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.fields.forEach(f -> {
-            out.format("\n%spublic %s %s() {\n", indent, f.resolvedType(imports), f.name);
+            out.format("\n%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName);
             indent.right();
-            out.format("%sreturn %s;\n", indent, f.name);
+            out.format("%sreturn %s;\n", indent, f.fieldName);
             indent.left();
             out.format("%s}\n", indent);
         });
