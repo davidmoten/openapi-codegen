@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
@@ -361,6 +361,7 @@ public class Generator2 {
             out.format("%sthis.value = value;\n", indent.right());
             out.format("%s}\n", indent.left());
         });
+        
         out.format("\n%spublic Object value() {\n", indent);
         out.format("%sreturn value;\n", indent.right());
         out.format("%s}\n", indent.left());
