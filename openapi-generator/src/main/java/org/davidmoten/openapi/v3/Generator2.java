@@ -124,7 +124,7 @@ public class Generator2 {
     }
 
     private enum ClassType {
-        INTERFACE("interface"), CLASS("class"), ENUM("enum"), ONE_OF("class");
+        INTERFACE("interface"), CLASS("class"), ENUM("enum"), ONE_OR_ANY_OF("class");
 
         private final String word;
 
@@ -227,7 +227,7 @@ public class Generator2 {
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
             }
-            if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema)) {
+            if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 stack.push(cls);
                 previous.ifPresent(p -> p.classes.add(cls));
@@ -247,8 +247,8 @@ public class Generator2 {
                     cls.classType = ClassType.CLASS;
                     boolean required = fieldIsRequired(schemaPath, last);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, fieldName.get(), required));
-                } else if (isOneOf(schema)) {
-                    handleOneOf(last, schema, cls);
+                } else if (isOneOf(schema) || isAnyOf(schema)) {
+                    handleOneOrAnyOf(last, schema, cls);
                 } else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
@@ -306,8 +306,8 @@ public class Generator2 {
         }
     }
 
-    private static void handleOneOf(SchemaWithName last, Schema<?> schema, Cls cls) {
-        cls.classType = ClassType.ONE_OF;
+    private static void handleOneOrAnyOf(SchemaWithName last, Schema<?> schema, Cls cls) {
+        cls.classType = ClassType.ONE_OR_ANY_OF;
         if (schema.getDiscriminator() != null) {
             cls.interfaceMethods.add(Names.toFieldName(last.name));
         }
@@ -331,7 +331,7 @@ public class Generator2 {
         writeClassDeclaration(out, imports, indent, cls);
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
-        if (cls.classType == ClassType.ONE_OF) {
+        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
             writeOneOfClassContent(out, imports, indent, cls);
         } else {
             writeFields(out, imports, indent, cls);
@@ -388,7 +388,7 @@ public class Generator2 {
             return String.format("\n%s%s %s", indent, x.resolvedType(imports), x.name);
         }).collect(Collectors.joining(","));
         indent.left().left();
-        final String visibility = cls.classType == ClassType.ENUM? "private":"public";
+        final String visibility = cls.classType == ClassType.ENUM ? "private" : "public";
         out.format("\n%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), text);
         indent.right();
         cls.fields.stream().forEach(x -> {
@@ -453,13 +453,22 @@ public class Generator2 {
         return sch.getOneOf() != null && !sch.getOneOf().isEmpty();
     }
 
+    static boolean isAnyOf(Schema<?> schema) {
+        if (!(schema instanceof ComposedSchema)) {
+            return false;
+        }
+        ComposedSchema sch = (ComposedSchema) schema;
+        return sch.getAnyOf() != null && !sch.getAnyOf().isEmpty();
+    }
+
     private static boolean isPrimitive(String type) {
         return type != null && !"array".equals(type) && !"object".equals(type);
     }
 
     private static ClassType classType(Schema<?> schema) {
-        if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getOneOf() != null) {
-            return ClassType.ONE_OF;
+        if (schema instanceof ComposedSchema
+                && ((((ComposedSchema) schema).getOneOf() != null) || ((ComposedSchema) schema).getAnyOf() != null)) {
+            return ClassType.ONE_OR_ANY_OF;
         } else if (schema.getEnum() != null) {
             return ClassType.ENUM;
         } else {
