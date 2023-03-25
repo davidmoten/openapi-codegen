@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
@@ -355,7 +356,8 @@ public class Generator2 {
         out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
         // add constructor for each member of the oneOf (fieldTypes)
         cls.fields.forEach(f -> {
-            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
+            out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+            out.format("%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
             out.format("%sthis.value = value;\n", indent.right());
             out.format("%s}\n", indent.left());
         });
@@ -391,7 +393,7 @@ public class Generator2 {
             return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);
         }).collect(Collectors.joining(",\n"));
         if (!text.isEmpty()) {
-            out.println(text + ";\n");
+            out.println("\n" + text + ";");
         }
     }
 
