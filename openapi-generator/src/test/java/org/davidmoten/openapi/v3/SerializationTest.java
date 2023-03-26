@@ -136,7 +136,7 @@ public class SerializationTest {
     }
 
     @JsonTypeInfo(use = Id.DEDUCTION)
-//    @JsonSubTypes({ @Type(Rectangle.class), @Type(Circle.class) })
+//    @JsonSubTypes({ @Type(Rectangle2.class), @Type(Circle2.class) })
     public class Geometry2 {
 
         @JsonValue
