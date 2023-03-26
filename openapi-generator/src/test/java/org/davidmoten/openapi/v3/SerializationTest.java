@@ -21,8 +21,7 @@ import com.github.davidmoten.guavamini.Preconditions;
 
 public class SerializationTest {
 
-    private static final Circle CIRCLE = new Circle("Circle", 12.0f, 50.5f, 4f);
-    private static final String CIRCLE_JSON = "{\"geometryType\":\"Circle\",\"lat\":12.0,\"lon\":50.5,\"radiusNm\":4.0}";
+    private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
 
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
@@ -48,17 +47,17 @@ public class SerializationTest {
     }
 
     @Test
-    public void testSerializeOneOfMember() throws JsonProcessingException {
+    public void testSerializeGeometrySubClass() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        assertEquals(CIRCLE_JSON, m.writeValueAsString(CIRCLE));
+        assertEquals(CIRCLE_JSON, m.writeValueAsString(new Circle("thing")));
     }
 
     @Test
     public void testSerializeGeometry() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        Geometry g = CIRCLE;
+        Geometry g = new Circle("thing");
         assertEquals(CIRCLE_JSON, m.writeValueAsString(g));
     }
 
@@ -69,87 +68,41 @@ public class SerializationTest {
         Object g = m.readerFor(Geometry.class).readValue(CIRCLE_JSON);
         assertTrue(g instanceof Circle);
         Circle c = (Circle) g;
-        assertEquals(12.0f, c.lat(), 0.000001);
+        assertEquals("thing", c.a());
     }
 
     @JsonTypeInfo(use = Id.DEDUCTION)
-    @JsonSubTypes({
-            @Type(Rectangle.class), 
-            @Type(Circle.class)})
+    @JsonSubTypes({ @Type(Rectangle.class), @Type(Circle.class) })
     public interface Geometry {
 
     }
 
     public static final class Circle implements Geometry {
 
-        private final String geometryType;
-        private final float lat;
-        private final float lon;
-        private final float radiusNm;
+        private String a;
 
         @JsonCreator
-        public Circle(@JsonProperty("geometryType") String geometryType, @JsonProperty("lat") float lat,
-                @JsonProperty("lon") float lon, @JsonProperty("radiusNm") float radiusNm) {
-            this.geometryType = Preconditions.checkNotNull(geometryType);
-            this.lat = lat;
-            this.lon = lon;
-            this.radiusNm = radiusNm;
+        public Circle(@JsonProperty("a") String a) {
+            this.a = a;
         }
 
-        public String geometryType() {
-            return geometryType;
+        public String a() {
+            return a;
         }
 
-        public float lat() {
-            return lat;
-        }
-
-        public float lon() {
-            return lon;
-        }
-
-        public float radiusNm() {
-            return radiusNm;
-        }
     }
 
     public static final class Rectangle implements Geometry {
 
-        private final String geometryType;
-        private final float minLat;
-        private final float leftLon;
-        private final float heightDegrees;
-        private final float widthDegrees;
+        private final int b;
 
         @JsonCreator
-        public Rectangle(@JsonProperty("geometryType") String geometryType, @JsonProperty("minLat") float minLat,
-                @JsonProperty("leftLon") float leftLon, @JsonProperty("heightDegrees") float heightDegrees,
-                @JsonProperty("widthDegrees") float widthDegrees) {
-            this.geometryType = Preconditions.checkNotNull(geometryType);
-            this.minLat = Preconditions.checkNotNull(minLat);
-            this.leftLon = Preconditions.checkNotNull(leftLon);
-            this.heightDegrees = heightDegrees;
-            this.widthDegrees = widthDegrees;
+        public Rectangle(@JsonProperty("b") int b) {
+            this.b = b;
         }
 
-        public String geometryType() {
-            return geometryType;
-        }
-
-        public float minLat() {
-            return minLat;
-        }
-
-        public float leftLon() {
-            return leftLon;
-        }
-
-        public float heightDegrees() {
-            return heightDegrees;
-        }
-
-        public float widthDegrees() {
-            return widthDegrees;
+        public int b() {
+            return b;
         }
     }
 
