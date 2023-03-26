@@ -44,7 +44,7 @@ public final class Names {
     private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
         Apis.visitSchemas(api, schemaPath -> {
             if (!Apis.isComplexSchema(schemaPath.last().schema)) {
-                System.out.println(schemaPath);
+                //System.out.println(schemaPath);
             }
         });
         System.out.println("////////////////////////////////////////////////");
