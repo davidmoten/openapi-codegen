@@ -46,6 +46,8 @@ public class SerializationTest {
         }
     }
 
+    // Tests using an interface and sub-classes
+
     @Test
     public void testSerializeGeometrySubClass() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
@@ -98,6 +100,81 @@ public class SerializationTest {
 
         @JsonCreator
         public Rectangle(@JsonProperty("b") int b) {
+            this.b = b;
+        }
+
+        public int b() {
+            return b;
+        }
+    }
+
+    // Tests using an interface and sub-classes
+
+    @Test
+    public void testSerializeGeometryMember() throws JsonProcessingException {
+        ObjectMapper m = new ObjectMapper();
+        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+        assertEquals(CIRCLE_JSON, m.writeValueAsString(new Circle2("thing")));
+    }
+
+    @Test
+    public void testSerializeGeometry2() throws JsonProcessingException {
+        ObjectMapper m = new ObjectMapper();
+        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+        Geometry2 g = new Geometry2(new Circle2("thing"));
+        assertEquals(CIRCLE_JSON, m.writeValueAsString(g));
+    }
+
+    @Test
+    public void testDeserializeGeometry2() throws JsonMappingException, JsonProcessingException {
+        ObjectMapper m = new ObjectMapper();
+        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+        Object g = m.readerFor(Geometry2.class).readValue(CIRCLE_JSON);
+        assertTrue(g instanceof Circle);
+        Circle c = (Circle) g;
+        assertEquals("thing", c.a());
+    }
+
+    @JsonTypeInfo(use = Id.DEDUCTION)
+//    @JsonSubTypes({ @Type(Rectangle.class), @Type(Circle.class) })
+    public class Geometry2 {
+
+        @JsonValue
+        private final Object value;
+
+        @JsonCreator
+        public Geometry2(Circle2 value) {
+            this.value = value;
+        }
+
+        @JsonCreator
+        public Geometry2(Rectangle2 value) {
+            this.value = value;
+        }
+
+    }
+
+    public static final class Circle2 {
+
+        private String a;
+
+        @JsonCreator
+        public Circle2(@JsonProperty("a") String a) {
+            this.a = a;
+        }
+
+        public String a() {
+            return a;
+        }
+
+    }
+
+    public static final class Rectangle2 {
+
+        private final int b;
+
+        @JsonCreator
+        public Rectangle2(@JsonProperty("b") int b) {
             this.b = b;
         }
 
