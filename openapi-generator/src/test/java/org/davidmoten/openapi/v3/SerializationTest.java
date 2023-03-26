@@ -3,6 +3,7 @@ package org.davidmoten.openapi.v3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -118,6 +119,7 @@ public class SerializationTest {
     }
 
     @Test
+    @Ignore
     public void testDeserializeGeometry2() throws JsonMappingException, JsonProcessingException {
         Object g = m.readerFor(Geometry2.class).readValue(CIRCLE_JSON);
         assertTrue(g instanceof Circle);

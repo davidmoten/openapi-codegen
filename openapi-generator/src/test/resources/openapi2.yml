@@ -1111,8 +1111,18 @@ components:
       
     Thing:
       oneOf:
-      - type: string
-      - type: integer
+      - $ref: '#/components/schemas/ThingMember1'
+      - $ref: '#/components/schemas/ThingMember2'
+      
+    ThingMember1:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+      
+    ThingMember2:
+      type: integer
       
     Thing2:
       type: object
