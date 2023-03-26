@@ -284,7 +284,7 @@ public class Generator2 {
                     }
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath, last);
-                    current.addField(fullClassName,last.name, fieldName, required);
+                    current.addField(fullClassName, last.name, fieldName, required);
                 }
             }
         }
@@ -361,7 +361,7 @@ public class Generator2 {
             out.format("%sthis.value = value;\n", indent.right());
             out.format("%s}\n", indent.left());
         });
-        
+
         out.format("\n%spublic Object value() {\n", indent);
         out.format("%sreturn value;\n", indent.right());
         out.format("%s}\n", indent.left());
@@ -403,19 +403,33 @@ public class Generator2 {
             out.println();
         }
         cls.fields.forEach(f -> {
+            if (cls.classType == ClassType.ENUM) {
+                out.format("%s@%s\n", indent, imports.add(JsonValue.class));
+            }
             out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.fieldName);
         });
     }
 
     private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls) {
         indent.right().right();
-        String text = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s%s %s", indent,
-                imports.add(JsonProperty.class), x.name, x.fieldName, x.resolvedType(imports), x.fieldName))
-                .collect(Collectors.joining(","));
+        final String parameters;
+        if (cls.classType == ClassType.ENUM) {
+            parameters = cls.fields.stream()
+                    .map(x -> String.format("\n%s %s", indent, x.resolvedType(imports), x.fieldName))
+                    .collect(Collectors.joining());
+        } else {
+            parameters = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", indent,
+                    imports.add(JsonProperty.class), x.name, x.resolvedType(imports), x.fieldName))
+                    .collect(Collectors.joining(","));
+        }
         indent.left().left();
-        out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+        if (cls.classType != ClassType.ENUM) {
+            out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+        } else {
+            out.println();
+        }
         final String visibility = cls.classType == ClassType.ENUM ? "private" : "public";
-        out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), text);
+        out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parameters);
         indent.right();
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive()) {
