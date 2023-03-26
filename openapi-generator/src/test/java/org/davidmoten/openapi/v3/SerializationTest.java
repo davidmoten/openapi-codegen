@@ -1,19 +1,25 @@
 package org.davidmoten.openapi.v3;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.davidmoten.guavamini.Preconditions;
 
 public class SerializationTest {
+
+    private static final Circle CIRCLE = new Circle("Circle", 12.0f, 50.5f, 4f);
+    private static final String CIRCLE_JSON = "{\"geometryType\":\"Circle\",\"lat\":12.0,\"lon\":50.5,\"radiusNm\":4.0}";
 
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
@@ -42,18 +48,23 @@ public class SerializationTest {
     public void testSerializeOneOfMember() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        Circle c = new Circle("Circle", 12.0f, 50.5f, 4f);
-        assertEquals("{\"geometryType\":\"Circle\",\"lat\":12.0,\"lon\":50.5,\"radiusNm\":4.0}",
-                m.writeValueAsString(c));
+        assertEquals(CIRCLE_JSON, m.writeValueAsString(CIRCLE));
     }
 
     @Test
     public void testSerializeGeometry() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        Geometry g = new Geometry(new Circle("Circle", 12.0f, 50.5f, 4f));
-        assertEquals("{\"geometryType\":\"Circle\",\"lat\":12.0,\"lon\":50.5,\"radiusNm\":4.0}",
-                m.writeValueAsString(g));
+        Geometry g = new Geometry(CIRCLE);
+        assertEquals(CIRCLE_JSON, m.writeValueAsString(g));
+    }
+
+    @Test
+    public void testDeserializeGeometry() throws JsonMappingException, JsonProcessingException {
+        ObjectMapper m = new ObjectMapper();
+        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+        Object c = m.readerFor(Geometry.class).readValue(CIRCLE_JSON);
+        assertTrue(c instanceof Circle);
     }
 
     public static final class Geometry {
@@ -61,11 +72,13 @@ public class SerializationTest {
         @JsonValue
         private final Object value;
 
-        public Geometry(Rectangle value) {
+        @JsonCreator(mode = Mode.PROPERTIES)
+        public Geometry(@JsonProperty("value") Rectangle value) {
             this.value = value;
         }
 
-        public Geometry(Circle value) {
+        @JsonCreator(mode = Mode.PROPERTIES)
+        public Geometry(@JsonProperty("value") Circle value) {
             this.value = value;
         }
 
@@ -81,7 +94,7 @@ public class SerializationTest {
         private final float lon;
         private final float radiusNm;
 
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        @JsonCreator
         public Circle(@JsonProperty("geometryType") String geometryType, @JsonProperty("lat") float lat,
                 @JsonProperty("lon") float lon, @JsonProperty("radiusNm") float radiusNm) {
             this.geometryType = Preconditions.checkNotNull(geometryType);
