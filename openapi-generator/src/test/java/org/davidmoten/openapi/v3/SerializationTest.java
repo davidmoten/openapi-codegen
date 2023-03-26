@@ -7,8 +7,11 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -55,7 +58,7 @@ public class SerializationTest {
     public void testSerializeGeometry() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        Geometry g = new Geometry(CIRCLE);
+        Geometry g = CIRCLE;
         assertEquals(CIRCLE_JSON, m.writeValueAsString(g));
     }
 
@@ -63,31 +66,21 @@ public class SerializationTest {
     public void testDeserializeGeometry() throws JsonMappingException, JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        Object c = m.readerFor(Geometry.class).readValue(CIRCLE_JSON);
-        assertTrue(c instanceof Circle);
+        Object g = m.readerFor(Geometry.class).readValue(CIRCLE_JSON);
+        assertTrue(g instanceof Circle);
+        Circle c = (Circle) g;
+        assertEquals(12.0f, c.lat(), 0.000001);
     }
 
-    public static final class Geometry {
+    @JsonTypeInfo(use = Id.DEDUCTION)
+    @JsonSubTypes({
+            @Type(Rectangle.class), 
+            @Type(Circle.class)})
+    public interface Geometry {
 
-        @JsonValue
-        private final Object value;
-
-        @JsonCreator(mode = Mode.PROPERTIES)
-        public Geometry(@JsonProperty("value") Rectangle value) {
-            this.value = value;
-        }
-
-        @JsonCreator(mode = Mode.PROPERTIES)
-        public Geometry(@JsonProperty("value") Circle value) {
-            this.value = value;
-        }
-
-        public Object value() {
-            return value;
-        }
     }
 
-    public static final class Circle {
+    public static final class Circle implements Geometry {
 
         private final String geometryType;
         private final float lat;
@@ -120,7 +113,7 @@ public class SerializationTest {
         }
     }
 
-    public static final class Rectangle {
+    public static final class Rectangle implements Geometry {
 
         private final String geometryType;
         private final float minLat;
