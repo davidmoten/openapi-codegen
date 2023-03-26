@@ -23,6 +23,8 @@ public class SerializationTest {
 
     private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
 
+    private static final ObjectMapper m = new ObjectMapper().setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
@@ -50,23 +52,17 @@ public class SerializationTest {
 
     @Test
     public void testSerializeGeometrySubClass() throws JsonProcessingException {
-        ObjectMapper m = new ObjectMapper();
-        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         assertEquals(CIRCLE_JSON, m.writeValueAsString(new Circle("thing")));
     }
 
     @Test
     public void testSerializeGeometry() throws JsonProcessingException {
-        ObjectMapper m = new ObjectMapper();
-        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         Geometry g = new Circle("thing");
         assertEquals(CIRCLE_JSON, m.writeValueAsString(g));
     }
 
     @Test
     public void testDeserializeGeometry() throws JsonMappingException, JsonProcessingException {
-        ObjectMapper m = new ObjectMapper();
-        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         Object g = m.readerFor(Geometry.class).readValue(CIRCLE_JSON);
         assertTrue(g instanceof Circle);
         Circle c = (Circle) g;
@@ -112,32 +108,26 @@ public class SerializationTest {
 
     @Test
     public void testSerializeGeometryMember() throws JsonProcessingException {
-        ObjectMapper m = new ObjectMapper();
-        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         assertEquals(CIRCLE_JSON, m.writeValueAsString(new Circle2("thing")));
     }
 
     @Test
     public void testSerializeGeometry2() throws JsonProcessingException {
-        ObjectMapper m = new ObjectMapper();
-        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         Geometry2 g = new Geometry2(new Circle2("thing"));
         assertEquals(CIRCLE_JSON, m.writeValueAsString(g));
     }
 
     @Test
     public void testDeserializeGeometry2() throws JsonMappingException, JsonProcessingException {
-        ObjectMapper m = new ObjectMapper();
-        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         Object g = m.readerFor(Geometry2.class).readValue(CIRCLE_JSON);
         assertTrue(g instanceof Circle);
         Circle c = (Circle) g;
         assertEquals("thing", c.a());
     }
 
-    @JsonTypeInfo(use = Id.DEDUCTION)
+//    @JsonTypeInfo(use = Id.DEDUCTION)
 //    @JsonSubTypes({ @Type(Rectangle2.class), @Type(Circle2.class) })
-    public class Geometry2 {
+    public static final class Geometry2 {
 
         @JsonValue
         private final Object value;
