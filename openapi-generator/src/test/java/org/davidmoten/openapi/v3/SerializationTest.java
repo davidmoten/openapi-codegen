@@ -39,11 +39,21 @@ public class SerializationTest {
     }
 
     @Test
-    public void testDeduction() throws JsonProcessingException {
+    public void testSerializeOneOfMember() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
         Circle c = new Circle("Circle", 12.0f, 50.5f, 4f);
-        assertEquals("{\"geometryType\":\"Circle\",\"lat\":12.0,\"lon\":50.5,\"radiusNm\":4.0}", m.writeValueAsString(c));
+        assertEquals("{\"geometryType\":\"Circle\",\"lat\":12.0,\"lon\":50.5,\"radiusNm\":4.0}",
+                m.writeValueAsString(c));
+    }
+
+    @Test
+    public void testSerializeGeometry() throws JsonProcessingException {
+        ObjectMapper m = new ObjectMapper();
+        m.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+        Geometry g = new Geometry(new Circle("Circle", 12.0f, 50.5f, 4f));
+        assertEquals("{\"geometryType\":\"Circle\",\"lat\":12.0,\"lon\":50.5,\"radiusNm\":4.0}",
+                m.writeValueAsString(g));
     }
 
     public static final class Geometry {
@@ -63,7 +73,7 @@ public class SerializationTest {
             return value;
         }
     }
-    
+
     public static final class Circle {
 
         private final String geometryType;
@@ -72,11 +82,8 @@ public class SerializationTest {
         private final float radiusNm;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        public Circle(
-                @JsonProperty("geometryType") String geometryType,
-                @JsonProperty("lat") float lat,
-                @JsonProperty("lon") float lon,
-                @JsonProperty("radiusNm") float radiusNm) {
+        public Circle(@JsonProperty("geometryType") String geometryType, @JsonProperty("lat") float lat,
+                @JsonProperty("lon") float lon, @JsonProperty("radiusNm") float radiusNm) {
             this.geometryType = Preconditions.checkNotNull(geometryType);
             this.lat = lat;
             this.lon = lon;
