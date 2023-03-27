@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -110,83 +109,19 @@ public class SerializationTest {
         }
     }
 
-    // Tests using an interface and sub-classes
-
-    @Test
-    public void testSerializeGeometryMember() throws JsonProcessingException {
-        assertEquals(CIRCLE_JSON, m.writeValueAsString(new Circle2("thing")));
-    }
-
-    @Test
-    public void testSerializeGeometry2() throws JsonProcessingException {
-        Geometry2 g = new Geometry2(new Circle2("thing"));
-        assertEquals(CIRCLE_JSON, m.writeValueAsString(g));
-    }
-
-    @Test
-    @Ignore
-    public void testDeserializeGeometry2() throws JsonMappingException, JsonProcessingException {
-        Object g = m.readerFor(Geometry2.class).readValue(CIRCLE_JSON);
-        assertTrue(g instanceof Circle);
-        Circle c = (Circle) g;
-        assertEquals("thing", c.a());
-    }
-
-//    @JsonTypeInfo(use = Id.DEDUCTION)
-//    @JsonSubTypes({ @Type(Rectangle2.class), @Type(Circle2.class) })
-    public static final class Geometry2 {
-
-        @JsonValue
-        private final Object value;
-
-        @JsonCreator
-        public Geometry2(Circle2 value) {
-            this.value = value;
-        }
-
-        @JsonCreator
-        public Geometry2(Rectangle2 value) {
-            this.value = value;
-        }
-
-    }
-
-    public static final class Circle2 {
-
-        private String a;
-
-        @JsonCreator
-        public Circle2(@JsonProperty("a") String a) {
-            this.a = a;
-        }
-
-        public String a() {
-            return a;
-        }
-
-    }
-
-    public static final class Rectangle2 {
-
-        private final int b;
-
-        @JsonCreator
-        public Rectangle2(@JsonProperty("b") int b) {
-            this.b = b;
-        }
-
-        public int b() {
-            return b;
-        }
-    }
-
     @Test
     public void testCustomPolymorphicDeserialization() throws JsonMappingException, JsonProcessingException {
         String json = "{\"radiusNm\":3.4}";
         OneOf g = m.readerFor(OneOf.class).readValue(json);
-        assertTrue(g.value instanceof Circle3);
-        assertEquals(3.4, ((Circle3) g.value).radiusNm, 0.00001);
+        assertTrue(g.value instanceof Circle2);
+        assertEquals(3.4, ((Circle2) g.value).radiusNm, 0.00001);
         assertEquals(json, m.writeValueAsString(g));
+    }
+
+    @Test(expected = JsonMappingException.class)
+    public void testCustomPolymorphicDeserializationThrows() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"radiusKm\":3.4}";
+        m.readerFor(OneOf.class).readValue(json);
     }
 
     @JsonDeserialize(using = OneOf.Deserializer.class)
@@ -208,21 +143,28 @@ public class SerializationTest {
         public OneOf(Rectangle rectangle) {
             this.value = rectangle;
         }
+        
+        /** Instance be of type Circle or Rectangle
+         * @return instance
+         */
+        public Object value() {
+            return value;
+        }
 
         @SuppressWarnings("serial")
         public static final class Deserializer extends OneOfDeserializer<OneOf> {
 
             public Deserializer() {
-                super(OneOf.class, Arrays.asList(Circle3.class, Rectangle3.class));
+                super(OneOf.class, Arrays.asList(Circle2.class, Rectangle2.class));
             }
         }
     }
 
-    public static final class Circle3 {
+    public static final class Circle2 {
         private final double radiusNm;
 
         @JsonCreator
-        public Circle3(@JsonProperty("radiusNm") double radiusNm) {
+        public Circle2(@JsonProperty("radiusNm") double radiusNm) {
             this.radiusNm = radiusNm;
         }
 
@@ -232,11 +174,11 @@ public class SerializationTest {
 
     }
 
-    public static final class Rectangle3 {
+    public static final class Rectangle2 {
         private final double heightDegrees;
 
         @JsonCreator
-        public Rectangle3(@JsonProperty("heightDegrees") double heightDegrees) {
+        public Rectangle2(@JsonProperty("heightDegrees") double heightDegrees) {
             this.heightDegrees = heightDegrees;
         }
 
