@@ -268,14 +268,15 @@ public class Generator2 {
                     stack.push(cls);
                 }
                 Cls current = stack.peek();
+                final String fullClassName;
                 if (isPrimitive(schema.getType())) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
+                    fullClassName = c.getCanonicalName();
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath, last);
-                    current.addField(c.getCanonicalName(), last.name, fieldName, required);
+                    current.addField(fullClassName, last.name, fieldName, required);
                 } else if (isRef(schema)) {
                     String ref = schema.get$ref();
-                    final String fullClassName;
                     if (!ref.startsWith("#")) {
                         fullClassName = names.externalRefClassName(ref);
                     } else {
@@ -285,7 +286,9 @@ public class Generator2 {
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath, last);
                     current.addField(fullClassName, last.name, fieldName, required);
-                } 
+                } else {
+                    throw new RuntimeException("unexpected");
+                }
             }
         }
 

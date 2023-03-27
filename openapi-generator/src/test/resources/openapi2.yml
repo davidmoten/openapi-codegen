@@ -1147,7 +1147,7 @@ components:
     ThingMember2:
       type: integer
       format: int32
-      
+    
     Thing2:
       type: object
       properties:
@@ -1156,6 +1156,9 @@ components:
           - type: string
           - type: integer
             format: int32          
-              
+
+    Simple:
+      type: string
+                    
               
       
