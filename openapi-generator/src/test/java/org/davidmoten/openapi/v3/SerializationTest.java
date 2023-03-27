@@ -157,7 +157,7 @@ public class SerializationTest {
         public static final class Deserializer extends OneOfDeserializer<OneOf> {
 
             public Deserializer() {
-                super(OneOf.class, Arrays.asList(Circle2.class, Rectangle2.class));
+                super(OneOf.class, Circle2.class, Rectangle2.class);
             }
         }
     }

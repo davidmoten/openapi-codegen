@@ -3,6 +3,7 @@ package org.davidmoten.openapi.v3.runtime;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -20,9 +21,9 @@ public class OneOfDeserializer<T> extends StdDeserializer<T> {
 
     private static final ObjectMapper m = new ObjectMapper();
 
-    protected OneOfDeserializer(Class<T> cls, List<Class<?>> classes) {
+    protected OneOfDeserializer(Class<T> cls, Class<?>... classes) {
         super(cls);
-        this.classes = classes;
+        this.classes = Arrays.asList(classes);
         this.cls = cls;
     }
 

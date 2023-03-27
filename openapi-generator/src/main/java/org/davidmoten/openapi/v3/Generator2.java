@@ -379,7 +379,7 @@ public class Generator2 {
         indent.right();
         String classes = cls.fields.stream().map(x -> imports.add(x.fullClassName) + ".class")
                 .collect(Collectors.joining(", "));
-        out.format("%ssuper(%s.class, %s.asList(%s));\n", indent, cls.simpleName(), imports.add(Arrays.class), classes);
+        out.format("%ssuper(%s.class, %s);\n", indent, cls.simpleName(), classes);
         indent.left();
         out.format("%s}\n", indent);
         indent.left();
