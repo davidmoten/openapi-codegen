@@ -6,10 +6,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.davidmoten.openapi.v3.runtime.Classes;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -206,27 +205,32 @@ public class SerializationTest {
             this.value = value;
         }
 
-        public static final class Deserializer extends StdDeserializer<OneOf> {
-            private static final long serialVersionUID = -4953059872205916149L;
+        @SuppressWarnings("serial")
+        public static final class Deserializer extends OneOfDeserializer<OneOf> {
 
-            private final Map<String, Class<?>> classes = createClasses();
-
-            public static Map<String, Class<?>> createClasses() {
-                Map<String, Class<?>> map = new HashMap<>();
-                map.put("radiusNm", Circle.class);
-                map.put("heightDegrees", Rectangle.class);
-                return map;
+            public Deserializer() {
+                super(Classes //
+                        .add("radiusNm", Circle3.class) //
+                        .add("heightDegrees", Rectangle3.class) //
+                        .build(), OneOf.class);
             }
+        }
+    }
+    
+    public static class OneOfDeserializer<T> extends StdDeserializer<T> {
+        private static final long serialVersionUID = -4953059872205916149L;
+        private final Map<String, Class<?>> classes;
+        private final Class<T> cls;
 
-            protected Deserializer() {
-                super(OneOf.class);
-            }
+        protected OneOfDeserializer(Map<String, Class<?>> classes, Class<T> cls) {
+            super(cls);
+            this.classes = classes;
+            this.cls = cls;
+        }
 
-            @Override
-            public OneOf deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-                return SerializationTest.deserialize(p, ctxt, classes, OneOf.class);
-            }
-
+        @Override
+        public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return SerializationTest.deserialize(p, ctxt, classes, cls);
         }
     }
 
