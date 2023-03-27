@@ -136,15 +136,17 @@ public class SerializationTest {
             this.value = value;
         }
 
-        public OneOf(Circle circle) {
+        public OneOf(Circle2 circle) {
             this.value = circle;
         }
 
-        public OneOf(Rectangle rectangle) {
+        public OneOf(Rectangle2 rectangle) {
             this.value = rectangle;
         }
-        
-        /** Instance be of type Circle or Rectangle
+
+        /**
+         * Instance be of type Circle or Rectangle
+         * 
          * @return instance
          */
         public Object value() {

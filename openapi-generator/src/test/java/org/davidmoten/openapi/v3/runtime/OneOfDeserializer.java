@@ -37,20 +37,27 @@ public class OneOfDeserializer<T> extends StdDeserializer<T> {
         TreeNode tree = p.getCodec().readTree(p);
         String json = m.writeValueAsString(tree);
         for (Class<?> c : classes) {
+            // try to deserialize with each of the oneOf member classes
             try {
                 Object o = m.readValue(json, (Class<Object>) c);
-                try {
-                    Constructor<T> con = cls.getDeclaredConstructor(Object.class);
-                    con.setAccessible(true);
-                    return con.newInstance(o);
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                    throw new RuntimeException("unexpected");
-                }
+                return newInstance(cls, o);
             } catch (DatabindException e) {
                 // does not match
             }
         }
         throw JsonMappingException.from(ctxt, "json did not match any of the possible classes: " + classes);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T newInstance(Class<?> cls, Object parameter) {
+        try {
+            Constructor<?> con = cls.getDeclaredConstructor(Object.class);
+            con.setAccessible(true);
+            return (T) con.newInstance(parameter);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
