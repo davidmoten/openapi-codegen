@@ -186,4 +186,10 @@ public final class Names {
         return definition.externalRefClassName(ref);
     }
 
+    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "double", "float", "long", "boolean", "byte", "short");
+    
+    public static boolean isPrimitiveFullClassName(String className) {
+        return PRIMITIVE_CLASS_NAMES.contains(className);
+    }
+
 }

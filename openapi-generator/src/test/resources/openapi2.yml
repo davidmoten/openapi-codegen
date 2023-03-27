@@ -1109,29 +1109,6 @@ components:
         long as 4096 characters but good to put an upper bound on it. 
       example: 10
       
-    Thing:
-      oneOf:
-      - $ref: '#/components/schemas/ThingMember1'
-      - $ref: '#/components/schemas/ThingMember2'
-      
-    ThingMember1:
-      type: object
-      properties:
-        name:
-          type: string
-      required: [name]
-      
-    ThingMember2:
-      type: integer
-      
-    Thing2:
-      type: object
-      properties:
-        stuff:
-          oneOf:
-          - type: string
-          - type: integer
-      
     Nested:
       type: object
       properties:
@@ -1154,6 +1131,31 @@ components:
                 required: [partNumber]
         second:
           type: string
+          
+    Thing:
+      oneOf:
+      - $ref: '#/components/schemas/ThingMember1'
+      - $ref: '#/components/schemas/ThingMember2'
+      
+    ThingMember1:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+      
+    ThingMember2:
+      type: integer
+      format: int32
+      
+    Thing2:
+      type: object
+      properties:
+        stuff:
+          oneOf:
+          - type: string
+          - type: integer
+            format: int32          
               
               
       

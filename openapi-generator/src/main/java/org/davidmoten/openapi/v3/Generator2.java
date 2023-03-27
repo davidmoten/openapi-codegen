@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -286,7 +285,7 @@ public class Generator2 {
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath, last);
                     current.addField(fullClassName, last.name, fieldName, required);
-                }
+                } 
             }
         }
 
@@ -359,11 +358,17 @@ public class Generator2 {
 
         out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
         out.format("%s%s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
-        out.format("%sthis.value = value;\n", indent.right());
+        out.format("%sthis.value = %s.checkNotNull(value);\n", indent.right(), imports.add(Preconditions.class));
         out.format("%s}\n", indent.left());
         cls.fields.forEach(f -> {
-            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
-            out.format("%sthis.value = value;\n", indent.right());
+            String className = toPrimitive(f.fullClassName);
+            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
+            indent.right();
+            if (Names.isPrimitiveFullClassName(className)) {
+                out.format("%sthis.value = value;\n", indent);
+            } else {
+                out.format("%sthis.value = %s.checkNotNull(value);\n", indent, imports.add(Preconditions.class));
+            }
             out.format("%s}\n", indent.left());
         });
 
@@ -377,7 +382,7 @@ public class Generator2 {
         indent.right();
         out.format("\n%spublic Deserializer() {\n", indent);
         indent.right();
-        String classes = cls.fields.stream().map(x -> imports.add(x.fullClassName) + ".class")
+        String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
                 .collect(Collectors.joining(", "));
         out.format("%ssuper(%s.class, %s);\n", indent, cls.simpleName(), classes);
         indent.left();
