@@ -181,9 +181,11 @@ public class SerializationTest {
 
     @Test
     public void testCustomPolymorphicDeserialization() throws JsonMappingException, JsonProcessingException {
-        OneOf g = m.readerFor(OneOf.class).readValue("{\"radiusNm\":3.4}");
+        String json = "{\"radiusNm\":3.4}";
+        OneOf g = m.readerFor(OneOf.class).readValue(json);
         assertTrue(g.value instanceof Circle3);
         assertEquals(3.4, ((Circle3) g.value).radiusNm, 0.00001);
+        assertEquals(json, m.writeValueAsString(g));
     }
 
     @JsonDeserialize(using = OneOf.Deserializer.class)
