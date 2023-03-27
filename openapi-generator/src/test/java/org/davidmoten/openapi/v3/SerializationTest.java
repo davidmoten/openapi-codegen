@@ -3,7 +3,8 @@ package org.davidmoten.openapi.v3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.davidmoten.openapi.v3.runtime.Classes;
+import java.util.Arrays;
+
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -199,23 +200,20 @@ public class SerializationTest {
         OneOf(Object value) {
             this.value = value;
         }
-        
+
         public OneOf(Circle circle) {
             this.value = circle;
         }
-        
+
         public OneOf(Rectangle rectangle) {
             this.value = rectangle;
         }
-        
+
         @SuppressWarnings("serial")
         public static final class Deserializer extends OneOfDeserializer<OneOf> {
 
             public Deserializer() {
-                super(OneOf.class, Classes //
-                        .add("radiusNm", Circle3.class) //
-                        .add("heightDegrees", Rectangle3.class) //
-                        .build());
+                super(OneOf.class, Arrays.asList(Circle3.class, Rectangle3.class));
             }
         }
     }
