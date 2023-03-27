@@ -3,9 +3,17 @@ package org.davidmoten.openapi.v3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,9 +23,15 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.github.davidmoten.guavamini.Preconditions;
 
 public class SerializationTest {
@@ -173,6 +187,105 @@ public class SerializationTest {
         public int b() {
             return b;
         }
+    }
+
+    @Test
+    public void testCustomPolymorphicDeserialization() {
+
+    }
+
+    @JsonDeserialize(using = OneOf.Deserializer.class)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
+    public static final class OneOf {
+
+        @JsonValue
+        private final Object value;
+
+        @JsonCreator
+        public OneOf(Object value) {
+            this.value = value;
+        }
+
+        public static final class Deserializer extends StdDeserializer<OneOf> {
+            private static final long serialVersionUID = -4953059872205916149L;
+
+            private final Map<String, Class<?>> classes = createClasses();
+
+            public static Map<String, Class<?>> createClasses() {
+                Map<String, Class<?>> map = new HashMap<>();
+                map.put("radiusNm", Circle.class);
+                map.put("heightDegrees", Rectangle.class);
+                return map;
+            }
+
+            protected Deserializer() {
+                super(OneOf.class);
+            }
+
+            @Override
+            public OneOf deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                return SerializationTest.deserialize(p, ctxt, classes, OneOf.class);
+            }
+
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> T deserialize(JsonParser p, DeserializationContext ctxt, Map<String, Class<?>> classes, Class<T> cls)
+            throws IOException {
+        TreeNode tree = p.getCodec().readTree(p);
+        Class<?> c = null;
+        for (Entry<String, Class<?>> entry : classes.entrySet()) {
+            if (tree.get(entry.getKey()) != null) {
+                c = entry.getValue();
+            }
+        }
+        if (c == null) {
+            throw JsonMappingException.from(ctxt,
+                    "json did not match any of the possible classes: " + classes.values());
+        }
+        String json = m.writeValueAsString(tree);
+        for (Constructor<?> con : OneOf.class.getConstructors()) {
+            if (con.getParameters()[0].getType().equals(c)) {
+                @SuppressWarnings("unchecked")
+                Object o = m.readValue(json, (Class<Object>) c);
+                try {
+                    return (T) con.newInstance(new Object[] { o });
+                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        throw JsonMappingException.from(ctxt, "unexpected");
+    }
+
+    public static final class Circle3 {
+        private final double radiusNm;
+
+        @JsonCreator
+        public Circle3(@JsonProperty("radiusNm") double radiusNm) {
+            this.radiusNm = radiusNm;
+        }
+
+        public double radiusNm() {
+            return radiusNm;
+        }
+
+    }
+
+    public static final class Rectangle3 {
+        private final double heightDegrees;
+
+        @JsonCreator
+        public Rectangle3(@JsonProperty("heightDegrees") double heightDegrees) {
+            this.heightDegrees = heightDegrees;
+        }
+
+        public double heightDegrees() {
+            return heightDegrees;
+        }
+
     }
 
 }
