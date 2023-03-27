@@ -1,6 +1,7 @@
 package org.davidmoten.openapi.v3.runtime;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,7 +20,7 @@ public class OneOfDeserializer<T> extends StdDeserializer<T> {
 
     private static final ObjectMapper m = new ObjectMapper();
 
-    protected OneOfDeserializer(Map<String, Class<?>> classes, Class<T> cls) {
+    protected OneOfDeserializer(Class<T> cls, Map<String, Class<?>> classes) {
         super(cls);
         this.classes = classes;
         this.cls = cls;
@@ -47,7 +48,9 @@ public class OneOfDeserializer<T> extends StdDeserializer<T> {
         String json = m.writeValueAsString(tree);
         Object o = m.readValue(json, (Class<Object>) c);
         try {
-            return cls.getDeclaredConstructor(Object.class).newInstance(o);
+            Constructor<T> con = cls.getDeclaredConstructor(Object.class);
+            con.setAccessible(true);
+            return con.newInstance(o);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             throw new RuntimeException("unexpected");

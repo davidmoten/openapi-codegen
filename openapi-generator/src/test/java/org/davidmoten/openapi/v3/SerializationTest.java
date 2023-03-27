@@ -196,18 +196,26 @@ public class SerializationTest {
         private final Object value;
 
         @JsonCreator
-        public OneOf(Object value) {
+        OneOf(Object value) {
             this.value = value;
+        }
+        
+        public OneOf(Circle circle) {
+            this.value = circle;
+        }
+        
+        public OneOf(Rectangle rectangle) {
+            this.value = rectangle;
         }
         
         @SuppressWarnings("serial")
         public static final class Deserializer extends OneOfDeserializer<OneOf> {
 
             public Deserializer() {
-                super(Classes //
+                super(OneOf.class, Classes //
                         .add("radiusNm", Circle3.class) //
                         .add("heightDegrees", Rectangle3.class) //
-                        .build(), OneOf.class);
+                        .build());
             }
         }
     }
