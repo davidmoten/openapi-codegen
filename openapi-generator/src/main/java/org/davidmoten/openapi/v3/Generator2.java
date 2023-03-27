@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -13,14 +14,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
+import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
@@ -355,9 +356,13 @@ public class Generator2 {
     private static void writeOneOrAnyOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
         out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
         // add constructor for each member of the oneOf (fieldTypes)
+
+        out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+        out.format("%s%s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
+        out.format("%sthis.value = value;\n", indent.right());
+        out.format("%s}\n", indent.left());
         cls.fields.forEach(f -> {
-            out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
-            out.format("%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
+            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
             out.format("%sthis.value = value;\n", indent.right());
             out.format("%s}\n", indent.left());
         });
@@ -365,6 +370,20 @@ public class Generator2 {
         out.format("\n%spublic Object value() {\n", indent);
         out.format("%sreturn value;\n", indent.right());
         out.format("%s}\n", indent.left());
+
+        out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
+        out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
+                imports.add(OneOfDeserializer.class), cls.simpleName());
+        indent.right();
+        out.format("\n%spublic Deserializer() {\n", indent);
+        indent.right();
+        String classes = cls.fields.stream().map(x -> imports.add(x.fullClassName) + ".class")
+                .collect(Collectors.joining(", "));
+        out.format("%ssuper(%s.class, %s.asList(%s));\n", indent, cls.simpleName(), imports.add(Arrays.class), classes);
+        indent.left();
+        out.format("%s}\n", indent);
+        indent.left();
+        out.format("%s}\n", indent);
     }
 
     private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
@@ -375,13 +394,17 @@ public class Generator2 {
             modifier = "static final ";
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF) {
-            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
-            indent.right().right();
-            String types = cls.fields.stream().map(x -> String.format("\n%s@%s(%s.class)", indent,
-                    imports.add(Type.class), imports.add(x.fullClassName))).collect(Collectors.joining(", "));
-            indent.left();
-            indent.left();
-            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
+//            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
+//            indent.right().right();
+//            String types = cls.fields.stream().map(x -> String.format("\n%s@%s(%s.class)", indent,
+//                    imports.add(Type.class), imports.add(x.fullClassName))).collect(Collectors.joining(", "));
+//            indent.left();
+//            indent.left();
+//            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
+            out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
+                    cls.simpleName());
+            out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
+                    imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
         } else {
             out.println();
         }
