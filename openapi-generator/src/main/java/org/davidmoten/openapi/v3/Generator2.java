@@ -295,7 +295,7 @@ public class Generator2 {
         @Override
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
-            if (Apis.isComplexSchema(schemaPath.last().schema) || isEnum(schemaPath.last().schema)) {
+            if (Apis.isComplexSchema(schemaPath.last().schema) || isEnum(schemaPath.last().schema) || (schemaPath.size() == 1)) {
                 stack.pop();
                 if (stack.isEmpty()) {
                     Indent indent = new Indent();
