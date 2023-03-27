@@ -3,13 +3,8 @@ package org.davidmoten.openapi.v3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.davidmoten.openapi.v3.runtime.Classes;
+import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -23,14 +18,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.github.davidmoten.guavamini.Preconditions;
 
 public class SerializationTest {
@@ -189,8 +180,10 @@ public class SerializationTest {
     }
 
     @Test
-    public void testCustomPolymorphicDeserialization() {
-
+    public void testCustomPolymorphicDeserialization() throws JsonMappingException, JsonProcessingException {
+        OneOf g = m.readerFor(OneOf.class).readValue("{\"radiusNm\":3.4}");
+        assertTrue(g.value instanceof Circle3);
+        assertEquals(3.4, ((Circle3) g.value).radiusNm, 0.00001);
     }
 
     @JsonDeserialize(using = OneOf.Deserializer.class)
@@ -214,47 +207,6 @@ public class SerializationTest {
                         .add("heightDegrees", Rectangle3.class) //
                         .build(), OneOf.class);
             }
-        }
-    }
-
-    public static class OneOfDeserializer<T> extends StdDeserializer<T> {
-        private static final long serialVersionUID = -4953059872205916149L;
-        private final Map<String, Class<?>> classes;
-        private final Class<T> cls;
-
-        protected OneOfDeserializer(Map<String, Class<?>> classes, Class<T> cls) {
-            super(cls);
-            this.classes = classes;
-            this.cls = cls;
-        }
-
-        @Override
-        public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            return SerializationTest.deserialize(p, ctxt, classes, cls);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T> T deserialize(JsonParser p, DeserializationContext ctxt, Map<String, Class<?>> classes, Class<T> cls)
-            throws IOException {
-        TreeNode tree = p.getCodec().readTree(p);
-        Class<?> c = null;
-        for (Entry<String, Class<?>> entry : classes.entrySet()) {
-            if (tree.get(entry.getKey()) != null) {
-                c = entry.getValue();
-            }
-        }
-        if (c == null) {
-            throw JsonMappingException.from(ctxt,
-                    "json did not match any of the possible classes: " + classes.values());
-        }
-        String json = m.writeValueAsString(tree);
-        Object o = m.readValue(json, (Class<Object>) c);
-        try {
-            return cls.getConstructor(Object.class).newInstance(o);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException("unexpected");
         }
     }
 
