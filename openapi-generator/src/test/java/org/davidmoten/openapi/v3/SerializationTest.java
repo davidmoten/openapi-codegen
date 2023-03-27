@@ -189,7 +189,7 @@ public class SerializationTest {
     }
 
     @JsonDeserialize(using = OneOf.Deserializer.class)
-    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
     public static final class OneOf {
 
         @JsonValue
@@ -199,7 +199,7 @@ public class SerializationTest {
         public OneOf(Object value) {
             this.value = value;
         }
-
+        
         @SuppressWarnings("serial")
         public static final class Deserializer extends OneOfDeserializer<OneOf> {
 

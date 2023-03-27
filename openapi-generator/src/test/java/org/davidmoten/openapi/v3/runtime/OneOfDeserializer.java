@@ -47,7 +47,7 @@ public class OneOfDeserializer<T> extends StdDeserializer<T> {
         String json = m.writeValueAsString(tree);
         Object o = m.readValue(json, (Class<Object>) c);
         try {
-            return cls.getConstructor(Object.class).newInstance(o);
+            return cls.getDeclaredConstructor(Object.class).newInstance(o);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             throw new RuntimeException("unexpected");
