@@ -46,7 +46,6 @@ public class OneOfDeserializer<T> extends StdDeserializer<T> {
             }
         }
         throw JsonMappingException.from(ctxt, "json did not match any of the possible classes: " + classes);
-
     }
 
     @SuppressWarnings("unchecked")
