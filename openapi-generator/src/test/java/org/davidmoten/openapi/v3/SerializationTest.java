@@ -216,7 +216,7 @@ public class SerializationTest {
             }
         }
     }
-    
+
     public static class OneOfDeserializer<T> extends StdDeserializer<T> {
         private static final long serialVersionUID = -4953059872205916149L;
         private final Map<String, Class<?>> classes;
@@ -249,19 +249,13 @@ public class SerializationTest {
                     "json did not match any of the possible classes: " + classes.values());
         }
         String json = m.writeValueAsString(tree);
-        for (Constructor<?> con : OneOf.class.getConstructors()) {
-            if (con.getParameters()[0].getType().equals(c)) {
-                @SuppressWarnings("unchecked")
-                Object o = m.readValue(json, (Class<Object>) c);
-                try {
-                    return (T) con.newInstance(new Object[] { o });
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        Object o = m.readValue(json, (Class<Object>) c);
+        try {
+            return cls.getConstructor(Object.class).newInstance(o);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException("unexpected");
         }
-        throw JsonMappingException.from(ctxt, "unexpected");
     }
 
     public static final class Circle3 {
