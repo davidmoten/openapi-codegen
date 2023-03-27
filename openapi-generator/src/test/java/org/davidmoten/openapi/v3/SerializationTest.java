@@ -132,7 +132,7 @@ public class SerializationTest {
         private final Object value;
 
         @JsonCreator
-        OneOf(Object value) {
+        private OneOf(Object value) {
             this.value = value;
         }
 

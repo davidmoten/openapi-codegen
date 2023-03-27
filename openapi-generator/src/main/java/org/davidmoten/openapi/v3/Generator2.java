@@ -356,11 +356,12 @@ public class Generator2 {
     }
 
     private static void writeOneOrAnyOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        out.format("\n%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
+        out.format("\n%s@%s\n", indent, imports.add(JsonValue.class));
+        out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
         // add constructor for each member of the oneOf (fieldTypes)
 
         out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
-        out.format("%s%s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
+        out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
         out.format("%sthis.value = %s.checkNotNull(value);\n", indent.right(), imports.add(Preconditions.class));
         out.format("%s}\n", indent.left());
         cls.fields.forEach(f -> {
