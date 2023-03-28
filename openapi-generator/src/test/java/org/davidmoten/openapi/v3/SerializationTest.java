@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 import org.junit.Test;
@@ -12,24 +13,26 @@ import org.junit.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.github.davidmoten.guavamini.Preconditions;
 
 public class SerializationTest {
 
     private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
 
-    private static final ObjectMapper m = new ObjectMapper();
+    private static final ObjectMapper m = new ObjectMapper().registerModule(new Jdk8Module());
 
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
@@ -164,18 +167,28 @@ public class SerializationTest {
     }
 
     @JsonAutoDetect(fieldVisibility = Visibility.ANY)
+    @JsonInclude(Include.NON_NULL)
     public static final class Circle2 {
         private final double radiusNm;
+        private final String colour;
 
         @JsonCreator
-        public Circle2(@JsonProperty("radiusNm") double radiusNm) {
+        private Circle2(@JsonProperty("radiusNm") double radiusNm, @JsonProperty("colour") String colour) {
             this.radiusNm = radiusNm;
+            this.colour = colour;
+        }
+        
+        public Circle2(@JsonProperty("radiusNm") double radiusNm, @JsonProperty("colour") Optional<String> colour) {
+            this(radiusNm, colour.orElse(null));
         }
 
         public double radiusNm() {
             return radiusNm;
         }
 
+        public Optional<String> colour() {
+            return Optional.ofNullable(colour);
+        }
     }
 
     @JsonAutoDetect(fieldVisibility = Visibility.ANY)

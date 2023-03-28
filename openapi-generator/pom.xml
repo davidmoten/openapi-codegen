@@ -21,6 +21,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <slf4j.version>1.7.30</slf4j.version>
         <log4j.version>2.13.3</log4j.version>
+        <jackson.version>2.14.2</jackson.version>
     </properties>
 
     <licenses>
@@ -80,7 +81,13 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.14.2</version>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
@@ -143,29 +150,29 @@
                 </executions>
             </plugin>
 
-<!--            <plugin>-->
-<!--                <groupId>org.openapitools</groupId>-->
-<!--                <artifactId>openapi-generator-maven-plugin</artifactId>-->
-<!--                <version>6.4.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>generate</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <inputSpec>${project.basedir}/src/test/resources/openapi2.yml</inputSpec>-->
-<!--                            <generatorName>spring</generatorName>-->
-<!--                            <apiPackage>api.controllers</apiPackage>-->
-<!--                            <modelPackage>api.responses</modelPackage>-->
-<!--                            <configOptions>-->
-<!--                                <interfaceOnly>false</interfaceOnly>-->
-<!--                                <delegatePattern>true</delegatePattern>-->
-<!--                                <generateSupportingFiles>false</generateSupportingFiles>-->
-<!--                            </configOptions>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <groupId>org.openapitools</groupId>-->
+            <!--                <artifactId>openapi-generator-maven-plugin</artifactId>-->
+            <!--                <version>6.4.0</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <goals>-->
+            <!--                            <goal>generate</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <inputSpec>${project.basedir}/src/test/resources/openapi2.yml</inputSpec>-->
+            <!--                            <generatorName>spring</generatorName>-->
+            <!--                            <apiPackage>api.controllers</apiPackage>-->
+            <!--                            <modelPackage>api.responses</modelPackage>-->
+            <!--                            <configOptions>-->
+            <!--                                <interfaceOnly>false</interfaceOnly>-->
+            <!--                                <delegatePattern>true</delegatePattern>-->
+            <!--                                <generateSupportingFiles>false</generateSupportingFiles>-->
+            <!--                            </configOptions>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
         </plugins>
 
     </build>
