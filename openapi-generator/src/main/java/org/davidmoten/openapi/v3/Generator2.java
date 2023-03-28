@@ -18,8 +18,6 @@ import javax.validation.constraints.Size;
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -184,7 +182,11 @@ public class Generator2 {
         }
 
         public String resolvedType(Imports imports) {
-            return resolveType(this, imports);
+            return Generator2.resolvedType(this, imports);
+        }
+
+        public String resolvedTypeNullable(Imports imports) {
+            return Generator2.resolvedTypeNullable(this, imports);
         }
 
         public boolean isPrimitive() {
@@ -405,10 +407,10 @@ public class Generator2 {
                 cls.simpleName());
     }
 
-    private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
-        out.format("%s@%s(fieldVisibility = %s.ANY)\n", indent,
-                imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
-    }
+//    private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
+//        out.format("%s@%s(fieldVisibility = %s.ANY)\n", indent, imports.add(JsonAutoDetect.class),
+//                imports.add(Visibility.class), imports.add(Visibility.class));
+//    }
 
     private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
         String text = cls.enumMembers.stream().map(x -> {
@@ -507,7 +509,7 @@ public class Generator2 {
             if (unwrapSingleField(cls)) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
-            out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.fieldName);
+            out.format("%sprivate final %s %s;\n", indent, f.resolvedTypeNullable(imports), f.fieldName);
         });
     }
 
@@ -517,14 +519,14 @@ public class Generator2 {
 
     private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls) {
         indent.right().right();
-        final String parameters;
+        final String parametersNullable;
         if (unwrapSingleField(cls)) {
-            parameters = cls.fields.stream()
-                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName))
-                    .collect(Collectors.joining());
+            parametersNullable = cls.fields.stream()
+                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName))
+                    .collect(Collectors.joining(","));
         } else {
-            parameters = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", indent,
-                    imports.add(JsonProperty.class), x.name, x.resolvedType(imports), x.fieldName))
+            parametersNullable = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", indent,
+                    imports.add(JsonProperty.class), x.name, x.resolvedTypeNullable(imports), x.fieldName))
                     .collect(Collectors.joining(","));
         }
         indent.left().left();
@@ -533,11 +535,14 @@ public class Generator2 {
         } else {
             out.println();
         }
-        final String visibility = cls.classType == ClassType.ENUM ? "private" : "public";
-        out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parameters);
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
+        // if has optional then write a private constructor with nullable parameters
+        // and a public constructor with Optional parameters
+        final String visibility = cls.classType == ClassType.ENUM || hasOptional ? "private" : "public";
+        out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
         cls.fields.stream().forEach(x -> {
-            if (!x.isPrimitive()) {
+            if (!x.isPrimitive() && !x.required) {
                 out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName, imports.add(Preconditions.class),
                         x.fieldName);
             } else {
@@ -546,13 +551,40 @@ public class Generator2 {
         });
         indent.left();
         out.format("%s}\n", indent);
+        if (hasOptional) {
+            indent.right().right();
+            String parametersOptional = cls.fields.stream()
+                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName))
+                    .collect(Collectors.joining(","));
+            indent.left().left();
+            out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
+            indent.right();
+            cls.fields.stream().forEach(x -> {
+                if (!x.isPrimitive()) {
+                    if (x.required) {
+                        out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName,
+                                imports.add(Preconditions.class), x.fieldName, x.fieldName);
+                    } else {
+                        out.format("%sthis.%s = %s.checkNotNull(%s).orElse(null);\n", indent, x.fieldName,
+                                imports.add(Preconditions.class), x.fieldName, x.fieldName);
+                    }
+                } else {
+                    out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
+                }
+            });
+            indent.left();
+        }
     }
 
     private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls) {
         cls.fields.forEach(f -> {
             out.format("\n%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName);
             indent.right();
-            out.format("%sreturn %s;\n", indent, f.fieldName);
+            if (!f.required) {
+                out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName);
+            } else {
+                out.format("%sreturn %s;\n", indent, f.fieldName);
+            }
             indent.left();
             out.format("%s}\n", indent);
         });
@@ -562,9 +594,24 @@ public class Generator2 {
         cls.classes.forEach(c -> writeClass(out, imports, indent, c));
     }
 
-    private static String resolveType(Field f, Imports imports) {
+    private static String resolvedTypeNullable(Field f, Imports imports) {
         if (f.isArray) {
-            return imports.add(List.class) + "<" + imports.add(f.fullClassName) + ">";
+            return toList(f, imports);
+        }
+        if (f.required) {
+            return imports.add(toPrimitive(f.fullClassName));
+        } else {
+            return imports.add(f.fullClassName);
+        }
+    }
+
+    private static String toList(Field f, Imports imports) {
+        return imports.add(List.class) + "<" + imports.add(f.fullClassName) + ">";
+    }
+
+    private static String resolvedType(Field f, Imports imports) {
+        if (f.isArray) {
+            return toList(f, imports);
         } else if (f.required) {
             return imports.add(toPrimitive(f.fullClassName));
         } else {
