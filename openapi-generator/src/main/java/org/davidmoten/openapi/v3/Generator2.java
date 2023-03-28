@@ -21,6 +21,8 @@ import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -394,6 +396,7 @@ public class Generator2 {
         } else {
             out.println();
         }
+        out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
         out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
     }
 
