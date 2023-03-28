@@ -1,8 +1,13 @@
 package org.davidmoten.openapi.v3;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -355,8 +360,16 @@ public class Generator2 {
                     out.format("\nIMPORTS_HERE");
                     writeClass(out, imports, indent, cls);
                     System.out.println("////////////////////////////////////////////////");
-                    System.out.println(out.text().replace("IMPORTS_HERE", imports.toString()));
+                    String content = out.text().replace("IMPORTS_HERE", imports.toString());
+                    System.out.println(content);
                     out.close();
+                    File file = names.schemaNameToJavaFile(schemaPath.first().name);
+                    file.getParentFile().mkdirs();
+                    try {
+                        Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
                 }
             }
         }
@@ -730,8 +743,7 @@ public class Generator2 {
         } else if (c.equals(Boolean.class.getCanonicalName())) {
             return "boolean";
         } else if (c.equals(BigInteger.class.getCanonicalName())) {
-            // TODO long might be safer?
-            return "int";
+            return c;
         } else {
             return c;
         }
