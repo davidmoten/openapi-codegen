@@ -3,8 +3,6 @@ package org.davidmoten.openapi.v3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 import org.junit.Test;
 

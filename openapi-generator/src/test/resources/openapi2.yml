@@ -1009,6 +1009,7 @@ components:
       properties:
         navBroadcastAreaType:
           type: string
+          minLength: 1
         geometry: 
           $ref: '#/components/schemas/Geometry'
       required: [navBroadcastAreaType, geometry]
@@ -1159,6 +1160,11 @@ components:
 
     Simple:
       type: string
+      
+    SimpleWithConstraints:
+      type: string
+      minLength: 4
+      maxLength: 255
                     
               
       

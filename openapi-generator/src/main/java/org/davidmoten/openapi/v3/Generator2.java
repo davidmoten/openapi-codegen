@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.Size;
+
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 
@@ -27,6 +29,7 @@ import com.github.davidmoten.guavamini.Sets;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 
 public class Generator2 {
 
@@ -76,6 +79,7 @@ public class Generator2 {
         String enumFullType;
         private int num = 0;
         private Set<String> fieldNames = new HashSet<String>();
+        boolean topLevel = false;
 
         private String nextAnonymousFieldName() {
             num++;
@@ -108,7 +112,12 @@ public class Generator2 {
         }
 
         void addField(String fullType, String name, String fieldName, boolean required) {
-            fields.add(new Field(fullType, name, fieldName, required));
+            fields.add(new Field(fullType, name, fieldName, required, Optional.empty(), Optional.empty()));
+        }
+
+        void addField(String fullType, String name, String fieldName, boolean required, Optional<Integer> minLength,
+                Optional<Integer> maxLength) {
+            fields.add(new Field(fullType, name, fieldName, required, minLength, maxLength));
         }
 
         public String pkg() {
@@ -152,12 +161,17 @@ public class Generator2 {
         final String name;
         final String fieldName;
         final boolean required;
+        final Optional<Integer> minLength;
+        final Optional<Integer> maxLength;
 
-        public Field(String fullClassName, String name, String fieldName, boolean required) {
+        public Field(String fullClassName, String name, String fieldName, boolean required, Optional<Integer> minLength,
+                Optional<Integer> maxLength) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
             this.required = required;
+            this.minLength = minLength;
+            this.maxLength = maxLength;
         }
 
         public String resolvedType(Imports imports) {
@@ -166,6 +180,12 @@ public class Generator2 {
 
         public boolean isPrimitive() {
             return required && PRIMITIVE_CLASS_NAMES.contains(toPrimitive(fullClassName));
+        }
+
+        @Override
+        public String toString() {
+            return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
+                    + ", required=" + required + ", minLength=" + minLength + ", maxLength=" + maxLength + "]";
         }
     }
 
@@ -235,6 +255,7 @@ public class Generator2 {
                 cls.fullClassName = names.schemaNameToClassName(last.name);
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
+                cls.topLevel = true;
             }
             if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
@@ -254,7 +275,7 @@ public class Generator2 {
                     handleEnum(schema, cls);
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
-                    boolean required = fieldIsRequired(schemaPath, last);
+                    boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required));
                 } else if (isOneOf(schema) || isAnyOf(schema)) {
                     handleOneOrAnyOf(last, schema, cls);
@@ -269,12 +290,21 @@ public class Generator2 {
                 }
                 Cls current = stack.peek();
                 final String fullClassName;
-                if (isPrimitive(schema.getType())) {
+                if (isPrimitive(schema)) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
                     fullClassName = c.getCanonicalName();
+                    final Optional<Integer> minLength;
+                    final Optional<Integer> maxLength;
+                    if (isString(schema)) {
+                        minLength = Optional.ofNullable(schema.getMinLength());
+                        maxLength = Optional.ofNullable(schema.getMaxLength());
+                    } else {
+                        minLength = Optional.empty();
+                        maxLength = Optional.empty();
+                    }
                     String fieldName = current.nextFieldName(last.name);
-                    boolean required = fieldIsRequired(schemaPath, last);
-                    current.addField(fullClassName, last.name, fieldName, required);
+                    boolean required = fieldIsRequired(schemaPath);
+                    current.addField(fullClassName, last.name, fieldName, required, minLength, maxLength);
                 } else if (isRef(schema)) {
                     String ref = schema.get$ref();
                     if (!ref.startsWith("#")) {
@@ -284,7 +314,7 @@ public class Generator2 {
                         fullClassName = names.schemaNameToClassName(schemaName);
                     }
                     String fieldName = current.nextFieldName(last.name);
-                    boolean required = fieldIsRequired(schemaPath, last);
+                    boolean required = fieldIsRequired(schemaPath);
                     current.addField(fullClassName, last.name, fieldName, required);
                 } else {
                     throw new RuntimeException("unexpected");
@@ -295,7 +325,8 @@ public class Generator2 {
         @Override
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
-            if (Apis.isComplexSchema(schemaPath.last().schema) || isEnum(schemaPath.last().schema) || (schemaPath.size() == 1)) {
+            if (Apis.isComplexSchema(schemaPath.last().schema) || isEnum(schemaPath.last().schema)
+                    || (schemaPath.size() == 1)) {
                 stack.pop();
                 if (stack.isEmpty()) {
                     Indent indent = new Indent();
@@ -310,9 +341,14 @@ public class Generator2 {
         }
     }
 
-    private static boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last) {
+    private static boolean isString(Schema<?> schema) {
+        return "string".equals(schema.getType());
+    }
+
+    private static boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath) {
+        SchemaWithName last = schemaPath.last();
         if (schemaPath.size() <= 1) {
-            return false;
+            return isPrimitive(last.schema);
         } else {
             return contains(schemaPath.secondLast().schema.getRequired(), last.name);
         }
@@ -435,7 +471,11 @@ public class Generator2 {
             out.println();
         }
         cls.fields.forEach(f -> {
-            if (cls.classType == ClassType.ENUM) {
+            f.minLength.ifPresent(x -> out.format("%s@%s(min = %s, message = \"%s\")\n", indent, imports.add(Size.class), x,
+                    "string value must be at least " + x + " characters: " + f.fieldName));
+            f.maxLength.ifPresent(x -> out.format("%s@%s(max = %s, message = \"%s\")\n", indent, imports.add(Size.class), x,
+                    "string value must be at most " + x + " characters: " + f.fieldName));
+            if (cls.classType == ClassType.ENUM || (cls.topLevel && cls.fields.size() == 1)) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
             out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.fieldName);
@@ -533,7 +573,8 @@ public class Generator2 {
         return sch.getAnyOf() != null && !sch.getAnyOf().isEmpty();
     }
 
-    private static boolean isPrimitive(String type) {
+    private static boolean isPrimitive(Schema<?> schema) {
+        String type = schema.getType();
         return type != null && !"array".equals(type) && !"object".equals(type);
     }
 
