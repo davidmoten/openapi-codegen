@@ -1166,6 +1166,14 @@ components:
       minLength: 4
       maxLength: 255
       pattern: '[a-b0-9]*'
+      
+      
+    ArraySimple:
+      type: array
+      items:
+        type: integer
+        format: int32
+     
                     
               
       

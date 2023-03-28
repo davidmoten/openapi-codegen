@@ -29,6 +29,7 @@ import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator2 {
@@ -111,14 +112,14 @@ public class Generator2 {
             return next;
         }
 
-        void addField(String fullType, String name, String fieldName, boolean required) {
-            fields.add(new Field(fullType, name, fieldName, required, Optional.empty(), Optional.empty(),
+        void addField(String fullType, String name, String fieldName, boolean required, boolean isArray) {
+            fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
                     Optional.empty()));
         }
 
-        void addField(String fullType, String name, String fieldName, boolean required, Optional<Integer> minLength,
-                Optional<Integer> maxLength, Optional<String> pattern) {
-            fields.add(new Field(fullType, name, fieldName, required, minLength, maxLength, pattern));
+        void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
+                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern) {
+            fields.add(new Field(fullType, name, fieldName, required, isArray, minLength, maxLength, pattern));
         }
 
         public String pkg() {
@@ -165,16 +166,19 @@ public class Generator2 {
         final Optional<Integer> minLength;
         final Optional<Integer> maxLength;
         final Optional<String> pattern;
+        final boolean isArray;
 
-        public Field(String fullClassName, String name, String fieldName, boolean required, Optional<Integer> minLength,
-                Optional<Integer> maxLength, Optional<String> pattern) {
+        public Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
+                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
             this.required = required;
+            this.isArray = isArray;
             this.minLength = minLength;
             this.maxLength = maxLength;
             this.pattern = pattern;
+
         }
 
         public String resolvedType(Imports imports) {
@@ -260,7 +264,11 @@ public class Generator2 {
                 cls.classType = classType(schema);
                 cls.topLevel = true;
             }
-            if (Apis.isComplexSchema(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)) {
+            if (isArray(schema)) {
+                return;
+            }
+            boolean isArray = schemaPath.size() > 2 && schemaPath.secondLast().schema instanceof ArraySchema;
+            if (isObject(schema) || isMap(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 stack.push(cls);
                 previous.ifPresent(p -> p.classes.add(cls));
@@ -279,7 +287,8 @@ public class Generator2 {
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
                     boolean required = fieldIsRequired(schemaPath);
-                    previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required));
+                    previous.ifPresent(
+                            p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
                 } else if (isOneOf(schema) || isAnyOf(schema)) {
                     handleOneOrAnyOf(last, schema, cls);
                 } else {
@@ -310,7 +319,8 @@ public class Generator2 {
                     }
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
-                    current.addField(fullClassName, last.name, fieldName, required, minLength, maxLength, pattern);
+                    current.addField(fullClassName, last.name, fieldName, required, isArray, minLength, maxLength,
+                            pattern);
                 } else if (isRef(schema)) {
                     String ref = schema.get$ref();
                     if (!ref.startsWith("#")) {
@@ -321,7 +331,7 @@ public class Generator2 {
                     }
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
-                    current.addField(fullClassName, last.name, fieldName, required);
+                    current.addField(fullClassName, last.name, fieldName, required, isArray);
                 } else {
                     throw new RuntimeException("unexpected");
                 }
@@ -425,7 +435,7 @@ public class Generator2 {
         for (Object o : schema.getEnum()) {
             cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
         }
-        cls.addField(cls.enumFullType, "value", "value", true);
+        cls.addField(cls.enumFullType, "value", "value", true, false);
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
@@ -481,8 +491,7 @@ public class Generator2 {
                     imports.add(Size.class), x, "string value must be at least " + x + " characters: " + f.fieldName));
             f.maxLength.ifPresent(x -> out.format("%s@%s(max = %s, message = \"%s\")\n", indent,
                     imports.add(Size.class), x, "string value must be at most " + x + " characters: " + f.fieldName));
-            f.pattern.ifPresent(x -> out.format("%s@%s(\"%s\")\n", indent,
-                    imports.add(Pattern.class), x));
+            f.pattern.ifPresent(x -> out.format("%s@%s(\"%s\")\n", indent, imports.add(Pattern.class), x));
             if (cls.classType == ClassType.ENUM || (cls.topLevel && cls.fields.size() == 1)) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
@@ -538,7 +547,9 @@ public class Generator2 {
     }
 
     private static String resolveType(Field f, Imports imports) {
-        if (f.required) {
+        if (f.isArray) {
+            return imports.add(List.class) + "<" + imports.add(f.fullClassName) + ">";
+        } else if (f.required) {
             return imports.add(toPrimitive(f.fullClassName));
         } else {
             return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
@@ -584,6 +595,10 @@ public class Generator2 {
     private static boolean isPrimitive(Schema<?> schema) {
         String type = schema.getType();
         return type != null && !"array".equals(type) && !"object".equals(type);
+    }
+
+    private static boolean isMap(Schema<?> schema) {
+        return schema instanceof MapSchema;
     }
 
     private static ClassType classType(Schema<?> schema) {
