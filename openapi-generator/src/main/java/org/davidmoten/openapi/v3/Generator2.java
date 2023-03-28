@@ -391,7 +391,6 @@ public class Generator2 {
 //            indent.left();
 //            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
             writeOneOfDeserializerAnnotation(out, imports, indent, cls);
-            writeAutoDetectAnnotation(out, imports, indent);
         } else {
             out.println();
         }
@@ -404,7 +403,7 @@ public class Generator2 {
     }
 
     private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
-        out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
+        out.format("%s@%s(fieldVisibility = %s.ANY)\n", indent,
                 imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
     }
 

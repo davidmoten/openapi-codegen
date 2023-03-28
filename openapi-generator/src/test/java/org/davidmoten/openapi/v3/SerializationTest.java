@@ -29,7 +29,7 @@ public class SerializationTest {
 
     private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
 
-    private static final ObjectMapper m = new ObjectMapper().setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+    private static final ObjectMapper m = new ObjectMapper();
 
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
@@ -81,6 +81,7 @@ public class SerializationTest {
 
     }
 
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Circle implements Geometry {
 
         private String a;
@@ -111,7 +112,7 @@ public class SerializationTest {
     }
 
     @Test
-    public void testCustomPolymorphicDeserialization() throws JsonMappingException, JsonProcessingException {
+    public void testPolymorphicDeserializationAndSerialization() throws JsonMappingException, JsonProcessingException {
         String json = "{\"radiusNm\":3.4}";
         OneOf g = m.readerFor(OneOf.class).readValue(json);
         assertTrue(g.value instanceof Circle2);
@@ -120,13 +121,12 @@ public class SerializationTest {
     }
 
     @Test(expected = JsonMappingException.class)
-    public void testCustomPolymorphicDeserializationThrows() throws JsonMappingException, JsonProcessingException {
+    public void testPolymorphicDeserializationThrows() throws JsonMappingException, JsonProcessingException {
         String json = "{\"radiusKm\":3.4}";
         m.readerFor(OneOf.class).readValue(json);
     }
 
     @JsonDeserialize(using = OneOf.Deserializer.class)
-    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
     public static final class OneOf {
 
         @JsonValue
@@ -163,6 +163,7 @@ public class SerializationTest {
         }
     }
 
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Circle2 {
         private final double radiusNm;
 
@@ -177,6 +178,7 @@ public class SerializationTest {
 
     }
 
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Rectangle2 {
         private final double heightDegrees;
 
