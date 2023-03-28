@@ -398,7 +398,9 @@ public class Generator2 {
         } else {
             out.println();
         }
-        out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
+        if (cls.classType != ClassType.ENUM) {
+            out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
+        }
         out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
     }
 
@@ -664,6 +666,8 @@ public class Generator2 {
         return schema instanceof MapSchema;
     }
 
+    public static boolean MAP_INTEGER_TO_BIG_INTEGER = false;
+
     private static ClassType classType(Schema<?> schema) {
         if (schema instanceof ComposedSchema
                 && ((((ComposedSchema) schema).getOneOf() != null) || ((ComposedSchema) schema).getAnyOf() != null)) {
@@ -697,7 +701,7 @@ public class Generator2 {
             } else if ("int64".equals(format)) {
                 return Long.class;
             } else {
-                return BigInteger.class;
+                return MAP_INTEGER_TO_BIG_INTEGER ? BigInteger.class : Long.class;
             }
         } else if ("number".equals(type)) {
             if ("float".equals(format)) {
