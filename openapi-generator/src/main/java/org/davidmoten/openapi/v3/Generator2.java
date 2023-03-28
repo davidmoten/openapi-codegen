@@ -265,6 +265,7 @@ public class Generator2 {
                 cls.topLevel = true;
             }
             if (isArray(schema)) {
+                stack.push(cls);
                 return;
             }
             boolean isArray = schemaPath.size() >= 2 && schemaPath.secondLast().schema instanceof ArraySchema;

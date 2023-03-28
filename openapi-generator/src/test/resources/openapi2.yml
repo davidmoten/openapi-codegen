@@ -1173,6 +1173,18 @@ components:
       items:
         type: integer
         format: int32
+        
+        
+    ArrayComplex:
+      type: array
+      items: 
+        type: object
+        properties:
+          firstName: 
+            type: string
+          secondName:
+            type: string
+        required: [firstName]
      
                     
               
