@@ -1186,6 +1186,27 @@ components:
             type: string
         required: [firstName]
      
-                    
-              
+    Vehicle:
+      oneOf: 
+      - $ref: '#/components/schemas/Car'
+      - $ref: '#/components/schemas/Bike'
+      discriminator:
+        propertyName: vehicleType
+        mapping: 
+          car: '#/components/schemas/Car'
+          bike: '#/components/schemas/Bike'
+          
+    Car:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+      required: [vehicleType]
+          
+    Bike:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+      required: [vehicleType]
       

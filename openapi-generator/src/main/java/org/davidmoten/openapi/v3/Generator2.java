@@ -56,17 +56,7 @@ public class Generator2 {
         // generate model classes for schema definitions
         writeSchemaClasses(definition, names);
 
-//        superClasses(api).entrySet().forEach(x -> System.out.println(x.getKey().get$ref() + "->"
-//                + x.getValue().stream().map(y -> y.toString()).collect(Collectors.toList())));
     }
-
-//    private static void writeClientClass(Names names) {
-//        String className = names.clientClassName();
-//        File file = names.clientClassJavaFile();
-//        JavaClassWriter.write(file, className, ClassType.CLASS, (indent, imports, p) -> {
-//            p.format("%s// TODO\n", indent);
-//        });
-//    }
 
     private static void writeSchemaClasses(Definition definition, Names names) {
         names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
@@ -151,7 +141,10 @@ public class Generator2 {
     }
 
     private enum ClassType {
-        INTERFACE("interface"), CLASS("class"), ENUM("enum"), ONE_OR_ANY_OF("class");
+        CLASS("class"), //
+        ENUM("enum"), //
+        ONE_OR_ANY_OF_DISCRIMINATED("interface"), //
+        ONE_OR_ANY_OF_NON_DISCRIMINATED("class");
 
         private final String word;
 
@@ -165,7 +158,7 @@ public class Generator2 {
     }
 
     private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "long", "byte", "float", "double",
-            "boolean");
+            "boolean", "short");
 
     private final static class Field {
         private String fullClassName;
@@ -304,7 +297,7 @@ public class Generator2 {
                     previous.ifPresent(
                             p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
                 } else if (isOneOf(schema) || isAnyOf(schema)) {
-                    handleOneOrAnyOf(last, schema, cls);
+                    handleOneOrAnyOf(last, cls);
                 } else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
@@ -383,7 +376,7 @@ public class Generator2 {
         writeClassDeclaration(out, imports, indent, cls);
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
-        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
             writeOneOrAnyOfClassContent(out, imports, indent, cls);
         } else {
             writeFields(out, imports, indent, cls);
@@ -397,13 +390,13 @@ public class Generator2 {
 
     private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
         String modifier;
-        if (cls.classType == ClassType.INTERFACE || cls.classType == ClassType.ENUM) {
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ENUM) {
             modifier = "";
         } else {
             modifier = cls.topLevel ? "final " : "static final ";
         }
 
-        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
 //            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
 //            indent.right().right();
 //            String types = cls.fields.stream().map(x -> String.format("\n%s@%s(%s.class)", indent,
@@ -454,10 +447,13 @@ public class Generator2 {
         }
     }
 
-    private static void handleOneOrAnyOf(SchemaWithName last, Schema<?> schema, Cls cls) {
-        cls.classType = ClassType.ONE_OR_ANY_OF;
-        if (schema.getDiscriminator() != null) {
+    private static void handleOneOrAnyOf(SchemaWithName last, Cls cls) {
+        
+        if (last.schema.getDiscriminator() != null) {
             cls.interfaceMethods.add(Names.toFieldName(last.name));
+            cls.classType = ClassType.ONE_OR_ANY_OF_DISCRIMINATED;
+        } else {
+            cls.classType = ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         }
     }
 
@@ -646,10 +642,6 @@ public class Generator2 {
         return schema.get$ref() != null;
     }
 
-    private static boolean isArray(String type) {
-        return "array".equals(type);
-    }
-
     private static boolean isObject(Schema<?> schema) {
         return (schema.getType() == null && schema.getProperties() != null) || "object".equals(schema.getType());
     }
@@ -688,7 +680,7 @@ public class Generator2 {
     private static ClassType classType(Schema<?> schema) {
         if (schema instanceof ComposedSchema
                 && ((((ComposedSchema) schema).getOneOf() != null) || ((ComposedSchema) schema).getAnyOf() != null)) {
-            return ClassType.ONE_OR_ANY_OF;
+            return ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         } else if (schema.getEnum() != null) {
             return ClassType.ENUM;
         } else {
