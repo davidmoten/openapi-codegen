@@ -30,7 +30,6 @@ import com.github.davidmoten.guavamini.Sets;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
 
 public class Generator2 {
 
