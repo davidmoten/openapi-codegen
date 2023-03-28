@@ -1165,6 +1165,7 @@ components:
       type: string
       minLength: 4
       maxLength: 255
+      pattern: '[a-b0-9]*'
                     
               
       

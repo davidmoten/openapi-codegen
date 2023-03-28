@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
@@ -112,12 +113,13 @@ public class Generator2 {
         }
 
         void addField(String fullType, String name, String fieldName, boolean required) {
-            fields.add(new Field(fullType, name, fieldName, required, Optional.empty(), Optional.empty()));
+            fields.add(new Field(fullType, name, fieldName, required, Optional.empty(), Optional.empty(),
+                    Optional.empty()));
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, Optional<Integer> minLength,
-                Optional<Integer> maxLength) {
-            fields.add(new Field(fullType, name, fieldName, required, minLength, maxLength));
+                Optional<Integer> maxLength, Optional<String> pattern) {
+            fields.add(new Field(fullType, name, fieldName, required, minLength, maxLength, pattern));
         }
 
         public String pkg() {
@@ -163,15 +165,17 @@ public class Generator2 {
         final boolean required;
         final Optional<Integer> minLength;
         final Optional<Integer> maxLength;
+        final Optional<String> pattern;
 
         public Field(String fullClassName, String name, String fieldName, boolean required, Optional<Integer> minLength,
-                Optional<Integer> maxLength) {
+                Optional<Integer> maxLength, Optional<String> pattern) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
             this.required = required;
             this.minLength = minLength;
             this.maxLength = maxLength;
+            this.pattern = pattern;
         }
 
         public String resolvedType(Imports imports) {
@@ -295,16 +299,19 @@ public class Generator2 {
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
                     final Optional<Integer> maxLength;
+                    final Optional<String> pattern;
                     if (isString(schema)) {
                         minLength = Optional.ofNullable(schema.getMinLength());
                         maxLength = Optional.ofNullable(schema.getMaxLength());
+                        pattern = Optional.ofNullable(schema.getPattern());
                     } else {
                         minLength = Optional.empty();
                         maxLength = Optional.empty();
+                        pattern = Optional.empty();
                     }
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
-                    current.addField(fullClassName, last.name, fieldName, required, minLength, maxLength);
+                    current.addField(fullClassName, last.name, fieldName, required, minLength, maxLength, pattern);
                 } else if (isRef(schema)) {
                     String ref = schema.get$ref();
                     if (!ref.startsWith("#")) {
@@ -341,6 +348,57 @@ public class Generator2 {
         }
     }
 
+    private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        writeClassDeclaration(out, imports, indent, cls);
+        indent.right();
+        writeEnumMembers(out, imports, indent, cls);
+        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
+            writeOneOrAnyOfClassContent(out, imports, indent, cls);
+        } else {
+            writeFields(out, imports, indent, cls);
+            writeConstructor(out, imports, indent, cls);
+            writeGetters(out, imports, indent, cls);
+        }
+        writeMemberClasses(out, imports, indent, cls);
+        indent.left();
+        out.format("%s}\n", indent);
+    }
+
+    private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        String modifier;
+        if (cls.classType == ClassType.INTERFACE || cls.classType == ClassType.ENUM) {
+            modifier = "";
+        } else {
+            modifier = "static final ";
+        }
+        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
+//            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
+//            indent.right().right();
+//            String types = cls.fields.stream().map(x -> String.format("\n%s@%s(%s.class)", indent,
+//                    imports.add(Type.class), imports.add(x.fullClassName))).collect(Collectors.joining(", "));
+//            indent.left();
+//            indent.left();
+//            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
+            out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
+                    cls.simpleName());
+            out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
+                    imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
+        } else {
+            out.println();
+        }
+        out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
+    }
+
+    private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        String text = cls.enumMembers.stream().map(x -> {
+            String delim = x.parameter instanceof String ? "\"" : "";
+            return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);
+        }).collect(Collectors.joining(",\n"));
+        if (!text.isEmpty()) {
+            out.println("\n" + text + ";");
+        }
+    }
+
     private static boolean isString(Schema<?> schema) {
         return "string".equals(schema.getType());
     }
@@ -373,22 +431,6 @@ public class Generator2 {
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
         return collection != null && t != null && collection.contains(t);
-    }
-
-    private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        writeClassDeclaration(out, imports, indent, cls);
-        indent.right();
-        writeEnumMembers(out, imports, indent, cls);
-        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
-            writeOneOrAnyOfClassContent(out, imports, indent, cls);
-        } else {
-            writeFields(out, imports, indent, cls);
-            writeConstructor(out, imports, indent, cls);
-            writeGetters(out, imports, indent, cls);
-        }
-        writeMemberClasses(out, imports, indent, cls);
-        indent.left();
-        out.format("%s}\n", indent);
     }
 
     private static void writeOneOrAnyOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
@@ -431,50 +473,17 @@ public class Generator2 {
         out.format("%s}\n", indent);
     }
 
-    private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        String modifier;
-        if (cls.classType == ClassType.INTERFACE || cls.classType == ClassType.ENUM) {
-            modifier = "";
-        } else {
-            modifier = "static final ";
-        }
-        if (cls.classType == ClassType.ONE_OR_ANY_OF) {
-//            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
-//            indent.right().right();
-//            String types = cls.fields.stream().map(x -> String.format("\n%s@%s(%s.class)", indent,
-//                    imports.add(Type.class), imports.add(x.fullClassName))).collect(Collectors.joining(", "));
-//            indent.left();
-//            indent.left();
-//            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
-            out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
-                    cls.simpleName());
-            out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
-                    imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
-        } else {
-            out.println();
-        }
-        out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
-    }
-
-    private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        String text = cls.enumMembers.stream().map(x -> {
-            String delim = x.parameter instanceof String ? "\"" : "";
-            return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);
-        }).collect(Collectors.joining(",\n"));
-        if (!text.isEmpty()) {
-            out.println("\n" + text + ";");
-        }
-    }
-
     private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
         if (!cls.fields.isEmpty()) {
             out.println();
         }
         cls.fields.forEach(f -> {
-            f.minLength.ifPresent(x -> out.format("%s@%s(min = %s, message = \"%s\")\n", indent, imports.add(Size.class), x,
-                    "string value must be at least " + x + " characters: " + f.fieldName));
-            f.maxLength.ifPresent(x -> out.format("%s@%s(max = %s, message = \"%s\")\n", indent, imports.add(Size.class), x,
-                    "string value must be at most " + x + " characters: " + f.fieldName));
+            f.minLength.ifPresent(x -> out.format("%s@%s(min = %s, message = \"%s\")\n", indent,
+                    imports.add(Size.class), x, "string value must be at least " + x + " characters: " + f.fieldName));
+            f.maxLength.ifPresent(x -> out.format("%s@%s(max = %s, message = \"%s\")\n", indent,
+                    imports.add(Size.class), x, "string value must be at most " + x + " characters: " + f.fieldName));
+            f.pattern.ifPresent(x -> out.format("%s@%s(\"%s\")\n", indent,
+                    imports.add(Pattern.class), x));
             if (cls.classType == ClassType.ENUM || (cls.topLevel && cls.fields.size() == 1)) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
@@ -525,16 +534,16 @@ public class Generator2 {
         });
     }
 
+    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        cls.classes.forEach(c -> writeClass(out, imports, indent, c));
+    }
+
     private static String resolveType(Field f, Imports imports) {
         if (f.required) {
             return imports.add(toPrimitive(f.fullClassName));
         } else {
             return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
         }
-    }
-
-    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        cls.classes.forEach(c -> writeClass(out, imports, indent, c));
     }
 
     static boolean isEnum(Schema<?> schema) {
