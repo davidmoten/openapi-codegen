@@ -134,6 +134,10 @@ public class Generator2 {
         public String simpleName() {
             return Names.simpleClassName(fullClassName);
         }
+
+        public boolean unwrapSingleField() {
+            return classType == ClassType.ENUM || (topLevel && fields.size() == 1);
+        }
     }
 
     private static class EnumMember {
@@ -396,7 +400,7 @@ public class Generator2 {
         if (cls.classType == ClassType.INTERFACE || cls.classType == ClassType.ENUM) {
             modifier = "";
         } else {
-            modifier = "static final ";
+            modifier = cls.topLevel ? "final " : "static final ";
         }
 
         if (cls.classType == ClassType.ONE_OR_ANY_OF) {
@@ -516,26 +520,25 @@ public class Generator2 {
             out.println();
         }
         cls.fields.forEach(f -> {
-            f.minLength.ifPresent(x -> out.format("%s@%s(min = %s, message = \"%s\")\n", indent,
-                    imports.add(Size.class), x, "string value must be at least " + x + " characters: " + f.fieldName));
-            f.maxLength.ifPresent(x -> out.format("%s@%s(max = %s, message = \"%s\")\n", indent,
-                    imports.add(Size.class), x, "string value must be at most " + x + " characters: " + f.fieldName));
-            f.pattern.ifPresent(x -> out.format("%s@%s(\"%s\")\n", indent, imports.add(Pattern.class), x));
-            if (unwrapSingleField(cls)) {
+            if (f.minLength.isPresent() || f.maxLength.isPresent()) {
+                String minParameters = f.minLength.map(x -> "min = " + x + ", ").orElse("");
+                String maxParameters = f.maxLength.map(x -> "max = " + x + ", ").orElse("");
+                String params = minParameters + maxParameters;
+                out.format("%s@%s(%smessage = \"%s\")\n", indent, imports.add(Size.class), params,
+                        "size constraint not met: " + params);
+            }
+            f.pattern.ifPresent(x -> out.format("%s@%s(regexp = \"%s\")\n", indent, imports.add(Pattern.class), x));
+            if (cls.unwrapSingleField()) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
             out.format("%sprivate final %s %s;\n", indent, f.resolvedTypeNullable(imports), f.fieldName);
         });
     }
 
-    private static boolean unwrapSingleField(Cls cls) {
-        return cls.classType == ClassType.ENUM || (cls.topLevel && cls.fields.size() == 1);
-    }
-
     private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls) {
         indent.right().right();
         final String parametersNullable;
-        if (unwrapSingleField(cls)) {
+        if (cls.unwrapSingleField()) {
             parametersNullable = cls.fields.stream()
                     .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName))
                     .collect(Collectors.joining(","));
@@ -550,7 +553,7 @@ public class Generator2 {
         } else {
             out.println();
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
+        boolean hasOptional = !cls.unwrapSingleField() && cls.fields.stream().anyMatch(f -> !f.required);
         // if has optional then write a private constructor with nullable parameters
         // and a public constructor with Optional parameters
         final String visibility = cls.classType == ClassType.ENUM || hasOptional ? "private" : "public";
@@ -588,6 +591,7 @@ public class Generator2 {
                 }
             });
             indent.left();
+            out.format("%s}\n", indent);
         }
     }
 
@@ -595,7 +599,7 @@ public class Generator2 {
         cls.fields.forEach(f -> {
             out.format("\n%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName);
             indent.right();
-            if (!f.required) {
+            if (!f.required && !cls.unwrapSingleField()) {
                 out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName);
             } else {
                 out.format("%sreturn %s;\n", indent, f.fieldName);
