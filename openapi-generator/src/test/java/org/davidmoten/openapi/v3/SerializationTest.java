@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,6 +34,8 @@ public class SerializationTest {
     private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
 
     private static final ObjectMapper m = new ObjectMapper().registerModule(new Jdk8Module());
+
+    private Vehicle v;
 
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
@@ -84,9 +87,9 @@ public class SerializationTest {
 
     }
 
-    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Circle implements Geometry {
 
+        @JsonProperty("a")
         private String a;
 
         @JsonCreator
@@ -102,6 +105,7 @@ public class SerializationTest {
 
     public static final class Rectangle implements Geometry {
 
+        @JsonProperty("b")
         private final int b;
 
         @JsonCreator
@@ -177,7 +181,7 @@ public class SerializationTest {
             this.radiusNm = radiusNm;
             this.colour = colour;
         }
-        
+
         public Circle2(@JsonProperty("radiusNm") double radiusNm, @JsonProperty("colour") Optional<String> colour) {
             this(radiusNm, colour.orElse(null));
         }
@@ -228,6 +232,82 @@ public class SerializationTest {
 
         public List<Integer> arraySimple() {
             return arraySimple;
+        }
+    }
+
+    @Test
+    public void testDiscriminatorFindsCar() throws JsonMappingException, JsonProcessingException {
+        Vehicle v = m.readValue("{\"vehicleType\":\"car\"}", Vehicle.class);
+        assertTrue(v instanceof Car);
+    }
+
+    @Test
+    public void testDiscriminatorFindsBike() throws JsonMappingException, JsonProcessingException {
+        Vehicle v = m.readValue("{\"vehicleType\":\"bike\"}", Vehicle.class);
+        assertTrue(v instanceof Bike);
+    }
+
+    @Test
+    public void testDiscriminatorSerializeSubClass() throws JsonMappingException, JsonProcessingException {
+        String json = m.writeValueAsString(new Bike("red"));
+        System.out.println(json);
+        assertEquals("{\"vehicleType\":\"bike\",\"colour\":\"red\"}", json);
+    }
+
+    @JsonTypeInfo(use = Id.NAME, property = "vehicleType", include = As.EXISTING_PROPERTY)
+    @JsonSubTypes({ @Type(value = Car.class, name = "car"), @Type(value = Bike.class, name = "bike") })
+    public interface Vehicle {
+
+        String vehicleType();
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    public final static class Car implements Vehicle {
+
+        @JsonProperty("vehicleType")
+        private final String vehicleType;
+
+        @JsonCreator
+        private Car(@JsonProperty("vehicleType") String vehicleType) {
+            this.vehicleType = vehicleType;
+        }
+        
+        public Car() {
+            this("car");
+        }
+
+        @Override
+        public String vehicleType() {
+            return vehicleType;
+        }
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    public static final class Bike implements Vehicle {
+
+        @JsonProperty("vehicleType")
+        private final String vehicleType;
+        
+        @JsonProperty("colour")
+        private final String colour;
+
+        @JsonCreator
+        private Bike(@JsonProperty("vehicleType") String vehicleType, @JsonProperty("colour") String colour) {
+            this.vehicleType = vehicleType;
+            this.colour = colour;
+        }
+        
+        public Bike(String colour) {
+            this("bike", colour);
+        }
+
+        @Override
+        public String vehicleType() {
+            return vehicleType;
+        }
+
+        public String colour() {
+            return colour;
         }
     }
 
