@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.parser.OpenAPIParser;
@@ -68,6 +69,18 @@ public final class Names {
                 schemaNameToClassName(schemaName).replace(".", File.separator) + ".java");
     }
 
+    public String refToFullClassName(String ref) {
+        Preconditions.checkNotNull(ref);
+        final String fullClassName;
+        if (!ref.startsWith("#")) {
+            fullClassName = externalRefClassName(ref);
+        } else {
+            String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
+            fullClassName = schemaNameToClassName(schemaName);
+        }
+        return fullClassName;
+    }
+    
     public static String simpleClassName(String className) {
         return getLastItemInDotDelimitedString(className);
     }

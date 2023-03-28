@@ -11,8 +11,10 @@ import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +29,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Preconditions;
@@ -71,7 +77,7 @@ public class Generator2 {
         List<Field> fields = new ArrayList<>();
         List<EnumMember> enumMembers = new ArrayList<>();
         List<Cls> classes = new ArrayList<>();
-        List<String> interfaceMethods = new ArrayList<>();
+        Discriminator discriminator = null;
         String enumFullType;
         private int num = 0;
         private Set<String> fieldNames = new HashSet<String>();
@@ -127,6 +133,16 @@ public class Generator2 {
 
         public boolean unwrapSingleField() {
             return classType == ClassType.ENUM || (topLevel && fields.size() == 1);
+        }
+
+        public String discriminatorValueFromFullClassName(String fullClassName) {
+            String value = discriminator.fullClassNameToPropertyValue.get(fullClassName);
+            if (value == null) {
+                // TODO review using simple class name for value because collision risk
+                return Names.simpleClassName(fullClassName);
+            } else {
+                return value;
+            }
         }
     }
 
@@ -297,7 +313,7 @@ public class Generator2 {
                     previous.ifPresent(
                             p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
                 } else if (isOneOf(schema) || isAnyOf(schema)) {
-                    handleOneOrAnyOf(last, cls);
+                    handleOneOrAnyOf(last, cls, names);
                 } else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
@@ -329,13 +345,7 @@ public class Generator2 {
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minLength, maxLength,
                             pattern);
                 } else if (isRef(schema)) {
-                    String ref = schema.get$ref();
-                    if (!ref.startsWith("#")) {
-                        fullClassName = names.externalRefClassName(ref);
-                    } else {
-                        String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
-                        fullClassName = names.schemaNameToClassName(schemaName);
-                    }
+                    fullClassName = names.refToFullClassName(schema.get$ref());
                     String fieldName = current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
                     current.addField(fullClassName, last.name, fieldName, required, isArray);
@@ -376,7 +386,8 @@ public class Generator2 {
         writeClassDeclaration(out, imports, indent, cls);
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
-        if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
+                || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeOneOrAnyOfClassContent(out, imports, indent, cls);
         } else {
             writeFields(out, imports, indent, cls);
@@ -396,19 +407,23 @@ public class Generator2 {
             modifier = cls.topLevel ? "final " : "static final ";
         }
 
-        if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
-//            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
-//            indent.right().right();
-//            String types = cls.fields.stream().map(x -> String.format("\n%s@%s(%s.class)", indent,
-//                    imports.add(Type.class), imports.add(x.fullClassName))).collect(Collectors.joining(", "));
-//            indent.left();
-//            indent.left();
-//            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+            out.format("\n%s@%s(use = %s.NAME, property = \"%s\")\n", indent, 
+                    imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName);
+            indent.right().right();
+            String types = cls.fields.stream()
+                    .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),
+                            imports.add(x.fullClassName), cls.discriminatorValueFromFullClassName(x.fullClassName)))
+                    .collect(Collectors.joining(", "));
+            indent.left();
+            indent.left();
+            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
+        } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
             writeOneOfDeserializerAnnotation(out, imports, indent, cls);
         } else {
             out.println();
         }
-        if (cls.classType != ClassType.ENUM) {
+        if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
         }
         out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
@@ -447,13 +462,34 @@ public class Generator2 {
         }
     }
 
-    private static void handleOneOrAnyOf(SchemaWithName last, Cls cls) {
-        
-        if (last.schema.getDiscriminator() != null) {
-            cls.interfaceMethods.add(Names.toFieldName(last.name));
+    private static void handleOneOrAnyOf(SchemaWithName last, Cls cls, Names names) {
+
+        io.swagger.v3.oas.models.media.Discriminator discriminator = last.schema.getDiscriminator();
+        if (discriminator != null) {
+            String propertyName = discriminator.getPropertyName();
+            final Map<String, String> map;
+            if (discriminator.getMapping() != null) {
+                map = discriminator.getMapping().entrySet().stream()
+                        .collect(Collectors.toMap(x -> names.refToFullClassName(x.getValue()), x -> x.getKey()));
+            } else {
+                map = Collections.emptyMap();
+            }
+            cls.discriminator = new Discriminator(propertyName, Names.toFieldName(propertyName), map);
             cls.classType = ClassType.ONE_OR_ANY_OF_DISCRIMINATED;
         } else {
             cls.classType = ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
+        }
+    }
+
+    private static final class Discriminator {
+        final String propertyName;
+        final String fieldName;
+        final Map<String, String> fullClassNameToPropertyValue;
+
+        Discriminator(String propertyName, String fieldName, Map<String, String> fullClassNameToPropertyValue) {
+            this.propertyName = propertyName;
+            this.fieldName = fieldName;
+            this.fullClassNameToPropertyValue = fullClassNameToPropertyValue;
         }
     }
 
@@ -472,43 +508,47 @@ public class Generator2 {
     }
 
     private static void writeOneOrAnyOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        out.format("\n%s@%s\n", indent, imports.add(JsonValue.class));
-        out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
-        // add constructor for each member of the oneOf (fieldTypes)
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+            out.format("\n%s%s %s();\n", indent, imports.add(String.class), cls.discriminator.fieldName);
+        } else {
+            out.format("\n%s@%s\n", indent, imports.add(JsonValue.class));
+            out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
 
-        out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
-        out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
-        out.format("%sthis.value = %s.checkNotNull(value);\n", indent.right(), imports.add(Preconditions.class));
-        out.format("%s}\n", indent.left());
-        cls.fields.forEach(f -> {
-            String className = toPrimitive(f.fullClassName);
-            out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
-            indent.right();
-            if (Names.isPrimitiveFullClassName(className)) {
-                out.format("%sthis.value = value;\n", indent);
-            } else {
-                out.format("%sthis.value = %s.checkNotNull(value);\n", indent, imports.add(Preconditions.class));
-            }
+            // add constructor for each member of the oneOf (fieldTypes)
+            out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+            out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
+            out.format("%sthis.value = %s.checkNotNull(value);\n", indent.right(), imports.add(Preconditions.class));
             out.format("%s}\n", indent.left());
-        });
+            cls.fields.forEach(f -> {
+                String className = toPrimitive(f.fullClassName);
+                out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
+                indent.right();
+                if (Names.isPrimitiveFullClassName(className)) {
+                    out.format("%sthis.value = value;\n", indent);
+                } else {
+                    out.format("%sthis.value = %s.checkNotNull(value);\n", indent, imports.add(Preconditions.class));
+                }
+                out.format("%s}\n", indent.left());
+            });
 
-        out.format("\n%spublic Object value() {\n", indent);
-        out.format("%sreturn value;\n", indent.right());
-        out.format("%s}\n", indent.left());
+            out.format("\n%spublic Object value() {\n", indent);
+            out.format("%sreturn value;\n", indent.right());
+            out.format("%s}\n", indent.left());
 
-        out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
-        out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
-                imports.add(OneOfDeserializer.class), cls.simpleName());
-        indent.right();
-        out.format("\n%spublic Deserializer() {\n", indent);
-        indent.right();
-        String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
-                .collect(Collectors.joining(", "));
-        out.format("%ssuper(%s.class, %s);\n", indent, cls.simpleName(), classes);
-        indent.left();
-        out.format("%s}\n", indent);
-        indent.left();
-        out.format("%s}\n", indent);
+            out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
+            out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
+                    imports.add(OneOfDeserializer.class), cls.simpleName());
+            indent.right();
+            out.format("\n%spublic Deserializer() {\n", indent);
+            indent.right();
+            String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
+                    .collect(Collectors.joining(", "));
+            out.format("%ssuper(%s.class, %s);\n", indent, cls.simpleName(), classes);
+            indent.left();
+            out.format("%s}\n", indent);
+            indent.left();
+            out.format("%s}\n", indent);
+        }
     }
 
     private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
