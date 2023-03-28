@@ -3,6 +3,9 @@ package org.davidmoten.openapi.v3;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 import org.junit.Test;
 
@@ -185,7 +188,32 @@ public class SerializationTest {
         public double heightDegrees() {
             return heightDegrees;
         }
+    }
 
+    @Test
+    public void testArray() throws JsonMappingException, JsonProcessingException {
+        ObjectMapper m = new ObjectMapper();
+        List<Integer> list = Arrays.asList(1, 2, 3);
+        ArraySimple a = new ArraySimple(list);
+        String json = "[1,2,3]";
+        assertEquals(json, m.writeValueAsString(a));
+        ArraySimple b = m.readValue(json, ArraySimple.class);
+        assertEquals(list, b.arraySimple());
+    }
+
+    public static final class ArraySimple {
+
+        @JsonValue
+        private final List<Integer> arraySimple;
+
+        @JsonCreator
+        public ArraySimple(List<Integer> arraySimple) {
+            this.arraySimple = Preconditions.checkNotNull(arraySimple);
+        }
+
+        public List<Integer> arraySimple() {
+            return arraySimple;
+        }
     }
 
 }

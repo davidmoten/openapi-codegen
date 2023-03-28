@@ -47,7 +47,7 @@ public class Apis {
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
             if (a.getItems() != null) {
-                visitSchemas(schemaPath.add(new SchemaWithName(schemaPath.last().name + "Item", a.getItems())), visitor);
+                visitSchemas(schemaPath.add(new SchemaWithName(schemaPath.last().name, a.getItems())), visitor);
             }
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;

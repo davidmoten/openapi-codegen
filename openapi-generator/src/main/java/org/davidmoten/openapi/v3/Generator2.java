@@ -267,7 +267,7 @@ public class Generator2 {
             if (isArray(schema)) {
                 return;
             }
-            boolean isArray = schemaPath.size() > 2 && schemaPath.secondLast().schema instanceof ArraySchema;
+            boolean isArray = schemaPath.size() >= 2 && schemaPath.secondLast().schema instanceof ArraySchema;
             if (isObject(schema) || isMap(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 stack.push(cls);
@@ -380,6 +380,7 @@ public class Generator2 {
         } else {
             modifier = "static final ";
         }
+
         if (cls.classType == ClassType.ONE_OR_ANY_OF) {
 //            out.format("\n%s@%s(use = %s.DEDUCTION)\n", indent, imports.add(JsonTypeInfo.class), imports.add(Id.class));
 //            indent.right().right();
@@ -388,14 +389,22 @@ public class Generator2 {
 //            indent.left();
 //            indent.left();
 //            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
-            out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
-                    cls.simpleName());
-            out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
-                    imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
+            writeOneOfDeserializerAnnotation(out, imports, indent, cls);
+            writeAutoDetectAnnotation(out, imports, indent);
         } else {
             out.println();
         }
         out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
+    }
+
+    private static void writeOneOfDeserializerAnnotation(PrintStream out, Imports imports, Indent indent, Cls cls) {
+        out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
+                cls.simpleName());
+    }
+
+    private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
+        out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
+                imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
     }
 
     private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
@@ -492,19 +501,23 @@ public class Generator2 {
             f.maxLength.ifPresent(x -> out.format("%s@%s(max = %s, message = \"%s\")\n", indent,
                     imports.add(Size.class), x, "string value must be at most " + x + " characters: " + f.fieldName));
             f.pattern.ifPresent(x -> out.format("%s@%s(\"%s\")\n", indent, imports.add(Pattern.class), x));
-            if (cls.classType == ClassType.ENUM || (cls.topLevel && cls.fields.size() == 1)) {
+            if (unwrapSingleField(cls)) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
             out.format("%sprivate final %s %s;\n", indent, f.resolvedType(imports), f.fieldName);
         });
     }
 
+    private static boolean unwrapSingleField(Cls cls) {
+        return cls.classType == ClassType.ENUM || (cls.topLevel && cls.fields.size() == 1);
+    }
+
     private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls) {
         indent.right().right();
         final String parameters;
-        if (cls.classType == ClassType.ENUM) {
+        if (unwrapSingleField(cls)) {
             parameters = cls.fields.stream()
-                    .map(x -> String.format("\n%s %s", indent, x.resolvedType(imports), x.fieldName))
+                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName))
                     .collect(Collectors.joining());
         } else {
             parameters = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", indent,
