@@ -82,6 +82,7 @@ public class Generator2 {
         private int num = 0;
         private Set<String> fieldNames = new HashSet<String>();
         boolean topLevel = false;
+        boolean hasProperties = false;
 
         private String nextAnonymousFieldName() {
             num++;
@@ -132,7 +133,7 @@ public class Generator2 {
         }
 
         public boolean unwrapSingleField() {
-            return classType == ClassType.ENUM || (topLevel && fields.size() == 1);
+            return !hasProperties && (classType == ClassType.ENUM || (topLevel && fields.size() == 1));
         }
 
         public String discriminatorValueFromFullClassName(String fullClassName) {
@@ -309,6 +310,7 @@ public class Generator2 {
                     handleEnum(schema, cls);
                 } else if (isObject(schema)) {
                     cls.classType = ClassType.CLASS;
+                    cls.hasProperties = true;
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(
                             p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
