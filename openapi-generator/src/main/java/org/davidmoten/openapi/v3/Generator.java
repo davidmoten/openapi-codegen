@@ -47,7 +47,7 @@ import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator {
-    
+
     private final Definition definition;
 
     public Generator(Definition definition) {
@@ -242,7 +242,6 @@ public class Generator {
             this.minLength = minLength;
             this.maxLength = maxLength;
             this.pattern = pattern;
-
         }
 
         public String resolvedType(Imports imports) {
@@ -386,7 +385,7 @@ public class Generator {
                         maxLength = Optional.empty();
                         pattern = Optional.empty();
                     }
-                    String fieldName = current.nextFieldName(last.name);
+                    String fieldName = schemaPath.size() == 1 ? "value" : current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minLength, maxLength,
                             pattern);
