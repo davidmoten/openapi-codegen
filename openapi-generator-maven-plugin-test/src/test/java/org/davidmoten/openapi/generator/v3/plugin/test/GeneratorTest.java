@@ -1,7 +1,6 @@
 package org.davidmoten.openapi.generator.v3.plugin.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -10,6 +9,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import generated.model.SimpleInt;
+import generated.model.SimpleInteger;
 import generated.model.SimpleLong;
 
 public class GeneratorTest {
@@ -29,6 +29,15 @@ public class GeneratorTest {
         String json = "123";
         SimpleInt a = m.readValue(json, SimpleInt.class);
         assertEquals(Integer.TYPE, typeof(a.value()));
+        assertEquals(123, a.value());
+        assertEquals(json, m.writeValueAsString(a));
+    }
+    
+    @Test
+    public void testSimpleIntegerDefaultsToLong() throws JsonMappingException, JsonProcessingException {
+        String json = "123";
+        SimpleInteger a = m.readValue(json, SimpleInteger.class);
+        assertEquals(Long.TYPE, typeof(a.value()));
         assertEquals(123, a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
