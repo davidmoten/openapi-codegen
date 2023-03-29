@@ -43,7 +43,7 @@ public class ImportsTest {
                 + "\n" //
                 + "import java.io.IOException;\n" //
                 + "import java.lang.Integer;\n" //
-                + "import java.net.HttpURLConnection;\n\n", //
+                + "import java.net.HttpURLConnection;\n", //
                 imports.toString());
     }
     
