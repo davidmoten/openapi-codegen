@@ -35,8 +35,6 @@ public class SerializationTest {
 
     private static final ObjectMapper m = new ObjectMapper().registerModule(new Jdk8Module());
 
-    private Vehicle v;
-
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
