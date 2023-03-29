@@ -41,9 +41,8 @@ public final class GenerateMojo extends AbstractMojo {
         getLog().info("sources=" + sources);
         try {
             if (sources.getIncludes().isEmpty()) {
-                sources.addInclude("**/*.puml");
-                sources.addInclude("**/*.plantuml");
-                sources.addInclude("**/*.txt");
+                sources.addInclude("**/*.yml");
+                sources.addInclude("**/*.yaml");
             }
             List<File> files = FileUtils.getFiles(new File(sources.getDirectory()),
                     commaSeparate(sources.getIncludes()), commaSeparate(sources.getExcludes()));
