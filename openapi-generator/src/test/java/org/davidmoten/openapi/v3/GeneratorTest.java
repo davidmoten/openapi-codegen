@@ -15,7 +15,7 @@ public final class GeneratorTest {
                 StandardCharsets.UTF_8);
         Packages packages = new Packages("test.model", "test.client");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x);
-        new Generator2(d).generate();
+        new Generator(d).generate();
     }
     
 }

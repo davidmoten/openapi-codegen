@@ -5,6 +5,8 @@ import java.util.function.Function;
 
 public final class Definition {
     
+    public static boolean MAP_INTEGER_TO_BIG_INTEGER = false;
+    
     private final String definition;
     private final File generatedSourceDirectory;
     private final Packages packages;
