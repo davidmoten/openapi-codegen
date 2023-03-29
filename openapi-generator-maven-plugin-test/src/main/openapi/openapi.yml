@@ -1146,3 +1146,7 @@ components:
     SimpleString:
       type: string
       
+    SimpleDateTime:
+      type: string
+      format: date-time
+      
