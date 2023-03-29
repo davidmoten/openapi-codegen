@@ -85,16 +85,6 @@ public class PluginGeneratorTest {
     }
 
     @Test
-    public void testSimpleByteArrayUsingBase64Encoding() throws JsonMappingException, JsonProcessingException {
-        byte[] bytes = "abc".getBytes(StandardCharsets.UTF_8);
-        String json = "\"" + Base64.getEncoder().encodeToString(bytes) + "\"";
-        SimpleByteArray a = m.readValue(json, SimpleByteArray.class);
-        assertTrue(a.value() instanceof byte[]);
-        assertArrayEquals(bytes, a.value());
-        assertEquals(json, m.writeValueAsString(a));
-    }
-
-    @Test
     public void testSimpleDateTime() throws JsonMappingException, JsonProcessingException {
         String s = "2018-03-20T09:12:28Z";
         String json = "\"" + s + "\"";
@@ -110,6 +100,16 @@ public class PluginGeneratorTest {
         SimpleBoolean a = m.readValue(json, SimpleBoolean.class);
         assertEquals(Boolean.TYPE, typeof(a.value()));
         assertTrue(a.value());
+        assertEquals(json, m.writeValueAsString(a));
+    }
+    
+    @Test
+    public void testSimpleByteArrayUsingBase64Encoding() throws JsonMappingException, JsonProcessingException {
+        byte[] bytes = "abc".getBytes(StandardCharsets.UTF_8);
+        String json = "\"" + Base64.getEncoder().encodeToString(bytes) + "\"";
+        SimpleByteArray a = m.readValue(json, SimpleByteArray.class);
+        assertTrue(a.value() instanceof byte[]);
+        assertArrayEquals(bytes, a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
 
