@@ -92,6 +92,7 @@
 
     <modules>
         <module>openapi-generator</module>
+        <module>openapi-generator-maven-plugin</module>
     </modules>
 
     <build>
