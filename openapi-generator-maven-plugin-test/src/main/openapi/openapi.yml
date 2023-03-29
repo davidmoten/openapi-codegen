@@ -1158,3 +1158,5 @@ components:
       type: string
       format: date-time
       
+    SimpleBoolean:
+      type: boolean

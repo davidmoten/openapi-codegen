@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import generated.model.SimpleBoolean;
 import generated.model.SimpleDateTime;
 import generated.model.SimpleDouble;
 import generated.model.SimpleFloat;
@@ -88,25 +89,38 @@ public class GeneratorTest {
         assertEquals(OffsetDateTime.parse(s), a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
+    
+    @Test
+    public void testSimpleBoolean() throws JsonMappingException, JsonProcessingException {
+        String json = "true";
+        SimpleBoolean a = m.readValue(json, SimpleBoolean.class);
+        assertEquals(Boolean.TYPE, typeof(a.value()));
+        assertTrue(a.value());
+        assertEquals(json, m.writeValueAsString(a));
+    }
 
-    public static Class<Integer> typeof(int x) {
+    private static Class<Integer> typeof(int x) {
         return Integer.TYPE;
     }
 
-    public static Class<Long> typeof(long x) {
+    private static Class<Long> typeof(long x) {
         return Long.TYPE;
     }
     
-    public static Class<Float> typeof(float x) {
+    private static Class<Float> typeof(float x) {
         return Float.TYPE;
     }
     
-    public static Class<Double> typeof(double x) {
+    private static Class<Double> typeof(double x) {
         return Double.TYPE;
     }
     
-    public static Class<Byte> typeof(byte x) {
+    private static Class<Byte> typeof(byte x) {
         return Byte.TYPE;
+    }
+    
+    private static Class<Boolean> typeof(boolean x) {
+        return Boolean.TYPE;
     }
 
 }
