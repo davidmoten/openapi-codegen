@@ -7,81 +7,35 @@
         <artifactId>openapi-generator-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>openapi-generator</artifactId>
+    <artifactId>openapi-generator-runtime</artifactId>
     <name>${project.artifactId}</name>
     <description></description>
     <packaging>jar</packaging>
-
-    <url>http://github.com/davidmoten/openapi-generator</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <slf4j.version>1.7.30</slf4j.version>
-        <log4j.version>2.13.3</log4j.version>
-        <jackson.version>2.14.2</jackson.version>
-    </properties>
-
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
-        </license>
-    </licenses>
-
-    <ciManagement>
-        <system>Travis</system>
-        <url>https://travis-ci.org/davidmoten/openapi-generator</url>
-    </ciManagement>
-
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/davidmoten/openapi-generator/issues</url>
-    </issueManagement>
-
-    <inceptionYear>2020</inceptionYear>
-    <developers>
-        <developer>
-            <id>dave</id>
-            <name>Dave Moten</name>
-            <url>https://github.com/davidmoten/</url>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+10</timezone>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:https://github.com/davidmoten/openapi-generator.git</connection>
-        <developerConnection>scm:git:https://github.com/davidmoten/openapi-generator.git</developerConnection>
-        <url>scm:git:https://github.com:davidmoten/openapi-generator.git</url>
-        <tag>HEAD</tag>
-    </scm>
 
     <dependencies>
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-generator-runtime</artifactId>
-            <version>${project.parent.version}</version>
+            <artifactId>guava-mini</artifactId>
+            <version>0.1.4</version>
         </dependency>
 
         <dependency>
-            <groupId>io.swagger.parser.v3</groupId>
-            <artifactId>swagger-parser</artifactId>
-            <version>2.0.33</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
-        
+
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
-            <scope>test</scope>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>
@@ -130,6 +84,30 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!--            <plugin>-->
+            <!--                <groupId>org.openapitools</groupId>-->
+            <!--                <artifactId>openapi-generator-maven-plugin</artifactId>-->
+            <!--                <version>6.4.0</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <goals>-->
+            <!--                            <goal>generate</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <inputSpec>${project.basedir}/src/test/resources/openapi2.yml</inputSpec>-->
+            <!--                            <generatorName>spring</generatorName>-->
+            <!--                            <apiPackage>api.controllers</apiPackage>-->
+            <!--                            <modelPackage>api.responses</modelPackage>-->
+            <!--                            <configOptions>-->
+            <!--                                <interfaceOnly>false</interfaceOnly>-->
+            <!--                                <delegatePattern>true</delegatePattern>-->
+            <!--                                <generateSupportingFiles>false</generateSupportingFiles>-->
+            <!--                            </configOptions>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
         </plugins>
 
     </build>
