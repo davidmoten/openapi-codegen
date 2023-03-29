@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -65,10 +66,53 @@ public class Generator2 {
     }
 
     private static void writeSchemaClasses(Definition definition, Names names) {
+//        Map<String, List<String>> fullClassNameInterfaces = new HashMap<>();
+//        names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
+//            Visitor v = new Visitor();
+//            Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
+//        });
+        List<MyVisitor.Result> results = new ArrayList<>();
         names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
             MyVisitor v = new MyVisitor(names);
             Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
+            results.add(v.result());
         });
+        Map<String, List<String>> fullClassNameInterfaces = new HashMap<>();
+        for (MyVisitor.Result result : results) {
+            findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
+        }
+        for (MyVisitor.Result result : results) {
+            ByteArrayPrintStream out = ByteArrayPrintStream.create();
+            Indent indent = new Indent();
+            out.format("package %s;\n", result.cls.pkg());
+            out.format("\nIMPORTS_HERE");
+            writeClass(out, result.imports, indent, result.cls, fullClassNameInterfaces);
+            System.out.println("////////////////////////////////////////////////");
+            String content = out.text().replace("IMPORTS_HERE", result.imports.toString());
+            System.out.println(content);
+            out.close();
+            File file = names.schemaNameToJavaFile(result.name);
+            file.getParentFile().mkdirs();
+            try {
+                Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+    }
+
+    private static void findFullClassNameInterfaces(Cls cls, Map<String, List<String>> fullClassNameInterfaces) {
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+            cls.fields.forEach(x -> {
+                List<String> list = fullClassNameInterfaces.get(cls.fullClassName);
+                if (list == null) {
+                    list = new ArrayList<>();
+                    fullClassNameInterfaces.put(x.fullClassName, list);
+                }
+                list.add(cls.fullClassName);
+            });
+        }
+
     }
 
     private static final class Cls {
@@ -268,11 +312,10 @@ public class Generator2 {
         private final Names names;
         private Imports imports;
         private LinkedStack<Cls> stack = new LinkedStack<>();
-        private ByteArrayPrintStream out;
+        private Result result;
 
         public MyVisitor(Names names) {
             this.names = names;
-            this.out = ByteArrayPrintStream.create();
         }
 
         @Override
@@ -364,28 +407,32 @@ public class Generator2 {
                     || (schemaPath.size() == 1)) {
                 stack.pop();
                 if (stack.isEmpty()) {
-                    Indent indent = new Indent();
-                    out.format("package %s;\n", cls.pkg());
-                    out.format("\nIMPORTS_HERE");
-                    writeClass(out, imports, indent, cls);
-                    System.out.println("////////////////////////////////////////////////");
-                    String content = out.text().replace("IMPORTS_HERE", imports.toString());
-                    System.out.println(content);
-                    out.close();
-                    File file = names.schemaNameToJavaFile(schemaPath.first().name);
-                    file.getParentFile().mkdirs();
-                    try {
-                        Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
+                    this.result = new Result(cls, imports, schemaPath.first().name);
                 }
             }
         }
+
+        public Result result() {
+            return result;
+        }
+
+        public static final class Result {
+            final Cls cls;
+            final Imports imports;
+            final String name;
+
+            public Result(Cls cls, Imports imports, String name) {
+                this.cls = cls;
+                this.imports = imports;
+                this.name = name;
+            }
+        }
+
     }
 
-    private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        writeClassDeclaration(out, imports, indent, cls);
+    private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls,
+            Map<String, List<String>> fullClassNameInterfaces) {
+        writeClassDeclaration(out, imports, indent, cls, fullClassNameInterfaces);
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
         if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
@@ -396,29 +443,36 @@ public class Generator2 {
             writeConstructor(out, imports, indent, cls);
             writeGetters(out, imports, indent, cls);
         }
-        writeMemberClasses(out, imports, indent, cls);
+        writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces);
         indent.left();
         out.format("%s}\n", indent);
     }
 
-    private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls,
+            Map<String, List<String>> fullClassNameInterfaces) {
         String modifier;
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ENUM) {
             modifier = "";
         } else {
             modifier = cls.topLevel ? "final " : "static final ";
         }
-
+        List<String> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
+        final String implemented;
+        if (interfaces == null || interfaces.isEmpty()) {
+            implemented = "";
+        } else {
+            implemented = " implements " + interfaces.stream().map(x -> imports.add(x)).collect(Collectors.joining(", " ));
+        }
+        
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            out.format("\n%s@%s(use = %s.NAME, property = \"%s\")\n", indent, 
-                    imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName);
+            out.format("\n%s@%s(use = %s.NAME, property = \"%s\")\n", indent, imports.add(JsonTypeInfo.class),
+                    imports.add(Id.class), cls.discriminator.propertyName);
             indent.right().right();
             String types = cls.fields.stream()
                     .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),
                             imports.add(x.fullClassName), cls.discriminatorValueFromFullClassName(x.fullClassName)))
                     .collect(Collectors.joining(", "));
-            indent.left();
-            indent.left();
+            indent.left().left();
             out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
         } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
             writeOneOfDeserializerAnnotation(out, imports, indent, cls);
@@ -428,7 +482,7 @@ public class Generator2 {
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
         }
-        out.format("%spublic %s%s %s {\n", indent, modifier, cls.classType.word(), cls.simpleName());
+        out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
     }
 
     private static void writeOneOfDeserializerAnnotation(PrintStream out, Imports imports, Indent indent, Cls cls) {
@@ -647,8 +701,9 @@ public class Generator2 {
         });
     }
 
-    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls) {
-        cls.classes.forEach(c -> writeClass(out, imports, indent, c));
+    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls,
+            Map<String, List<String>> fullClassNameInterfaces) {
+        cls.classes.forEach(c -> writeClass(out, imports, indent, c, fullClassNameInterfaces));
     }
 
     private static String resolvedTypeNullable(Field f, Imports imports) {

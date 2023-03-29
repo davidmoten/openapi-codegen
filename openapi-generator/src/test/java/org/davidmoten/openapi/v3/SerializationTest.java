@@ -255,7 +255,9 @@ public class SerializationTest {
     }
 
     @JsonTypeInfo(use = Id.NAME, property = "vehicleType", include = As.EXISTING_PROPERTY)
-    @JsonSubTypes({ @Type(value = Car.class, name = "car"), @Type(value = Bike.class, name = "bike") })
+    @JsonSubTypes({ //
+        @Type(value = Car.class, name = "car"), //
+        @Type(value = Bike.class, name = "bike") })
     public interface Vehicle {
 
         String vehicleType();
