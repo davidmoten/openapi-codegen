@@ -1136,3 +1136,7 @@ components:
       type: integer
       format: int64
       
+    SimpleInt:
+      type: integer
+      format: int32
+      
