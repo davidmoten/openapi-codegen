@@ -1,9 +1,12 @@
 package org.davidmoten.openapi.generator.v3.plugin.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.Base64;
 
 import org.junit.Test;
 
@@ -14,6 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import generated.model.SimpleBoolean;
+import generated.model.SimpleByteArray;
 import generated.model.SimpleDateTime;
 import generated.model.SimpleDouble;
 import generated.model.SimpleFloat;
@@ -22,7 +26,7 @@ import generated.model.SimpleInteger;
 import generated.model.SimpleLong;
 import generated.model.SimpleString;
 
-public class GeneratorTest {
+public class PluginGeneratorTest {
 
     private static final ObjectMapper m = new ObjectMapper().registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -61,7 +65,7 @@ public class GeneratorTest {
         assertEquals(123.4, a.value(), 0.00001);
         assertEquals(json, m.writeValueAsString(a));
     }
-    
+
     @Test
     public void testSimpleDouble() throws JsonMappingException, JsonProcessingException {
         String json = "123.4";
@@ -81,6 +85,16 @@ public class GeneratorTest {
     }
 
     @Test
+    public void testSimpleByteArrayUsingBase64Encoding() throws JsonMappingException, JsonProcessingException {
+        byte[] bytes = "abc".getBytes(StandardCharsets.UTF_8);
+        String json = "\"" + Base64.getEncoder().encodeToString(bytes) + "\"";
+        SimpleByteArray a = m.readValue(json, SimpleByteArray.class);
+        assertTrue(a.value() instanceof byte[]);
+        assertArrayEquals(bytes, a.value());
+        assertEquals(json, m.writeValueAsString(a));
+    }
+
+    @Test
     public void testSimpleDateTime() throws JsonMappingException, JsonProcessingException {
         String s = "2018-03-20T09:12:28Z";
         String json = "\"" + s + "\"";
@@ -89,7 +103,7 @@ public class GeneratorTest {
         assertEquals(OffsetDateTime.parse(s), a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
-    
+
     @Test
     public void testSimpleBoolean() throws JsonMappingException, JsonProcessingException {
         String json = "true";
@@ -106,19 +120,19 @@ public class GeneratorTest {
     private static Class<Long> typeof(long x) {
         return Long.TYPE;
     }
-    
+
     private static Class<Float> typeof(float x) {
         return Float.TYPE;
     }
-    
+
     private static Class<Double> typeof(double x) {
         return Double.TYPE;
     }
-    
+
     private static Class<Byte> typeof(byte x) {
         return Byte.TYPE;
     }
-    
+
     private static Class<Boolean> typeof(boolean x) {
         return Boolean.TYPE;
     }

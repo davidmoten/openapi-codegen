@@ -22,6 +22,10 @@ public final class Imports {
     }
 
     public String add(String className) {
+        if (className.endsWith("[]") && Names.isPrimitiveFullClassName(className.substring(0, className.length() - 2))) {
+            // don't add byte[] etc to imports
+            return className;
+        }
         final String simplifiedName = simplifiedName(className);
         String c = map.get(simplifiedName);
         if (c == null) {
@@ -71,8 +75,7 @@ public final class Imports {
                     @Override
                     public String apply(String c) {
                         String firstSegment = firstSegment(c);
-                        boolean insertBlankLine = previous != null
-                                && !firstSegment.equals(previous);
+                        boolean insertBlankLine = previous != null && !firstSegment.equals(previous);
                         previous = firstSegment;
                         return (insertBlankLine ? "\n" : "") + "import " + c + ";";
                     }

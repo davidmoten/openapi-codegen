@@ -815,7 +815,7 @@ public class Generator {
             } else if ("date".equals(format)) {
                 return null;
             } else if ("byte".equals(format)) {
-                return Byte.class;
+                return byte[].class;
             } else if ("binary".equals(format)) {
                 return Byte.class;
             } else {
