@@ -2,6 +2,8 @@ package com.github.davidmoten.openapi.generator.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +14,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.io.FileUtils;
+import org.davidmoten.openapi.v3.Definition;
+import org.davidmoten.openapi.v3.Generator;
+import org.davidmoten.openapi.v3.Packages;
 
 @Mojo(name = "generate")
 public final class GenerateMojo extends AbstractMojo {
@@ -19,15 +24,21 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "sources")
     private FileSet sources;
 
-    @Parameter(name = "outputDirectory", defaultValue = "${project.build.directory}/generated-diagrams/")
+    @Parameter(name = "outputDirectory", defaultValue = "${project.build.directory}/generated-sources/java")
     private File outputDirectory;
+    
+    @Parameter(name = "modelPackage", defaultValue = "generated.model")
+    private String modelPackage;
 
+    @Parameter(name = "clientPackage", defaultValue = "generated.client")
+    private String clientPackage;
+    
     @Parameter(name = "charset", defaultValue = "UTF-8")
     private String charset;
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
-    
+
     @Override
     public void execute() throws MojoExecutionException {
         if (sources == null) {
@@ -46,9 +57,15 @@ public final class GenerateMojo extends AbstractMojo {
             }
             List<File> files = FileUtils.getFiles(new File(sources.getDirectory()),
                     commaSeparate(sources.getIncludes()), commaSeparate(sources.getExcludes()));
-            for (File file: files) {
+            for (File file : files) {
                 getLog().info(file.toString());
+                String definition = new String(Files.readAllBytes(file.toPath()),
+                        StandardCharsets.UTF_8);
+                Packages packages = new Packages(modelPackage, clientPackage);
+                Definition d = new Definition(definition, packages, outputDirectory, x -> x);
+                new Generator(d).generate();
             }
+            project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage());
         }
