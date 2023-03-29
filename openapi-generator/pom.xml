@@ -4,11 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.github.davidmoten</groupId>
-        <artifactId>sonatype-parent</artifactId>
-        <version>0.1</version>
+        <artifactId>openapi-generator-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
     </parent>
     <artifactId>openapi-generator</artifactId>
-    <version>0.1-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description></description>
     <packaging>jar</packaging>
