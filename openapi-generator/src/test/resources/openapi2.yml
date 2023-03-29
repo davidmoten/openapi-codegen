@@ -1208,5 +1208,7 @@ components:
       properties:
         vehicleType:
           type: string
-      required: [vehicleType]
+        colour:
+          type: string
+      required: [vehicleType, colour]
       
