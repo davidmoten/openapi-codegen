@@ -1044,12 +1044,14 @@ components:
       maximum: 21
           
     MetArea:
-      properties: 
+      properties:
+        metBroadcastAreaType:
+          type: string 
         metAreaCode:
           type: integer
           minimum: 1
           maximum: 21
-      required: [metAreaCode]
+      required: [metBroadcastAreaType, metAreaCode]
           
     CoastalWarningArea:
       properties: 
@@ -1195,20 +1197,34 @@ components:
         mapping: 
           car: '#/components/schemas/Car'
           bike: '#/components/schemas/Bike'
+    
+    HasWheels:
+      oneOf: 
+      - $ref: '#/components/schemas/Car'
+      - $ref: '#/components/schemas/Bike'
+      discriminator:
+        propertyName: wheelsType
+        mapping: 
+          four: '#/components/schemas/Car'
+          two: '#/components/schemas/Bike'
           
     Car:
       type: object
       properties:
         vehicleType:
           type: string
-      required: [vehicleType]
+        wheelsType:
+          type: string
+      required: [vehicleType, wheelsType]
           
     Bike:
       type: object
       properties:
         vehicleType:
           type: string
+        wheelsType:
+          type: string
         colour:
           type: string
-      required: [vehicleType, colour]
+      required: [vehicleType, wheelsType, colour]
       

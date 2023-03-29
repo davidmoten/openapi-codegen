@@ -77,7 +77,7 @@ public class Generator2 {
             Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
             results.add(v.result());
         });
-        Map<String, List<String>> fullClassNameInterfaces = new HashMap<>();
+        Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
         for (MyVisitor.Result result : results) {
             findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
         }
@@ -101,18 +101,17 @@ public class Generator2 {
         }
     }
 
-    private static void findFullClassNameInterfaces(Cls cls, Map<String, List<String>> fullClassNameInterfaces) {
+    private static void findFullClassNameInterfaces(Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             cls.fields.forEach(x -> {
-                List<String> list = fullClassNameInterfaces.get(cls.fullClassName);
+                Set<Cls> list = fullClassNameInterfaces.get(x.fullClassName);
                 if (list == null) {
-                    list = new ArrayList<>();
+                    list = new HashSet<>();
                     fullClassNameInterfaces.put(x.fullClassName, list);
                 }
-                list.add(cls.fullClassName);
+                list.add(cls);
             });
         }
-
     }
 
     private static final class Cls {
@@ -431,7 +430,7 @@ public class Generator2 {
     }
 
     private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls,
-            Map<String, List<String>> fullClassNameInterfaces) {
+            Map<String, Set<Cls>> fullClassNameInterfaces) {
         writeClassDeclaration(out, imports, indent, cls, fullClassNameInterfaces);
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
@@ -440,8 +439,8 @@ public class Generator2 {
             writeOneOrAnyOfClassContent(out, imports, indent, cls);
         } else {
             writeFields(out, imports, indent, cls);
-            writeConstructor(out, imports, indent, cls);
-            writeGetters(out, imports, indent, cls);
+            writeConstructor(out, imports, indent, cls, fullClassNameInterfaces);
+            writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
         }
         writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces);
         indent.left();
@@ -449,21 +448,22 @@ public class Generator2 {
     }
 
     private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls,
-            Map<String, List<String>> fullClassNameInterfaces) {
-        String modifier;
+            Map<String, Set<Cls>> fullClassNameInterfaces) {
+        final String modifier;
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ENUM) {
             modifier = "";
         } else {
             modifier = cls.topLevel ? "final " : "static final ";
         }
-        List<String> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
+        Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
         final String implemented;
         if (interfaces == null || interfaces.isEmpty()) {
             implemented = "";
         } else {
-            implemented = " implements " + interfaces.stream().map(x -> imports.add(x)).collect(Collectors.joining(", " ));
+            implemented = " implements "
+                    + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
         }
-        
+
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s@%s(use = %s.NAME, property = \"%s\")\n", indent, imports.add(JsonTypeInfo.class),
                     imports.add(Id.class), cls.discriminator.propertyName);
@@ -627,7 +627,8 @@ public class Generator2 {
         });
     }
 
-    private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls,
+            Map<String, Set<Cls>> fullClassNameInterfaces) {
         indent.right().right();
         final String parametersNullable;
         if (cls.unwrapSingleField()) {
@@ -640,6 +641,8 @@ public class Generator2 {
                     .collect(Collectors.joining(","));
         }
         indent.left().left();
+        Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
+
         if (cls.classType != ClassType.ENUM) {
             out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
         } else {
@@ -648,7 +651,8 @@ public class Generator2 {
         boolean hasOptional = !cls.unwrapSingleField() && cls.fields.stream().anyMatch(f -> !f.required);
         // if has optional then write a private constructor with nullable parameters
         // and a public constructor with Optional parameters
-        final String visibility = cls.classType == ClassType.ENUM || hasOptional ? "private" : "public";
+        final String visibility = cls.classType == ClassType.ENUM || hasOptional || !interfaces.isEmpty() ? "private"
+                : "public";
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
         cls.fields.stream().forEach(x -> {
@@ -661,16 +665,22 @@ public class Generator2 {
         });
         indent.left();
         out.format("%s}\n", indent);
-        if (hasOptional) {
+        if (hasOptional || !interfaces.isEmpty()) {
             indent.right().right();
-            String parametersOptional = cls.fields.stream()
+            String parametersOptional = cls.fields.stream().filter(
+                    x -> !interfaces.stream().map(y -> y.discriminator.propertyName).anyMatch(y -> x.name.equals(y)))
                     .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName))
                     .collect(Collectors.joining(","));
             indent.left().left();
             out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             cls.fields.stream().forEach(x -> {
-                if (!x.isPrimitive()) {
+                Optional<Discriminator> disc = interfaces.stream()
+                        .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator).findFirst();
+                if (disc.isPresent()) {
+                    out.format("%sthis.%s = \"%s\";\n", indent, x.fieldName,
+                            disc.get().fullClassNameToPropertyValue.get(cls.fullClassName));
+                } else if (!x.isPrimitive()) {
                     if (x.required) {
                         out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName,
                                 imports.add(Preconditions.class), x.fieldName, x.fieldName);
@@ -687,9 +697,19 @@ public class Generator2 {
         }
     }
 
-    private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static <T> T orElse(T value, T defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
+    private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
+        Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
-            out.format("\n%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName);
+            if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
+                out.format("\n%s@%s\n", indent, imports.add(Override.class));
+            } else {
+                out.println();
+            }
+            out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName);
             indent.right();
             if (!f.required && !cls.unwrapSingleField()) {
                 out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName);
@@ -702,7 +722,7 @@ public class Generator2 {
     }
 
     private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls,
-            Map<String, List<String>> fullClassNameInterfaces) {
+            Map<String, Set<Cls>> fullClassNameInterfaces) {
         cls.classes.forEach(c -> writeClass(out, imports, indent, c, fullClassNameInterfaces));
     }
 
