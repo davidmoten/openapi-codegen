@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import generated.model.SimpleDateTime;
+import generated.model.SimpleDouble;
 import generated.model.SimpleFloat;
 import generated.model.SimpleInt;
 import generated.model.SimpleInteger;
@@ -56,6 +57,15 @@ public class GeneratorTest {
         String json = "123.4";
         SimpleFloat a = m.readValue(json, SimpleFloat.class);
         assertEquals(Float.TYPE, typeof(a.value()));
+        assertEquals(123.4, a.value(), 0.00001);
+        assertEquals(json, m.writeValueAsString(a));
+    }
+    
+    @Test
+    public void testSimpleDouble() throws JsonMappingException, JsonProcessingException {
+        String json = "123.4";
+        SimpleDouble a = m.readValue(json, SimpleDouble.class);
+        assertEquals(Double.TYPE, typeof(a.value()));
         assertEquals(123.4, a.value(), 0.00001);
         assertEquals(json, m.writeValueAsString(a));
     }

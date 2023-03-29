@@ -1147,6 +1147,10 @@ components:
       type: number
       format: float
       
+    SimpleDouble:
+      type: number
+      format: double
+      
     SimpleString:
       type: string
       
