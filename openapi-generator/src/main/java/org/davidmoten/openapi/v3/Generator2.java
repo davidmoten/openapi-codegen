@@ -26,6 +26,7 @@ import javax.validation.constraints.Size;
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
@@ -481,6 +483,8 @@ public class Generator2 {
         }
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
+            out.format("%s@%s(fieldVisibility = %s.ANY)\n", indent, imports.add(JsonAutoDetect.class),
+                    imports.add(Visibility.class));
         }
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
     }
@@ -701,7 +705,8 @@ public class Generator2 {
         return value == null ? defaultValue : value;
     }
 
-    private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
+    private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls,
+            Map<String, Set<Cls>> fullClassNameInterfaces) {
         Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
             if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
