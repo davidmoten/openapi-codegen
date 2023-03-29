@@ -12,57 +12,6 @@
     <description></description>
     <packaging>jar</packaging>
 
-    <url>http://github.com/davidmoten/openapi-generator</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <slf4j.version>1.7.30</slf4j.version>
-        <log4j.version>2.13.3</log4j.version>
-        <jackson.version>2.14.2</jackson.version>
-    </properties>
-
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
-        </license>
-    </licenses>
-
-    <ciManagement>
-        <system>Travis</system>
-        <url>https://travis-ci.org/davidmoten/openapi-generator</url>
-    </ciManagement>
-
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/davidmoten/openapi-generator/issues</url>
-    </issueManagement>
-
-    <inceptionYear>2020</inceptionYear>
-    <developers>
-        <developer>
-            <id>dave</id>
-            <name>Dave Moten</name>
-            <url>https://github.com/davidmoten/</url>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+10</timezone>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:https://github.com/davidmoten/openapi-generator.git</connection>
-        <developerConnection>scm:git:https://github.com/davidmoten/openapi-generator.git</developerConnection>
-        <url>scm:git:https://github.com:davidmoten/openapi-generator.git</url>
-        <tag>HEAD</tag>
-    </scm>
-
     <dependencies>
 
         <dependency>
@@ -87,7 +36,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
