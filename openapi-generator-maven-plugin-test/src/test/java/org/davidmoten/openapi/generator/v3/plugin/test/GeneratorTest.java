@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import generated.model.SimpleDateTime;
+import generated.model.SimpleFloat;
 import generated.model.SimpleInt;
 import generated.model.SimpleInteger;
 import generated.model.SimpleLong;
@@ -51,6 +52,15 @@ public class GeneratorTest {
     }
 
     @Test
+    public void testSimpleFloat() throws JsonMappingException, JsonProcessingException {
+        String json = "123.4";
+        SimpleFloat a = m.readValue(json, SimpleFloat.class);
+        assertEquals(Float.TYPE, typeof(a.value()));
+        assertEquals(123.4, a.value(), 0.00001);
+        assertEquals(json, m.writeValueAsString(a));
+    }
+
+    @Test
     public void testSimpleString() throws JsonMappingException, JsonProcessingException {
         String json = "\"abc\"";
         SimpleString a = m.readValue(json, SimpleString.class);
@@ -69,12 +79,24 @@ public class GeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
     }
 
-    public static Class<Integer> typeof(final int x) {
+    public static Class<Integer> typeof(int x) {
         return Integer.TYPE;
     }
 
-    public static Class<Long> typeof(final long x) {
+    public static Class<Long> typeof(long x) {
         return Long.TYPE;
+    }
+    
+    public static Class<Float> typeof(float x) {
+        return Float.TYPE;
+    }
+    
+    public static Class<Double> typeof(double x) {
+        return Double.TYPE;
+    }
+    
+    public static Class<Byte> typeof(byte x) {
+        return Byte.TYPE;
     }
 
 }

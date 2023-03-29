@@ -1143,6 +1143,10 @@ components:
     SimpleInteger:
       type: integer
       
+    SimpleFloat:
+      type: number
+      format: float
+      
     SimpleString:
       type: string
       
