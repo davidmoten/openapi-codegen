@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Base64;
@@ -38,6 +39,7 @@ import generated.model.Shape2;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
+import generated.model.SimpleDate;
 import generated.model.SimpleDateTime;
 import generated.model.SimpleDouble;
 import generated.model.SimpleFloat;
@@ -119,6 +121,18 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleDateTime(OffsetDateTime.parse(s))));
+    }
+    
+    @Test
+    public void testSimpleDate() throws JsonMappingException, JsonProcessingException {
+        String s = "2018-03-20";
+        String json = "\"" + s + "\"";
+        SimpleDate a = m.readValue(json, SimpleDate.class);
+        assertTrue(a.value() instanceof LocalDate);
+        assertEquals(LocalDate.parse(s), a.value());
+        assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleDate(LocalDate.parse(s))));
     }
 
     @Test
