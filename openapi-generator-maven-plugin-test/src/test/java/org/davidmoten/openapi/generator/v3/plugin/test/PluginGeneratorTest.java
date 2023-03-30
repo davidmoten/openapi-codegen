@@ -43,6 +43,7 @@ import generated.model.SimpleInteger;
 import generated.model.SimpleIntegerArray;
 import generated.model.SimpleLong;
 import generated.model.SimpleString;
+import generated.model.Vehicle;
 
 public class PluginGeneratorTest {
 
@@ -228,8 +229,12 @@ public class PluginGeneratorTest {
 
     @Test
     public void testMultipleDiscriminatedPolymorphism() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"vehicleType\":\"bike\",\"wheelsType\":\"two\",\"colour\":\"red\"}";
+        Vehicle v = m.readValue(json, Vehicle.class);
+//        assertEquals("bike", v.vehicleType());
+        assertTrue(v instanceof Bike);
         Bike b = new Bike("red");
-        assertEquals("{\"vehicleType\":\"bike\",\"wheelsType\":\"two\",\"colour\":\"red\"}", m.writeValueAsString(b));
+        assertEquals(json, m.writeValueAsString(b));
 //        Vehicle v = m.readValue(json, Vehicle.class);
         
     }

@@ -520,8 +520,7 @@ public class Generator {
         }
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
-            out.format("%s@%s(fieldVisibility = %s.ANY)\n", indent, imports.add(JsonAutoDetect.class),
-                    imports.add(Visibility.class));
+            writeAutoDetectAnnotation(out, imports, indent);
         }
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
     }
@@ -531,10 +530,10 @@ public class Generator {
                 cls.simpleName());
     }
 
-//    private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
-//        out.format("%s@%s(fieldVisibility = %s.ANY)\n", indent, imports.add(JsonAutoDetect.class),
-//                imports.add(Visibility.class), imports.add(Visibility.class));
-//    }
+    private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
+        out.format("%s@%s(fieldVisibility = %s.ANY)\n", indent, imports.add(JsonAutoDetect.class),
+                imports.add(Visibility.class), imports.add(Visibility.class));
+    }
 
     private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
         String text = cls.enumMembers.stream().map(x -> {
