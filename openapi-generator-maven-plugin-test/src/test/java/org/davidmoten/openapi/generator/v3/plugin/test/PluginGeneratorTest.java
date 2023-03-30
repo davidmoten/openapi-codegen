@@ -236,8 +236,7 @@ public class PluginGeneratorTest {
         assertTrue(v instanceof Bike);
         Bike b = new Bike("red");
         assertEquals(json, m.writeValueAsString(b));
-//        Vehicle v = m.readValue(json, Vehicle.class);
-        
+        assertEquals(1, Bike.class.getConstructors().length);
     }
     
     @Test
