@@ -1228,3 +1228,6 @@ components:
           type: string
       required: [vehicleType, wheelsType, colour]
       
+    SimpleBinary:
+      type: string
+      format: binary

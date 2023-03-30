@@ -1164,3 +1164,7 @@ components:
     SimpleByteArray:
       type: string
       format: byte
+      
+    SimpleBinary:
+      type: string
+      format: binary

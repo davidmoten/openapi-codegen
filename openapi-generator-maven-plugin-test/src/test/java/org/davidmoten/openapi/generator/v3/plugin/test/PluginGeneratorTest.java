@@ -129,10 +129,6 @@ public class PluginGeneratorTest {
         return Double.TYPE;
     }
 
-    private static Class<Byte> typeof(byte x) {
-        return Byte.TYPE;
-    }
-
     private static Class<Boolean> typeof(boolean x) {
         return Boolean.TYPE;
     }

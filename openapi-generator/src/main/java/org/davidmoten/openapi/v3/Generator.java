@@ -25,8 +25,10 @@ import javax.validation.constraints.Size;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
 import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
+import org.davidmoten.openapi.v3.runtime.Util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -36,7 +38,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
@@ -161,12 +162,13 @@ public class Generator {
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
-                    Optional.empty()));
+                    Optional.empty(), Encoding.DEFAULT));
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
-                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern) {
-            fields.add(new Field(fullType, name, fieldName, required, isArray, minLength, maxLength, pattern));
+                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern, Encoding encoding) {
+            fields.add(
+                    new Field(fullType, name, fieldName, required, isArray, minLength, maxLength, pattern, encoding));
         }
 
         public String pkg() {
@@ -220,7 +222,7 @@ public class Generator {
     }
 
     private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "long", "byte", "float", "double",
-            "boolean", "short");
+            "boolean", "short", "byte[]");
 
     private final static class Field {
         private String fullClassName;
@@ -231,9 +233,10 @@ public class Generator {
         final Optional<Integer> maxLength;
         final Optional<String> pattern;
         final boolean isArray;
+        final Encoding encoding;
 
         public Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
-                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern) {
+                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern, Encoding encoding) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
@@ -242,6 +245,7 @@ public class Generator {
             this.minLength = minLength;
             this.maxLength = maxLength;
             this.pattern = pattern;
+            this.encoding = encoding;
         }
 
         public String resolvedType(Imports imports) {
@@ -254,6 +258,10 @@ public class Generator {
 
         public boolean isPrimitive() {
             return required && PRIMITIVE_CLASS_NAMES.contains(toPrimitive(fullClassName));
+        }
+
+        public boolean isOctets() {
+            return encoding == Encoding.OCTET;
         }
 
         @Override
@@ -372,6 +380,7 @@ public class Generator {
                 final String fullClassName;
                 if (isPrimitive(schema)) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
+                    System.out.println(c);
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
                     final Optional<Integer> maxLength;
@@ -387,8 +396,14 @@ public class Generator {
                     }
                     String fieldName = schemaPath.size() == 1 ? "value" : current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
+                    final Encoding encoding;
+                    if ("binary".equals(schema.getFormat())) {
+                        encoding = Encoding.OCTET;
+                    } else {
+                        encoding = Encoding.DEFAULT;
+                    }
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minLength, maxLength,
-                            pattern);
+                            pattern, encoding);
                 } else if (isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     String fieldName = current.nextFieldName(last.name);
@@ -427,7 +442,10 @@ public class Generator {
                 this.name = name;
             }
         }
+    }
 
+    private enum Encoding {
+        DEFAULT, OCTET;
     }
 
     private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls,
@@ -626,7 +644,13 @@ public class Generator {
             if (cls.unwrapSingleField()) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
-            out.format("%sprivate final %s %s;\n", indent, f.resolvedTypeNullable(imports), f.fieldName);
+            final String fieldType;
+            if (f.encoding == Encoding.OCTET) {
+                fieldType = imports.add(String.class);
+            } else {
+                fieldType = f.resolvedTypeNullable(imports);
+            }
+            out.format("%sprivate final %s %s;\n", indent, fieldType, f.fieldName);
         });
     }
 
@@ -652,9 +676,12 @@ public class Generator {
             out.println();
         }
         boolean hasOptional = !cls.unwrapSingleField() && cls.fields.stream().anyMatch(f -> !f.required);
-        // if has optional then write a private constructor with nullable parameters
+        boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
+        // if has optional or other criteria then write a private constructor with
+        // nullable parameters
         // and a public constructor with Optional parameters
-        final String visibility = cls.classType == ClassType.ENUM || hasOptional || !interfaces.isEmpty() ? "private"
+        final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
+                ? "private"
                 : "public";
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
@@ -668,7 +695,7 @@ public class Generator {
         });
         indent.left();
         out.format("%s}\n", indent);
-        if (hasOptional || !interfaces.isEmpty()) {
+        if (hasOptional || !interfaces.isEmpty() || hasBinary) {
             indent.right().right();
             String parametersOptional = cls.fields.stream().filter(
                     x -> !interfaces.stream().map(y -> y.discriminator.propertyName).anyMatch(y -> x.name.equals(y)))
@@ -692,7 +719,12 @@ public class Generator {
                                 imports.add(Preconditions.class), x.fieldName, x.fieldName);
                     }
                 } else {
-                    out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
+                    if (x.isOctets()) {
+                        out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName, imports.add(Util.class),
+                                x.fieldName);
+                    } else {
+                        out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
+                    }
                 }
             });
             indent.left();
@@ -715,8 +747,10 @@ public class Generator {
             }
             out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName);
             indent.right();
-            if (!f.required && !cls.unwrapSingleField()) {
+            if (!f.isOctets() && !f.required && !cls.unwrapSingleField()) {
                 out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName);
+            } else if (f.isOctets()){
+                out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName);
             } else {
                 out.format("%sreturn %s;\n", indent, f.fieldName);
             }
@@ -731,10 +765,11 @@ public class Generator {
     }
 
     private static String resolvedTypeNullable(Field f, Imports imports) {
-        if (f.isArray) {
+        if (f.encoding == Encoding.OCTET) {
+            return imports.add(String.class);
+        } else if (f.isArray) {
             return toList(f, imports);
-        }
-        if (f.required) {
+        } else if (f.required) {
             return imports.add(toPrimitive(f.fullClassName));
         } else {
             return imports.add(f.fullClassName);
@@ -746,7 +781,9 @@ public class Generator {
     }
 
     private static String resolvedType(Field f, Imports imports) {
-        if (f.isArray) {
+        if (f.isOctets()) {
+            return "byte[]";
+        } else if (f.isArray) {
             return toList(f, imports);
         } else if (f.required) {
             return imports.add(toPrimitive(f.fullClassName));
@@ -817,7 +854,7 @@ public class Generator {
             } else if ("byte".equals(format)) {
                 return byte[].class;
             } else if ("binary".equals(format)) {
-                return Byte.class;
+                return byte[].class;
             } else {
                 return String.class;
             }
@@ -844,7 +881,7 @@ public class Generator {
         } else if ("object".equals(type)) {
             return Object.class;
         } else {
-            return null;
+            throw new RuntimeException("unexpected type and format: " + type + ", " + format);
         }
     }
 
