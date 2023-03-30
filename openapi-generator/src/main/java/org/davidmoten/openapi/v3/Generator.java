@@ -39,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -503,8 +504,8 @@ public class Generator {
         }
 
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            out.format("\n%s@%s(use = %s.NAME, property = \"%s\")\n", indent, imports.add(JsonTypeInfo.class),
-                    imports.add(Id.class), cls.discriminator.propertyName);
+            out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY)\n", indent, imports.add(JsonTypeInfo.class),
+                    imports.add(Id.class), cls.discriminator.propertyName, imports.add(As.class));
             indent.right().right();
             String types = cls.fields.stream()
                     .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),

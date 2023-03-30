@@ -1092,7 +1092,45 @@ components:
             type: string
         required: [firstName]
      
- 
+    Vehicle:
+      oneOf: 
+      - $ref: '#/components/schemas/Car'
+      - $ref: '#/components/schemas/Bike'
+      discriminator:
+        propertyName: vehicleType
+        mapping: 
+          car: '#/components/schemas/Car'
+          bike: '#/components/schemas/Bike'
+    
+    HasWheels:
+      oneOf: 
+      - $ref: '#/components/schemas/Car'
+      - $ref: '#/components/schemas/Bike'
+      discriminator:
+        propertyName: wheelsType
+        mapping: 
+          four: '#/components/schemas/Car'
+          two: '#/components/schemas/Bike'
+          
+    Car:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+        wheelsType:
+          type: string
+      required: [vehicleType, wheelsType]
+          
+    Bike:
+      type: object
+      properties:
+        vehicleType:
+          type: string
+        wheelsType:
+          type: string
+        colour:
+          type: string
+      required: [vehicleType, wheelsType, colour]
       
     SimpleLong:
       type: integer

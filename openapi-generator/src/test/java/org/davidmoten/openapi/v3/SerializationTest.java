@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -181,7 +182,7 @@ public class SerializationTest {
             this.colour = colour;
         }
 
-        public Circle2(@JsonProperty("radiusNm") double radiusNm, @JsonProperty("colour") Optional<String> colour) {
+        public Circle2(double radiusNm, Optional<String> colour) {
             this(radiusNm, colour.orElse(null));
         }
 
@@ -263,6 +264,7 @@ public class SerializationTest {
     }
 
     @JsonInclude(Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility =  Visibility.ANY)
     public final static class Car implements Vehicle {
 
         @JsonProperty("vehicleType")
@@ -284,12 +286,11 @@ public class SerializationTest {
     }
 
     @JsonInclude(Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility =  Visibility.ANY)
     public static final class Bike implements Vehicle {
 
-        @JsonProperty("vehicleType")
         private final String vehicleType;
         
-        @JsonProperty("colour")
         private final String colour;
 
         @JsonCreator

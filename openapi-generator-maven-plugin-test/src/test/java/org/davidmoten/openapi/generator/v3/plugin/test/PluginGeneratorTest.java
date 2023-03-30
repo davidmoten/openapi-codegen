@@ -29,6 +29,7 @@ import generated.model.ArrayOfOneOf;
 import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.ArrayOfOneOfString;
 import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
+import generated.model.Bike;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
 import generated.model.SimpleBinary;
@@ -224,11 +225,13 @@ public class PluginGeneratorTest {
             // expected
         }
     }
-    
+
     @Test
-    public void testMultipleDiscriminatedPolymorphism() {
-        String json = "";
-         v = m.readValue(json, Vehicle.class);
+    public void testMultipleDiscriminatedPolymorphism() throws JsonMappingException, JsonProcessingException {
+        Bike b = new Bike("red");
+        assertEquals("{\"vehicleType\":\"bike\",\"wheelsType\":\"two\",\"colour\":\"red\"}", m.writeValueAsString(b));
+//        Vehicle v = m.readValue(json, Vehicle.class);
+        
     }
 
     private static Class<Integer> typeof(int x) {
