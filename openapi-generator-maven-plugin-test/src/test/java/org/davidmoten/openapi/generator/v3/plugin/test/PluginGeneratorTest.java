@@ -32,6 +32,7 @@ import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.Bike;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
+import generated.model.Ref;
 import generated.model.Shape;
 import generated.model.Shape2;
 import generated.model.SimpleBinary;
@@ -258,6 +259,15 @@ public class PluginGeneratorTest {
         assertEquals("Square2", s.shapeType());
         assertEquals(json, m.writeValueAsString(s));
         assertEquals(json, m.writeValueAsString(new Square2()));
+    }
+    
+    @Test
+    public void testRef() throws JsonMappingException, JsonProcessingException {
+        String json = "123";
+        Ref r = m.readValue(json, Ref.class);
+        assertEquals(123, r.value().value());
+        assertEquals(json, m.writeValueAsString(r));
+        assertEquals(json, m.writeValueAsString(new Ref(new SimpleInteger(123))));
     }
 
     private static Class<Integer> typeof(int x) {
