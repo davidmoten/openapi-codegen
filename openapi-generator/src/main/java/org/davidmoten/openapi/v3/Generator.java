@@ -24,7 +24,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
-import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
+import org.davidmoten.openapi.v3.runtime.PolymorphicDeserializer;
+import org.davidmoten.openapi.v3.runtime.PolymorphicType;
 import org.davidmoten.openapi.v3.runtime.Util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -129,6 +130,7 @@ public class Generator {
         private Set<String> fieldNames = new HashSet<String>();
         boolean topLevel = false;
         boolean hasProperties = false;
+        PolymorphicType polymorphicType;
 
         private String nextAnonymousFieldName() {
             num++;
@@ -558,6 +560,7 @@ public class Generator {
     private static void handleOneOrAnyOf(ImmutableList<SchemaWithName> schemaPath, Cls cls, Names names,
             Optional<Cls> previous, Optional<String> fieldName, boolean isArray) {
         SchemaWithName last = schemaPath.last();
+        cls.polymorphicType = isOneOf(last.schema) ? PolymorphicType.ONE_OF : PolymorphicType.ANY_OF;
         io.swagger.v3.oas.models.media.Discriminator discriminator = last.schema.getDiscriminator();
         if (discriminator != null) {
             String propertyName = discriminator.getPropertyName();
@@ -633,13 +636,14 @@ public class Generator {
 
             out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
             out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
-                    imports.add(OneOfDeserializer.class), cls.simpleName());
+                    imports.add(PolymorphicDeserializer.class), cls.simpleName());
             indent.right();
             out.format("\n%spublic Deserializer() {\n", indent);
             indent.right();
             String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
-            out.format("%ssuper(%s.class, %s);\n", indent, cls.simpleName(), classes);
+            out.format("%ssuper(%s.%s, %s.class, %s);\n", indent, imports.add(PolymorphicType.class),
+                    cls.polymorphicType.name(), cls.simpleName(), classes);
             indent.left();
             out.format("%s}\n", indent);
             indent.left();

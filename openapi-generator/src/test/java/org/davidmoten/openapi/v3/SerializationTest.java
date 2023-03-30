@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.davidmoten.openapi.v3.runtime.OneOfDeserializer;
+import org.davidmoten.openapi.v3.runtime.PolymorphicDeserializer;
+import org.davidmoten.openapi.v3.runtime.PolymorphicType;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -160,10 +161,10 @@ public class SerializationTest {
         }
 
         @SuppressWarnings("serial")
-        public static final class Deserializer extends OneOfDeserializer<OneOf> {
+        public static final class Deserializer extends PolymorphicDeserializer<OneOf> {
 
             public Deserializer() {
-                super(OneOf.class, Circle2.class, Rectangle2.class);
+                super(PolymorphicType.ONE_OF, OneOf.class, Circle2.class, Rectangle2.class);
             }
         }
     }
