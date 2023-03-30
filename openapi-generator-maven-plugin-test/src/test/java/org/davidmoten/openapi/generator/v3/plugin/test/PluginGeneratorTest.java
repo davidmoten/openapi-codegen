@@ -32,6 +32,7 @@ import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.Bike;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
+import generated.model.Shape;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
@@ -237,6 +238,13 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(b));
 //        Vehicle v = m.readValue(json, Vehicle.class);
         
+    }
+    
+    @Test
+    public void testSingleDiscriminationPolymorphism() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"shapeType\":\"square\"}";
+        Shape s = m.readValue(json, Shape.class);
+        assertEquals("square", s.shapeType());
     }
 
     private static Class<Integer> typeof(int x) {

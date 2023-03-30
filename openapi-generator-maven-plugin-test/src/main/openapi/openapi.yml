@@ -1132,6 +1132,30 @@ components:
           type: string
       required: [vehicleType, wheelsType, colour]
       
+    Shape:
+      oneOf:
+      - $ref: '#/components/schemas/Oval'
+      - $ref: '#/components/schemas/Square'
+      discriminator:
+        propertyName: shapeType
+        mapping: 
+          oval: '#/components/schemas/Oval'
+          square: '#/components/schemas/Square'
+          
+    Oval:
+      type: object
+      properties:
+        shapeType:
+          type: string
+      required: [shapeType]
+      
+    Square:
+      type: object
+      properties:
+        shapeType:
+          type: string
+      required: [shapeType]      
+      
     SimpleLong:
       type: integer
       format: int64
