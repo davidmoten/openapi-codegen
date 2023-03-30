@@ -1168,4 +1168,15 @@ components:
           type: string
         num:
           type: integer
-          format: int32         
+          format: int32
+          
+    ObjectNoOptionalFields:
+      type: object
+      properties:
+        label: 
+          type: string
+        num:
+          type: integer
+          format: int32
+      required: [label, num]
+               

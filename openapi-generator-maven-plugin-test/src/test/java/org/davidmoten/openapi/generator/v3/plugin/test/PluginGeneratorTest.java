@@ -2,6 +2,7 @@ package org.davidmoten.openapi.generator.v3.plugin.test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -13,11 +14,13 @@ import java.util.Optional;
 
 import org.davidmoten.openapi.v3.runtime.Mapper;
 import org.davidmoten.openapi.v3.runtime.Util;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.github.davidmoten.guavamini.Lists;
 
 import generated.model.ArrayOfComplexType;
@@ -27,6 +30,7 @@ import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.ArrayOfOneOfString;
 import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.ObjectAllOptionalFields;
+import generated.model.ObjectNoOptionalFields;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
@@ -179,7 +183,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(
                 new ArrayOfOneOf(Arrays.asList(new ArrayOfOneOfItem(true), new ArrayOfOneOfItem(123)))));
     }
-    
+
     @Test
     public void testArrayOfOneOfString() throws JsonMappingException, JsonProcessingException {
         String json = "[\"hello\",123]";
@@ -187,10 +191,10 @@ public class PluginGeneratorTest {
         assertEquals("hello", a.value().get(0).value());
         assertEquals(123, a.value().get(1).value());
         assertEquals(json, m.writeValueAsString(a));
-        assertEquals(json, m.writeValueAsString(
-                new ArrayOfOneOfString(Arrays.asList(new ArrayOfOneOfStringItem("hello"), new ArrayOfOneOfStringItem(123)))));
+        assertEquals(json, m.writeValueAsString(new ArrayOfOneOfString(
+                Arrays.asList(new ArrayOfOneOfStringItem("hello"), new ArrayOfOneOfStringItem(123)))));
     }
-    
+
     @Test
     public void testObjectWithAllOptionalFields() throws JsonMappingException, JsonProcessingException {
         String json = "{\"str\":\"hello\",\"num\":123}";
@@ -199,6 +203,26 @@ public class PluginGeneratorTest {
         assertEquals(123, (int) a.num().get());
         assertEquals("{}", m.writeValueAsString(new ObjectAllOptionalFields(Optional.empty(), Optional.empty())));
         ObjectAllOptionalFields b = m.readValue("{}", ObjectAllOptionalFields.class);
+        assertFalse(b.str().isPresent());
+        assertFalse(b.num().isPresent());
+        assertEquals(1, b.getClass().getConstructors().length);
+    }
+
+    @Test
+    public void testObjectWithNoOptionalFields() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"label\":\"hello\",\"num\":123}";
+        ObjectNoOptionalFields a = m.readValue(json, ObjectNoOptionalFields.class);
+        assertEquals("hello", a.label());
+        assertEquals(123, (int) a.num());
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new ObjectNoOptionalFields("hello", 123)));
+        assertEquals(1, ObjectNoOptionalFields.class.getConstructors().length);
+        try {
+            m.readValue("{}", ObjectNoOptionalFields.class);
+            Assert.fail();
+        } catch (ValueInstantiationException e) {
+            // expected
+        }
     }
 
     private static Class<Integer> typeof(int x) {
