@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.davidmoten.guavamini.Lists;
 
+import generated.model.ArrayOfComplexType;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
@@ -134,6 +135,16 @@ public class PluginGeneratorTest {
         String json = "[1,2,3]";
         SimpleIntegerArray a = m.readValue(json, SimpleIntegerArray.class);
         assertEquals(list, a.value());
+        assertEquals(json, m.writeValueAsString(a));
+    }
+
+    @Test
+    public void testArrayOfComplexType() throws JsonMappingException, JsonProcessingException {
+        String json = "[{\"name\":\"Fred\"},{\"name\":\"Sam\"}]";
+        ArrayOfComplexType a = m.readValue(json, ArrayOfComplexType.class);
+        assertEquals(2, a.value().size());
+        assertEquals("Fred", a.value().get(0).name());
+        assertEquals("Sam", a.value().get(1).name());
         assertEquals(json, m.writeValueAsString(a));
     }
 

@@ -1173,3 +1173,20 @@ components:
       type: array
       items: 
         type: integer
+        
+    ArrayOfComplexType:
+      type: array
+      items: 
+        type: object
+        properties:
+          name:
+            type: string
+        required: [name]
+        
+    MixedTypeArray:
+      type: array
+      items:
+        oneOf:
+        - type: string
+        - type: integer 
+          format: int32
