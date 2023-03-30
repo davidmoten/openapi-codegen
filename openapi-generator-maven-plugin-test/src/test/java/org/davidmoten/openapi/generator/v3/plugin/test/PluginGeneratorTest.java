@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Base64;
+import java.util.List;
 
 import org.davidmoten.openapi.v3.runtime.Util;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.davidmoten.guavamini.Lists;
 
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
@@ -25,6 +27,7 @@ import generated.model.SimpleDouble;
 import generated.model.SimpleFloat;
 import generated.model.SimpleInt;
 import generated.model.SimpleInteger;
+import generated.model.SimpleIntegerArray;
 import generated.model.SimpleLong;
 import generated.model.SimpleString;
 
@@ -104,7 +107,7 @@ public class PluginGeneratorTest {
         assertTrue(a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
-    
+
     @Test
     public void testSimpleByteArrayUsingBase64Encoding() throws JsonMappingException, JsonProcessingException {
         byte[] bytes = "abc".getBytes(StandardCharsets.UTF_8);
@@ -114,7 +117,7 @@ public class PluginGeneratorTest {
         assertArrayEquals(bytes, a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
-    
+
     @Test
     public void testSimpleBinaryUsingOctetEncoding() throws JsonMappingException, JsonProcessingException {
         byte[] bytes = "abc".getBytes(StandardCharsets.UTF_8);
@@ -122,6 +125,15 @@ public class PluginGeneratorTest {
         SimpleBinary a = m.readValue(json, SimpleBinary.class);
         assertTrue(a.value() instanceof byte[]);
         assertArrayEquals(bytes, a.value());
+        assertEquals(json, m.writeValueAsString(a));
+    }
+
+    @Test
+    public void testSimpleIntegerArray() throws JsonMappingException, JsonProcessingException {
+        List<Long> list = Lists.newArrayList(1L, 2L, 3L);
+        String json = "[1,2,3]";
+        SimpleIntegerArray a = m.readValue(json, SimpleIntegerArray.class);
+        assertEquals(list, a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
 

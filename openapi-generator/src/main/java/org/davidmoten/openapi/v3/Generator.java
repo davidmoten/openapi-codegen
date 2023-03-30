@@ -159,6 +159,14 @@ public class Generator {
             fieldNames.add(next);
             return next;
         }
+        
+        String fieldName(Field f) {
+            if (unwrapSingleField()) {
+                return "value";
+            } else {
+                return f.fieldName;
+            }
+        }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
@@ -247,6 +255,10 @@ public class Generator {
             this.pattern = pattern;
             this.encoding = encoding;
         }
+        
+        public String fieldName(Cls cls) {
+            return cls.fieldName(this);
+        }
 
         public String resolvedType(Imports imports) {
             return Generator.resolvedType(this, imports);
@@ -263,7 +275,7 @@ public class Generator {
         public boolean isOctets() {
             return encoding == Encoding.OCTET;
         }
-
+        
         @Override
         public String toString() {
             return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
@@ -650,7 +662,7 @@ public class Generator {
             } else {
                 fieldType = f.resolvedTypeNullable(imports);
             }
-            out.format("%sprivate final %s %s;\n", indent, fieldType, f.fieldName);
+            out.format("%sprivate final %s %s;\n", indent, fieldType, cls.fieldName(f));
         });
     }
 
@@ -660,11 +672,11 @@ public class Generator {
         final String parametersNullable;
         if (cls.unwrapSingleField()) {
             parametersNullable = cls.fields.stream()
-                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName))
+                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
         } else {
             parametersNullable = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", indent,
-                    imports.add(JsonProperty.class), x.name, x.resolvedTypeNullable(imports), x.fieldName))
+                    imports.add(JsonProperty.class), x.name, x.resolvedTypeNullable(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
         }
         indent.left().left();
@@ -687,10 +699,10 @@ public class Generator {
         indent.right();
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive() && !x.required) {
-                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName, imports.add(Preconditions.class),
-                        x.fieldName);
+                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls), imports.add(Preconditions.class),
+                        x.fieldName(cls));
             } else {
-                out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
+                out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
             }
         });
         indent.left();
@@ -699,7 +711,7 @@ public class Generator {
             indent.right().right();
             String parametersOptional = cls.fields.stream().filter(
                     x -> !interfaces.stream().map(y -> y.discriminator.propertyName).anyMatch(y -> x.name.equals(y)))
-                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName))
+                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
             indent.left().left();
             out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
@@ -708,21 +720,21 @@ public class Generator {
                 Optional<Discriminator> disc = interfaces.stream()
                         .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator).findFirst();
                 if (disc.isPresent()) {
-                    out.format("%sthis.%s = \"%s\";\n", indent, x.fieldName,
+                    out.format("%sthis.%s = \"%s\";\n", indent, x.fieldName(cls),
                             disc.get().fullClassNameToPropertyValue.get(cls.fullClassName));
                 } else if (!x.isPrimitive()) {
                     if (x.required) {
-                        out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName,
-                                imports.add(Preconditions.class), x.fieldName, x.fieldName);
+                        out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls),
+                                imports.add(Preconditions.class), x.fieldName(cls), x.fieldName(cls));
                     } else {
-                        out.format("%sthis.%s = %s.checkNotNull(%s).orElse(null);\n", indent, x.fieldName,
-                                imports.add(Preconditions.class), x.fieldName, x.fieldName);
+                        out.format("%sthis.%s = %s.checkNotNull(%s).orElse(null);\n", indent, x.fieldName(cls),
+                                imports.add(Preconditions.class), x.fieldName(cls), x.fieldName(cls));
                     }
                 } else if (x.isOctets()) {
-                    out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName, imports.add(Util.class),
-                            x.fieldName);
+                    out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName(cls), imports.add(Util.class),
+                            x.fieldName(cls));
                 } else {
-                    out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
+                    out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
                 }
             });
             indent.left();
@@ -743,14 +755,14 @@ public class Generator {
             } else {
                 out.println();
             }
-            out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName);
+            out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName(cls));
             indent.right();
             if (!f.isOctets() && !f.required && !cls.unwrapSingleField()) {
-                out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName);
+                out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName(cls));
             } else if (f.isOctets()) {
-                out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName);
+                out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName(cls));
             } else {
-                out.format("%sreturn %s;\n", indent, f.fieldName);
+                out.format("%sreturn %s;\n", indent, f.fieldName(cls));
             }
             indent.left();
             out.format("%s}\n", indent);
