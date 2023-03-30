@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -881,6 +882,8 @@ public class Generator {
                 return OffsetDateTime.class;
             } else if ("date".equals(format)) {
                 return LocalDate.class;
+            } else if ("time".equals(format)) {
+                return OffsetTime.class;
             } else if ("byte".equals(format)) {
                 return byte[].class;
             } else if ("binary".equals(format)) {

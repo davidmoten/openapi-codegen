@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -48,6 +50,7 @@ import generated.model.SimpleInteger;
 import generated.model.SimpleIntegerArray;
 import generated.model.SimpleLong;
 import generated.model.SimpleString;
+import generated.model.SimpleTime;
 import generated.model.Square;
 import generated.model.Square2;
 import generated.model.Vehicle;
@@ -122,7 +125,7 @@ public class PluginGeneratorTest {
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleDateTime(OffsetDateTime.parse(s))));
     }
-    
+
     @Test
     public void testSimpleDate() throws JsonMappingException, JsonProcessingException {
         String s = "2018-03-20";
@@ -133,6 +136,18 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleDate(LocalDate.parse(s))));
+    }
+
+    @Test
+    public void testSimpleTime() throws JsonMappingException, JsonProcessingException {
+        String s = "09:12:28Z";
+        String json = "\"" + s + "\"";
+        SimpleTime a = m.readValue(json, SimpleTime.class);
+        assertTrue(a.value() instanceof OffsetTime);
+        assertEquals(OffsetTime.parse(s), a.value());
+        assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleTime(OffsetTime.parse(s))));
     }
 
     @Test
@@ -256,7 +271,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(b));
         assertEquals(1, Bike.class.getConstructors().length);
     }
-    
+
     @Test
     public void testSingleDiscriminationPolymorphism() throws JsonMappingException, JsonProcessingException {
         String json = "{\"shapeType\":\"square\"}";
@@ -265,7 +280,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(s));
         assertEquals(json, m.writeValueAsString(new Square()));
     }
-    
+
     @Test
     public void testDiscriminatorWithoutMapping() throws JsonMappingException, JsonProcessingException {
         String json = "{\"shapeType\":\"Square2\"}";
@@ -274,7 +289,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(s));
         assertEquals(json, m.writeValueAsString(new Square2()));
     }
-    
+
     @Test
     public void testRef() throws JsonMappingException, JsonProcessingException {
         String json = "123";
