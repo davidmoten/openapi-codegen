@@ -1183,7 +1183,7 @@ components:
             type: string
         required: [name]
         
-    MixedTypeArray:
+    ArrayOfOneOf:
       type: array
       items:
         oneOf:

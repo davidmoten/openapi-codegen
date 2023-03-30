@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -20,6 +21,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.davidmoten.guavamini.Lists;
 
 import generated.model.ArrayOfComplexType;
+import generated.model.ArrayOfComplexType.ArrayOfComplexTypeItem;
+import generated.model.ArrayOfOneOf;
+import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
@@ -88,6 +92,8 @@ public class PluginGeneratorTest {
         assertTrue(a.value() instanceof String);
         assertEquals("abc", a.value());
         assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleString("abc")));
     }
 
     @Test
@@ -98,6 +104,8 @@ public class PluginGeneratorTest {
         assertTrue(a.value() instanceof OffsetDateTime);
         assertEquals(OffsetDateTime.parse(s), a.value());
         assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleDateTime(OffsetDateTime.parse(s))));
     }
 
     @Test
@@ -107,6 +115,8 @@ public class PluginGeneratorTest {
         assertEquals(Boolean.TYPE, typeof(a.value()));
         assertTrue(a.value());
         assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleBoolean(true)));
     }
 
     @Test
@@ -117,6 +127,8 @@ public class PluginGeneratorTest {
         assertTrue(a.value() instanceof byte[]);
         assertArrayEquals(bytes, a.value());
         assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleByteArray(bytes)));
     }
 
     @Test
@@ -127,6 +139,8 @@ public class PluginGeneratorTest {
         assertTrue(a.value() instanceof byte[]);
         assertArrayEquals(bytes, a.value());
         assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleBinary(bytes)));
     }
 
     @Test
@@ -136,6 +150,8 @@ public class PluginGeneratorTest {
         SimpleIntegerArray a = m.readValue(json, SimpleIntegerArray.class);
         assertEquals(list, a.value());
         assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new SimpleIntegerArray(list)));
     }
 
     @Test
@@ -146,6 +162,20 @@ public class PluginGeneratorTest {
         assertEquals("Fred", a.value().get(0).name());
         assertEquals("Sam", a.value().get(1).name());
         assertEquals(json, m.writeValueAsString(a));
+        // test constructor
+        assertEquals(json, m.writeValueAsString(new ArrayOfComplexType(
+                Arrays.asList(new ArrayOfComplexTypeItem("Fred"), new ArrayOfComplexTypeItem("Sam")))));
+    }
+
+    @Test
+    public void testArrayOfOneOf() throws JsonMappingException, JsonProcessingException {
+        String json = "[\"hello\", 123]";
+        ArrayOfOneOf a = m.readValue(json, ArrayOfOneOf.class);
+        assertEquals("hello", a.value().get(0).value());
+        assertEquals(123, a.value().get(1).value());
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(json, m.writeValueAsString(
+                new ArrayOfOneOf(Arrays.asList(new ArrayOfOneOfItem("hello"), new ArrayOfOneOfItem(123)))));
     }
 
     private static Class<Integer> typeof(int x) {

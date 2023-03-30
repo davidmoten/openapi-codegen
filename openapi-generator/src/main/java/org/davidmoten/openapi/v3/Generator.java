@@ -159,7 +159,7 @@ public class Generator {
             fieldNames.add(next);
             return next;
         }
-        
+
         String fieldName(Field f) {
             if (unwrapSingleField()) {
                 return "value";
@@ -255,7 +255,7 @@ public class Generator {
             this.pattern = pattern;
             this.encoding = encoding;
         }
-        
+
         public String fieldName(Cls cls) {
             return cls.fieldName(this);
         }
@@ -275,7 +275,7 @@ public class Generator {
         public boolean isOctets() {
             return encoding == Encoding.OCTET;
         }
-        
+
         @Override
         public String toString() {
             return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
@@ -372,13 +372,9 @@ public class Generator {
                 if (isEnum(schema)) {
                     handleEnum(schema, cls);
                 } else if (isObject(schema)) {
-                    cls.classType = ClassType.CLASS;
-                    cls.hasProperties = true;
-                    boolean required = fieldIsRequired(schemaPath);
-                    previous.ifPresent(
-                            p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
+                    handleObject(schemaPath, last, schema, cls, isArray, previous, fieldName);
                 } else if (isOneOf(schema) || isAnyOf(schema)) {
-                    handleOneOrAnyOf(last, cls, names);
+                    handleOneOrAnyOf(schemaPath, cls, names, previous, fieldName, isArray);
                 } else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
@@ -454,6 +450,14 @@ public class Generator {
                 this.name = name;
             }
         }
+    }
+
+    private static void handleObject(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last, Schema<?> schema,
+            final Cls cls, boolean isArray, Optional<Cls> previous, final Optional<String> fieldName) {
+        cls.classType = ClassType.CLASS;
+        cls.hasProperties = isObject(schema);
+        boolean required = fieldIsRequired(schemaPath);
+        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
     }
 
     private enum Encoding {
@@ -551,8 +555,9 @@ public class Generator {
         }
     }
 
-    private static void handleOneOrAnyOf(SchemaWithName last, Cls cls, Names names) {
-
+    private static void handleOneOrAnyOf(ImmutableList<SchemaWithName> schemaPath, Cls cls, Names names,
+            Optional<Cls> previous, Optional<String> fieldName, boolean isArray) {
+        SchemaWithName last = schemaPath.last();
         io.swagger.v3.oas.models.media.Discriminator discriminator = last.schema.getDiscriminator();
         if (discriminator != null) {
             String propertyName = discriminator.getPropertyName();
@@ -568,6 +573,8 @@ public class Generator {
         } else {
             cls.classType = ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         }
+        boolean required = fieldIsRequired(schemaPath);
+        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
     }
 
     private static final class Discriminator {
@@ -675,8 +682,9 @@ public class Generator {
                     .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
         } else {
-            parametersNullable = cls.fields.stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", indent,
-                    imports.add(JsonProperty.class), x.name, x.resolvedTypeNullable(imports), x.fieldName(cls)))
+            parametersNullable = cls.fields
+                    .stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", indent, imports.add(JsonProperty.class),
+                            x.name, x.resolvedTypeNullable(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
         }
         indent.left().left();
@@ -699,8 +707,8 @@ public class Generator {
         indent.right();
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive() && !x.required) {
-                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls), imports.add(Preconditions.class),
-                        x.fieldName(cls));
+                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls),
+                        imports.add(Preconditions.class), x.fieldName(cls));
             } else {
                 out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
             }
