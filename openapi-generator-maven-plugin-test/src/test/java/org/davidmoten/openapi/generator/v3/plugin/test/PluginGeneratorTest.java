@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 import org.davidmoten.openapi.v3.runtime.Mapper;
 import org.davidmoten.openapi.v3.runtime.Util;
@@ -25,6 +26,7 @@ import generated.model.ArrayOfOneOf;
 import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.ArrayOfOneOfString;
 import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
+import generated.model.ObjectAllOptionalFields;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
@@ -187,6 +189,16 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(
                 new ArrayOfOneOfString(Arrays.asList(new ArrayOfOneOfStringItem("hello"), new ArrayOfOneOfStringItem(123)))));
+    }
+    
+    @Test
+    public void testObjectWithAllOptionalFields() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"str\":\"hello\",\"num\":123}";
+        ObjectAllOptionalFields a = m.readValue(json, ObjectAllOptionalFields.class);
+        assertEquals("hello", a.str().get());
+        assertEquals(123, (int) a.num().get());
+        assertEquals("{}", m.writeValueAsString(new ObjectAllOptionalFields(Optional.empty(), Optional.empty())));
+        ObjectAllOptionalFields b = m.readValue("{}", ObjectAllOptionalFields.class);
     }
 
     private static Class<Integer> typeof(int x) {

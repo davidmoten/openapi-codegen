@@ -1161,7 +1161,7 @@ components:
         - type: integer 
           format: int32
           
-    Object:
+    ObjectAllOptionalFields:
       type: object
       properties:
         str: 

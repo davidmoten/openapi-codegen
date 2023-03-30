@@ -711,7 +711,7 @@ public class Generator {
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
         cls.fields.stream().forEach(x -> {
-            if (!x.isPrimitive() && !x.required) {
+            if (!x.isPrimitive() && !x.required && !visibility.equals("private")) {
                 out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls),
                         imports.add(Preconditions.class), x.fieldName(cls));
             } else {
