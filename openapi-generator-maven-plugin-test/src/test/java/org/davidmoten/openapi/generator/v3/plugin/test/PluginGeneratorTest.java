@@ -224,6 +224,12 @@ public class PluginGeneratorTest {
             // expected
         }
     }
+    
+    @Test
+    public void testMultipleDiscriminatedPolymorphism() {
+        String json = "";
+         v = m.readValue(json, Vehicle.class);
+    }
 
     private static Class<Integer> typeof(int x) {
         return Integer.TYPE;
