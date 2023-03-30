@@ -196,15 +196,6 @@ public class Generator {
             return !hasProperties && (classType == ClassType.ENUM || (topLevel && fields.size() == 1));
         }
 
-        public String discriminatorValueFromFullClassName(String fullClassName) {
-            String value = discriminator.fullClassNameToPropertyValue.get(fullClassName);
-            if (value == null) {
-                // TODO review using simple class name for value because collision risk
-                return Names.simpleClassName(fullClassName);
-            } else {
-                return value;
-            }
-        }
     }
 
     private static class EnumMember {
@@ -509,7 +500,7 @@ public class Generator {
             indent.right().right();
             String types = cls.fields.stream()
                     .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),
-                            imports.add(x.fullClassName), cls.discriminatorValueFromFullClassName(x.fullClassName)))
+                            imports.add(x.fullClassName), cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName)))
                     .collect(Collectors.joining(", "));
             indent.left().left();
             out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
@@ -590,6 +581,16 @@ public class Generator {
             this.propertyName = propertyName;
             this.fieldName = fieldName;
             this.fullClassNameToPropertyValue = fullClassNameToPropertyValue;
+        }
+        
+        public String discriminatorValueFromFullClassName(String fullClassName) {
+            String value = fullClassNameToPropertyValue.get(fullClassName);
+            if (value == null) {
+                // TODO review using simple class name for value because collision risk
+                return Names.simpleClassName(fullClassName);
+            } else {
+                return value;
+            }
         }
     }
 
@@ -737,7 +738,7 @@ public class Generator {
                         .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator).findFirst();
                 if (disc.isPresent()) {
                     out.format("%sthis.%s = \"%s\";\n", indent, x.fieldName(cls),
-                            disc.get().fullClassNameToPropertyValue.get(cls.fullClassName));
+                            disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
                 } else if (!x.isPrimitive()) {
                     if (x.required) {
                         out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls),

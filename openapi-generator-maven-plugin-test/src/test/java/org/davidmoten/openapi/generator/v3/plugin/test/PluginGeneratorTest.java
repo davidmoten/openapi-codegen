@@ -33,6 +33,7 @@ import generated.model.Bike;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
 import generated.model.Shape;
+import generated.model.Shape2;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
@@ -44,6 +45,8 @@ import generated.model.SimpleInteger;
 import generated.model.SimpleIntegerArray;
 import generated.model.SimpleLong;
 import generated.model.SimpleString;
+import generated.model.Square;
+import generated.model.Square2;
 import generated.model.Vehicle;
 
 public class PluginGeneratorTest {
@@ -244,6 +247,17 @@ public class PluginGeneratorTest {
         String json = "{\"shapeType\":\"square\"}";
         Shape s = m.readValue(json, Shape.class);
         assertEquals("square", s.shapeType());
+        assertEquals(json, m.writeValueAsString(s));
+        assertEquals(json, m.writeValueAsString(new Square()));
+    }
+    
+    @Test
+    public void testDiscriminatorWithoutMapping() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"shapeType\":\"Square2\"}";
+        Shape2 s = m.readValue(json, Shape2.class);
+        assertEquals("Square2", s.shapeType());
+        assertEquals(json, m.writeValueAsString(s));
+        assertEquals(json, m.writeValueAsString(new Square2()));
     }
 
     private static Class<Integer> typeof(int x) {
