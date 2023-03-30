@@ -622,7 +622,8 @@ public class Generator {
             // add constructor for each member of the oneOf (fieldTypes)
             out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
             out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
-            out.format("%sthis.value = %s.checkNotNull(value);\n", indent.right(), imports.add(Preconditions.class));
+            out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
+                    imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class));
             out.format("%s}\n", indent.left());
             cls.fields.forEach(f -> {
                 String className = toPrimitive(f.fullClassName);
@@ -631,7 +632,8 @@ public class Generator {
                 if (Names.isPrimitiveFullClassName(className)) {
                     out.format("%sthis.value = value;\n", indent);
                 } else {
-                    out.format("%sthis.value = %s.checkNotNull(value);\n", indent, imports.add(Preconditions.class));
+                    out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
+                            imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class));
                 }
                 out.format("%s}\n", indent.left());
             });
@@ -720,8 +722,9 @@ public class Generator {
                 System.out.println("here");
             }
             if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls),
-                        imports.add(Preconditions.class), x.fieldName(cls));
+                out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
+                        imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
+                        x.fieldName(cls));
             } else {
                 out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
             }
@@ -745,11 +748,13 @@ public class Generator {
                             disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
                 } else if (!x.isPrimitive()) {
                     if (x.required) {
-                        out.format("%sthis.%s = %s.checkNotNull(%s);\n", indent, x.fieldName(cls),
-                                imports.add(Preconditions.class), x.fieldName(cls), x.fieldName(cls));
+                        out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
+                                imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
+                                x.fieldName(cls), x.fieldName(cls));
                     } else {
-                        out.format("%sthis.%s = %s.checkNotNull(%s).orElse(null);\n", indent, x.fieldName(cls),
-                                imports.add(Preconditions.class), x.fieldName(cls), x.fieldName(cls));
+                        out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\").orElse(null);\n", indent, x.fieldName(cls),
+                                imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
+                                x.fieldName(cls), x.fieldName(cls));
                     }
                 } else if (x.isOctets()) {
                     out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName(cls), imports.add(Util.class),
