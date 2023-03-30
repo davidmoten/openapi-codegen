@@ -61,7 +61,6 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                     // Jackson very permissive with readValue so we will tighten things up a bit
                     if (!c.equals(String.class) || (json.startsWith("\"") && json.endsWith("\""))) {
                         Object o = m.readValue(json, c);
-                        System.out.format("o=%s, c=%s, json=%s\n", o, c, json);
                         v = newInstance(cls, o);
                         count++;
                     } 
