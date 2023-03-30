@@ -1168,3 +1168,8 @@ components:
     SimpleBinary:
       type: string
       format: binary
+      
+    SimpleIntegerArray:
+      type: array
+      items: 
+        type: integer

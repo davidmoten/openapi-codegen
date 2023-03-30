@@ -718,13 +718,11 @@ public class Generator {
                         out.format("%sthis.%s = %s.checkNotNull(%s).orElse(null);\n", indent, x.fieldName,
                                 imports.add(Preconditions.class), x.fieldName, x.fieldName);
                     }
+                } else if (x.isOctets()) {
+                    out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName, imports.add(Util.class),
+                            x.fieldName);
                 } else {
-                    if (x.isOctets()) {
-                        out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName, imports.add(Util.class),
-                                x.fieldName);
-                    } else {
-                        out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
-                    }
+                    out.format("%sthis.%s = %s;\n", indent, x.fieldName, x.fieldName);
                 }
             });
             indent.left();
@@ -749,7 +747,7 @@ public class Generator {
             indent.right();
             if (!f.isOctets() && !f.required && !cls.unwrapSingleField()) {
                 out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName);
-            } else if (f.isOctets()){
+            } else if (f.isOctets()) {
                 out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName);
             } else {
                 out.format("%sreturn %s;\n", indent, f.fieldName);
