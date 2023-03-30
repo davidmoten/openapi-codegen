@@ -1187,6 +1187,6 @@ components:
       type: array
       items:
         oneOf:
-        - type: string
+        - type: boolean
         - type: integer 
           format: int32

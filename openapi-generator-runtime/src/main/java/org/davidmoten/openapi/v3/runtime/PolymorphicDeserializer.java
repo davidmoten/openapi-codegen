@@ -54,12 +54,16 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         } else if (type == PolymorphicType.ONE_OF) {
             T v = null;
             int count = 0;
+            System.out.println(classes);
             for (Class<?> c : classes) {
                 // try to deserialize with each of the member classes
                 try {
-                    Object o = m.readValue(json, (Class<Object>) c);
-                    v = newInstance(cls, o);
-                    count++;
+                    // Jackson very permissive with readValue so we will tighten things up a bit
+                    if (!c.equals(String.class) || (json.startsWith("\"") && json.endsWith("\""))) {
+                        Object o = m.readValue(json, c);
+                        v = newInstance(cls, o);
+                        count++;
+                    }
                 } catch (DatabindException e) {
                     // ignore because does not match
                 }

@@ -1,5 +1,7 @@
 package org.davidmoten.openapi.v3;
 
+import static org.davidmoten.openapi.v3.runtime.Util.toPrimitive;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -907,19 +909,4 @@ public class Generator {
         }
     }
 
-    private static String toPrimitive(String c) {
-        if (c.equals(Integer.class.getCanonicalName())) {
-            return "int";
-        } else if (c.equals(Long.class.getCanonicalName())) {
-            return "long";
-        } else if (c.equals(Float.class.getCanonicalName())) {
-            return "float";
-        } else if (c.equals(Boolean.class.getCanonicalName())) {
-            return "boolean";
-        } else if (c.equals(BigInteger.class.getCanonicalName())) {
-            return c;
-        } else {
-            return c;
-        }
-    }
 }

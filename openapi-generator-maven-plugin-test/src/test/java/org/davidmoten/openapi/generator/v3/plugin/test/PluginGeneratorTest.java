@@ -15,8 +15,10 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.davidmoten.guavamini.Lists;
 
@@ -38,8 +40,11 @@ import generated.model.SimpleString;
 
 public class PluginGeneratorTest {
 
-    private static final ObjectMapper m = new ObjectMapper().registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    private static final ObjectMapper m = JsonMapper //
+            .builder() //
+            .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS) //
+            .build() //
+            .registerModule(new JavaTimeModule());
 
     @Test
     public void testSimpleLong() throws JsonMappingException, JsonProcessingException {
@@ -169,13 +174,19 @@ public class PluginGeneratorTest {
 
     @Test
     public void testArrayOfOneOf() throws JsonMappingException, JsonProcessingException {
-        String json = "[\"hello\", 123]";
+        String json = "[true, 123]";
         ArrayOfOneOf a = m.readValue(json, ArrayOfOneOf.class);
-        assertEquals("hello", a.value().get(0).value());
+        assertTrue((boolean) a.value().get(0).value());
         assertEquals(123, a.value().get(1).value());
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(
-                new ArrayOfOneOf(Arrays.asList(new ArrayOfOneOfItem("hello"), new ArrayOfOneOfItem(123)))));
+                new ArrayOfOneOf(Arrays.asList(new ArrayOfOneOfItem(true), new ArrayOfOneOfItem(123)))));
+    }
+
+    @Test
+    public void testRead() throws JsonMappingException, JsonProcessingException {
+        System.out.println(m.readValue("\"abc\"", String.class));
+        System.out.println(m.readValue("123", boolean.class));
     }
 
     private static Class<Integer> typeof(int x) {
