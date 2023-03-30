@@ -1264,6 +1264,15 @@ components:
       properties:
         shapeType:
           type: string
-      required: [shapeType]      
+      required: [shapeType]   
+      
+    ######################
+    ## refs
+    ######################
+    
+    Ref:
+      $ref: '#components/schemas/SimpleInteger'
+      
+         
       
                
