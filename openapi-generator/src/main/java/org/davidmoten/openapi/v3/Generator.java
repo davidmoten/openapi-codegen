@@ -392,7 +392,6 @@ public class Generator {
                 final String fullClassName;
                 if (isPrimitive(schema)) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat());
-                    System.out.println(c);
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
                     final Optional<Integer> maxLength;

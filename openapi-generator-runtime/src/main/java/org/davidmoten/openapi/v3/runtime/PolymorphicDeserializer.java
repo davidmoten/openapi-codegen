@@ -54,7 +54,6 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         } else if (type == PolymorphicType.ONE_OF) {
             T v = null;
             int count = 0;
-            System.out.println(classes);
             for (Class<?> c : classes) {
                 // try to deserialize with each of the member classes
                 try {
