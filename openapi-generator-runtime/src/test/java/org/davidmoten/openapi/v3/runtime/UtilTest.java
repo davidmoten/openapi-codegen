@@ -12,7 +12,7 @@ public class UtilTest {
     public void test() {
         String a = "abc";
         String b = Util.encodeOctets(a.getBytes(StandardCharsets.UTF_8));
-        System.out.println(b);
+        assertEquals("616263", b);
         assertEquals("abc", new String(Util.decodeOctets(b), StandardCharsets.UTF_8));
     }
 }

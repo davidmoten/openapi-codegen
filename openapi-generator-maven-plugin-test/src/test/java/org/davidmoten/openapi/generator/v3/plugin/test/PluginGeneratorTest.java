@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Base64;
 
+import org.davidmoten.openapi.v3.runtime.Util;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
 import generated.model.SimpleDateTime;
@@ -108,6 +110,16 @@ public class PluginGeneratorTest {
         byte[] bytes = "abc".getBytes(StandardCharsets.UTF_8);
         String json = "\"" + Base64.getEncoder().encodeToString(bytes) + "\"";
         SimpleByteArray a = m.readValue(json, SimpleByteArray.class);
+        assertTrue(a.value() instanceof byte[]);
+        assertArrayEquals(bytes, a.value());
+        assertEquals(json, m.writeValueAsString(a));
+    }
+    
+    @Test
+    public void testSimpleBinaryUsingOctetEncoding() throws JsonMappingException, JsonProcessingException {
+        byte[] bytes = "abc".getBytes(StandardCharsets.UTF_8);
+        String json = "\"" + Util.encodeOctets(bytes) + "\"";
+        SimpleBinary a = m.readValue(json, SimpleBinary.class);
         assertTrue(a.value() instanceof byte[]);
         assertArrayEquals(bytes, a.value());
         assertEquals(json, m.writeValueAsString(a));
