@@ -504,7 +504,7 @@ public class Generator {
         }
 
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.PROPERTY)\n", indent, imports.add(JsonTypeInfo.class),
+            out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY)\n", indent, imports.add(JsonTypeInfo.class),
                     imports.add(Id.class), cls.discriminator.propertyName, imports.add(As.class));
             indent.right().right();
             String types = cls.fields.stream()

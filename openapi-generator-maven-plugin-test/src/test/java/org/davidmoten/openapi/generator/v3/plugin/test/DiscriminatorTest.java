@@ -30,14 +30,14 @@ public class DiscriminatorTest {
         Square square = new Square();
         assertEquals(json, m.writeValueAsString(square));
 
-        // deserialization
+        // deserialization using Shape does not work, nor with Square
         Shape s = m.readValue(json, Shape.class);
 
         // fails. shapeType is null
         assertEquals("square", s.shapeType());
     }
 
-    @JsonTypeInfo(use = Id.NAME, property = "shapeType", include = As.PROPERTY)
+    @JsonTypeInfo(use = Id.NAME, property = "shapeType", include = As.EXISTING_PROPERTY)
     @JsonSubTypes({ @Type(value = Oval.class, name = "oval"), @Type(value = Square.class, name = "square") })
     public interface Shape {
 
