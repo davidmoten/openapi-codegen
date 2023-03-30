@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -879,7 +880,7 @@ public class Generator {
             if ("date-time".equals(format)) {
                 return OffsetDateTime.class;
             } else if ("date".equals(format)) {
-                return null;
+                return LocalDate.class;
             } else if ("byte".equals(format)) {
                 return byte[].class;
             } else if ("binary".equals(format)) {

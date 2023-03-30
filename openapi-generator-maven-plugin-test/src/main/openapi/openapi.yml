@@ -1182,6 +1182,10 @@ components:
       type: string
       format: date-time
       
+    SimpleDate:
+      type: string
+      format: date
+      
     SimpleBoolean:
       type: boolean
       
