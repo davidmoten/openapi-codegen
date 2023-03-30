@@ -20,34 +20,40 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DiscriminatorTest {
-    
+
     @Test
     public void test() throws JsonMappingException, JsonProcessingException {
         ObjectMapper m = new ObjectMapper();
         String json = "{\"shapeType\":\"square\"}";
+
+        // serialization works
+        Square square = new Square();
+        assertEquals(json, m.writeValueAsString(square));
+
+        // deserialization
         Shape s = m.readValue(json, Shape.class);
+
+        // fails. shapeType is null
         assertEquals("square", s.shapeType());
     }
-    
+
     @JsonTypeInfo(use = Id.NAME, property = "shapeType", include = As.PROPERTY)
-    @JsonSubTypes({
-            @Type(value = Oval.class, name = "oval"), 
-            @Type(value = Square.class, name = "square")})
+    @JsonSubTypes({ @Type(value = Oval.class, name = "oval"), @Type(value = Square.class, name = "square") })
     public interface Shape {
 
         String shapeType();
     }
-    
+
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
-    public final class Square implements Shape {
+    public static final class Square implements Shape {
 
         private final String shapeType;
 
         @JsonCreator
-        private Square(
-                @JsonProperty("shapeType") String shapeType) {
+        private Square(@JsonProperty("shapeType") String shapeType) {
             this.shapeType = shapeType;
+            System.out.println("constructed");
         }
 
         public Square() {
@@ -67,8 +73,7 @@ public class DiscriminatorTest {
         private final String shapeType;
 
         @JsonCreator
-        private Oval(
-                @JsonProperty("shapeType") String shapeType) {
+        private Oval(@JsonProperty("shapeType") String shapeType) {
             this.shapeType = shapeType;
         }
 
@@ -81,5 +86,5 @@ public class DiscriminatorTest {
             return shapeType;
         }
     }
-    
+
 }
