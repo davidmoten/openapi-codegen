@@ -1241,4 +1241,26 @@ components:
           type: integer
           format: int32
       required: [label, num]
+      
+    Shape2:
+      oneOf:
+      - $ref: '#/components/schemas/Oval2'
+      - $ref: '#/components/schemas/Square2'
+      discriminator:
+        propertyName: shapeType
+          
+    Oval2:
+      type: object
+      properties:
+        shapeType:
+          type: string
+      required: [shapeType]
+      
+    Square2:
+      type: object
+      properties:
+        shapeType:
+          type: string
+      required: [shapeType]      
+      
                
