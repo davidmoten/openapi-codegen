@@ -10,16 +10,13 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
+import org.davidmoten.openapi.v3.runtime.Mapper;
 import org.davidmoten.openapi.v3.runtime.Util;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.davidmoten.guavamini.Lists;
 
 import generated.model.ArrayOfComplexType;
@@ -40,11 +37,7 @@ import generated.model.SimpleString;
 
 public class PluginGeneratorTest {
 
-    private static final ObjectMapper m = JsonMapper //
-            .builder() //
-            .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS) //
-            .build() //
-            .registerModule(new JavaTimeModule());
+    private static final ObjectMapper m = Mapper.instance();
 
     @Test
     public void testSimpleLong() throws JsonMappingException, JsonProcessingException {
@@ -174,19 +167,13 @@ public class PluginGeneratorTest {
 
     @Test
     public void testArrayOfOneOf() throws JsonMappingException, JsonProcessingException {
-        String json = "[true, 123]";
+        String json = "[true,123]";
         ArrayOfOneOf a = m.readValue(json, ArrayOfOneOf.class);
         assertTrue((boolean) a.value().get(0).value());
         assertEquals(123, a.value().get(1).value());
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(
                 new ArrayOfOneOf(Arrays.asList(new ArrayOfOneOfItem(true), new ArrayOfOneOfItem(123)))));
-    }
-
-    @Test
-    public void testRead() throws JsonMappingException, JsonProcessingException {
-        System.out.println(m.readValue("\"abc\"", String.class));
-        System.out.println(m.readValue("123", boolean.class));
     }
 
     private static Class<Integer> typeof(int x) {

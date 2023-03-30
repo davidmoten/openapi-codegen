@@ -22,7 +22,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
     private final List<Class<?>> classes;
     private final Class<T> cls;
 
-    private static final ObjectMapper m = new ObjectMapper();
+    private static final ObjectMapper m = Mapper.instance();
 
     protected PolymorphicDeserializer(PolymorphicType type, Class<T> cls, Class<?>... classes) {
         super(cls);
@@ -61,9 +61,10 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                     // Jackson very permissive with readValue so we will tighten things up a bit
                     if (!c.equals(String.class) || (json.startsWith("\"") && json.endsWith("\""))) {
                         Object o = m.readValue(json, c);
+                        System.out.format("o=%s, c=%s, json=%s\n", o, c, json);
                         v = newInstance(cls, o);
                         count++;
-                    }
+                    } 
                 } catch (DatabindException e) {
                     // ignore because does not match
                 }
