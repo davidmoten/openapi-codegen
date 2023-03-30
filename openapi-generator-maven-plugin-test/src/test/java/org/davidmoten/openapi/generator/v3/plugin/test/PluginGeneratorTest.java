@@ -231,7 +231,7 @@ public class PluginGeneratorTest {
     public void testMultipleDiscriminatedPolymorphism() throws JsonMappingException, JsonProcessingException {
         String json = "{\"vehicleType\":\"bike\",\"wheelsType\":\"two\",\"colour\":\"red\"}";
         Vehicle v = m.readValue(json, Vehicle.class);
-//        assertEquals("bike", v.vehicleType());
+        assertEquals("bike", v.vehicleType());
         assertTrue(v instanceof Bike);
         Bike b = new Bike("red");
         assertEquals(json, m.writeValueAsString(b));
