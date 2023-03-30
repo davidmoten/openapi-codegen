@@ -23,6 +23,8 @@ import generated.model.ArrayOfComplexType;
 import generated.model.ArrayOfComplexType.ArrayOfComplexTypeItem;
 import generated.model.ArrayOfOneOf;
 import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
+import generated.model.ArrayOfOneOfString;
+import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.SimpleBinary;
 import generated.model.SimpleBoolean;
 import generated.model.SimpleByteArray;
@@ -174,6 +176,17 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(
                 new ArrayOfOneOf(Arrays.asList(new ArrayOfOneOfItem(true), new ArrayOfOneOfItem(123)))));
+    }
+    
+    @Test
+    public void testArrayOfOneOfString() throws JsonMappingException, JsonProcessingException {
+        String json = "[\"hello\",123]";
+        ArrayOfOneOfString a = m.readValue(json, ArrayOfOneOfString.class);
+        assertEquals("hello", a.value().get(0).value());
+        assertEquals(123, a.value().get(1).value());
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(json, m.writeValueAsString(
+                new ArrayOfOneOfString(Arrays.asList(new ArrayOfOneOfStringItem("hello"), new ArrayOfOneOfStringItem(123)))));
     }
 
     private static Class<Integer> typeof(int x) {

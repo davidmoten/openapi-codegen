@@ -1190,3 +1190,11 @@ components:
         - type: boolean
         - type: integer 
           format: int32
+
+    ArrayOfOneOfString:
+      type: array
+      items:
+        oneOf:
+        - type: string
+        - type: integer 
+          format: int32
