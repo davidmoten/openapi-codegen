@@ -1242,6 +1242,9 @@ components:
           format: int32
       required: [label, num]
       
+    ######################################
+    ## polymorphism, no mapping specified
+    ######################################
     Shape2:
       oneOf:
       - $ref: '#/components/schemas/Oval2'
