@@ -495,12 +495,14 @@ public class Generator {
         }
 
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n", indent, imports.add(JsonTypeInfo.class),
-                    imports.add(Id.class), cls.discriminator.propertyName, imports.add(As.class));
+            out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",
+                    indent, imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName,
+                    imports.add(As.class));
             indent.right().right();
             String types = cls.fields.stream()
                     .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),
-                            imports.add(x.fullClassName), cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName)))
+                            imports.add(x.fullClassName),
+                            cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName)))
                     .collect(Collectors.joining(", "));
             indent.left().left();
             out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
@@ -522,8 +524,8 @@ public class Generator {
     }
 
     private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
-        out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent, imports.add(JsonAutoDetect.class),
-                imports.add(Visibility.class), imports.add(Visibility.class));
+        out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
+                imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
     }
 
     private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
@@ -543,7 +545,7 @@ public class Generator {
     private static boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath) {
         SchemaWithName last = schemaPath.last();
         if (schemaPath.size() <= 1) {
-            return isPrimitive(last.schema);
+            return isPrimitive(last.schema) || isRef(last.schema);
         } else {
             return contains(schemaPath.secondLast().schema.getRequired(), last.name);
         }
@@ -582,7 +584,7 @@ public class Generator {
             this.fieldName = fieldName;
             this.fullClassNameToPropertyValue = fullClassNameToPropertyValue;
         }
-        
+
         public String discriminatorValueFromFullClassName(String fullClassName) {
             String value = fullClassNameToPropertyValue.get(fullClassName);
             if (value == null) {
