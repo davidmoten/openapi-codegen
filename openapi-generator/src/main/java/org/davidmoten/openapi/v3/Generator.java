@@ -700,6 +700,8 @@ public class Generator {
         // The private one is to be annotated
         // with JsonCreator for use by Jackson.
 
+        
+        //TODO javadoc
         indent.right().right();
         final String parametersNullable;
         if (cls.unwrapSingleField()) {
