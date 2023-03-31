@@ -91,7 +91,7 @@ public class PluginGeneratorTest {
     public void testSimpleIntegerDefaultsToLong() throws JsonMappingException, JsonProcessingException {
         String json = "123";
         SimpleInteger a = m.readValue(json, SimpleInteger.class);
-        assertReturns(SimpleInteger.class, "value", int.class);
+        assertReturns(SimpleInteger.class, "value", long.class);
         assertEquals(123, a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
