@@ -28,6 +28,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintWriter;
+import org.davidmoten.openapi.v3.runtime.Config;
 import org.davidmoten.openapi.v3.runtime.PolymorphicDeserializer;
 import org.davidmoten.openapi.v3.runtime.PolymorphicType;
 import org.davidmoten.openapi.v3.runtime.Util;
@@ -72,6 +73,43 @@ public class Generator {
         // generate model classes for schema definitions
         writeSchemaClasses(definition, names);
 
+        writeGlobalsClass(names);
+
+    }
+
+    private void writeGlobalsClass(Names names) {
+        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        Indent indent = new Indent();
+        String fullClassName = names.globalsFullClassName();
+        Imports imports = new Imports(fullClassName);
+        out.format("package %s;\n", Names.pkg(fullClassName));
+        out.format("\nIMPORTS_HERE");
+        out.format("\npublic final class %s {\n", Names.simpleClassName(fullClassName));
+        indent.right();
+        out.format("\n%sprivate static %s config = %s.builder().build();\n", indent, imports.add(Config.class), imports.add(Config.class));
+        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent, imports.add(Config.class));
+        indent.right();
+        out.format("%sconfig = configuration;\n", indent);
+        indent.left();
+        out.format("%s}\n", indent);
+        out.format("\n%spublic static %s config() {\n", indent, imports.add(Config.class));
+        indent.right();
+        out.format("%sreturn config;\n", indent);
+        indent.left();
+        out.format("%s}\n", indent);
+        indent.left();
+        out.format("%s}\n", indent);
+        System.out.println("////////////////////////////////////////////////");
+        String content = out.text().replace("IMPORTS_HERE", imports.toString());
+        System.out.println(content);
+        out.close();
+        File file = names.fullClassNameToJavaFile(fullClassName);
+        file.getParentFile().mkdirs();
+        try {
+            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private static void writeSchemaClasses(Definition definition, Names names) {
@@ -700,8 +738,7 @@ public class Generator {
         // The private one is to be annotated
         // with JsonCreator for use by Jackson.
 
-        
-        //TODO javadoc
+        // TODO javadoc
         indent.right().right();
         final String parametersNullable;
         if (cls.unwrapSingleField()) {

@@ -65,8 +65,12 @@ public final class Names {
     }
 
     public File schemaNameToJavaFile(String schemaName) {
+        return fullClassNameToJavaFile(schemaNameToClassName(schemaName));
+    }
+    
+    public File fullClassNameToJavaFile(String fullClassName) {
         return new File(definition.generatedSourceDirectory(),
-                schemaNameToClassName(schemaName).replace(".", File.separator) + ".java");
+                fullClassName.replace(".", File.separator) + ".java");
     }
 
     public String refToFullClassName(String ref) {
@@ -81,8 +85,8 @@ public final class Names {
         return fullClassName;
     }
     
-    public static String simpleClassName(String className) {
-        return getLastItemInDotDelimitedString(className);
+    public static String simpleClassName(String fullClassName) {
+        return getLastItemInDotDelimitedString(fullClassName);
     }
 
     public static String pkg(String className) {
@@ -203,6 +207,10 @@ public final class Names {
     
     public static boolean isPrimitiveFullClassName(String className) {
         return PRIMITIVE_CLASS_NAMES.contains(className);
+    }
+
+    public String globalsFullClassName() {
+        return definition.packages().modelPackage() + ".config.Globals";
     }
 
 }
