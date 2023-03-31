@@ -6,3 +6,4 @@ Java code generator from OpenAPI definition file
 * `additionalProperties` (Dictionary) support
 * `allOf` support
 * generate javadoc for fields
+* delegate constructors using `this(`
