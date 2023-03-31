@@ -36,6 +36,7 @@ import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.Bike;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
+import generated.model.PropertyRef;
 import generated.model.Ref;
 import generated.model.Shape;
 import generated.model.Shape2;
@@ -330,5 +331,15 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new Ref(new SimpleInteger(123))));
         shouldThrowIAE(() -> new Ref(null));
+    }
+    
+    @Test
+    public void testPropertyRef() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"first\":123}";
+        PropertyRef r = m.readValue(json, PropertyRef.class);
+        assertEquals(123, r.first().value());
+        assertEquals(json, m.writeValueAsString(r));
+        assertEquals(json, m.writeValueAsString(new PropertyRef(new SimpleInteger(123))));
+        shouldThrowIAE(() -> new PropertyRef(null));
     }
 }
