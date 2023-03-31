@@ -1,10 +1,12 @@
-package org.davidmoten.openapi.v3.runtime;
+package org.davidmoten.openapi.v3.runtime.internal;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+
+import org.davidmoten.openapi.v3.runtime.Config;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
@@ -21,31 +23,31 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
     private final PolymorphicType type;
     private final List<Class<?>> classes;
     private final Class<T> cls;
+    private final ObjectMapper mapper;
 
-    private static final ObjectMapper m = Mapper.instance();
-
-    protected PolymorphicDeserializer(PolymorphicType type, Class<T> cls, Class<?>... classes) {
+    protected PolymorphicDeserializer(Config config, PolymorphicType type, Class<T> cls, Class<?>... classes) {
         super(cls);
         this.type = type;
         this.classes = Arrays.asList(classes);
         this.cls = cls;
+        this.mapper = config.mapper();
     }
 
     @Override
     public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        return deserializePoly(p, ctxt, classes, cls, type);
+        return deserializePoly(mapper, p, ctxt, classes, cls, type);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T deserializePoly(JsonParser p, DeserializationContext ctxt, List<Class<?>> classes,
-            Class<T> cls, PolymorphicType type) throws IOException {
+    private static <T> T deserializePoly(ObjectMapper mapper, JsonParser p, DeserializationContext ctxt,
+            List<Class<?>> classes, Class<T> cls, PolymorphicType type) throws IOException {
         TreeNode tree = p.getCodec().readTree(p);
-        String json = m.writeValueAsString(tree);
+        String json = mapper.writeValueAsString(tree);
         if (type == PolymorphicType.ANY_OF) {
             for (Class<?> c : classes) {
                 // try to deserialize with each of the member classes
                 try {
-                    Object o = m.readValue(json, (Class<Object>) c);
+                    Object o = mapper.readValue(json, (Class<Object>) c);
                     return newInstance(cls, o);
                 } catch (DatabindException e) {
                     // ignore because does not match
@@ -59,10 +61,10 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                 try {
                     // Jackson very permissive with readValue so we will tighten things up a bit
                     if (!c.equals(String.class) || (json.startsWith("\"") && json.endsWith("\""))) {
-                        Object o = m.readValue(json, c);
+                        Object o = mapper.readValue(json, c);
                         v = newInstance(cls, o);
                         count++;
-                    } 
+                    }
                 } catch (DatabindException e) {
                     // ignore because does not match
                 }

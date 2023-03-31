@@ -1,4 +1,4 @@
-package org.davidmoten.openapi.v3.runtime;
+package org.davidmoten.openapi.v3.runtime.internal;
 
 import java.math.BigInteger;
 

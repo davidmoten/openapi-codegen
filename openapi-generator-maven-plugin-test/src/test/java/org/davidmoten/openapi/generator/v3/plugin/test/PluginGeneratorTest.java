@@ -16,8 +16,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
-import org.davidmoten.openapi.v3.runtime.Mapper;
-import org.davidmoten.openapi.v3.runtime.Util;
+import org.davidmoten.openapi.v3.runtime.internal.Util;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -57,10 +56,11 @@ import generated.model.SimpleTime;
 import generated.model.Square;
 import generated.model.Square2;
 import generated.model.Vehicle;
+import generated.model.config.Globals;
 
 public class PluginGeneratorTest {
 
-    private static final ObjectMapper m = Mapper.instance();
+    private static final ObjectMapper m = Globals.config().mapper();
 
     @Test
     public void testSimpleLong() throws JsonMappingException, JsonProcessingException {

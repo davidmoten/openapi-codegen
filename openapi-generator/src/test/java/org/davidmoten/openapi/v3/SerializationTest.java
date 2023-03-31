@@ -7,14 +7,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.davidmoten.openapi.v3.runtime.PolymorphicDeserializer;
-import org.davidmoten.openapi.v3.runtime.PolymorphicType;
+import org.davidmoten.openapi.v3.runtime.Config;
+import org.davidmoten.openapi.v3.runtime.internal.PolymorphicDeserializer;
+import org.davidmoten.openapi.v3.runtime.internal.PolymorphicType;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,6 +34,8 @@ import com.github.davidmoten.guavamini.Preconditions;
 public class SerializationTest {
 
     private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
+    
+    private static final Config CONFIG = Config.builder().build();
 
     private static final ObjectMapper m = new ObjectMapper().registerModule(new Jdk8Module());
 
@@ -165,7 +167,7 @@ public class SerializationTest {
         public static final class Deserializer extends PolymorphicDeserializer<OneOf> {
 
             public Deserializer() {
-                super(PolymorphicType.ONE_OF, OneOf.class, Circle2.class, Rectangle2.class);
+                super(CONFIG, PolymorphicType.ONE_OF, OneOf.class, Circle2.class, Rectangle2.class);
             }
         }
     }

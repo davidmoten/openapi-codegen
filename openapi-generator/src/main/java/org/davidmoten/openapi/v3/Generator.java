@@ -1,6 +1,6 @@
 package org.davidmoten.openapi.v3;
 
-import static org.davidmoten.openapi.v3.runtime.Util.toPrimitive;
+import static org.davidmoten.openapi.v3.runtime.internal.Util.toPrimitive;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +29,9 @@ import javax.validation.constraints.Size;
 
 import org.davidmoten.openapi.v3.internal.ByteArrayPrintWriter;
 import org.davidmoten.openapi.v3.runtime.Config;
-import org.davidmoten.openapi.v3.runtime.PolymorphicDeserializer;
-import org.davidmoten.openapi.v3.runtime.PolymorphicType;
-import org.davidmoten.openapi.v3.runtime.Util;
+import org.davidmoten.openapi.v3.runtime.internal.PolymorphicDeserializer;
+import org.davidmoten.openapi.v3.runtime.internal.PolymorphicType;
+import org.davidmoten.openapi.v3.runtime.internal.Util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -133,7 +133,7 @@ public class Generator {
             Indent indent = new Indent();
             out.format("package %s;\n", result.cls.pkg());
             out.format("\nIMPORTS_HERE");
-            writeClass(out, result.imports, indent, result.cls, fullClassNameInterfaces);
+            writeClass(out, result.imports, indent, result.cls, fullClassNameInterfaces, names);
             System.out.println("////////////////////////////////////////////////");
             String content = out.text().replace("IMPORTS_HERE", result.imports.toString());
             System.out.println(content);
@@ -506,19 +506,19 @@ public class Generator {
     }
 
     private static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces) {
+            Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
         writeClassDeclaration(out, imports, indent, cls, fullClassNameInterfaces);
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
         if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
                 || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            writeOneOrAnyOfClassContent(out, imports, indent, cls);
+            writeOneOrAnyOfClassContent(out, imports, indent, cls, names);
         } else {
             writeFields(out, imports, indent, cls);
             writeConstructor(out, imports, indent, cls, fullClassNameInterfaces);
             writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
         }
-        writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces);
+        writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces, names);
         indent.left();
         out.format("%s}\n", indent);
     }
@@ -659,7 +659,7 @@ public class Generator {
         return collection != null && t != null && collection.contains(t);
     }
 
-    private static void writeOneOrAnyOfClassContent(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+    private static void writeOneOrAnyOfClassContent(PrintWriter out, Imports imports, Indent indent, Cls cls, Names names) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s%s %s();\n", indent, imports.add(String.class), cls.discriminator.fieldName);
         } else {
@@ -670,7 +670,7 @@ public class Generator {
             out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
             out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
             out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
-                    imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class));
+                    imports.add(org.davidmoten.openapi.v3.runtime.internal.Preconditions.class));
             out.format("%s}\n", indent.left());
             cls.fields.forEach(f -> {
                 String className = toPrimitive(f.fullClassName);
@@ -680,7 +680,7 @@ public class Generator {
                     out.format("%sthis.value = value;\n", indent);
                 } else {
                     out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
-                            imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class));
+                            imports.add(org.davidmoten.openapi.v3.runtime.internal.Preconditions.class));
                 }
                 out.format("%s}\n", indent.left());
             });
@@ -697,7 +697,7 @@ public class Generator {
             indent.right();
             String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
-            out.format("%ssuper(%s.%s, %s.class, %s);\n", indent, imports.add(PolymorphicType.class),
+            out.format("%ssuper(%s.config(), %s.%s, %s.class, %s);\n", indent, imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
                     cls.polymorphicType.name(), cls.simpleName(), classes);
             indent.left();
             out.format("%s}\n", indent);
@@ -772,7 +772,7 @@ public class Generator {
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                 out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
-                        imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
+                        imports.add(org.davidmoten.openapi.v3.runtime.internal.Preconditions.class), x.fieldName(cls),
                         x.fieldName(cls));
             } else {
                 out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
@@ -798,16 +798,16 @@ public class Generator {
                 } else if (!x.isPrimitive() && !x.isByteArray()) {
                     if (x.required) {
                         out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
-                                imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
+                                imports.add(org.davidmoten.openapi.v3.runtime.internal.Preconditions.class), x.fieldName(cls),
                                 x.fieldName(cls), x.fieldName(cls));
                     } else {
                         out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\").orElse(null);\n", indent, x.fieldName(cls),
-                                imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
+                                imports.add(org.davidmoten.openapi.v3.runtime.internal.Preconditions.class), x.fieldName(cls),
                                 x.fieldName(cls), x.fieldName(cls));
                     }
                 } else if (x.isOctets()) {
                     out.format("%sthis.%s = %s.encodeOctets(%s.checkNotNull(%s, \"%s\"));\n", indent, x.fieldName(cls),
-                            imports.add(Util.class), imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class),
+                            imports.add(Util.class), imports.add(org.davidmoten.openapi.v3.runtime.internal.Preconditions.class),
                             x.fieldName(cls), x.fieldName(cls));
                 } else {
                     out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
@@ -846,8 +846,8 @@ public class Generator {
     }
 
     private static void writeMemberClasses(PrintWriter out, Imports imports, Indent indent, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces) {
-        cls.classes.forEach(c -> writeClass(out, imports, indent, c, fullClassNameInterfaces));
+            Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
+        cls.classes.forEach(c -> writeClass(out, imports, indent, c, fullClassNameInterfaces, names));
     }
 
     private static String resolvedTypeNullable(Field f, Imports imports) {

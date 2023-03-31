@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.nio.charset.StandardCharsets;
 
+import org.davidmoten.openapi.v3.runtime.internal.Util;
 import org.junit.Test;
 
 public class UtilTest {
