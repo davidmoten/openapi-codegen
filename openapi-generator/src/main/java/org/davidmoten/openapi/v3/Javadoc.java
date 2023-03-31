@@ -1,6 +1,6 @@
 package org.davidmoten.openapi.v3;
 
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,13 +15,13 @@ public class Javadoc {
 
     private static final int MAX_JAVADOC_WIDTH = 80;
 
-    public static void printJavadoc(PrintStream p, Indent indent, String text) {
+    public static void printJavadoc(PrintWriter out, Indent indent, String text) {
         Preconditions.checkNotNull(text);
-        printJavadoc(p, indent, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
+        printJavadoc(out, indent, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
                 Collections.emptyMap());
     }
 
-    private static void printJavadoc(PrintStream p, Indent indent, Optional<String> text, List<Annotation> annotations,
+    private static void printJavadoc(PrintWriter p, Indent indent, Optional<String> text, List<Annotation> annotations,
             Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc) {
         boolean hasText = text.isPresent() || !annotations.isEmpty();
         boolean addParagraph = false;

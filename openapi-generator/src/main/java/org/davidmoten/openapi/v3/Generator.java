@@ -4,7 +4,7 @@ import static org.davidmoten.openapi.v3.runtime.Util.toPrimitive;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import org.davidmoten.openapi.v3.internal.ByteArrayPrintStream;
+import org.davidmoten.openapi.v3.internal.ByteArrayPrintWriter;
 import org.davidmoten.openapi.v3.runtime.PolymorphicDeserializer;
 import org.davidmoten.openapi.v3.runtime.PolymorphicType;
 import org.davidmoten.openapi.v3.runtime.Util;
@@ -91,7 +91,7 @@ public class Generator {
             findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
         }
         for (MyVisitor.Result result : results) {
-            ByteArrayPrintStream out = ByteArrayPrintStream.create();
+            ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
             Indent indent = new Indent();
             out.format("package %s;\n", result.cls.pkg());
             out.format("\nIMPORTS_HERE");
@@ -467,7 +467,7 @@ public class Generator {
         DEFAULT, OCTET;
     }
 
-    private static void writeClass(PrintStream out, Imports imports, Indent indent, Cls cls,
+    private static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         writeClassDeclaration(out, imports, indent, cls, fullClassNameInterfaces);
         indent.right();
@@ -485,7 +485,7 @@ public class Generator {
         out.format("%s}\n", indent);
     }
 
-    private static void writeClassDeclaration(PrintStream out, Imports imports, Indent indent, Cls cls,
+    private static void writeClassDeclaration(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         final String modifier;
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ENUM) {
@@ -529,17 +529,17 @@ public class Generator {
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
     }
 
-    private static void writeOneOfDeserializerAnnotation(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeOneOfDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
                 cls.simpleName());
     }
 
-    private static void writeAutoDetectAnnotation(PrintStream out, Imports imports, Indent indent) {
+    private static void writeAutoDetectAnnotation(PrintWriter out, Imports imports, Indent indent) {
         out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
                 imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
     }
 
-    private static void writeEnumMembers(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeEnumMembers(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         String text = cls.enumMembers.stream().map(x -> {
             String delim = x.parameter instanceof String ? "\"" : "";
             return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);
@@ -621,7 +621,7 @@ public class Generator {
         return collection != null && t != null && collection.contains(t);
     }
 
-    private static void writeOneOrAnyOfClassContent(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeOneOrAnyOfClassContent(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s%s %s();\n", indent, imports.add(String.class), cls.discriminator.fieldName);
         } else {
@@ -668,7 +668,7 @@ public class Generator {
         }
     }
 
-    private static void writeFields(PrintStream out, Imports imports, Indent indent, Cls cls) {
+    private static void writeFields(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         if (!cls.fields.isEmpty()) {
             out.println();
         }
@@ -694,7 +694,7 @@ public class Generator {
         });
     }
 
-    private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls,
+    private static void writeConstructor(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         // this code will write one public constructor or one private and one public.
         // The private one is to be annotated
@@ -785,7 +785,7 @@ public class Generator {
         return value == null ? defaultValue : value;
     }
 
-    private static void writeGetters(PrintStream out, Imports imports, Indent indent, Cls cls,
+    private static void writeGetters(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
@@ -808,7 +808,7 @@ public class Generator {
         });
     }
 
-    private static void writeMemberClasses(PrintStream out, Imports imports, Indent indent, Cls cls,
+    private static void writeMemberClasses(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         cls.classes.forEach(c -> writeClass(out, imports, indent, c, fullClassNameInterfaces));
     }
