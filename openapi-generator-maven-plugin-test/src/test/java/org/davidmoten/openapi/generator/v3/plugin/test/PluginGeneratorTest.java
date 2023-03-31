@@ -197,6 +197,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleBinary(bytes)));
+        shouldThrowIAE(() -> new SimpleBinary(null));
     }
 
     @Test
@@ -208,6 +209,8 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleIntegerArray(list)));
+        // TODO should null be passable to List<Long>?
+        // shouldThrowIAE(() -> new SimpleIntegerArray(null));
     }
 
     @Test
@@ -256,6 +259,8 @@ public class PluginGeneratorTest {
         assertFalse(b.str().isPresent());
         assertFalse(b.num().isPresent());
         assertEquals(1, b.getClass().getConstructors().length);
+        shouldThrowIAE(() -> new ObjectAllOptionalFields(null, Optional.of(123)));
+        shouldThrowIAE(() -> new ObjectAllOptionalFields(Optional.of("hello"), null));
     }
 
     @Test
@@ -273,6 +278,7 @@ public class PluginGeneratorTest {
         } catch (ValueInstantiationException e) {
             // expected
         }
+        shouldThrowIAE(() -> new ObjectNoOptionalFields(null, 123));
     }
 
     @Test
@@ -284,6 +290,7 @@ public class PluginGeneratorTest {
         Bike b = new Bike("red");
         assertEquals(json, m.writeValueAsString(b));
         assertEquals(1, Bike.class.getConstructors().length);
+        shouldThrowIAE(() -> new Bike(null));
     }
 
     @Test
@@ -311,6 +318,7 @@ public class PluginGeneratorTest {
         assertEquals(123, r.value().value());
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new Ref(new SimpleInteger(123))));
+        shouldThrowIAE(() -> new Ref(null));
     }
 
     private static Class<Integer> typeof(int x) {

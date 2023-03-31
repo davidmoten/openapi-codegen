@@ -238,7 +238,7 @@ public class Generator {
         final Optional<Integer> minLength;
         final Optional<Integer> maxLength;
         final Optional<String> pattern;
-        final boolean isArray;
+        final boolean isArray; // if a List to be used to represent
         final Encoding encoding;
 
         public Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
@@ -726,9 +726,6 @@ public class Generator {
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
         cls.fields.stream().forEach(x -> {
-            if (x.name.equals("label")) {
-                System.out.println("here");
-            }
             if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                 out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
                         imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
