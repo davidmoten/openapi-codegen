@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -63,15 +64,25 @@ public class PluginGeneratorTest {
     public void testSimpleLong() throws JsonMappingException, JsonProcessingException {
         String json = Long.MAX_VALUE + "";
         SimpleLong a = m.readValue(json, SimpleLong.class);
-        assertEquals(Long.TYPE, typeof(a.value()));
+        assertReturns(SimpleLong.class, "value", long.class);
         assertEquals(json, m.writeValueAsString(a));
+    }
+    
+    public static void assertReturns(Class<?> cls, String methodName, Class<?> returnClass) {
+        Method method;
+        try {
+            method = cls.getMethod(methodName);
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
+        assertEquals(returnClass, method.getReturnType());
     }
 
     @Test
     public void testSimpleInt() throws JsonMappingException, JsonProcessingException {
         String json = "123";
         SimpleInt a = m.readValue(json, SimpleInt.class);
-        assertEquals(Integer.TYPE, typeof(a.value()));
+        assertReturns(SimpleInt.class, "value", int.class);
         assertEquals(123, a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
@@ -80,7 +91,7 @@ public class PluginGeneratorTest {
     public void testSimpleIntegerDefaultsToLong() throws JsonMappingException, JsonProcessingException {
         String json = "123";
         SimpleInteger a = m.readValue(json, SimpleInteger.class);
-        assertEquals(Long.TYPE, typeof(a.value()));
+        assertReturns(SimpleInteger.class, "value", int.class);
         assertEquals(123, a.value());
         assertEquals(json, m.writeValueAsString(a));
     }
@@ -89,7 +100,7 @@ public class PluginGeneratorTest {
     public void testSimpleFloat() throws JsonMappingException, JsonProcessingException {
         String json = "123.4";
         SimpleFloat a = m.readValue(json, SimpleFloat.class);
-        assertEquals(Float.TYPE, typeof(a.value()));
+        assertReturns(SimpleFloat.class, "value", float.class);
         assertEquals(123.4, a.value(), 0.00001);
         assertEquals(json, m.writeValueAsString(a));
     }
@@ -98,7 +109,7 @@ public class PluginGeneratorTest {
     public void testSimpleDouble() throws JsonMappingException, JsonProcessingException {
         String json = "123.4";
         SimpleDouble a = m.readValue(json, SimpleDouble.class);
-        assertEquals(Double.TYPE, typeof(a.value()));
+        assertReturns(SimpleDouble.class, "value", double.class);
         assertEquals(123.4, a.value(), 0.00001);
         assertEquals(json, m.writeValueAsString(a));
     }
@@ -167,7 +178,7 @@ public class PluginGeneratorTest {
     public void testSimpleBoolean() throws JsonMappingException, JsonProcessingException {
         String json = "true";
         SimpleBoolean a = m.readValue(json, SimpleBoolean.class);
-        assertEquals(Boolean.TYPE, typeof(a.value()));
+        assertReturns(SimpleBoolean.class, "value", boolean.class);
         assertTrue(a.value());
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
@@ -320,25 +331,4 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(new Ref(new SimpleInteger(123))));
         shouldThrowIAE(() -> new Ref(null));
     }
-
-    private static Class<Integer> typeof(int x) {
-        return Integer.TYPE;
-    }
-
-    private static Class<Long> typeof(long x) {
-        return Long.TYPE;
-    }
-
-    private static Class<Float> typeof(float x) {
-        return Float.TYPE;
-    }
-
-    private static Class<Double> typeof(double x) {
-        return Double.TYPE;
-    }
-
-    private static Class<Boolean> typeof(boolean x) {
-        return Boolean.TYPE;
-    }
-
 }

@@ -15,15 +15,19 @@ public final class Util {
     public static String toPrimitive(String canonicalClassName) {
         if (canonicalClassName.equals(Integer.class.getCanonicalName())) {
             return "int";
+        } else if (canonicalClassName.equals(Short.class.getCanonicalName())) {
+            return "short";
         } else if (canonicalClassName.equals(Long.class.getCanonicalName())) {
             return "long";
         } else if (canonicalClassName.equals(Float.class.getCanonicalName())) {
             return "float";
+        } else if (canonicalClassName.equals(Double.class.getCanonicalName())) {
+            return "double";
         } else if (canonicalClassName.equals(Boolean.class.getCanonicalName())) {
             return "boolean";
-        } else if (canonicalClassName.equals(BigInteger.class.getCanonicalName())) {
-            return canonicalClassName;
-        } else {
+        } else if (canonicalClassName.equals(Byte.class.getCanonicalName())) {
+            return "byte";
+        }  else {
             return canonicalClassName;
         }
     }
