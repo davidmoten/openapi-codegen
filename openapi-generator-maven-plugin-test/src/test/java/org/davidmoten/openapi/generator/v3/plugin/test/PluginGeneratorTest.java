@@ -4,12 +4,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -112,6 +112,16 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleString("abc")));
+        shouldThrowIAE(() -> new SimpleString(null));
+    }
+
+    private static void shouldThrowIAE(Runnable r) {
+        try {
+            r.run();
+            fail();
+        } catch (IllegalArgumentException e) {
+            // all good
+        }
     }
 
     @Test
@@ -124,6 +134,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleDateTime(OffsetDateTime.parse(s))));
+        shouldThrowIAE(() -> new SimpleDateTime(null));
     }
 
     @Test
@@ -136,6 +147,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleDate(LocalDate.parse(s))));
+        shouldThrowIAE(() -> new SimpleDate(null));
     }
 
     @Test
@@ -148,6 +160,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleTime(OffsetTime.parse(s))));
+        shouldThrowIAE(() -> new SimpleTime(null));
     }
 
     @Test
@@ -171,6 +184,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleByteArray(bytes)));
+        shouldThrowIAE(() -> new SimpleByteArray(null));
     }
 
     @Test

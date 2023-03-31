@@ -228,7 +228,7 @@ public class Generator {
     }
 
     private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "long", "byte", "float", "double",
-            "boolean", "short", "byte[]");
+            "boolean", "short");
 
     private final static class Field {
         private String fullClassName;
