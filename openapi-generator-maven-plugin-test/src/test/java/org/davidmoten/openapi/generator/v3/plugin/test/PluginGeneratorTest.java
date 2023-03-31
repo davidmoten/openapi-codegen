@@ -292,6 +292,7 @@ public class PluginGeneratorTest {
             // expected
         }
         shouldThrowIAE(() -> new ObjectNoOptionalFields(null, 123));
+        onePublicConstructor(ObjectNoOptionalFields.class);
     }
 
     @Test
@@ -304,6 +305,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(b));
         assertEquals(1, Bike.class.getConstructors().length);
         shouldThrowIAE(() -> new Bike(null));
+        onePublicConstructor(Bike.class);
     }
 
     @Test
@@ -313,6 +315,7 @@ public class PluginGeneratorTest {
         assertEquals("square", s.shapeType());
         assertEquals(json, m.writeValueAsString(s));
         assertEquals(json, m.writeValueAsString(new Square()));
+        onePublicConstructor(Square.class);
     }
 
     @Test
@@ -322,6 +325,7 @@ public class PluginGeneratorTest {
         assertEquals("Square2", s.shapeType());
         assertEquals(json, m.writeValueAsString(s));
         assertEquals(json, m.writeValueAsString(new Square2()));
+        onePublicConstructor(Square2.class);
     }
 
     @Test
@@ -332,6 +336,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new Ref(new SimpleInteger(123))));
         shouldThrowIAE(() -> new Ref(null));
+        onePublicConstructor(Ref.class);
     }
 
     @Test
@@ -342,6 +347,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new PropertyRef(new SimpleInteger(123))));
         shouldThrowIAE(() -> new PropertyRef(null));
+        onePublicConstructor(PropertyRef.class);
     }
 
     @Test
@@ -355,7 +361,7 @@ public class PluginGeneratorTest {
         onePublicConstructor(PropertyRefOptional.class);
     }
 
-    private static void onePublicConstructor(Class<PropertyRefOptional> c) {
+    private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
 }
