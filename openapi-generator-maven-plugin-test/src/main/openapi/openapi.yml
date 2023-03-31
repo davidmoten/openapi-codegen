@@ -1288,6 +1288,12 @@ components:
           $ref: '#components/schemas/SimpleInteger'
       required: [first]
       
+    PropertyRefOptional:
+      type: object
+      properties:
+        first: 
+          $ref: '#components/schemas/SimpleInteger'
+      
          
       
                

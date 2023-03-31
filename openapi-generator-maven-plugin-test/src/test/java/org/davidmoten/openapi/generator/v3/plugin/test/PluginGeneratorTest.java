@@ -37,6 +37,7 @@ import generated.model.Bike;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
 import generated.model.PropertyRef;
+import generated.model.PropertyRefOptional;
 import generated.model.Ref;
 import generated.model.Shape;
 import generated.model.Shape2;
@@ -68,7 +69,7 @@ public class PluginGeneratorTest {
         assertReturns(SimpleLong.class, "value", long.class);
         assertEquals(json, m.writeValueAsString(a));
     }
-    
+
     public static void assertReturns(Class<?> cls, String methodName, Class<?> returnClass) {
         Method method;
         try {
@@ -332,7 +333,7 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(new Ref(new SimpleInteger(123))));
         shouldThrowIAE(() -> new Ref(null));
     }
-    
+
     @Test
     public void testPropertyRef() throws JsonMappingException, JsonProcessingException {
         String json = "{\"first\":123}";
@@ -341,5 +342,15 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new PropertyRef(new SimpleInteger(123))));
         shouldThrowIAE(() -> new PropertyRef(null));
+    }
+
+    @Test
+    public void testPropertyRefOptional() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"first\":123}";
+        PropertyRefOptional r = m.readValue(json, PropertyRefOptional.class);
+        assertEquals(123, r.first().get().value());
+        assertEquals(json, m.writeValueAsString(r));
+        assertEquals(json, m.writeValueAsString(new PropertyRefOptional(Optional.of(new SimpleInteger(123)))));
+        shouldThrowIAE(() -> new PropertyRefOptional(null));
     }
 }
