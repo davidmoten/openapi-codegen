@@ -57,7 +57,7 @@ public final class Names {
     }
 
     public String schemaNameToClassName(String schemaName) {
-        return definition.packages().modelPackage() + "." + schemaNameToSimpleClassName(schemaName);
+        return definition.packages().basePackage() + ".model." + schemaNameToSimpleClassName(schemaName);
     }
 
     public String schemaNameToSimpleClassName(String schemaName) {
@@ -127,7 +127,7 @@ public final class Names {
     }
 
     public String clientClassName() {
-        return definition.packages().clientPackage() + ".Client";
+        return definition.packages().basePackage() + "client.Client";
     }
 
     public File clientClassJavaFile() {
@@ -210,7 +210,7 @@ public final class Names {
     }
 
     public String globalsFullClassName() {
-        return definition.packages().modelPackage() + ".config.Globals";
+        return definition.packages().basePackage() + ".Globals";
     }
 
 }

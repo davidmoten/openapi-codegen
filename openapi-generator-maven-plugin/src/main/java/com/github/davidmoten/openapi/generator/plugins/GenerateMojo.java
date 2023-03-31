@@ -26,13 +26,10 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "outputDirectory", defaultValue = "${project.build.directory}/generated-sources/java")
     private File outputDirectory;
-    
-    @Parameter(name = "modelPackage", defaultValue = "generated.model")
-    private String modelPackage;
 
-    @Parameter(name = "clientPackage", defaultValue = "generated.client")
-    private String clientPackage;
-    
+    @Parameter(name = "basePackage", defaultValue = "generated")
+    private String basePackage;
+
     @Parameter(name = "charset", defaultValue = "UTF-8")
     private String charset;
 
@@ -59,9 +56,8 @@ public final class GenerateMojo extends AbstractMojo {
                     commaSeparate(sources.getIncludes()), commaSeparate(sources.getExcludes()));
             for (File file : files) {
                 getLog().info(file.toString());
-                String definition = new String(Files.readAllBytes(file.toPath()),
-                        StandardCharsets.UTF_8);
-                Packages packages = new Packages(modelPackage, clientPackage);
+                String definition = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                Packages packages = new Packages(basePackage);
                 Definition d = new Definition(definition, packages, outputDirectory, x -> x);
                 new Generator(d).generate();
             }

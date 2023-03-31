@@ -13,7 +13,7 @@ public final class GeneratorTest {
     public void testGenerate() throws IOException {
         String definition = new String(Files.readAllBytes(new File("../openapi-generator-maven-plugin-test/src/main/openapi/openapi.yml").toPath()),
                 StandardCharsets.UTF_8);
-        Packages packages = new Packages("test.model", "test.client");
+        Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x);
         new Generator(d).generate();
     }

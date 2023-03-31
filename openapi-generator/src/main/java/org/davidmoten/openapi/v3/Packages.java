@@ -2,20 +2,14 @@ package org.davidmoten.openapi.v3;
 
 public final class Packages {
 
-    private final String modelPackage;
-    private final String clientPackage;
+    private final String basePackage;
 
-    public Packages(String modelPackage, String clientPackage) {
-        this.modelPackage = modelPackage;
-        this.clientPackage = clientPackage;
+    public Packages(String basePackage) {
+        this.basePackage = basePackage;
     }
     
-    public String modelPackage() {
-        return modelPackage;
+    public String basePackage() {
+        return basePackage;
     }
     
-    public String clientPackage() {
-        return clientPackage;
-    }
-
 }

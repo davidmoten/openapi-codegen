@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.github.davidmoten.guavamini.Lists;
 
+import generated.Globals;
 import generated.model.ArrayOfComplexType;
 import generated.model.ArrayOfComplexType.ArrayOfComplexTypeItem;
 import generated.model.ArrayOfOneOf;
@@ -56,7 +57,6 @@ import generated.model.SimpleTime;
 import generated.model.Square;
 import generated.model.Square2;
 import generated.model.Vehicle;
-import generated.model.config.Globals;
 
 public class PluginGeneratorTest {
 
