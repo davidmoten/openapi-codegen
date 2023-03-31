@@ -19,6 +19,12 @@
             <artifactId>openapi-generator-runtime</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>word-wrap</artifactId>
+            <version>0.1.12</version>
+        </dependency>
 
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>

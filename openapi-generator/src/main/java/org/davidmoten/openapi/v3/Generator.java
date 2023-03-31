@@ -129,6 +129,7 @@ public class Generator {
         List<Field> fields = new ArrayList<>();
         List<EnumMember> enumMembers = new ArrayList<>();
         List<Cls> classes = new ArrayList<>();
+        String description = null;
         Discriminator discriminator = null;
         String enumFullType;
         private int num = 0;
@@ -345,6 +346,7 @@ public class Generator {
             SchemaWithName last = schemaPath.last();
             Schema<?> schema = last.schema;
             final Cls cls = new Cls();
+            cls.description = schema.getDescription();
             if (stack.isEmpty()) {
                 // should be top-level class
                 cls.fullClassName = names.schemaNameToClassName(last.name);
@@ -499,7 +501,10 @@ public class Generator {
             implemented = " implements "
                     + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
         }
-
+        if (cls.description != null) {
+            System.out.println(cls.description);
+            Javadoc.printJavadoc(out, indent, cls.description);
+        }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",
                     indent, imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName,
