@@ -4,6 +4,7 @@ import static org.davidmoten.openapi.v3.runtime.internal.Util.toPrimitive;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,8 +61,21 @@ public class Generator {
 
     private final Definition definition;
 
+    private static String version = readVersion();
+
     public Generator(Definition definition) {
         this.definition = definition;
+
+    }
+
+    private static String readVersion() {
+        Properties p = new Properties();
+        try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
+            p.load(in);
+            return p.get("groupId") + ":" + p.get("artifactId") + p.get("version");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public void generate() {
@@ -575,8 +590,8 @@ public class Generator {
     }
 
     private static void addGeneratedAnnotation(PrintWriter out, Imports imports, Indent indent) {
-        out.format("%s@%s(value = \"com.github.davidmoten:openapi-client-generator:VERSION_HERE\")\n", indent,
-                imports.add(Generated.class));
+        out.format("%s@%s(value = \"%s\")\n", indent,
+                imports.add(Generated.class), version);
     }
 
     private static void writeOneOfDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent, Cls cls) {
