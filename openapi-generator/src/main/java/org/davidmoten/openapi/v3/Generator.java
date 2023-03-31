@@ -279,6 +279,10 @@ public class Generator {
             return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
                     + ", required=" + required + ", minLength=" + minLength + ", maxLength=" + maxLength + "]";
         }
+
+        public boolean isByteArray() {
+            return fullClassName.equals("byte[]");
+        }
     }
 
     private static final class LinkedStack<T> {
@@ -687,6 +691,10 @@ public class Generator {
 
     private static void writeConstructor(PrintStream out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
+        // this code will write one public constructor or one private and one public.
+        // The private one is to be annotated
+        // with JsonCreator for use by Jackson.
+
         indent.right().right();
         final String parametersNullable;
         if (cls.unwrapSingleField()) {
@@ -746,7 +754,7 @@ public class Generator {
                 if (disc.isPresent()) {
                     out.format("%sthis.%s = \"%s\";\n", indent, x.fieldName(cls),
                             disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
-                } else if (!x.isPrimitive()) {
+                } else if (!x.isPrimitive() && !x.isByteArray()) {
                     if (x.required) {
                         out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
                                 imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class), x.fieldName(cls),
@@ -757,8 +765,9 @@ public class Generator {
                                 x.fieldName(cls), x.fieldName(cls));
                     }
                 } else if (x.isOctets()) {
-                    out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName(cls), imports.add(Util.class),
-                            x.fieldName(cls));
+                    out.format("%sthis.%s = %s.encodeOctets(%s.checkNotNull(%s, \"%s\"));\n", indent, x.fieldName(cls),
+                            imports.add(Util.class), imports.add(org.davidmoten.openapi.v3.runtime.Preconditions.class),
+                            x.fieldName(cls), x.fieldName(cls));
                 } else {
                     out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
                 }
