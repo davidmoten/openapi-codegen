@@ -352,5 +352,10 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new PropertyRefOptional(Optional.of(new SimpleInteger(123)))));
         shouldThrowIAE(() -> new PropertyRefOptional(null));
+        onePublicConstructor(PropertyRefOptional.class);
+    }
+
+    private static void onePublicConstructor(Class<PropertyRefOptional> c) {
+        assertEquals(1, c.getConstructors().length);
     }
 }
