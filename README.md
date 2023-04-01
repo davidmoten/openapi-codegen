@@ -18,4 +18,4 @@ Java code generator from OpenAPI definition file
 * when discriminator mappings specified two sets of conflicting mapping annotations are generated
 * SimpleRef case has no type safety (Ref is passed in as Object in constructor)
 * unnecessary generated imports
-* anonymous schemas generated as top level classes when could be nested static member classes
+* anonymous schemas generated as top level classes when could be nested static member classes (pollutes top level package)
