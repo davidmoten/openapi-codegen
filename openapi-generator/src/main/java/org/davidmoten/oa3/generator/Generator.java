@@ -28,8 +28,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Generated;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import org.davidmoten.oa3.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.generator.runtime.Config;
@@ -55,7 +53,6 @@ import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
