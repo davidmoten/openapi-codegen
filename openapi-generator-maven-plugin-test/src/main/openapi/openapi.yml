@@ -1304,11 +1304,11 @@ components:
         first: 
           type: string
           minLength: 1
-          maxLength: 10
+          maxLength: 3
         second:
           type: string
           minLength: 2
-          maxLength: 8
+          maxLength: 3
       required: [first] 
       
     Pattern:

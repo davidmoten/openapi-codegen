@@ -34,6 +34,7 @@ import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.ArrayOfOneOfString;
 import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.Bike;
+import generated.model.MinMaxLength;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
 import generated.model.PropertyRef;
@@ -371,6 +372,40 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(new PropertyRefOptional(Optional.of(new SimpleInteger(123)))));
         shouldThrowIAE(() -> new PropertyRefOptional(null));
         onePublicConstructor(PropertyRefOptional.class);
+    }
+
+    @Test
+    public void testMinMaxLengthAreOk() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"first\":\"abc\",\"second\":\"def\"}";
+        MinMaxLength a = m.readValue(json, MinMaxLength.class);
+        assertEquals("abc", a.first());
+        assertEquals("def", a.second().get());
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(json, m.writeValueAsString(new MinMaxLength("abc", Optional.of("def"))));
+    }
+
+    @Test(expected = ValueInstantiationException.class)
+    public void testMinMaxLengthTooSmall() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"first\":\"\",\"second\":\"def\"}";
+        m.readValue(json, MinMaxLength.class);
+    }
+
+    @Test(expected = ValueInstantiationException.class)
+    public void testMinMaxLengthTooSmallOptional() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"first\":\"abc\",\"second\":\"d\"}";
+        m.readValue(json, MinMaxLength.class);
+    }
+
+    @Test(expected = ValueInstantiationException.class)
+    public void testMinMaxLengthTooBig() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"first\":\"abcdef\",\"second\":\"def\"}";
+        m.readValue(json, MinMaxLength.class);
+    }
+
+    @Test(expected = ValueInstantiationException.class)
+    public void testMinMaxLengthTooBigOptional() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"abc\":\"abc\",\"second\":\"defgh\"}";
+        m.readValue(json, MinMaxLength.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {
