@@ -19,3 +19,4 @@ Java code generator from OpenAPI definition file
 * SimpleRef case has no type safety (Ref is passed in as Object in constructor)
 * unnecessary generated imports
 * anonymous schemas generated as top level classes when could be nested static member classes (pollutes top level package)
+* should be able to create oneOf member without specifying discriminator value in constructor (is constant)
