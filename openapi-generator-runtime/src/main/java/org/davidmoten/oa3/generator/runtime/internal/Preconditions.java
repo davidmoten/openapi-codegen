@@ -12,15 +12,23 @@ public final class Preconditions {
         return t;
     }
 
-    public static void checkMinimum(Number x, String min, String name) {
-        if (new BigDecimal(min).compareTo(BigDecimal.valueOf(x.doubleValue())) > 0) {
-            throw new IllegalArgumentException(name + " cannot be less than " + min);
+    public static void checkMinimum(Number x, String min, String name, boolean exclusive) {
+        int compare = new BigDecimal(min).compareTo(BigDecimal.valueOf(x.doubleValue()));
+        if (!exclusive && compare > 0) {
+            throw new IllegalArgumentException(name + " must be >= " + min);
+        }
+        if (exclusive && compare >= 0) {
+            throw new IllegalArgumentException(name + " must be > " + min);
         }
     }
-    
-    public static void checkMaximum(Number x, String max, String name) {
-        if (new BigDecimal(max).compareTo(BigDecimal.valueOf(x.doubleValue())) < 0) {
-            throw new IllegalArgumentException(name + " cannot be more than " + max);
+
+    public static void checkMaximum(Number x, String max, String name, boolean exclusive) {
+        int compare = new BigDecimal(max).compareTo(BigDecimal.valueOf(x.doubleValue()));
+        if (!exclusive && compare < 0) {
+            throw new IllegalArgumentException(name + " must be <= " + max);
+        }
+        if (exclusive && compare <= 0) {
+            throw new IllegalArgumentException(name + " must be < " + max);
         }
     }
 

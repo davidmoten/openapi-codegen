@@ -36,6 +36,7 @@ import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.ArrayOfOneOfString;
 import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.Bike;
+import generated.model.ExclusiveMinMaxInteger;
 import generated.model.MinMaxDouble;
 import generated.model.MinMaxInteger;
 import generated.model.MinMaxLength;
@@ -494,6 +495,27 @@ public class PluginGeneratorTest {
     public void testMinMaxDoubleTooBigWithNoDecimalPart() throws JsonMappingException, JsonProcessingException {
         String json = "5";
         m.readValue(json, MinMaxDouble.class);
+    }
+
+    @Test
+    public void testExclusiveMinMaxIntegerPasses() throws JsonMappingException, JsonProcessingException {
+        String json = "3";
+        ExclusiveMinMaxInteger a = m.readValue(json, ExclusiveMinMaxInteger.class);
+        assertEquals(3, a.value());
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(json, m.writeValueAsString(new ExclusiveMinMaxInteger(3)));
+    }
+
+    @Test(expected = ValueInstantiationException.class)
+    public void testExclusiveMinMaxIntegerTooSmall() throws JsonMappingException, JsonProcessingException {
+        String json = "2";
+        m.readValue(json, ExclusiveMinMaxInteger.class);
+    }
+
+    @Test(expected = ValueInstantiationException.class)
+    public void testExclusiveMinMaxIntegerTooBig() throws JsonMappingException, JsonProcessingException {
+        String json = "4";
+        m.readValue(json, ExclusiveMinMaxInteger.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {

@@ -234,14 +234,15 @@ public class Generator {
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
-                    Optional.empty(), Optional.empty(), Optional.empty(), Encoding.DEFAULT));
+                    Optional.empty(), Optional.empty(), Optional.empty(), false, false, Encoding.DEFAULT));
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern,
-                Optional<BigDecimal> min, Optional<BigDecimal> max, Encoding encoding) {
+                Optional<BigDecimal> min, Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax,
+                Encoding encoding) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, minLength, maxLength, pattern, min, max,
-                    encoding));
+                    exclusiveMin, exclusiveMax, encoding));
         }
 
         public String pkg() {
@@ -300,10 +301,13 @@ public class Generator {
         final Optional<BigDecimal> max;
         final boolean isArray; // if a List to be used to represent
         final Encoding encoding;
+        final boolean exclusiveMin;
+        final boolean exclusiveMax;
 
         public Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern,
-                Optional<BigDecimal> min, Optional<BigDecimal> max, Encoding encoding) {
+                Optional<BigDecimal> min, Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax,
+                Encoding encoding) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
@@ -312,6 +316,8 @@ public class Generator {
             this.minLength = minLength;
             this.maxLength = maxLength;
             this.pattern = pattern;
+            this.exclusiveMin = exclusiveMin;
+            this.exclusiveMax = exclusiveMax;
             this.encoding = encoding;
             this.min = min;
             this.max = max;
@@ -477,8 +483,10 @@ public class Generator {
                     }
                     Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
+                    boolean exclusiveMin = orElse(schema.getExclusiveMinimum(), false);
+                    boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minLength, maxLength,
-                            pattern, min, max, encoding);
+                            pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     String fieldName = current.nextFieldName(last.name);
@@ -915,14 +923,14 @@ public class Generator {
                     x.pattern.get(), x.fieldName(cls));
         }
         if (x.min.isPresent()) {
-            out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\");\n", indent,
+            out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
                     imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), raw,
-                    x.min.get().toString(), x.fieldName(cls));
+                    x.min.get().toString(), x.fieldName(cls), x.exclusiveMin);
         }
         if (x.max.isPresent()) {
-            out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\");\n", indent,
+            out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
                     imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), raw,
-                    x.max.get().toString(), x.fieldName(cls));
+                    x.max.get().toString(), x.fieldName(cls), x.exclusiveMax);
         }
     }
 

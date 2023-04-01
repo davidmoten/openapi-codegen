@@ -1334,4 +1334,11 @@ components:
       minimum: 2.1
       maximum: 4.5
       
+    ExclusiveMinMaxInteger:
+      type: integer
+      format: int32
+      minimum: 2
+      maximum: 4
+      exclusiveMinimum: true
+      exclusiveMaximum: true
                
