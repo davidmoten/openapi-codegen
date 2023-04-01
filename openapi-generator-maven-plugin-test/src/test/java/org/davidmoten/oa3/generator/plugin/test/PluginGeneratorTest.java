@@ -16,6 +16,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import org.davidmoten.oa3.generator.runtime.Config;
 import org.davidmoten.oa3.generator.runtime.internal.Util;
 import org.junit.Assert;
 import org.junit.Test;
@@ -391,10 +392,21 @@ public class PluginGeneratorTest {
         m.readValue(json, MinMaxLength.class);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testMinMaxLengthTooSmallPublicConstructor() throws JsonMappingException, JsonProcessingException {
+        new MinMaxLength("", Optional.of("def"));
+    }
+
     @Test(expected = ValueInstantiationException.class)
     public void testMinMaxLengthTooSmallOptional() throws JsonMappingException, JsonProcessingException {
         String json = "{\"first\":\"abc\",\"second\":\"d\"}";
         m.readValue(json, MinMaxLength.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMinMaxLengthTooSmallOptionalPublicConstructor()
+            throws JsonMappingException, JsonProcessingException {
+        new MinMaxLength("abc", Optional.of("d"));
     }
 
     @Test(expected = ValueInstantiationException.class)
@@ -403,10 +415,32 @@ public class PluginGeneratorTest {
         m.readValue(json, MinMaxLength.class);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testMinMaxLengthTooBigPublicConstructor() throws JsonMappingException, JsonProcessingException {
+        new MinMaxLength("abcdef", Optional.of("def"));
+    }
+
     @Test(expected = ValueInstantiationException.class)
     public void testMinMaxLengthTooBigOptional() throws JsonMappingException, JsonProcessingException {
         String json = "{\"abc\":\"abc\",\"second\":\"defgh\"}";
         m.readValue(json, MinMaxLength.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMinMaxLengthTooBigOptionalPublicConstructor() throws JsonMappingException, JsonProcessingException {
+        new MinMaxLength("abc", Optional.of("defgh"));
+    }
+
+    @Test
+    public void testTurnValidateOff() {
+        Config old = Globals.config();
+        try {
+            Config config = Config.builder().mapper(Globals.config().mapper()).validate(false).build();
+            Globals.setConfig(config);
+            new MinMaxLength("abc", Optional.of("defgh"));
+        } finally {
+            Globals.setConfig(old);
+        }
     }
 
     private static void onePublicConstructor(Class<?> c) {
