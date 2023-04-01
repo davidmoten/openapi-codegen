@@ -1357,6 +1357,7 @@ components:
     MinMaxItems:
       type: array
       items:
-        type: string
+        type: integer
+        format: int32
       minItems: 2
       maxItems: 4          

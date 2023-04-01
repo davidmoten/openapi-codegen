@@ -39,6 +39,7 @@ import generated.model.Bike;
 import generated.model.ExclusiveMinMaxInteger;
 import generated.model.MinMaxDouble;
 import generated.model.MinMaxInteger;
+import generated.model.MinMaxItems;
 import generated.model.MinMaxLength;
 import generated.model.NamesWithSpaces;
 import generated.model.ObjectAllOptionalFields;
@@ -544,6 +545,12 @@ public class PluginGeneratorTest {
         assertEquals("hello", a.value().value());
     }
 
+    @Test
+    public void testMinMaxItems() throws JsonMappingException, JsonProcessingException {
+        String json = "";
+        MinMaxItems a = m.readValue(json, MinMaxItems.class);
+    }
+    
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
