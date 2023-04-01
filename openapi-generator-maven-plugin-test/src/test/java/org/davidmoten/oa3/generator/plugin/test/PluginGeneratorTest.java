@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.davidmoten.oa3.generator.runtime.Config;
 import org.davidmoten.oa3.generator.runtime.internal.Util;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -453,19 +454,19 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(new MinMaxInteger(2)));
     }
-    
+
     @Test(expected = ValueInstantiationException.class)
     public void testMinMaxIntegerTooSmall() throws JsonMappingException, JsonProcessingException {
         String json = "1";
         m.readValue(json, MinMaxInteger.class);
     }
-    
+
     @Test(expected = ValueInstantiationException.class)
     public void testMinMaxIntegerTooBig() throws JsonMappingException, JsonProcessingException {
         String json = "5";
         m.readValue(json, MinMaxInteger.class);
     }
-    
+
     @Test
     public void testMinMaxDoublePasses() throws JsonMappingException, JsonProcessingException {
         String json = "2.6";
@@ -474,16 +475,24 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(new MinMaxDouble(2.6)));
     }
-    
+
     @Test(expected = ValueInstantiationException.class)
     public void testMinMaxDoubleTooSmall() throws JsonMappingException, JsonProcessingException {
         String json = "1.2";
         m.readValue(json, MinMaxDouble.class);
     }
-    
+
     @Test(expected = ValueInstantiationException.class)
     public void testMinMaxDoubleTooBig() throws JsonMappingException, JsonProcessingException {
-        String json = "5.4";
+        String json = "5.0";
+        m.readValue(json, MinMaxDouble.class);
+    }
+
+    // TODO need to address this failure
+    @Test(expected = ValueInstantiationException.class)
+    @Ignore
+    public void testMinMaxDoubleTooBigWithNoDecimalPart() throws JsonMappingException, JsonProcessingException {
+        String json = "5";
         m.readValue(json, MinMaxDouble.class);
     }
 
