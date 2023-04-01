@@ -292,7 +292,7 @@ paths:
             on startTime > startTimeMin.
           schema:
             type: string
-            format: datetime
+            format: date-time
             example: '2022-04-20T18:25:43.511Z' 
         - in: query
           name: startTimeMinInclusive
@@ -318,7 +318,7 @@ paths:
             on startTime < startTimeMax.
           schema:
             type: string
-            format: datetime
+            format: date-time
             example: '2022-04-24T23:25:43.511Z'
         - in: query
           name: startTimeMaxInclusive
@@ -344,7 +344,7 @@ paths:
             on startTime > startTimeMin.
           schema:
             type: string
-            format: datetime
+            format: date-time
             example: '2022-04-21T18:25:43.511Z'
         - in: query
           name: endTimeMinInclusive
@@ -369,7 +369,7 @@ paths:
             on endTime < endTimeMax.
           schema:
             type: string
-            format: datetime
+            format: date-time
             example: '2022-04-25T14:18:23.000Z'
         - in: query
           name: endTimeMaxInclusive
@@ -649,7 +649,7 @@ components:
           example: '1/mZ1edKKACtPAb7zGlwSzvs72PvhAbGmB8K1ZrGxpcNM'
         expiryTime:
           type: string
-          format: datetime
+          format: date-time
           description: |
             An expiryTime should always accompany the token
             because a requested validity duration may be 
@@ -790,12 +790,12 @@ components:
           $ref: '#/components/schemas/Broadcast'
         startTime:
           type: string
-          format: datetime
+          format: date-time
           description: the scheduled time of the initial broadcast
           example: '2022-04-23T10:30:43.511Z'
         endTime:
           type: string
-          format: datetime
+          format: date-time
           description: |
             the time after which no more broadcasts should be made
             of this MSI 
@@ -836,26 +836,26 @@ components:
           $ref: '#/components/schemas/Broadcast'
         createdTime:
           type: string
-          format: datetime
+          format: date-time
           description: |
             when the MSI was created
           example: '2022-04-23T10:25:43.511Z'
         cancelledTime:
           type: string
-          format: datetime
+          format: date-time
           description: |
             when the MSI was cancelled. This field should be set
             if the status is CANCELLED.
           example: '2022-04-24T13:28:43.511Z'
         startTime:
           type: string
-          format: datetime
+          format: date-time
           description: |
             Start time of the broadcast schedule
           example: '2022-04-23T10:30:43.511Z'
         endTime:
           type: string
-          format: datetime
+          format: date-time
           description: |
             End time of the broadcast schedule
           example: '2022-04-24T10:25:43.511Z'
