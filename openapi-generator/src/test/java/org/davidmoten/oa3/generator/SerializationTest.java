@@ -34,7 +34,7 @@ import com.github.davidmoten.guavamini.Preconditions;
 public class SerializationTest {
 
     private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
-    
+
     private static final Config CONFIG = Config.builder().build();
 
     private static final ObjectMapper m = new ObjectMapper().registerModule(new Jdk8Module());
@@ -258,15 +258,15 @@ public class SerializationTest {
 
     @JsonTypeInfo(use = Id.NAME, property = "vehicleType", include = As.EXISTING_PROPERTY)
     @JsonSubTypes({ //
-        @Type(value = Car.class, name = "car"), //
-        @Type(value = Bike.class, name = "bike") })
+            @Type(value = Car.class, name = "car"), //
+            @Type(value = Bike.class, name = "bike") })
     public interface Vehicle {
 
         String vehicleType();
     }
 
     @JsonInclude(Include.NON_NULL)
-    @JsonAutoDetect(fieldVisibility =  Visibility.ANY)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public final static class Car implements Vehicle {
 
         @JsonProperty("vehicleType")
@@ -276,7 +276,7 @@ public class SerializationTest {
         private Car(@JsonProperty("vehicleType") String vehicleType) {
             this.vehicleType = vehicleType;
         }
-        
+
         public Car() {
             this("car");
         }
@@ -288,11 +288,11 @@ public class SerializationTest {
     }
 
     @JsonInclude(Include.NON_NULL)
-    @JsonAutoDetect(fieldVisibility =  Visibility.ANY)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Bike implements Vehicle {
 
         private final String vehicleType;
-        
+
         private final String colour;
 
         @JsonCreator
@@ -300,7 +300,7 @@ public class SerializationTest {
             this.vehicleType = vehicleType;
             this.colour = colour;
         }
-        
+
         public Bike(String colour) {
             this("bike", colour);
         }
@@ -314,5 +314,4 @@ public class SerializationTest {
             return colour;
         }
     }
-
 }

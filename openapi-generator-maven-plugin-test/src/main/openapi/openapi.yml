@@ -1342,3 +1342,9 @@ components:
       exclusiveMinimum: true
       exclusiveMaximum: true
                
+    NamesWithSpaces:
+      type: object
+      properties:
+        'the name': 
+          type: string
+                     

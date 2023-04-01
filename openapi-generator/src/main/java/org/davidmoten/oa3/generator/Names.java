@@ -67,10 +67,9 @@ public final class Names {
     public File schemaNameToJavaFile(String schemaName) {
         return fullClassNameToJavaFile(schemaNameToClassName(schemaName));
     }
-    
+
     public File fullClassNameToJavaFile(String fullClassName) {
-        return new File(definition.generatedSourceDirectory(),
-                fullClassName.replace(".", File.separator) + ".java");
+        return new File(definition.generatedSourceDirectory(), fullClassName.replace(".", File.separator) + ".java");
     }
 
     public String refToFullClassName(String ref) {
@@ -84,7 +83,7 @@ public final class Names {
         }
         return fullClassName;
     }
-    
+
     public static String simpleClassName(String fullClassName) {
         return getLastItemInDotDelimitedString(fullClassName);
     }
@@ -94,14 +93,30 @@ public final class Names {
     }
 
     public static String toIdentifier(String s) {
-        if (Character.isDigit(s.charAt(0))) {
-            return "_" + s;
-        } else if (javaReservedWords.contains(s.toLowerCase())) {
-            return s.toLowerCase() + "_";
-        } else if (s.toUpperCase().equals(s)) {
-            return s;
+        StringBuilder b = new StringBuilder();
+        char lastCh = ' ';
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (i == 0) {
+                if (!Character.isJavaIdentifierStart(ch)) {
+                    b.append("_");
+                }
+            }
+            if (Character.isJavaIdentifierPart(ch)) {
+                b.append(ch);
+            } else {
+                ch = '_';
+                if (lastCh != ch) {
+                    b.append(ch);
+                }
+            }
+            lastCh = ch;
+        }
+        String candidate = lowerFirst(b.toString());
+        if (javaReservedWords.contains(candidate)) {
+            return candidate + "_";
         } else {
-            return lowerFirst(s);
+            return candidate;
         }
     }
 
@@ -203,8 +218,9 @@ public final class Names {
         return definition.externalRefClassName(ref);
     }
 
-    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "double", "float", "long", "boolean", "byte", "short");
-    
+    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "double", "float", "long", "boolean",
+            "byte", "short");
+
     public static boolean isPrimitiveFullClassName(String className) {
         return PRIMITIVE_CLASS_NAMES.contains(className);
     }

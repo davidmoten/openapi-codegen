@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Generated;
 
 import org.davidmoten.oa3.generator.internal.ByteArrayPrintWriter;
+import org.davidmoten.oa3.generator.internal.Mutable;
 import org.davidmoten.oa3.generator.runtime.Config;
 import org.davidmoten.oa3.generator.runtime.internal.PolymorphicDeserializer;
 import org.davidmoten.oa3.generator.runtime.internal.PolymorphicType;
@@ -787,10 +788,18 @@ public class Generator {
         if (!cls.fields.isEmpty()) {
             out.println();
         }
+        Mutable<Boolean> first = Mutable.create(true);
         cls.fields.forEach(f -> {
+            if (!first.value) {
+                out.println();
+            }
+            first.value = false;
             if (cls.unwrapSingleField()) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
+            } else {
+                out.format("%s@%s(\"%s\")\n", indent, imports.add(JsonProperty.class), f.name);
             }
+            
             final String fieldType;
             if (f.encoding == Encoding.OCTET) {
                 fieldType = imports.add(String.class);
