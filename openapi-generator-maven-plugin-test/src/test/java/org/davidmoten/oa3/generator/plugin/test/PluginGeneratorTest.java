@@ -226,12 +226,16 @@ public class PluginGeneratorTest {
         // TODO should null be passable to List<Long>?
         // shouldThrowIAE(() -> new SimpleIntegerArray(null));
     }
-    
+
     @Test
     public void testSimpleEnum() throws JsonMappingException, JsonProcessingException {
         String json = "\"there\"";
         SimpleEnum a = m.readValue(json, SimpleEnum.class);
         assertEquals(SimpleEnum.THERE, a);
+        assertEquals("there", a.value());
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(SimpleEnum.THERE, SimpleEnum.fromValue("there"));
+        assertEquals(0, SimpleEnum.class.getConstructors().length);
     }
 
     @Test
