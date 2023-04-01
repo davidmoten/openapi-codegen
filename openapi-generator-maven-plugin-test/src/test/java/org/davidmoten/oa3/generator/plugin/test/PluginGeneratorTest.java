@@ -382,6 +382,7 @@ public class PluginGeneratorTest {
         assertEquals("def", a.second().get());
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(new MinMaxLength("abc", Optional.of("def"))));
+        onePublicConstructor(MinMaxLength.class);
     }
 
     @Test(expected = ValueInstantiationException.class)
