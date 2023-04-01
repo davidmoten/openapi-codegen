@@ -775,14 +775,6 @@ public class Generator {
             out.println();
         }
         cls.fields.forEach(f -> {
-            if (f.minLength.isPresent() || f.maxLength.isPresent()) {
-                String minParameters = f.minLength.map(x -> "min = " + x + ", ").orElse("");
-                String maxParameters = f.maxLength.map(x -> "max = " + x + ", ").orElse("");
-                String params = minParameters + maxParameters;
-                out.format("%s@%s(%smessage = \"%s\")\n", indent, imports.add(Size.class), params,
-                        "size constraint not met: " + params);
-            }
-            f.pattern.ifPresent(x -> out.format("%s@%s(regexp = \"%s\")\n", indent, imports.add(Pattern.class), x));
             if (cls.unwrapSingleField()) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             }
@@ -840,8 +832,9 @@ public class Generator {
                                 imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
                                 x.fieldName(cls), x.fieldName(cls));
                     }
+                    validateMore(out2, imports, indent, cls, x, false);
                 }));
-        
+
         // assign
         cls.fields.stream().forEach(x -> {
             assignField(out, indent, cls, x);
@@ -867,7 +860,10 @@ public class Generator {
                             out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
                                     imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
                                     x.fieldName(cls), x.fieldName(cls));
+                            validateMore(out2, imports, indent, cls, x, !x.required);
                         }
+//                        f.pattern.ifPresent(
+//                                x -> out.format("%s@%s(regexp = \"%s\")\n", indent, imports.add(Pattern.class), x));
                     }));
 
             // assign
@@ -892,6 +888,25 @@ public class Generator {
             });
             indent.left();
             closeParen(out, indent);
+        }
+    }
+
+    private static void validateMore(PrintWriter out, Imports imports, Indent indent, Cls cls, Field x,
+            boolean useGet) {
+        if (x.minLength.isPresent()) {
+            out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
+                    x.fieldName(cls) + (useGet ? ".get()" : ""), x.minLength.get(), x.fieldName(cls));
+        }
+        if (x.maxLength.isPresent()) {
+            out.format("%s%s.checkMaxLength(%s, %s, \"%s\");\n", indent,
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
+                    x.fieldName(cls) + (useGet ? ".get()" : ""), x.maxLength.get(), x.fieldName(cls));
+        }
+        if (x.pattern.isPresent()) {
+            out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
+                    x.fieldName(cls) + (useGet ? ".get()" : ""), x.pattern.get(), x.fieldName(cls));
         }
     }
 

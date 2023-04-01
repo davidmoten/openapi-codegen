@@ -1298,4 +1298,28 @@ components:
       type: string
       enum: [hello,there,you]    
       
+    MinMaxLength:
+      type: object
+      properties:
+        first: 
+          type: string
+          minLength: 1
+          maxLength: 10
+        second:
+          type: string
+          minLength: 2
+          maxLength: 8
+      required: [first] 
+      
+    Pattern:
+      type: object
+      properties:
+        first: 
+          type: string
+          pattern: 'a.*'
+        second:
+          type: string
+          pattern: 'b.*'
+      required: [first]  
+      
                
