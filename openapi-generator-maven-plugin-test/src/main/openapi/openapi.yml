@@ -1327,5 +1327,11 @@ components:
       format: int32
       minimum: 2
       maximum: 4
+
+    MinMaxDouble:
+      type: number
+      format: double
+      minimum: 2.1
+      maximum: 4.5
       
                
