@@ -20,3 +20,4 @@ Java code generator from OpenAPI definition file
 * unnecessary generated imports
 * anonymous schemas generated as top level classes when could be nested static member classes (pollutes top level package)
 * should be able to create oneOf member without specifying discriminator value in constructor (is constant)
+* field types should be primitives in constructors, getters when mandatory (means a compile-time error instead of a runtime error) 
