@@ -35,7 +35,7 @@ import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.ArrayOfOneOfString;
 import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.Bike;
-import generated.model.MinMax;
+import generated.model.MinMaxInteger;
 import generated.model.MinMaxLength;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
@@ -445,24 +445,24 @@ public class PluginGeneratorTest {
     }
 
     @Test
-    public void testMinMaxPasses() throws JsonMappingException, JsonProcessingException {
+    public void testMinMaxIntegerPasses() throws JsonMappingException, JsonProcessingException {
         String json = "2";
-        MinMax a = m.readValue(json, MinMax.class);
+        MinMaxInteger a = m.readValue(json, MinMaxInteger.class);
         assertEquals(2, a.value());
         assertEquals(json, m.writeValueAsString(a));
-        assertEquals(json, m.writeValueAsString(new MinMax(2)));
+        assertEquals(json, m.writeValueAsString(new MinMaxInteger(2)));
     }
     
     @Test(expected = ValueInstantiationException.class)
-    public void testMinMaxTooSmall() throws JsonMappingException, JsonProcessingException {
+    public void testMinMaxIntegerTooSmall() throws JsonMappingException, JsonProcessingException {
         String json = "1";
-        m.readValue(json, MinMax.class);
+        m.readValue(json, MinMaxInteger.class);
     }
     
     @Test(expected = ValueInstantiationException.class)
-    public void testMinMaxTooBig() throws JsonMappingException, JsonProcessingException {
+    public void testMinMaxIntegerTooBig() throws JsonMappingException, JsonProcessingException {
         String json = "5";
-        m.readValue(json, MinMax.class);
+        m.readValue(json, MinMaxInteger.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {

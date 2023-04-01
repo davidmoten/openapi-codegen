@@ -1322,7 +1322,7 @@ components:
           pattern: 'b.*'
       required: [first]  
       
-    MinMax:
+    MinMaxInteger:
       type: integer
       format: int32
       minimum: 2
