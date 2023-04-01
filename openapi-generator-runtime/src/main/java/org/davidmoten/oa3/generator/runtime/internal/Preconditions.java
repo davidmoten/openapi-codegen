@@ -1,6 +1,7 @@
 package org.davidmoten.oa3.generator.runtime.internal;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 public final class Preconditions {
@@ -44,6 +45,20 @@ public final class Preconditions {
             throw new IllegalArgumentException(name + " must have a length of at most " + maxLength);
         }
         return s;
+    }
+    
+    public static <S extends Collection<T>, T> S checkMinSize(S collection, int min, String name) {
+        if (collection.size() < min) {
+            throw new IllegalArgumentException("collection must be have at least " + min + " elements");
+        }
+        return collection;
+    }
+    
+    public static <S extends Collection<T>, T> S checkMaxSize(S collection, int max, String name) {
+        if (collection.size() > max) {
+            throw new IllegalArgumentException("collection must be have at most " + max + " elements");
+        }
+        return collection;
     }
 
     public static String checkMatchesPattern(String s, String pattern, String name) {
