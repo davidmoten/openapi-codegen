@@ -8,3 +8,4 @@ Java code generator from OpenAPI definition file
 * generate javadoc for fields
 * delegate constructors using `this(`
 * use jakarta validation jar
+* add equals and hashCode
