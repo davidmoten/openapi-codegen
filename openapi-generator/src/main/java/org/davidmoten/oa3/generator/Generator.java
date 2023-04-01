@@ -831,14 +831,17 @@ public class Generator {
                 : "public";
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
+        // validate
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
+                out.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
                         imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
                         x.fieldName(cls), x.fieldName(cls));
-            } else {
-                out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
             }
+        });
+        // assign
+        cls.fields.stream().forEach(x -> {
+            assignField(out, indent, cls, x);
         });
         indent.left();
         out.format("%s}\n", indent);
@@ -851,6 +854,17 @@ public class Generator {
             indent.left().left();
             out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
+            // validate
+            cls.fields.stream().forEach(x -> {
+                Optional<Discriminator> disc = interfaces.stream()
+                        .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator).findFirst();
+                if (!disc.isPresent() && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
+                    out.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
+                            imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
+                            x.fieldName(cls), x.fieldName(cls));
+                }
+            });
+            // assign
             cls.fields.stream().forEach(x -> {
                 Optional<Discriminator> disc = interfaces.stream()
                         .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator).findFirst();
@@ -859,26 +873,24 @@ public class Generator {
                             disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
                 } else if (!x.isPrimitive() && !x.isByteArray()) {
                     if (x.required) {
-                        out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
-                                imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                                x.fieldName(cls), x.fieldName(cls), x.fieldName(cls));
+                        assignField(out, indent, cls, x);
                     } else {
-                        out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\").orElse(null);\n", indent, x.fieldName(cls),
-                                imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                                x.fieldName(cls), x.fieldName(cls), x.fieldName(cls));
+                        out.format("%sthis.%s = %s.orElse(null);\n", indent, x.fieldName(cls), x.fieldName(cls));
                     }
                 } else if (x.isOctets()) {
-                    out.format("%sthis.%s = %s.encodeOctets(%s.checkNotNull(%s, \"%s\"));\n", indent, x.fieldName(cls),
-                            imports.add(Util.class),
-                            imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                            x.fieldName(cls), x.fieldName(cls));
+                    out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName(cls), imports.add(Util.class),
+                            x.fieldName(cls));
                 } else {
-                    out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
+                    assignField(out, indent, cls, x);
                 }
             });
             indent.left();
             out.format("%s}\n", indent);
         }
+    }
+
+    private static void assignField(PrintWriter out, Indent indent, Cls cls, Field x) {
+        out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
     }
 
     private static <T> T orElse(T value, T defaultValue) {
