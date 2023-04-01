@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Generated;
@@ -54,6 +55,7 @@ import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Discriminator;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -534,13 +536,13 @@ public class Generator {
             writeOneOrAnyOfClassContent(out, imports, indent, cls, names);
         } else {
             writeFields(out, imports, indent, cls);
-            writeConstructor(out, imports, indent, cls, fullClassNameInterfaces);
+            writeConstructor(out, imports, indent, cls, fullClassNameInterfaces, names);
             writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
         }
         writeEnumCreator(out, imports, indent, cls);
         writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces, names);
         indent.left();
-        out.format("%s}\n", indent);
+        closeParen(out, indent);
     }
 
     private static void writeEnumCreator(PrintWriter out, Imports imports, Indent indent, Cls cls) {
@@ -566,13 +568,13 @@ public class Generator {
             indent.right();
             out.format("%sreturn x;\n", indent);
             indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
             indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
             out.format("%sthrow new %s(\"unexpected enum value: '\" + value + \"'\");\n", indent,
                     imports.add(IllegalArgumentException.class));
             indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
         }
     }
 
@@ -762,9 +764,9 @@ public class Generator {
                     imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
                     cls.polymorphicType.name(), cls.simpleName(), classes);
             indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
             indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
         }
     }
 
@@ -795,7 +797,7 @@ public class Generator {
     }
 
     private static void writeConstructor(PrintWriter out, Imports imports, Indent indent, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces) {
+            Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
         // this code will write one public constructor or one private and one public.
         // The private one is to be annotated
         // with JsonCreator for use by Jackson.
@@ -831,20 +833,21 @@ public class Generator {
                 : "public";
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
-        // validate
-        cls.fields.stream().forEach(x -> {
-            if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                out.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                        imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                        x.fieldName(cls), x.fieldName(cls));
-            }
-        });
+        ifValidate(out, indent, imports, names, //
+                out2 -> cls.fields.stream().forEach(x -> {
+                    if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
+                        out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
+                                imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
+                                x.fieldName(cls), x.fieldName(cls));
+                    }
+                }));
+        
         // assign
         cls.fields.stream().forEach(x -> {
             assignField(out, indent, cls, x);
         });
         indent.left();
-        out.format("%s}\n", indent);
+        closeParen(out, indent);
         if (hasOptional || !interfaces.isEmpty() || hasBinary) {
             indent.right().right();
             String parametersOptional = cls.fields.stream().filter(
@@ -855,15 +858,18 @@ public class Generator {
             out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             // validate
-            cls.fields.stream().forEach(x -> {
-                Optional<Discriminator> disc = interfaces.stream()
-                        .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator).findFirst();
-                if (!disc.isPresent() && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
-                    out.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                            imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                            x.fieldName(cls), x.fieldName(cls));
-                }
-            });
+            ifValidate(out, indent, imports, names, //
+                    out2 -> cls.fields.stream().forEach(x -> {
+                        Optional<Discriminator> disc = interfaces.stream()
+                                .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator)
+                                .findFirst();
+                        if (!disc.isPresent() && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
+                            out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
+                                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
+                                    x.fieldName(cls), x.fieldName(cls));
+                        }
+                    }));
+
             // assign
             cls.fields.stream().forEach(x -> {
                 Optional<Discriminator> disc = interfaces.stream()
@@ -885,8 +891,29 @@ public class Generator {
                 }
             });
             indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
         }
+    }
+
+    private static void ifValidate(PrintWriter out, Indent indent, Imports imports, Names names,
+            Consumer<PrintWriter> r) {
+        ByteArrayPrintWriter b = ByteArrayPrintWriter.create();
+        indent.right();
+        r.accept(b);
+        indent.left();
+        b.close();
+        String text = b.text();
+        if (text.isEmpty()) {
+            return;
+        } else {
+            out.format("%sif (%s.config().validate()) {\n", indent, imports.add(names.globalsFullClassName()));
+            out.print(text);
+            closeParen(out, indent);
+        }
+    }
+
+    private static PrintWriter closeParen(PrintWriter out, Indent indent) {
+        return out.format("%s}\n", indent);
     }
 
     private static void assignField(PrintWriter out, Indent indent, Cls cls, Field x) {
@@ -916,7 +943,7 @@ public class Generator {
                 out.format("%sreturn %s;\n", indent, f.fieldName(cls));
             }
             indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
         });
     }
 
