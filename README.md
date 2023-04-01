@@ -9,6 +9,7 @@ Java code generator from OpenAPI definition file
 * delegate constructors using `this(`
 * use jakarta validation jar
 * add equals and hashCode
+* generate classes for parameters
 
 ## Notes on OpenAPI openapi-generator
 
