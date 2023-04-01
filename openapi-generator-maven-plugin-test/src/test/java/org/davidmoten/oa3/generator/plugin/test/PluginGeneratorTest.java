@@ -35,6 +35,7 @@ import generated.model.ArrayOfOneOf.ArrayOfOneOfItem;
 import generated.model.ArrayOfOneOfString;
 import generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import generated.model.Bike;
+import generated.model.MinMax;
 import generated.model.MinMaxLength;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
@@ -441,6 +442,27 @@ public class PluginGeneratorTest {
         } finally {
             Globals.setConfig(old);
         }
+    }
+
+    @Test
+    public void testMinMaxPasses() throws JsonMappingException, JsonProcessingException {
+        String json = "2";
+        MinMax a = m.readValue(json, MinMax.class);
+        assertEquals(2, a.value());
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(json, m.writeValueAsString(new MinMax(2)));
+    }
+    
+    @Test(expected = ValueInstantiationException.class)
+    public void testMinMaxTooSmall() throws JsonMappingException, JsonProcessingException {
+        String json = "1";
+        m.readValue(json, MinMax.class);
+    }
+    
+    @Test(expected = ValueInstantiationException.class)
+    public void testMinMaxTooBig() throws JsonMappingException, JsonProcessingException {
+        String json = "5";
+        m.readValue(json, MinMax.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {
