@@ -237,13 +237,14 @@ public class Generator {
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
-                    Optional.empty(), Encoding.DEFAULT));
+                    Optional.empty(), Optional.empty(), Optional.empty(), Encoding.DEFAULT));
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
-                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern, Encoding encoding) {
-            fields.add(
-                    new Field(fullType, name, fieldName, required, isArray, minLength, maxLength, pattern, encoding));
+                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern,
+                Optional<BigDecimal> min, Optional<BigDecimal> max, Encoding encoding) {
+            fields.add(new Field(fullType, name, fieldName, required, isArray, minLength, maxLength, pattern, min, max,
+                    encoding));
         }
 
         public String pkg() {
@@ -298,11 +299,14 @@ public class Generator {
         final Optional<Integer> minLength;
         final Optional<Integer> maxLength;
         final Optional<String> pattern;
+        final Optional<BigDecimal> min;
+        final Optional<BigDecimal> max;
         final boolean isArray; // if a List to be used to represent
         final Encoding encoding;
 
         public Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
-                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern, Encoding encoding) {
+                Optional<Integer> minLength, Optional<Integer> maxLength, Optional<String> pattern,
+                Optional<BigDecimal> min, Optional<BigDecimal> max, Encoding encoding) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
@@ -312,6 +316,8 @@ public class Generator {
             this.maxLength = maxLength;
             this.pattern = pattern;
             this.encoding = encoding;
+            this.min = min;
+            this.max = max;
         }
 
         public String fieldName(Cls cls) {
@@ -472,8 +478,10 @@ public class Generator {
                     } else {
                         encoding = Encoding.DEFAULT;
                     }
+                    Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
+                    Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minLength, maxLength,
-                            pattern, encoding);
+                            pattern, min, max, encoding);
                 } else if (isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     String fieldName = current.nextFieldName(last.name);
@@ -893,20 +901,31 @@ public class Generator {
 
     private static void validateMore(PrintWriter out, Imports imports, Indent indent, Cls cls, Field x,
             boolean useGet) {
+        String raw = x.fieldName(cls) + (useGet ? ".get()" : "");
         if (x.minLength.isPresent()) {
             out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                    x.fieldName(cls) + (useGet ? ".get()" : ""), x.minLength.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), raw,
+                    x.minLength.get(), x.fieldName(cls));
         }
         if (x.maxLength.isPresent()) {
             out.format("%s%s.checkMaxLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                    x.fieldName(cls) + (useGet ? ".get()" : ""), x.maxLength.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), raw,
+                    x.maxLength.get(), x.fieldName(cls));
         }
         if (x.pattern.isPresent()) {
             out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
-                    x.fieldName(cls) + (useGet ? ".get()" : ""), x.pattern.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), raw,
+                    x.pattern.get(), x.fieldName(cls));
+        }
+        if (x.min.isPresent()) {
+            out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\");\n", indent,
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), raw,
+                    x.min.get().toString(), x.fieldName(cls));
+        }
+        if (x.max.isPresent()) {
+            out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\");\n", indent,
+                    imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), raw,
+                    x.max.get().toString(), x.fieldName(cls));
         }
     }
 
