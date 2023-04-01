@@ -46,6 +46,8 @@ import generated.model.ObjectNoOptionalFields;
 import generated.model.PropertyRef;
 import generated.model.PropertyRefOptional;
 import generated.model.Ref;
+import generated.model.RefWithSpace;
+import generated.model.Schema_Name_With_Space;
 import generated.model.Shape;
 import generated.model.Shape2;
 import generated.model.SimpleBinary;
@@ -518,13 +520,28 @@ public class PluginGeneratorTest {
         String json = "4";
         m.readValue(json, ExclusiveMinMaxInteger.class);
     }
-    
+
     @Test
     public void testNamesWithSpaces() throws JsonMappingException, JsonProcessingException {
         String json = "{\"the name\":\"julie\"}";
         NamesWithSpaces a = m.readValue(json, NamesWithSpaces.class);
         assertEquals("julie", a.the_name().get());
         assertEquals(json, m.writeValueAsString(a));
+    }
+    
+    @Test
+    public void testSchemaNameWithSpace() throws JsonMappingException, JsonProcessingException {
+        String json = "\"hello\"";
+        Schema_Name_With_Space a = m.readValue(json, Schema_Name_With_Space.class);
+        assertEquals("hello", a.value());
+    }
+    
+    @Test
+    public void testRefWithSpace() throws JsonMappingException, JsonProcessingException {
+        String json = "\"hello\"";
+        RefWithSpace a = m.readValue(json, RefWithSpace.class);
+        assertTrue(a.value() instanceof Schema_Name_With_Space);
+        assertEquals("hello", a.value().value());
     }
 
     private static void onePublicConstructor(Class<?> c) {

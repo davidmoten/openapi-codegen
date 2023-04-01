@@ -1348,3 +1348,8 @@ components:
         'the name': 
           type: string
                      
+    'Schema Name With Space':
+      type: string           
+      
+    RefWithSpace:
+      $ref: '#/components/schemas/Schema Name With Space'          
