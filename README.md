@@ -9,3 +9,11 @@ Java code generator from OpenAPI definition file
 * delegate constructors using `this(`
 * use jakarta validation jar
 * add equals and hashCode
+
+## Notes on OpenAPI openapi-generator
+
+* Mutable classes mean that validation cannot be performed at construction time and have to use validation-api annotations
+* Mutable classes bad
+* No support for oneOf, anyOf when no discriminator specified
+* when discriminator mappings specified two sets of conflicting mapping annotations are generated
+* SimpleRef case has no type safety (Ref is passed in as Object in constructor)
