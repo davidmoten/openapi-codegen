@@ -529,14 +529,14 @@ public class PluginGeneratorTest {
         assertEquals("julie", a.the_name().get());
         assertEquals(json, m.writeValueAsString(a));
     }
-    
+
     @Test
     public void testSchemaNameWithSpace() throws JsonMappingException, JsonProcessingException {
         String json = "\"hello\"";
         Schema_Name_With_Space a = m.readValue(json, Schema_Name_With_Space.class);
         assertEquals("hello", a.value());
     }
-    
+
     @Test
     public void testRefWithSpace() throws JsonMappingException, JsonProcessingException {
         String json = "\"hello\"";
@@ -548,22 +548,21 @@ public class PluginGeneratorTest {
     @Test
     public void testMinMaxItems() throws JsonMappingException, JsonProcessingException {
         String json = "[1,2,3]";
-        MinMaxItems a = m.readValue(json, MinMaxItems.class);
-        // TODO
+        m.readValue(json, MinMaxItems.class);
     }
-    
-    @Test(expected=ValueInstantiationException.class)
+
+    @Test(expected = ValueInstantiationException.class)
     public void testMinMaxItemsTooFew() throws JsonMappingException, JsonProcessingException {
         String json = "[1]";
         m.readValue(json, MinMaxItems.class);
     }
-    
-    @Test(expected=ValueInstantiationException.class)
+
+    @Test(expected = ValueInstantiationException.class)
     public void testMinMaxItemsTooMany() throws JsonMappingException, JsonProcessingException {
         String json = "[1,2,3,4,5]";
         m.readValue(json, MinMaxItems.class);
     }
-    
+
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
