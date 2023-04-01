@@ -17,3 +17,4 @@ Java code generator from OpenAPI definition file
 * No support for oneOf, anyOf when no discriminator specified
 * when discriminator mappings specified two sets of conflicting mapping annotations are generated
 * SimpleRef case has no type safety (Ref is passed in as Object in constructor)
+* unnecessary generated imports
