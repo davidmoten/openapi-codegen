@@ -47,6 +47,7 @@ import generated.model.SimpleByteArray;
 import generated.model.SimpleDate;
 import generated.model.SimpleDateTime;
 import generated.model.SimpleDouble;
+import generated.model.SimpleEnum;
 import generated.model.SimpleFloat;
 import generated.model.SimpleInt;
 import generated.model.SimpleInteger;
@@ -224,6 +225,13 @@ public class PluginGeneratorTest {
         assertEquals(json, m.writeValueAsString(new SimpleIntegerArray(list)));
         // TODO should null be passable to List<Long>?
         // shouldThrowIAE(() -> new SimpleIntegerArray(null));
+    }
+    
+    @Test
+    public void testSimpleEnum() throws JsonMappingException, JsonProcessingException {
+        String json = "\"there\"";
+        SimpleEnum a = m.readValue(json, SimpleEnum.class);
+        assertEquals(SimpleEnum.THERE, a);
     }
 
     @Test

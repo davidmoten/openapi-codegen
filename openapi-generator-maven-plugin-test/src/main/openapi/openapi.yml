@@ -1294,6 +1294,8 @@ components:
         first: 
           $ref: '#components/schemas/SimpleInteger'
       
-         
+    SimpleEnum:
+      type: string
+      enum: [hello,there,you]    
       
                

@@ -537,9 +537,43 @@ public class Generator {
             writeConstructor(out, imports, indent, cls, fullClassNameInterfaces);
             writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
         }
+        writeEnumCreator(out, imports, indent, cls);
         writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces, names);
         indent.left();
         out.format("%s}\n", indent);
+    }
+
+    private static void writeEnumCreator(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+        if (cls.classType == ClassType.ENUM) {
+//            @JsonCreator
+//            public static SubjectIndicator fromValue(String value) {
+//              for (SubjectIndicator b : SubjectIndicator.values()) {
+//                if (b.value.equals(value)) {
+//                  return b;
+//                }
+//              }
+//              throw new IllegalArgumentException("Unexpected value '" + value + "'");
+//            }
+            String simpleClassName = Names.simpleClassName(cls.fullClassName);
+            out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+            out.format("%spublic static %s fromValue(%s value) {\n", indent, simpleClassName,
+                    imports.add(Object.class));
+            indent.right();
+            out.format("%sfor (%s x: %s.values()) {\n", indent, simpleClassName, simpleClassName);
+            indent.right();
+            // be careful because x.value can be primitive
+            out.format("%sif (value.equals(x.value)) {\n", indent);
+            indent.right();
+            out.format("%sreturn x;\n", indent);
+            indent.left();
+            out.format("%s}\n", indent);
+            indent.left();
+            out.format("%s}\n", indent);
+            out.format("%sthrow new %s(\"unexpected enum value: '\" + value + \"'\");\n", indent,
+                    imports.add(IllegalArgumentException.class));
+            indent.left();
+            out.format("%s}\n", indent);
+        }
     }
 
     private static void writeClassDeclaration(PrintWriter out, Imports imports, Indent indent, Cls cls,
@@ -590,8 +624,7 @@ public class Generator {
     }
 
     private static void addGeneratedAnnotation(PrintWriter out, Imports imports, Indent indent) {
-        out.format("%s@%s(value = \"%s\")\n", indent,
-                imports.add(Generated.class), version);
+        out.format("%s@%s(value = \"%s\")\n", indent, imports.add(Generated.class), version);
     }
 
     private static void writeOneOfDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent, Cls cls) {
@@ -801,8 +834,8 @@ public class Generator {
         cls.fields.stream().forEach(x -> {
             if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                 out.format("%sthis.%s = %s.checkNotNull(%s, \"%s\");\n", indent, x.fieldName(cls),
-                        imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class), x.fieldName(cls),
-                        x.fieldName(cls));
+                        imports.add(org.davidmoten.oa3.generator.runtime.internal.Preconditions.class),
+                        x.fieldName(cls), x.fieldName(cls));
             } else {
                 out.format("%sthis.%s = %s;\n", indent, x.fieldName(cls), x.fieldName(cls));
             }
