@@ -40,6 +40,7 @@ import generated.model.ExclusiveMinMaxInteger;
 import generated.model.MinMaxDouble;
 import generated.model.MinMaxInteger;
 import generated.model.MinMaxLength;
+import generated.model.NamesWithSpaces;
 import generated.model.ObjectAllOptionalFields;
 import generated.model.ObjectNoOptionalFields;
 import generated.model.PropertyRef;
@@ -516,6 +517,14 @@ public class PluginGeneratorTest {
     public void testExclusiveMinMaxIntegerTooBig() throws JsonMappingException, JsonProcessingException {
         String json = "4";
         m.readValue(json, ExclusiveMinMaxInteger.class);
+    }
+    
+    @Test
+    public void testNamesWithSpaces() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"the name\":\"julie\"}";
+        NamesWithSpaces a = m.readValue(json, NamesWithSpaces.class);
+        assertEquals("julie", a.the_name().get());
+        assertEquals(json, m.writeValueAsString(a));
     }
 
     private static void onePublicConstructor(Class<?> c) {
