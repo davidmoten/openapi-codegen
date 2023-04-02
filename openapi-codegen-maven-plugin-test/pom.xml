@@ -83,6 +83,9 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <basePackage>org.davidmoten.oa3.codegen.test.generated</basePackage>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

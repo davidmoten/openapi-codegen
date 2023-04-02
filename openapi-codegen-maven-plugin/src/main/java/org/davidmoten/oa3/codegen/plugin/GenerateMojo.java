@@ -28,7 +28,7 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "outputDirectory", defaultValue = "${project.build.directory}/generated-sources/java")
     private File outputDirectory;
 
-    @Parameter(name = "basePackage", defaultValue = "generated")
+    @Parameter(name = "basePackage", defaultValue = "openapi.generated")
     private String basePackage;
 
     @Parameter(name = "charset", defaultValue = "UTF-8")
