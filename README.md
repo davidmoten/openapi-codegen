@@ -11,6 +11,7 @@ Java code generator from OpenAPI definition file
 * add equals and hashCode
 * generate classes for parameters
 * workaround JsonCreator not being able to pass `5` into a double argument, must be `5.0 (https://github.com/FasterXML/jackson-core/issues/532)
+* support external schema refs
 
 ## Notes on OpenAPI openapi-generator
 
