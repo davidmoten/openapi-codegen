@@ -21,17 +21,6 @@ public class Apis {
                 .entrySet() //
                 .stream() //
                 .forEach(x -> visitSchemas(x.getKey(), x.getValue(), visitor));
-        api.getPaths().forEach((pathName, pathItem) -> {
-            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                operation.getResponses().forEach((statusCode, response) -> {
-                    if (response.getContent() != null) {
-                        response.getContent().forEach((mimeType, mediaType) -> {
-                            visitSchemas(mimeType, mediaType.getSchema(), visitor);
-                        });
-                    }
-                });
-            });
-        });
     }
 
     static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {

@@ -142,6 +142,67 @@ public class Generator {
             Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
             results.add(v.result());
         });
+        names.api().getPaths().forEach((pathName, pathItem) -> {
+            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
+                operation.getResponses().forEach((statusCode, response) -> {
+                    if (response.getContent() != null) {
+                        response.getContent().forEach((mimeType, mediaType) -> {
+                            MyVisitor v = new MyVisitor(names);
+                            Apis.visitSchemas("Path " + pathName + " Method " + httpMethod + " StatusCode " + statusCode
+                                    + " Content " + mimeType, mediaType.getSchema(), v);
+                            results.add(v.result());
+                        });
+                    }
+                });
+            });
+        });
+        names.api().getPaths().forEach((pathName, pathItem) -> {
+            if (pathItem.getParameters() != null) {
+                pathItem.getParameters().forEach(parameter -> {
+                    if (parameter.getContent() != null) {
+                        parameter.getContent().forEach((mimeType, mediaType) -> {
+                            MyVisitor v = new MyVisitor(names);
+                            Apis.visitSchemas(
+                                    "Path " + pathName + " Parameter " + parameter.getName() + " Content " + mimeType,
+                                    mediaType.getSchema(), v);
+                            results.add(v.result());
+                        });
+                    }
+                });
+            }
+        });
+        names.api().getPaths().forEach((pathName, pathItem) -> {
+            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
+                if (operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
+                    operation.getRequestBody().getContent().forEach((mimeType, mediaType) -> {
+                        MyVisitor v = new MyVisitor(names);
+                        Apis.visitSchemas(
+                                "Path" + pathName + " Method " + httpMethod + " RequestBody " + " Content " + mimeType,
+                                mediaType.getSchema(), v);
+                        results.add(v.result());
+                    });
+                }
+            });
+        });
+        names.api().getComponents().getParameters().forEach((parameterName, parameter) -> {
+            if (parameter.getContent() != null) {
+                parameter.getContent().forEach((mimeType, mediaType) -> {
+                    MyVisitor v = new MyVisitor(names);
+                    Apis.visitSchemas("Parameter " + parameterName + " Content " + mimeType, mediaType.getSchema(), v);
+                    results.add(v.result());
+                });
+            }
+        });
+        names.api().getComponents().getResponses().forEach((responseName, response) -> {
+            if (response.getContent() != null) {
+                response.getContent().forEach((mimeType, mediaType) -> {
+                    MyVisitor v = new MyVisitor(names);
+                    Apis.visitSchemas("Response " + responseName + " Content " + mimeType, mediaType.getSchema(), v);
+                    results.add(v.result());
+                });
+            }
+        });
+
         Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
         for (MyVisitor.Result result : results) {
             findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
