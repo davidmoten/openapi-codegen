@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.generator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +24,18 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.github.davidmoten.guavamini.Preconditions;
 
@@ -175,7 +183,9 @@ public class SerializationTest {
     @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     @JsonInclude(Include.NON_NULL)
     public static final class Circle2 {
+        @JsonProperty("radiusNm")
         private final double radiusNm;
+        @JsonProperty("colour")
         private final String colour;
 
         @JsonCreator
@@ -199,6 +209,7 @@ public class SerializationTest {
 
     @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Rectangle2 {
+        @JsonProperty("heightDegrees")
         private final double heightDegrees;
 
         @JsonCreator
@@ -291,8 +302,10 @@ public class SerializationTest {
     @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Bike implements Vehicle {
 
+        @JsonProperty("vehicleType")
         private final String vehicleType;
 
+        @JsonProperty("colour")
         private final String colour;
 
         @JsonCreator
@@ -313,5 +326,55 @@ public class SerializationTest {
         public String colour() {
             return colour;
         }
+    }
+
+    @Test
+    public void testAllOf() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"firstName\":\"Dave\",\"numBikes\":3,\"common\":\"abc\"}";
+        ObjectMapper mapper = m.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        AllOf a = mapper.readValue(json, AllOf.class);
+        assertEquals("Dave", a.person.firstName);
+        assertEquals(3, a.bikes.numBikes);
+        assertEquals("abc", a.person.common);
+        assertEquals("abc", a.bikes.common);
+        // TODO serialization problematic because Jackson repeats the common field
+        // (admittedly it has to resolve a conflict if there is one)
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    @JsonDeserialize(using = AllOf.Deserializer.class)
+    public static final class AllOf {
+
+        @JsonUnwrapped
+        public Person person;
+
+        @JsonUnwrapped
+        public HasBikes bikes;
+
+        public AllOf(Person person, HasBikes bikes) {
+            this.person = person;
+            this.bikes = bikes;
+        }
+
+        @SuppressWarnings("serial")
+        public static final class Deserializer extends PolymorphicDeserializer<AllOf> {
+
+            protected Deserializer() {
+                super(Config.builder().build(), PolymorphicType.ALL_OF, AllOf.class, Person.class, HasBikes.class);
+            }
+        }
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    public static final class Person {
+        public String firstName;
+        public String lastName;
+        public String common;
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    public static final class HasBikes {
+        public int numBikes;
+        public String common;
     }
 }
