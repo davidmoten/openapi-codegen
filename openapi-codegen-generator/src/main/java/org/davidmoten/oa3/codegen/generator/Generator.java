@@ -149,7 +149,7 @@ public class Generator {
                         response.getContent().forEach((mimeType, mediaType) -> {
                             MyVisitor v = new MyVisitor(names);
                             Apis.visitSchemas("Path " + pathName + " Method " + httpMethod + " StatusCode " + statusCode
-                                    + " Content " + mimeType, mediaType.getSchema(), v);
+                                    + " Response Content " + mimeType, mediaType.getSchema(), v);
                             results.add(v.result());
                         });
                     }

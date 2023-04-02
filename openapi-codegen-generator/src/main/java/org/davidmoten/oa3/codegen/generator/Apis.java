@@ -25,7 +25,15 @@ public class Apis {
 
     static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
         Preconditions.checkArgument(name != null);
-        visitSchemas(ImmutableList.of(new SchemaWithName(name, schema)), visitor);
+        visitSchemas(ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)), visitor);
+    }
+
+    private static String stripLeadingSlash(String name) {
+        if (name.startsWith("/")) {
+            return name.substring(1);
+        } else {
+            return name;
+        }
     }
 
     static void visitSchemas(ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
