@@ -532,13 +532,6 @@ public class PluginGeneratorTest {
     }
 
     @Test
-    public void testSchemaNameWithSpace() throws JsonMappingException, JsonProcessingException {
-        String json = "\"hello\"";
-        Schema_Name_With_Space a = m.readValue(json, Schema_Name_With_Space.class);
-        assertEquals("hello", a.value());
-    }
-
-    @Test
     public void testRefWithSpace() throws JsonMappingException, JsonProcessingException {
         String json = "\"hello\"";
         RefWithSpace a = m.readValue(json, RefWithSpace.class);

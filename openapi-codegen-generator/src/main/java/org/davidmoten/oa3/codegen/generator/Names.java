@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
@@ -37,7 +38,10 @@ public final class Names {
     public Names(Definition definition) {
         this.definition = definition;
         SwaggerParseResult result = new OpenAPIParser().readContents(definition.definition(), null, null);
-        result.getMessages().stream().forEach(System.out::println);
+        String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
+        if (!errors.isEmpty()) {
+            throw new RuntimeException(errors);
+        }
         this.api = result.getOpenAPI();
         superSchemas(api);
         schemaFullClassNames(api);
