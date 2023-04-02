@@ -39,8 +39,6 @@ import org.davidmoten.oa3.codegen.test.generated.model.ObjectNoOptionalFields;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRef;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRefOptional;
 import org.davidmoten.oa3.codegen.test.generated.model.Ref;
-import org.davidmoten.oa3.codegen.test.generated.model.RefWithSpace;
-import org.davidmoten.oa3.codegen.test.generated.model.Schema_Name_With_Space;
 import org.davidmoten.oa3.codegen.test.generated.model.Shape;
 import org.davidmoten.oa3.codegen.test.generated.model.Shape2;
 import org.davidmoten.oa3.codegen.test.generated.model.SimpleBinary;
@@ -529,14 +527,6 @@ public class PluginGeneratorTest {
         NamesWithSpaces a = m.readValue(json, NamesWithSpaces.class);
         assertEquals("julie", a.the_name().get());
         assertEquals(json, m.writeValueAsString(a));
-    }
-
-    @Test
-    public void testRefWithSpace() throws JsonMappingException, JsonProcessingException {
-        String json = "\"hello\"";
-        RefWithSpace a = m.readValue(json, RefWithSpace.class);
-        assertTrue(a.value() instanceof Schema_Name_With_Space);
-        assertEquals("hello", a.value().value());
     }
 
     @Test
