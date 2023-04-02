@@ -337,8 +337,18 @@ public class SerializationTest {
         assertEquals(3, a.bikes.numBikes);
         assertEquals("abc", a.person.common);
         assertEquals("abc", a.bikes.common);
+
         // TODO serialization problematic because Jackson repeats the common field
         // (admittedly it has to resolve a conflict if there is one)
+        // As a test workaround we ensure that Jackson deserialization doesn't get
+        // flustered by the repeated field
+
+        AllOf b = mapper.readValue(mapper.writeValueAsString(a), AllOf.class);
+        assertEquals("Dave", b.person.firstName);
+        assertEquals(3, b.bikes.numBikes);
+        assertEquals("abc", b.person.common);
+        assertEquals("abc", b.bikes.common);
+
     }
 
     @JsonInclude(Include.NON_NULL)
