@@ -358,7 +358,8 @@ public class Generator {
         CLASS("class"), //
         ENUM("enum"), //
         ONE_OR_ANY_OF_DISCRIMINATED("interface"), //
-        ONE_OR_ANY_OF_NON_DISCRIMINATED("class");
+        ONE_OR_ANY_OF_NON_DISCRIMINATED("class"), //
+        ALL_OF("class");
 
         private final String word;
 
@@ -538,7 +539,7 @@ public class Generator {
                     handleEnum(schema, cls);
                 } else if (isObject(schema)) {
                     handleObject(schemaPath, last, schema, cls, isArray, previous, fieldName);
-                } else if (isOneOf(schema) || isAnyOf(schema)) {
+                } else if (isOneOf(schema) || isAnyOf(schema) || isAllOf(schema)) {
                     handleOneOrAnyOf(schemaPath, cls, names, previous, fieldName, isArray);
                 } else {
                     // TODO
@@ -771,7 +772,8 @@ public class Generator {
     private static void handleOneOrAnyOf(ImmutableList<SchemaWithName> schemaPath, Cls cls, Names names,
             Optional<Cls> previous, Optional<String> fieldName, boolean isArray) {
         SchemaWithName last = schemaPath.last();
-        cls.polymorphicType = isOneOf(last.schema) ? PolymorphicType.ONE_OF : PolymorphicType.ANY_OF;
+        cls.polymorphicType = isOneOf(last.schema) ? PolymorphicType.ONE_OF
+                : (isAnyOf(last.schema) ? PolymorphicType.ANY_OF : PolymorphicType.ALL_OF);
         io.swagger.v3.oas.models.media.Discriminator discriminator = last.schema.getDiscriminator();
         if (discriminator != null) {
             String propertyName = discriminator.getPropertyName();
@@ -1136,7 +1138,7 @@ public class Generator {
         }
     }
 
-    static boolean isEnum(Schema<?> schema) {
+    private static boolean isEnum(Schema<?> schema) {
         return schema.getEnum() != null && !schema.getEnum().isEmpty();
     }
 
@@ -1152,7 +1154,7 @@ public class Generator {
         return schema instanceof ArraySchema;
     }
 
-    static boolean isOneOf(Schema<?> schema) {
+    private static boolean isOneOf(Schema<?> schema) {
         if (!(schema instanceof ComposedSchema)) {
             return false;
         }
@@ -1160,12 +1162,20 @@ public class Generator {
         return sch.getOneOf() != null && !sch.getOneOf().isEmpty();
     }
 
-    static boolean isAnyOf(Schema<?> schema) {
+    private static boolean isAnyOf(Schema<?> schema) {
         if (!(schema instanceof ComposedSchema)) {
             return false;
         }
         ComposedSchema sch = (ComposedSchema) schema;
         return sch.getAnyOf() != null && !sch.getAnyOf().isEmpty();
+    }
+
+    private static boolean isAllOf(Schema<?> schema) {
+        if (!(schema instanceof ComposedSchema)) {
+            return false;
+        }
+        ComposedSchema sch = (ComposedSchema) schema;
+        return sch.getAllOf() != null && !sch.getAllOf().isEmpty();
     }
 
     private static boolean isPrimitive(Schema<?> schema) {
