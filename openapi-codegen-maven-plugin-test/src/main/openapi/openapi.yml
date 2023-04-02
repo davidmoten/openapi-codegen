@@ -1387,5 +1387,9 @@ components:
                 b: 
                   type: string
                   
+    EnumCollision:
+      type: string
+      enum: ['a b','a  b','a  b']                  
+                  
     
               
