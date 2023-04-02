@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen</artifactId>
+            <artifactId>openapi-codegen-generator</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

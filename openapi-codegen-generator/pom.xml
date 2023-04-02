@@ -7,7 +7,7 @@
         <artifactId>openapi-codegen-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>openapi-codegen</artifactId>
+    <artifactId>openapi-codegen-generator</artifactId>
     <name>${project.artifactId}</name>
     <description></description>
     <packaging>jar</packaging>

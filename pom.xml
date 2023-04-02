@@ -92,7 +92,7 @@
 
     <modules>
         <module>openapi-codegen-runtime</module>
-        <module>openapi-codegen</module>
+        <module>openapi-codegen-generator</module>
         <module>openapi-codegen-maven-plugin</module>
         <module>openapi-codegen-maven-plugin-test</module>
     </modules>
