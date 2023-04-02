@@ -8,14 +8,14 @@
         <version>0.1</version>
     </parent>
     <groupId>com.github.davidmoten</groupId>
-    <artifactId>openapi-generator-parent</artifactId>
+    <artifactId>openapi-codegen-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <name>${project.artifactId}</name>
     <description>Generates objects from OpenAPI schema v3</description>
     <packaging>pom</packaging>
 
-    <url>http://github.com/davidmoten/openapi-generator</url>
+    <url>http://github.com/davidmoten/openapi-codegen</url>
 
     <prerequisites>
         <maven>3.1.1</maven>
@@ -26,7 +26,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <scm.url>scm:git:https://github.com/davidmoten/openapi-generator.git</scm.url>
+        <scm.url>scm:git:https://github.com/davidmoten/openapi-codegen.git</scm.url>
         <javadoc.version>3.5.0</javadoc.version>
         <pmd.version>3.20.0</pmd.version>
         <project.info.version>3.4.2</project.info.version>
@@ -60,12 +60,12 @@
 
     <ciManagement>
         <system>Travis</system>
-        <url>https://travis-ci.org/davidmoten/openapi-generator</url>
+        <url>https://travis-ci.org/davidmoten/openapi-codegen</url>
     </ciManagement>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/davidmoten/openapi-generator/issues</url>
+        <url>https://github.com/davidmoten/openapi-codegen/issues</url>
     </issueManagement>
 
     <inceptionYear>2023</inceptionYear>
@@ -91,10 +91,10 @@
 
 
     <modules>
-        <module>openapi-generator-runtime</module>
-        <module>openapi-generator</module>
-        <module>openapi-generator-maven-plugin</module>
-        <module>openapi-generator-maven-plugin-test</module>
+        <module>openapi-codegen-runtime</module>
+        <module>openapi-codegen</module>
+        <module>openapi-codegen-maven-plugin</module>
+        <module>openapi-codegen-maven-plugin-test</module>
     </modules>
 
     <build>

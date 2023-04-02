@@ -19,7 +19,7 @@ import org.davidmoten.oa3.generator.Definition;
 import org.davidmoten.oa3.generator.Generator;
 import org.davidmoten.oa3.generator.Packages;
 
-@Mojo(name = "generate",defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES, threadSafe = false)
 public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "sources")
