@@ -56,6 +56,8 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class Generator {
 
@@ -144,43 +146,41 @@ public class Generator {
         });
         names.api().getPaths().forEach((pathName, pathItem) -> {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                operation.getResponses().forEach((statusCode, response) -> {
-                    if (response.getContent() != null) {
-                        response.getContent().forEach((mimeType, mediaType) -> {
-                            MyVisitor v = new MyVisitor(names);
-                            Apis.visitSchemas("Path " + pathName + " Method " + httpMethod + " StatusCode " + statusCode
-                                    + " Response Content " + mimeType, mediaType.getSchema(), v);
-                            results.add(v.result());
-                        });
-                    }
-                });
+                if (operation.getResponses() != null) {
+                    operation.getResponses().forEach((statusCode, response) -> {
+                        String prefix = "Path " + pathName + " Method " + httpMethod + " StatusCode " + statusCode;
+                        visitResponse(names, results, response, prefix);
+                    });
+                }
+                if (operation.getParameters() != null) {
+                    operation.getParameters().forEach(parameter -> {
+                        String prefix = "Path " + pathName + " Method " + httpMethod;
+                        visitParameter(names, results, parameter, prefix);
+                    });
+                }
+
             });
         });
         names.api().getPaths().forEach((pathName, pathItem) -> {
             if (pathItem.getParameters() != null) {
                 pathItem.getParameters().forEach(parameter -> {
-                    if (parameter.getContent() != null) {
-                        parameter.getContent().forEach((mimeType, mediaType) -> {
-                            MyVisitor v = new MyVisitor(names);
-                            Apis.visitSchemas(
-                                    "Path " + pathName + " Parameter " + parameter.getName() + " Content " + mimeType,
-                                    mediaType.getSchema(), v);
-                            results.add(v.result());
-                        });
-                    }
+                    String prefix = "Path " + pathName;
+                    visitParameter(names, results, parameter, prefix);
                 });
             }
         });
         names.api().getPaths().forEach((pathName, pathItem) -> {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                if (operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
-                    operation.getRequestBody().getContent().forEach((mimeType, mediaType) -> {
-                        MyVisitor v = new MyVisitor(names);
-                        Apis.visitSchemas(
-                                "Path" + pathName + " Method " + httpMethod + " RequestBody " + " Content " + mimeType,
-                                mediaType.getSchema(), v);
-                        results.add(v.result());
-                    });
+                String prefix = "Path" + pathName + " Method " + httpMethod;
+                if (operation.getRequestBody() != null) {
+                    if (operation.getRequestBody().getContent() != null) {
+                        operation.getRequestBody().getContent().forEach((mimeType, mediaType) -> {
+                            MyVisitor v = new MyVisitor(names);
+                            Apis.visitSchemas(prefix + " RequestBody " + " Content " + mimeType, mediaType.getSchema(),
+                                    v);
+                            results.add(v.result());
+                        });
+                    }
                 }
             });
         });
@@ -224,6 +224,29 @@ public class Generator {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
+        }
+    }
+
+    private static void visitParameter(Names names, List<MyVisitor.Result> results, Parameter parameter,
+            String prefix) {
+        if (parameter.getContent() != null) {
+            parameter.getContent().forEach((mimeType, mediaType) -> {
+                MyVisitor v = new MyVisitor(names);
+                Apis.visitSchemas(prefix + " Parameter " + parameter.getName() + " Content " + mimeType,
+                        mediaType.getSchema(), v);
+                results.add(v.result());
+            });
+        }
+    }
+
+    private static void visitResponse(Names names, List<MyVisitor.Result> results, ApiResponse response,
+            String prefix) {
+        if (response.getContent() != null) {
+            response.getContent().forEach((mimeType, mediaType) -> {
+                MyVisitor v = new MyVisitor(names);
+                Apis.visitSchemas(prefix + " Response Content " + mimeType, mediaType.getSchema(), v);
+                results.add(v.result());
+            });
         }
     }
 
