@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class Apis {
 
@@ -21,6 +22,17 @@ public class Apis {
                 .entrySet() //
                 .stream() //
                 .forEach(x -> visitSchemas(x.getKey(), x.getValue(), visitor));
+        api.getPaths().forEach((pathName, pathItem) -> {
+            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
+                operation.getResponses().forEach((statusCode, response) -> {
+                    if (response.getContent() != null) {
+                        response.getContent().forEach((mimeType, mediaType) -> {
+                            visitSchemas(mimeType, mediaType.getSchema(), visitor);
+                        });
+                    }
+                });
+            });
+        });
     }
 
     static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
@@ -47,7 +59,8 @@ public class Apis {
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
             if (a.getItems() != null) {
-                visitSchemas(schemaPath.add(new SchemaWithName(schemaPath.last().name + "Item", a.getItems())), visitor);
+                visitSchemas(schemaPath.add(new SchemaWithName(schemaPath.last().name + "Item", a.getItems())),
+                        visitor);
             }
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;
@@ -67,7 +80,7 @@ public class Apis {
         }
         visitor.finishSchema(schemaPath);
     }
-    
+
     public static final boolean isComplexSchema(Schema<?> schema) {
         for (Class<? extends Schema<?>> cls : COMPLEX_SCHEMA_CLASSES) {
             if (cls.isAssignableFrom(schema.getClass())) {
@@ -76,7 +89,7 @@ public class Apis {
         }
         return schema.getProperties() != null;
     }
-    
+
     @SuppressWarnings("unchecked")
     private static List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.newArrayList( //
             ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
