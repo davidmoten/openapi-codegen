@@ -65,7 +65,6 @@ public class Generator {
 
     public Generator(Definition definition) {
         this.definition = definition;
-
     }
 
     private static String readVersion() {
