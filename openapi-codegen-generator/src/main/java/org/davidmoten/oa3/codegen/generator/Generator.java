@@ -47,6 +47,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Preconditions;
@@ -640,7 +641,7 @@ public class Generator {
         writeEnumMembers(out, imports, indent, cls);
         if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
                 || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            writeOneOrAnyOfClassContent(out, imports, indent, cls, names);
+            writePolymorphicClassContent(out, imports, indent, cls, names);
         } else {
             writeFields(out, imports, indent, cls);
             writeConstructor(out, imports, indent, cls, fullClassNameInterfaces, names);
@@ -717,8 +718,8 @@ public class Generator {
                     .collect(Collectors.joining(", "));
             indent.left().left();
             out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
-        } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
-            writeOneOfDeserializerAnnotation(out, imports, indent, cls);
+        } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
+            writePolymorphicDeserializerAnnotation(out, imports, indent, cls);
         } else {
             out.println();
         }
@@ -736,7 +737,8 @@ public class Generator {
         out.format("%s@%s(value = \"%s\")\n", indent, imports.add(Generated.class), version);
     }
 
-    private static void writeOneOfDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+    private static void writePolymorphicDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent,
+            Cls cls) {
         out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
                 cls.simpleName());
     }
@@ -834,12 +836,17 @@ public class Generator {
         return collection != null && t != null && collection.contains(t);
     }
 
-    private static void writeOneOrAnyOfClassContent(PrintWriter out, Imports imports, Indent indent, Cls cls,
+    private static void writePolymorphicClassContent(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Names names) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s%s %s();\n", indent, imports.add(String.class), cls.discriminator.fieldName);
         } else {
-            out.format("\n%s@%s\n", indent, imports.add(JsonValue.class));
+            out.println();
+            if (cls.classType == ClassType.ALL_OF) {
+                out.format("%s@%s\n", indent, imports.add(JsonUnwrapped.class));
+            } else {
+                out.format("%s@%s\n", indent, imports.add(JsonValue.class));
+            }
             out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
 
             // add constructor for each member of the oneOf (fieldTypes)
