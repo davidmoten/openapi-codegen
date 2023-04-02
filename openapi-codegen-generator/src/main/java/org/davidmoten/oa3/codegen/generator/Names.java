@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -227,6 +228,26 @@ public final class Names {
 
     public String globalsFullClassName() {
         return definition.packages().basePackage() + ".Globals";
+    }
+
+    public static Map<String, String> getEnumValueToIdentifierMap(List<?> values) {
+        Map<String, String> map = new HashMap<>();
+        Set<String> set = new LinkedHashSet<>();
+        values.forEach(o -> set.add(o.toString()));
+        for (String o : set) {
+            int i = 0;
+            String value = o.toString();
+            String name = enumNameToEnumConstant(value);
+            while (true) {
+                String candidate = name + (i == 0 ? "" : "_" + i);
+                if (!map.containsValue(candidate)) {
+                    map.put(o, candidate);
+                    break;
+                }
+                i++;
+            }
+        }
+        return map;
     }
 
 }

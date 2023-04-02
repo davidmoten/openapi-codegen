@@ -120,7 +120,7 @@ public class Generator {
         out.format("%s}\n", indent);
         System.out.println("////////////////////////////////////////////////");
         String content = out.text().replace("IMPORTS_HERE", imports.toString());
-        System.out.println(content);
+//        System.out.println(content);
         out.close();
         File file = names.fullClassNameToJavaFile(fullClassName);
         file.getParentFile().mkdirs();
@@ -734,8 +734,13 @@ public class Generator {
         cls.classType = ClassType.ENUM;
         Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
         cls.enumFullType = valueCls.getCanonicalName();
+        Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
+        Set<String> used = new HashSet<>();
         for (Object o : schema.getEnum()) {
-            cls.enumMembers.add(new EnumMember(Names.enumNameToEnumConstant(o.toString()), o));
+            if (!used.contains(o.toString())) {
+                cls.enumMembers.add(new EnumMember(map.get(o.toString()), o));
+                used.add(o.toString());
+            }
         }
         cls.addField(cls.enumFullType, "value", "value", true, false);
     }
@@ -937,8 +942,8 @@ public class Generator {
         }
         if (x.pattern.isPresent()) {
             out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
-                    x.pattern.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw, x.pattern.get(),
+                    x.fieldName(cls));
         }
         if (x.min.isPresent()) {
             out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
@@ -973,7 +978,8 @@ public class Generator {
         if (text.isEmpty()) {
             return;
         } else {
-            out.format("%sif (%s.config().validateInConstructor()) {\n", indent, imports.add(names.globalsFullClassName()));
+            out.format("%sif (%s.config().validateInConstructor()) {\n", indent,
+                    imports.add(names.globalsFullClassName()));
             out.print(text);
             closeParen(out, indent);
         }

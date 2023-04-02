@@ -1389,7 +1389,11 @@ components:
                   
     EnumCollision:
       type: string
-      enum: ['a b','a  b','a  b']                  
+      enum: ['a b','a  b','a   b']      
+      
+    EnumRepeated:
+      type: string
+      enum: ['a','a','b']                     
                   
     
               

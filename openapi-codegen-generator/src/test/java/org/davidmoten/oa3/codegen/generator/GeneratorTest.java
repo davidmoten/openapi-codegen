@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import org.davidmoten.oa3.codegen.generator.Definition;
-import org.davidmoten.oa3.codegen.generator.Generator;
-import org.davidmoten.oa3.codegen.generator.Packages;
 import org.junit.Test;
 
 public final class GeneratorTest {
