@@ -80,7 +80,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.4</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -96,33 +96,7 @@
                     </execution>
                 </executions>
             </plugin>
-
-
-            <!--            <plugin>-->
-            <!--                <groupId>org.openapitools</groupId>-->
-            <!--                <artifactId>openapi-codegen-maven-plugin</artifactId>-->
-            <!--                <version>6.4.0</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <goals>-->
-            <!--                            <goal>generate</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <inputSpec>${project.basedir}/src/test/resources/openapi2.yml</inputSpec>-->
-            <!--                            <generatorName>spring</generatorName>-->
-            <!--                            <apiPackage>api.controllers</apiPackage>-->
-            <!--                            <modelPackage>api.responses</modelPackage>-->
-            <!--                            <configOptions>-->
-            <!--                                <interfaceOnly>false</interfaceOnly>-->
-            <!--                                <delegatePattern>true</delegatePattern>-->
-            <!--                                <generateSupportingFiles>false</generateSupportingFiles>-->
-            <!--                            </configOptions>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
         </plugins>
-
     </build>
 
 </project>
