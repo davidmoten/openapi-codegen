@@ -1369,3 +1369,23 @@ components:
       - ميلادي
       maxLength: 7
       example: هجري      
+      
+    NestedNameCollision:
+      type: object
+      properties:
+        collision: 
+          type: object
+          properties:
+            a: 
+              type: string
+        other: 
+          type: object
+          properties:
+            collision:
+              type: object
+              properties:
+                b: 
+                  type: string
+                  
+    
+              
