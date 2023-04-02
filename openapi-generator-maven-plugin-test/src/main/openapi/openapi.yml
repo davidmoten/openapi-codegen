@@ -1361,3 +1361,11 @@ components:
         format: int32
       minItems: 2
       maxItems: 4          
+      
+    ForeignLanguageEnum:
+      type: string
+      enum:
+      - هجري
+      - ميلادي
+      maxLength: 7
+      example: هجري      

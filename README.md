@@ -24,3 +24,4 @@ Java code generator from OpenAPI definition file
 * should be able to create oneOf member without specifying discriminator value in constructor (is constant)
 * field types should be primitives in constructors, getters when mandatory (means a compile-time error instead of a runtime error) 
 * codebase is ~200K lines of java code, 30K lines of templates, is a monster and must be very difficult to make major changes to
+* 3500 open issues on github repo says the contributors are likely spread very thin (not surprising)
