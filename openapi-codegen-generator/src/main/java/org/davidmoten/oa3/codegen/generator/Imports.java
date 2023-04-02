@@ -22,23 +22,24 @@ public final class Imports {
     }
 
     public String add(String className) {
-        if (className.endsWith("[]") && Names.isPrimitiveFullClassName(className.substring(0, className.length() - 2))) {
+        if (className.endsWith("[]")
+                && Names.isPrimitiveFullClassName(className.substring(0, className.length() - 2))) {
             // don't add byte[] etc to imports
             return className;
         }
-        final String simplifiedName = simplifiedName(className);
-        String c = map.get(simplifiedName);
+        final String simpleName = simpleName(className);
+        String c = map.get(simpleName);
         if (c == null) {
-            map.put(simplifiedName, className);
-            return simplifiedName;
+            map.put(simpleName, className);
+            return simpleName;
         } else if (c.equals(className)) {
-            return simplifiedName;
+            return simpleName;
         } else {
             return className;
         }
     }
 
-    private static String simplifiedName(String className) {
+    private static String simpleName(String className) {
         final String simpleName;
         int i = className.lastIndexOf('.');
         if (i == -1) {
@@ -64,9 +65,9 @@ public final class Imports {
                 .filter(c -> !c.equals("int")) //
                 .filter(c -> !c.equals("byte")) //
                 .filter(c -> !c.equals("long")) //
-                .filter(c -> !c.equals(fullClassName))
-                // ensure that if in same pkg as fullClassName that we don't need
-                // to specify an import
+                .filter(c -> !c.equals(fullClassName)) // ensure that if in same pkg as fullClassName that we don't need
+                                                       // to specify an import
+                .filter(c -> !c.startsWith(fullClassName + ".")) // is member class
                 .filter(c -> !pkg(c).equals(pkgFullClassName)) //
                 .map(new Function<String, String>() {
 
