@@ -79,12 +79,10 @@
                 <version>${project.parent.version}</version>
                 <executions>
                     <execution>
-                        <id>test1</id>
-                        <phase>generate-sources</phase>
+                        <id>unit-test</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <configuration></configuration>
                     </execution>
                 </executions>
             </plugin>

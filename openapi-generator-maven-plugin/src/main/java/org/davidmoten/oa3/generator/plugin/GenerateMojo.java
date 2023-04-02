@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.maven.model.FileSet;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -18,7 +19,7 @@ import org.davidmoten.oa3.generator.Definition;
 import org.davidmoten.oa3.generator.Generator;
 import org.davidmoten.oa3.generator.Packages;
 
-@Mojo(name = "generate")
+@Mojo(name = "generate",defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "sources")
