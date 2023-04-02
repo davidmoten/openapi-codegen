@@ -26,6 +26,8 @@ import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOf.ArrayOfOneOf
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import org.davidmoten.oa3.codegen.test.generated.model.Bike;
+import org.davidmoten.oa3.codegen.test.generated.model.EnumCollision;
+import org.davidmoten.oa3.codegen.test.generated.model.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.generated.model.ExclusiveMinMaxInteger;
 import org.davidmoten.oa3.codegen.test.generated.model.MinMaxDouble;
 import org.davidmoten.oa3.codegen.test.generated.model.MinMaxInteger;
@@ -560,6 +562,16 @@ public class PluginGeneratorTest {
     public void testMinMaxItemsTooMany() throws JsonMappingException, JsonProcessingException {
         String json = "[1,2,3,4,5]";
         m.readValue(json, MinMaxItems.class);
+    }
+    
+    @Test
+    public void testEnum() {
+        assertEquals(3, EnumCollision.values().length);
+    }
+    
+    @Test
+    public void testEnumRepeated() {
+        assertEquals(2, EnumRepeated.values().length);
     }
 
     private static void onePublicConstructor(Class<?> c) {
