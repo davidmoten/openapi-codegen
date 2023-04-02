@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class Annotation {
+class Annotation {
 
     Optional<String> getString() {
         return Optional.empty();

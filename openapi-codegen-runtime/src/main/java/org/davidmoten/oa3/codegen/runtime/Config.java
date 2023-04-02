@@ -9,11 +9,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public final class Config {
 
     private ObjectMapper mapper;
-    private boolean validate;
+    private boolean validateInConstructor;
 
+    // Use a builder so we can add fields without making a breaking change
     private Config(ObjectMapper mapper, boolean validate) {
         this.mapper = mapper;
-        this.validate = validate;
+        this.validateInConstructor = validate;
     }
 
     public static final Builder builder() {
@@ -28,7 +29,7 @@ public final class Config {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) //
                 .build() //
                 .registerModule(new JavaTimeModule());
-                
+
         private boolean validate = true;
 
         Builder() {
@@ -54,8 +55,8 @@ public final class Config {
         return mapper;
     }
 
-    public boolean validate() {
-        return validate;
+    public boolean validateInConstructor() {
+        return validateInConstructor;
     }
 
 }

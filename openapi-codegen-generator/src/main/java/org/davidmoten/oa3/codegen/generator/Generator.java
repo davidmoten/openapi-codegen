@@ -973,7 +973,7 @@ public class Generator {
         if (text.isEmpty()) {
             return;
         } else {
-            out.format("%sif (%s.config().validate()) {\n", indent, imports.add(names.globalsFullClassName()));
+            out.format("%sif (%s.config().validateInConstructor()) {\n", indent, imports.add(names.globalsFullClassName()));
             out.print(text);
             closeParen(out, indent);
         }
