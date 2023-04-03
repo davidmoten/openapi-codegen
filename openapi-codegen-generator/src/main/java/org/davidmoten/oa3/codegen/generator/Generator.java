@@ -522,7 +522,8 @@ public class Generator {
                     : Optional.empty();
             Optional<Integer> maxItems = isArray ? Optional.ofNullable(schemaPath.secondLast().schema.getMaxItems())
                     : Optional.empty();
-            if (isObject(schema) || isMap(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)) {
+            if (isObject(schema) || isMap(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)
+                    || isAllOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 stack.push(cls);
                 previous.ifPresent(p -> p.classes.add(cls));
@@ -541,7 +542,7 @@ public class Generator {
                 } else if (isObject(schema)) {
                     handleObject(schemaPath, last, schema, cls, isArray, previous, fieldName);
                 } else if (isOneOf(schema) || isAnyOf(schema) || isAllOf(schema)) {
-                    handleOneOrAnyOf(schemaPath, cls, names, previous, fieldName, isArray);
+                    handlePolymorphism(schemaPath, cls, names, previous, fieldName, isArray);
                 } else {
                     // TODO
                     cls.fullClassName = previous + ".Unknown";
@@ -640,7 +641,7 @@ public class Generator {
         indent.right();
         writeEnumMembers(out, imports, indent, cls);
         if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
-                || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+                || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicClassContent(out, imports, indent, cls, names);
         } else {
             writeFields(out, imports, indent, cls);
@@ -771,11 +772,10 @@ public class Generator {
         }
     }
 
-    private static void handleOneOrAnyOf(ImmutableList<SchemaWithName> schemaPath, Cls cls, Names names,
+    private static void handlePolymorphism(ImmutableList<SchemaWithName> schemaPath, Cls cls, Names names,
             Optional<Cls> previous, Optional<String> fieldName, boolean isArray) {
         SchemaWithName last = schemaPath.last();
-        cls.polymorphicType = isOneOf(last.schema) ? PolymorphicType.ONE_OF
-                : (isAnyOf(last.schema) ? PolymorphicType.ANY_OF : PolymorphicType.ALL_OF);
+        cls.polymorphicType = polymorphicType(last.schema);
         io.swagger.v3.oas.models.media.Discriminator discriminator = last.schema.getDiscriminator();
         if (discriminator != null) {
             String propertyName = discriminator.getPropertyName();
@@ -787,12 +787,30 @@ public class Generator {
                 map = Collections.emptyMap();
             }
             cls.discriminator = new Discriminator(propertyName, Names.toFieldName(propertyName), map);
-            cls.classType = ClassType.ONE_OR_ANY_OF_DISCRIMINATED;
+        }
+        if (cls.polymorphicType == PolymorphicType.ONE_OF|| cls.polymorphicType == PolymorphicType.ANY_OF) {
+            if (discriminator != null) {
+                cls.classType = ClassType.ONE_OR_ANY_OF_DISCRIMINATED;
+            } else {
+                cls.classType = ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
+            }
         } else {
-            cls.classType = ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
+            cls.classType = ClassType.ALL_OF;
         }
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
+    }
+
+    private static PolymorphicType polymorphicType(Schema<?> schema) {
+        final PolymorphicType pt;
+        if (isOneOf(schema)) {
+            pt = PolymorphicType.ONE_OF;
+        } else if (isAnyOf(schema)) {
+            pt = PolymorphicType.ANY_OF;
+        } else {
+            pt = PolymorphicType.ALL_OF;
+        }
+        return pt;
     }
 
     private static final class Discriminator {
@@ -841,37 +859,37 @@ public class Generator {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s%s %s();\n", indent, imports.add(String.class), cls.discriminator.fieldName);
         } else {
-            out.println();
-            if (cls.classType == ClassType.ALL_OF) {
-                out.format("%s@%s\n", indent, imports.add(JsonUnwrapped.class));
-            } else {
+            if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
+                out.println();
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
-            }
-            out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
+                out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
 
-            // add constructor for each member of the oneOf (fieldTypes)
-            out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
-            out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
-            out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
-            out.format("%s}\n", indent.left());
-            cls.fields.forEach(f -> {
-                String className = toPrimitive(f.fullClassName);
-                out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
-                indent.right();
-                if (Names.isPrimitiveFullClassName(className)) {
-                    out.format("%sthis.value = value;\n", indent);
-                } else {
-                    out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
-                            imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
-                }
+                // add constructor for each member of the oneOf (fieldTypes)
+                out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+                out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
+                out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
                 out.format("%s}\n", indent.left());
-            });
+                cls.fields.forEach(f -> {
+                    String className = toPrimitive(f.fullClassName);
+                    out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
+                    indent.right();
+                    if (Names.isPrimitiveFullClassName(className)) {
+                        out.format("%sthis.value = value;\n", indent);
+                    } else {
+                        out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
+                                imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
+                    }
+                    out.format("%s}\n", indent.left());
+                });
 
-            out.format("\n%spublic Object value() {\n", indent);
-            out.format("%sreturn value;\n", indent.right());
-            out.format("%s}\n", indent.left());
-
+                out.format("\n%spublic Object value() {\n", indent);
+                out.format("%sreturn value;\n", indent.right());
+                out.format("%s}\n", indent.left());
+            } else {
+                // allof
+                writeFields(out, imports, indent, cls);
+            }
             out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
             out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
                     imports.add(PolymorphicDeserializer.class), cls.simpleName());
@@ -900,12 +918,13 @@ public class Generator {
                 out.println();
             }
             first.value = false;
-            if (cls.unwrapSingleField()) {
+            if (cls.classType == ClassType.ALL_OF) {
+                out.format("%s@%s\n", indent, imports.add(JsonUnwrapped.class));
+            } else if (cls.unwrapSingleField()) {
                 out.format("%s@%s\n", indent, imports.add(JsonValue.class));
             } else {
                 out.format("%s@%s(\"%s\")\n", indent, imports.add(JsonProperty.class), f.name);
             }
-
             final String fieldType;
             if (f.encoding == Encoding.OCTET) {
                 fieldType = imports.add(String.class);

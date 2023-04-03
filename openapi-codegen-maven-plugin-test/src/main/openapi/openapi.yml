@@ -1389,5 +1389,8 @@ components:
       type: string
       enum: ['a','a','b']                     
                   
-    
+    AllOfRefs:
+      allOf:
+      - $ref: '#/components/schemas/Oval2'
+      - $ref: '#/components/schemas/Square2'    
               
