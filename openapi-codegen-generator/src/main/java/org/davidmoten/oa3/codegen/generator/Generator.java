@@ -589,7 +589,13 @@ public class Generator {
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
-                    String fieldName = current.nextFieldName(last.name);
+                    final String fieldNameCandidate;
+                    if (last.name == null) {
+                        fieldNameCandidate = Names.simpleClassName(fullClassName);
+                    } else {
+                        fieldNameCandidate = last.name;
+                    }
+                    String fieldName = current.nextFieldName(fieldNameCandidate);
                     boolean required = fieldIsRequired(schemaPath);
                     current.addField(fullClassName, last.name, fieldName, required, isArray);
                 } else {

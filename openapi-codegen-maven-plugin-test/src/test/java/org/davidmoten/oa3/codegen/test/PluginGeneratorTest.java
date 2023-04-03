@@ -27,8 +27,7 @@ import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import org.davidmoten.oa3.codegen.test.generated.model.Bike;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog;
-import org.davidmoten.oa3.codegen.test.generated.model.Dog.Anonymous2;
-import org.davidmoten.oa3.codegen.test.generated.model.Dog.Anonymous2.Breed;
+import org.davidmoten.oa3.codegen.test.generated.model.Dog.Anonymous1.Breed;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumCollision;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.generated.model.ExclusiveMinMaxInteger;
@@ -567,9 +566,9 @@ public class PluginGeneratorTest {
     public void testAllOfWithAnonymousType() throws JsonProcessingException {
         String json = "{\"description\":\"brown and curly\",\"breed\":\"cross\"}";
         Dog a = m.readValue(json, Dog.class);
-        assertEquals("brown and curly", a.anonymous1().description());
-        assertEquals(Breed.CROSS, a.anonymous2().breed().get());
-        Dog b = new Dog(new Pet("brown and curly"), new Dog.Anonymous2(Optional.of(Breed.CROSS)));
+        assertEquals("brown and curly", a.pet().description());
+        assertEquals(Breed.CROSS, a.anonymous1().breed().get());
+        Dog b = new Dog(new Pet("brown and curly"), new Dog.Anonymous1(Optional.of(Breed.CROSS)));
         assertEquals(json, m.writeValueAsString(b));
     }
 
