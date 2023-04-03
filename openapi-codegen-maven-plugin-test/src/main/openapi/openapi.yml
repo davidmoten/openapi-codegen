@@ -1415,5 +1415,11 @@ components:
       properties:
         name: 
           type: string
-          enum: [hi,there,you]                  
+          enum: [hi,there,you]    
+          
+    PropertyNotRequired:
+      type: object
+      properties:
+        name: 
+          type: string              
               

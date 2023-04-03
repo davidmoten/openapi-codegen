@@ -39,6 +39,7 @@ import org.davidmoten.oa3.codegen.test.generated.model.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectNoOptionalFields;
 import org.davidmoten.oa3.codegen.test.generated.model.Pet;
+import org.davidmoten.oa3.codegen.test.generated.model.PropertyNotRequired;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRef;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRefOptional;
 import org.davidmoten.oa3.codegen.test.generated.model.Ref;
@@ -549,21 +550,32 @@ public class PluginGeneratorTest {
         String json = "[1,2,3,4,5]";
         m.readValue(json, MinMaxItems.class);
     }
-    
+
     @Test
     public void testEnum() {
         assertEquals(3, EnumCollision.values().length);
     }
-    
+
     @Test
     public void testEnumRepeated() {
         assertEquals(2, EnumRepeated.values().length);
     }
-    
+
     @Test
     public void testAllOfWithAnonymousType() {
         String json = "";
-        new Dog(new Pet("brown and curly"), new Anonymous2()); //bad already, Anonymous2 should be enum typed
+        new Dog(new Pet("brown and curly"), new Anonymous2()); // bad already, Anonymous2 should be enum typed
+    }
+
+    @Test
+    public void testPropertyNotRequired() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"name\":\"boo\"}";
+        PropertyNotRequired a = m.readValue(json, PropertyNotRequired.class);
+        assertEquals("boo", a.name().get());
+        assertEquals(json, m.writeValueAsString(new PropertyNotRequired(Optional.of("boo"))));
+        PropertyNotRequired b = m.readValue("{}", PropertyNotRequired.class);
+        assertEquals("{}", m.writeValueAsString(new PropertyNotRequired(Optional.empty())));
+        assertFalse(b.name().isPresent());
     }
 
     private static void onePublicConstructor(Class<?> c) {
