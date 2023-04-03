@@ -26,8 +26,11 @@ import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOf.ArrayOfOneOf
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import org.davidmoten.oa3.codegen.test.generated.model.Bike;
+import org.davidmoten.oa3.codegen.test.generated.model.Breeding;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog.Object1.Breed;
+import org.davidmoten.oa3.codegen.test.generated.model.Dog2;
+import org.davidmoten.oa3.codegen.test.generated.model.DogBreed;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumCollision;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.generated.model.ExclusiveMinMaxInteger;
@@ -569,6 +572,16 @@ public class PluginGeneratorTest {
         assertEquals("brown and curly", a.pet().description());
         assertEquals(Breed.CROSS, a.object1().breed().get());
         Dog b = new Dog(new Pet("brown and curly"), new Dog.Object1(Optional.of(Breed.CROSS)));
+        assertEquals(json, m.writeValueAsString(b));
+    }
+
+    @Test
+    public void testAllOfWithRefs() throws JsonProcessingException {
+        String json = "{\"description\":\"brown and curly\",\"breeder\":\"Jane's Kennels\",\"breed\":\"cross\"}";
+        Dog2 a = m.readValue(json, Dog2.class);
+        assertEquals("brown and curly", a.pet().description());
+        assertEquals(DogBreed.CROSS, a.breeding().breed());
+        Dog2 b = new Dog2(new Pet("brown and curly"), new Breeding("Jane's Kennels", DogBreed.CROSS));
         assertEquals(json, m.writeValueAsString(b));
     }
 

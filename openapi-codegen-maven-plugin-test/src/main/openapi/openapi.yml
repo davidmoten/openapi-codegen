@@ -1433,4 +1433,22 @@ components:
           breed:
             type: string
             enum: [poodle, cross]
+            
+    Breeding:
+      type: object
+      properties:
+        breeder: 
+          type: string
+        breed:
+          $ref: '#/components/schemas/DogBreed'
+      required: [breeder, breed]
+          
+    DogBreed: 
+      type: string
+      enum: [poodle, cross]
+
+    Dog2:
+      allOf:
+      - $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/Breeding'            
               
