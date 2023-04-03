@@ -6,24 +6,34 @@ import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Preconditions;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class Apis {
 
-    static void visitSchemas(OpenAPI api, Visitor visitor) {
-        api //
-                .getComponents() //
-                .getSchemas() //
-                .entrySet() //
-                .stream() //
-                .forEach(x -> visitSchemas(x.getKey(), x.getValue(), visitor));
+    public static void visitSchemas(OpenAPI api, Visitor visitor) {
+        api.getPaths().forEach((name, pathItem) -> visitSchemas(ImmutableList.of("Path", name), pathItem, visitor));
+        api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
+        api.getComponents().getParameters().forEach(
+                (name, parameter) -> visitSchemas(ImmutableList.of("Parameter").add(name), parameter, visitor));
+        api.getComponents().getPathItems()
+                .forEach((name, pathItem) -> visitSchemas(ImmutableList.of("PathItem").add(name), pathItem, visitor));
+        api.getComponents().getRequestBodies().forEach(
+                (name, requestBody) -> visitSchemas(ImmutableList.of("RequestBody").add(name), requestBody, visitor));
+        api.getComponents().getResponses()
+                .forEach((name, response) -> visitSchemas(ImmutableList.of("Response").add(name), response, visitor));
     }
 
-    static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
+    public static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
         Preconditions.checkArgument(name != null);
         visitSchemas(ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)), visitor);
     }
@@ -34,6 +44,68 @@ public class Apis {
         } else {
             return name;
         }
+    }
+
+    public static void visitSchemas(ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
+        if (pathItem.readOperationsMap() != null) {
+            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
+                visitSchemas(names.add(httpMethod.toString()), operation, visitor);
+            });
+        }
+        if (pathItem.getParameters() != null) {
+            pathItem.getParameters().forEach(p -> visitSchemas(names.add(p.getName()), p, visitor));
+        }
+    }
+
+    private static void visitSchemas(ImmutableList<String> list, Operation operation, Visitor visitor) {
+        if (operation == null) {
+            return;
+        }
+        if (operation.getParameters() != null) {
+            operation.getParameters().forEach(p -> visitSchemas(list.add(p.getName()), p, visitor));
+        }
+        visitSchemas(list, operation.getRequestBody(), visitor);
+        if (operation.getResponses() != null) {
+            operation.getResponses().forEach((statusCode, response) -> {
+                visitSchemas(list.add(statusCode), response, visitor);
+            });
+        }
+    }
+
+    private static void visitSchemas(ImmutableList<String> list, ApiResponse response, Visitor visitor) {
+        visitSchemas(list, response.getContent(), visitor);
+    }
+
+    private static void visitSchemas(ImmutableList<String> list, RequestBody requestBody, Visitor visitor) {
+        if (requestBody != null) {
+            visitSchemas(list, requestBody.getContent(), visitor);
+        }
+    }
+
+    private static void visitSchemas(ImmutableList<String> list, Content content, Visitor visitor) {
+        if (content != null) {
+            content.forEach((mimeType, mediaType) -> visit(list.add(mimeType), mediaType.getSchema(), visitor));
+        }
+    }
+
+    private static void visit(ImmutableList<String> list, Schema<?> schema, Visitor visitor) {
+        ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
+        visitor.startSchema(schemaPath);
+        visitor.finishSchema(schemaPath);
+    }
+
+    private static String toName(ImmutableList<String> list) {
+        StringBuilder b = new StringBuilder();
+        for (String s : list) {
+            if (b.length() > 0) {
+                b.append("_");
+            }
+            b.append(s);
+        }
+        return b.toString();
+    }
+
+    private static void visitSchemas(ImmutableList<String> list, Parameter parameter, Visitor visitor) {
     }
 
     static void visitSchemas(ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {

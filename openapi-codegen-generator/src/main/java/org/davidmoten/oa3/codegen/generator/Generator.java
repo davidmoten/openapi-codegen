@@ -145,68 +145,6 @@ public class Generator {
             Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
             results.add(v.result());
         });
-        if (true) {
-            names.api().getPaths().forEach((pathName, pathItem) -> {
-                pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                    if (operation.getResponses() != null) {
-                        operation.getResponses().forEach((statusCode, response) -> {
-                            String prefix = "Path " + pathName + " Method " + httpMethod + " StatusCode " + statusCode;
-                            visitResponse(names, results, response, prefix);
-                        });
-                    }
-                    if (operation.getParameters() != null) {
-                        operation.getParameters().forEach(parameter -> {
-                            String prefix = "Path " + pathName + " Method " + httpMethod;
-                            visitParameter(names, results, parameter, prefix);
-                        });
-                    }
-
-                });
-            });
-            names.api().getPaths().forEach((pathName, pathItem) -> {
-                if (pathItem.getParameters() != null) {
-                    pathItem.getParameters().forEach(parameter -> {
-                        String prefix = "Path " + pathName;
-                        visitParameter(names, results, parameter, prefix);
-                    });
-                }
-            });
-            names.api().getPaths().forEach((pathName, pathItem) -> {
-                pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                    String prefix = "Path" + pathName + " Method " + httpMethod;
-                    if (operation.getRequestBody() != null) {
-                        if (operation.getRequestBody().getContent() != null) {
-                            operation.getRequestBody().getContent().forEach((mimeType, mediaType) -> {
-                                MyVisitor v = new MyVisitor(names);
-                                Apis.visitSchemas(prefix + " RequestBody " + " Content " + mimeType,
-                                        mediaType.getSchema(), v);
-                                results.add(v.result());
-                            });
-                        }
-                    }
-                });
-            });
-            names.api().getComponents().getParameters().forEach((parameterName, parameter) -> {
-                if (parameter.getContent() != null) {
-                    parameter.getContent().forEach((mimeType, mediaType) -> {
-                        MyVisitor v = new MyVisitor(names);
-                        Apis.visitSchemas("Parameter " + parameterName + " Content " + mimeType, mediaType.getSchema(),
-                                v);
-                        results.add(v.result());
-                    });
-                }
-            });
-            names.api().getComponents().getResponses().forEach((responseName, response) -> {
-                if (response.getContent() != null) {
-                    response.getContent().forEach((mimeType, mediaType) -> {
-                        MyVisitor v = new MyVisitor(names);
-                        Apis.visitSchemas("Response " + responseName + " Content " + mimeType, mediaType.getSchema(),
-                                v);
-                        results.add(v.result());
-                    });
-                }
-            });
-        }
 
         Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
         for (MyVisitor.Result result : results) {
