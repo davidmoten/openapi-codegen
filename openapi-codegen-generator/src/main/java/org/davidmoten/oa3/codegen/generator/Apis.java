@@ -21,16 +21,25 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 public class Apis {
 
     public static void visitSchemas(OpenAPI api, Visitor visitor) {
-        api.getPaths().forEach((name, pathItem) -> visitSchemas(ImmutableList.of("Path", name), pathItem, visitor));
-        api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
-        api.getComponents().getParameters().forEach(
-                (name, parameter) -> visitSchemas(ImmutableList.of("Parameter").add(name), parameter, visitor));
-        api.getComponents().getPathItems()
-                .forEach((name, pathItem) -> visitSchemas(ImmutableList.of("PathItem").add(name), pathItem, visitor));
-        api.getComponents().getRequestBodies().forEach(
-                (name, requestBody) -> visitSchemas(ImmutableList.of("RequestBody").add(name), requestBody, visitor));
-        api.getComponents().getResponses()
-                .forEach((name, response) -> visitSchemas(ImmutableList.of("Response").add(name), response, visitor));
+        if (api.getPaths() != null) {
+            api.getPaths().forEach((name, pathItem) -> visitSchemas(ImmutableList.of("Path", name), pathItem, visitor));
+        }
+        if (api.getComponents() != null) {
+            if (api.getComponents().getSchemas() != null)
+                api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
+            if (api.getComponents().getParameters() != null)
+                api.getComponents().getParameters().forEach(
+                        (name, parameter) -> visitSchemas(ImmutableList.of("Parameter").add(name), parameter, visitor));
+            if (api.getComponents().getPathItems() != null)
+                api.getComponents().getPathItems().forEach(
+                        (name, pathItem) -> visitSchemas(ImmutableList.of("PathItem").add(name), pathItem, visitor));
+            if (api.getComponents().getRequestBodies() != null)
+                api.getComponents().getRequestBodies().forEach((name,
+                        requestBody) -> visitSchemas(ImmutableList.of("RequestBody").add(name), requestBody, visitor));
+            if (api.getComponents().getResponses() != null)
+                api.getComponents().getResponses().forEach(
+                        (name, response) -> visitSchemas(ImmutableList.of("Response").add(name), response, visitor));
+        }
     }
 
     public static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
