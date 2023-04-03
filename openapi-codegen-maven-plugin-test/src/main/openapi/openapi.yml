@@ -1389,22 +1389,6 @@ components:
       type: string
       enum: ['a','a','b']    
       
-    Pet:
-      type: object
-      properties:
-        description: 
-          type: string
-      required: [description]
-              
-    Dog:
-      allOf:
-      - $ref: '#/components/schemas/Pet'
-      - type: object
-        properties:
-          breed:
-            type: string
-            enum: [poodle, cross]
-                        
     AllOfRefs:
       allOf:
       - $ref: '#/components/schemas/Oval2'
@@ -1432,5 +1416,21 @@ components:
            first:
              type: string
            second:
-             type: string        
+             type: string    
+                 
+    Pet:
+      type: object
+      properties:
+        description: 
+          type: string
+      required: [description]
+              
+    Dog:
+      allOf:
+      - $ref: '#/components/schemas/Pet'
+      - type: object
+        properties:
+          breed:
+            type: string
+            enum: [poodle, cross]
               

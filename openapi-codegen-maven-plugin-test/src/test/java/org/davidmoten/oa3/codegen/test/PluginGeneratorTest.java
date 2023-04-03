@@ -28,6 +28,7 @@ import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString.ArrayO
 import org.davidmoten.oa3.codegen.test.generated.model.Bike;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog.Anonymous2;
+import org.davidmoten.oa3.codegen.test.generated.model.Dog.Anonymous2.Breed;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumCollision;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.generated.model.ExclusiveMinMaxInteger;
@@ -563,9 +564,13 @@ public class PluginGeneratorTest {
     }
 
     @Test
-    public void testAllOfWithAnonymousType() {
-        String json = "";
-        new Dog(new Pet("brown and curly"), new Anonymous2()); // bad already, Anonymous2 should be enum typed
+    public void testAllOfWithAnonymousType() throws JsonProcessingException {
+        String json = "{\"description\":\"brown and curly\",\"breed\":\"cross\"}";
+        Dog a = m.readValue(json, Dog.class);
+        assertEquals("brown and curly", a.anonymous1().description());
+        assertEquals(Breed.CROSS, a.anonymous2().breed().get());
+        Dog b = new Dog(new Pet("brown and curly"), new Dog.Anonymous2(Optional.of(Breed.CROSS)));
+        assertEquals(json, m.writeValueAsString(b));
     }
 
     @Test
@@ -578,7 +583,7 @@ public class PluginGeneratorTest {
         assertEquals("{}", m.writeValueAsString(new PropertyNotRequired(Optional.empty())));
         assertFalse(b.name().isPresent());
     }
-    
+
     @Test
     public void testPropertyAnonymous() throws JsonMappingException, JsonProcessingException {
         String json = "{}";
@@ -587,7 +592,7 @@ public class PluginGeneratorTest {
         json = "{\"name\":{\"first\":\"Anne\",\"second\":\"Smith\"}}";
         PropertyAnonymous b = m.readValue(json, PropertyAnonymous.class);
         assertEquals("Anne", b.name().get().first().get());
-        
+
     }
 
     private static void onePublicConstructor(Class<?> c) {

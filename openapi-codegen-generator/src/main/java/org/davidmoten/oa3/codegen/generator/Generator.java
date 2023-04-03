@@ -646,7 +646,7 @@ public class Generator {
         writeEnumMembers(out, imports, indent, cls);
         if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
                 || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
-            writePolymorphicClassContent(out, imports, indent, cls, names);
+            writePolymorphicClassContent(out, imports, indent, cls, names, fullClassNameInterfaces);
         } else {
             writeFields(out, imports, indent, cls);
             writeConstructor(out, imports, indent, cls, fullClassNameInterfaces, names);
@@ -863,7 +863,7 @@ public class Generator {
     }
 
     private static void writePolymorphicClassContent(PrintWriter out, Imports imports, Indent indent, Cls cls,
-            Names names) {
+            Names names, Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s%s %s();\n", indent, imports.add(String.class), cls.discriminator.fieldName);
         } else {
@@ -923,6 +923,7 @@ public class Generator {
                 });
                 indent.left();
                 closeParen(out, indent);
+                writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
             }
             out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
             out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
@@ -1043,8 +1044,6 @@ public class Generator {
                                     x.fieldName(cls), x.fieldName(cls));
                             validateMore(out2, imports, indent, cls, x, !x.required);
                         }
-//                        f.pattern.ifPresent(
-//                                x -> out.format("%s@%s(regexp = \"%s\")\n", indent, imports.add(Pattern.class), x));
                     }));
 
             // assign
