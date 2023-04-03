@@ -145,64 +145,68 @@ public class Generator {
             Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
             results.add(v.result());
         });
-        names.api().getPaths().forEach((pathName, pathItem) -> {
-            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                if (operation.getResponses() != null) {
-                    operation.getResponses().forEach((statusCode, response) -> {
-                        String prefix = "Path " + pathName + " Method " + httpMethod + " StatusCode " + statusCode;
-                        visitResponse(names, results, response, prefix);
-                    });
-                }
-                if (operation.getParameters() != null) {
-                    operation.getParameters().forEach(parameter -> {
-                        String prefix = "Path " + pathName + " Method " + httpMethod;
+        if (false) {
+            names.api().getPaths().forEach((pathName, pathItem) -> {
+                pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
+                    if (operation.getResponses() != null) {
+                        operation.getResponses().forEach((statusCode, response) -> {
+                            String prefix = "Path " + pathName + " Method " + httpMethod + " StatusCode " + statusCode;
+                            visitResponse(names, results, response, prefix);
+                        });
+                    }
+                    if (operation.getParameters() != null) {
+                        operation.getParameters().forEach(parameter -> {
+                            String prefix = "Path " + pathName + " Method " + httpMethod;
+                            visitParameter(names, results, parameter, prefix);
+                        });
+                    }
+
+                });
+            });
+            names.api().getPaths().forEach((pathName, pathItem) -> {
+                if (pathItem.getParameters() != null) {
+                    pathItem.getParameters().forEach(parameter -> {
+                        String prefix = "Path " + pathName;
                         visitParameter(names, results, parameter, prefix);
                     });
                 }
-
             });
-        });
-        names.api().getPaths().forEach((pathName, pathItem) -> {
-            if (pathItem.getParameters() != null) {
-                pathItem.getParameters().forEach(parameter -> {
-                    String prefix = "Path " + pathName;
-                    visitParameter(names, results, parameter, prefix);
-                });
-            }
-        });
-        names.api().getPaths().forEach((pathName, pathItem) -> {
-            pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                String prefix = "Path" + pathName + " Method " + httpMethod;
-                if (operation.getRequestBody() != null) {
-                    if (operation.getRequestBody().getContent() != null) {
-                        operation.getRequestBody().getContent().forEach((mimeType, mediaType) -> {
-                            MyVisitor v = new MyVisitor(names);
-                            Apis.visitSchemas(prefix + " RequestBody " + " Content " + mimeType, mediaType.getSchema(),
-                                    v);
-                            results.add(v.result());
-                        });
+            names.api().getPaths().forEach((pathName, pathItem) -> {
+                pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
+                    String prefix = "Path" + pathName + " Method " + httpMethod;
+                    if (operation.getRequestBody() != null) {
+                        if (operation.getRequestBody().getContent() != null) {
+                            operation.getRequestBody().getContent().forEach((mimeType, mediaType) -> {
+                                MyVisitor v = new MyVisitor(names);
+                                Apis.visitSchemas(prefix + " RequestBody " + " Content " + mimeType,
+                                        mediaType.getSchema(), v);
+                                results.add(v.result());
+                            });
+                        }
                     }
+                });
+            });
+            names.api().getComponents().getParameters().forEach((parameterName, parameter) -> {
+                if (parameter.getContent() != null) {
+                    parameter.getContent().forEach((mimeType, mediaType) -> {
+                        MyVisitor v = new MyVisitor(names);
+                        Apis.visitSchemas("Parameter " + parameterName + " Content " + mimeType, mediaType.getSchema(),
+                                v);
+                        results.add(v.result());
+                    });
                 }
             });
-        });
-        names.api().getComponents().getParameters().forEach((parameterName, parameter) -> {
-            if (parameter.getContent() != null) {
-                parameter.getContent().forEach((mimeType, mediaType) -> {
-                    MyVisitor v = new MyVisitor(names);
-                    Apis.visitSchemas("Parameter " + parameterName + " Content " + mimeType, mediaType.getSchema(), v);
-                    results.add(v.result());
-                });
-            }
-        });
-        names.api().getComponents().getResponses().forEach((responseName, response) -> {
-            if (response.getContent() != null) {
-                response.getContent().forEach((mimeType, mediaType) -> {
-                    MyVisitor v = new MyVisitor(names);
-                    Apis.visitSchemas("Response " + responseName + " Content " + mimeType, mediaType.getSchema(), v);
-                    results.add(v.result());
-                });
-            }
-        });
+            names.api().getComponents().getResponses().forEach((responseName, response) -> {
+                if (response.getContent() != null) {
+                    response.getContent().forEach((mimeType, mediaType) -> {
+                        MyVisitor v = new MyVisitor(names);
+                        Apis.visitSchemas("Response " + responseName + " Content " + mimeType, mediaType.getSchema(),
+                                v);
+                        results.add(v.result());
+                    });
+                }
+            });
+        }
 
         Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
         for (MyVisitor.Result result : results) {
@@ -538,7 +542,7 @@ public class Generator {
                     fieldName = Optional.empty();
                 }
                 if (isEnum(schema)) {
-                    handleEnum(schema, cls);
+                    handleEnum(schemaPath, cls, previous, isArray, fieldName);
                 } else if (isObject(schema)) {
                     handleObject(schemaPath, last, schema, cls, isArray, previous, fieldName);
                 } else if (isOneOf(schema) || isAnyOf(schema) || isAllOf(schema)) {
@@ -768,7 +772,8 @@ public class Generator {
         if (schemaPath.size() <= 1) {
             return isPrimitive(last.schema) || isRef(last.schema);
         } else {
-            return contains(schemaPath.secondLast().schema.getRequired(), last.name) || isAllOf(schemaPath.secondLast().schema);
+            return contains(schemaPath.secondLast().schema.getRequired(), last.name)
+                    || isAllOf(schemaPath.secondLast().schema);
         }
     }
 
@@ -835,7 +840,8 @@ public class Generator {
         }
     }
 
-    private static void handleEnum(Schema<?> schema, Cls cls) {
+    private static void handleEnum(ImmutableList<SchemaWithName> schemaPath, Cls cls, Optional<Cls> previous, boolean isArray, Optional<String> fieldName) {
+        Schema<?> schema = schemaPath.last().schema;
         cls.classType = ClassType.ENUM;
         Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
         cls.enumFullType = valueCls.getCanonicalName();
@@ -848,6 +854,8 @@ public class Generator {
             }
         }
         cls.addField(cls.enumFullType, "value", "value", true, false);
+        boolean required = fieldIsRequired(schemaPath);
+        previous.ifPresent(p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required, isArray));
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {

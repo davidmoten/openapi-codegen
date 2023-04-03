@@ -1387,8 +1387,8 @@ components:
       
     EnumRepeated:
       type: string
-      enum: ['a','a','b']                     
-
+      enum: ['a','a','b']    
+      
     Pet:
       type: object
       properties:
@@ -1409,4 +1409,11 @@ components:
       allOf:
       - $ref: '#/components/schemas/Oval2'
       - $ref: '#/components/schemas/Square2'    
+              
+    EnumProperty:
+      type: object
+      properties:
+        name: 
+          type: string
+          enum: [hi,there,you]                  
               
