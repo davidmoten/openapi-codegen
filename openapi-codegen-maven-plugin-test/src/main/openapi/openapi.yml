@@ -1455,8 +1455,9 @@ components:
     ArrayInProperty:
       type: object
       properties:
-        list: 
+        counts: 
           type: array
           items: 
             type: integer
             format: int32
+      required: [counts]

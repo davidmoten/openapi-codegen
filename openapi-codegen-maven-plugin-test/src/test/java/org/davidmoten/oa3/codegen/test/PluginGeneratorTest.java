@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.internal.Util;
 import org.davidmoten.oa3.codegen.test.generated.Globals;
+import org.davidmoten.oa3.codegen.test.generated.model.ArrayInProperty;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfComplexType;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfComplexType.ArrayOfComplexTypeItem;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOf;
@@ -604,7 +605,13 @@ public class PluginGeneratorTest {
         json = "{\"name\":{\"first\":\"Anne\",\"second\":\"Smith\"}}";
         PropertyAnonymous b = m.readValue(json, PropertyAnonymous.class);
         assertEquals("Anne", b.name().get().first().get());
-
+    }
+    
+    @Test
+    public void testArrayInProperty() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"counts\":[1,2,3]}";
+        ArrayInProperty a= m.readValue(json, ArrayInProperty.class);
+        
     }
 
     private static void onePublicConstructor(Class<?> c) {

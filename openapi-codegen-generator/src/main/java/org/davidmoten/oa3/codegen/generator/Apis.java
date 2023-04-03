@@ -26,8 +26,6 @@ public class Apis {
             api.getPaths().forEach((name, pathItem) -> visitSchemas(ImmutableList.of("Path", name), pathItem, visitor));
         }
         if (api.getComponents() != null) {
-            if (api.getComponents().getSchemas() != null)
-                api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
             if (api.getComponents().getParameters() != null)
                 api.getComponents().getParameters().forEach(
                         (name, parameter) -> visitSchemas(ImmutableList.of("Parameter").add(name), parameter, visitor));
@@ -40,6 +38,8 @@ public class Apis {
             if (api.getComponents().getResponses() != null)
                 api.getComponents().getResponses().forEach(
                         (name, response) -> visitSchemas(ImmutableList.of("Response").add(name), response, visitor));
+            if (api.getComponents().getSchemas() != null)
+                api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
         }
     }
 

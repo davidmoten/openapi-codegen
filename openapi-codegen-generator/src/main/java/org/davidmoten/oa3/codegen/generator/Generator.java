@@ -253,9 +253,8 @@ public class Generator {
         }
 
         public boolean unwrapSingleField() {
-            return !hasProperties && (classType == ClassType.ENUM || (topLevel && fields.size() == 1));
+            return !hasProperties && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER || (topLevel && fields.size() == 1));
         }
-
     }
 
     private static class EnumMember {
@@ -273,7 +272,8 @@ public class Generator {
         ENUM("enum"), //
         ONE_OR_ANY_OF_DISCRIMINATED("interface"), //
         ONE_OR_ANY_OF_NON_DISCRIMINATED("class"), //
-        ALL_OF("class");
+        ALL_OF("class"), //
+        ARRAY_WRAPPER("class");
 
         private final String word;
 
@@ -435,11 +435,11 @@ public class Generator {
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
                     cls.fullClassName = fullClassName;
                     boolean required = fieldIsRequired(schemaPath);
-                    previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, true));
+                    previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, false));
                 } else {
                     cls.fullClassName = names.schemaNameToClassName(last.name);
                 }
-                cls.classType = ClassType.CLASS;
+                cls.classType = ClassType.ARRAY_WRAPPER;
                 stack.push(cls);
                 return;
             }
