@@ -20,6 +20,7 @@ import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.internal.Util;
 import org.davidmoten.oa3.codegen.test.generated.Globals;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayInProperty;
+import org.davidmoten.oa3.codegen.test.generated.model.ArrayInProperty.Counts;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfComplexType;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfComplexType.ArrayOfComplexTypeItem;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOf;
@@ -611,7 +612,12 @@ public class PluginGeneratorTest {
     public void testArrayInProperty() throws JsonMappingException, JsonProcessingException {
         String json = "{\"counts\":[1,2,3]}";
         ArrayInProperty a= m.readValue(json, ArrayInProperty.class);
-        
+        assertEquals(Arrays.asList(1,2,3), a.counts().value());
+        assertEquals(json, m.writeValueAsString(a));
+        ArrayInProperty b = new ArrayInProperty(new Counts(Arrays.asList(1,2,3)));
+        assertEquals(json, m.writeValueAsString(b));
+        onePublicConstructor(ArrayInProperty.class);
+        onePublicConstructor(Counts.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {
