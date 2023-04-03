@@ -138,9 +138,6 @@ public class Generator {
 //            Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
 //        });
         MyVisitor v = new MyVisitor(names);
-        names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
-            Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
-        });
         Apis.visitSchemas(names.api(), v);
 
         Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();

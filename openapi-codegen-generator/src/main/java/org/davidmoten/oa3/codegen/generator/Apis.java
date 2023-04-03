@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MapSchema;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -93,14 +94,19 @@ public class Apis {
 
     private static void visitSchemas(ImmutableList<String> list, Content content, Visitor visitor) {
         if (content != null) {
-            content.forEach((mimeType, mediaType) -> visit(list.add(mimeType), mediaType.getSchema(), visitor));
+            content.forEach((mimeType, mediaType) -> visitSchemas(list.add(mimeType), mediaType, visitor));
         }
     }
 
-    private static void visit(ImmutableList<String> list, Schema<?> schema, Visitor visitor) {
-        ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
-        visitor.startSchema(schemaPath);
-        visitor.finishSchema(schemaPath);
+    private static void visitSchemas(ImmutableList<String> list, MediaType mediaType, Visitor visitor) {
+        visitSchemas(list, mediaType.getSchema(), visitor);
+    }
+
+    private static void visitSchemas(ImmutableList<String> list, Schema<?> schema, Visitor visitor) {
+        if (schema != null) {
+            ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
+            visitSchemas(schemaPath, visitor);
+        }
     }
 
     private static String toName(ImmutableList<String> list) {
