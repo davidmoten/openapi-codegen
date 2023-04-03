@@ -285,7 +285,7 @@ public class Generator {
 
         private String nextAnonymousFieldName() {
             num++;
-            return "anonymous" + num;
+            return "object" + num;
         }
 
         String nextFieldName(String name) {
