@@ -54,30 +54,12 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         }
     }
 
-    private static <T> T deserializeAllOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls,
-            DeserializationContext ctxt) throws JsonMappingException, JsonProcessingException {
-        ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        List<Object> list = new ArrayList<>();
-        for (Class<?> c : classes) {
-            list.add(m.readValue(json, c));
-        }
-        try {
-            Constructor<T> con = cls.getDeclaredConstructor(classes.toArray(new Class<?>[] {}));
-            con.setAccessible(true);
-            return con.newInstance(list.toArray());
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private static <T> T deserializeAnyOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls,
             DeserializationContext ctxt) throws JsonProcessingException {
         for (Class<?> c : classes) {
             // try to deserialize with each of the member classes
             try {
-                @SuppressWarnings("unchecked")
-                Object o = mapper.readValue(json, (Class<Object>) c);
+                Object o = mapper.readValue(json, c);
                 return newInstance(cls, o);
             } catch (DatabindException e) {
                 // ignore because does not match
@@ -114,12 +96,28 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                 "json did not match any of the possible classes: " + classes + ", json=\n" + json);
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T newInstance(Class<?> cls, Object parameter) {
+    private static <T> T deserializeAllOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls,
+            DeserializationContext ctxt) throws JsonMappingException, JsonProcessingException {
+        ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        List<Object> list = new ArrayList<>();
+        for (Class<?> c : classes) {
+            list.add(m.readValue(json, c));
+        }
         try {
-            Constructor<?> con = cls.getDeclaredConstructor(Object.class);
+            Constructor<T> con = cls.getDeclaredConstructor(classes.toArray(new Class<?>[] {}));
             con.setAccessible(true);
-            return (T) con.newInstance(parameter);
+            return con.newInstance(list.toArray());
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static <T> T newInstance(Class<T> cls, Object parameter) {
+        try {
+            Constructor<T> con = cls.getDeclaredConstructor(Object.class);
+            con.setAccessible(true);
+            return con.newInstance(parameter);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             throw new RuntimeException(e);
