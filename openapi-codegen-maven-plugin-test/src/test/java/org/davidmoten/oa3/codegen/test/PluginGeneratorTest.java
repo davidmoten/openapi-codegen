@@ -39,6 +39,7 @@ import org.davidmoten.oa3.codegen.test.generated.model.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectNoOptionalFields;
 import org.davidmoten.oa3.codegen.test.generated.model.Pet;
+import org.davidmoten.oa3.codegen.test.generated.model.PropertyAnonymous;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyNotRequired;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRef;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRefOptional;
@@ -576,6 +577,17 @@ public class PluginGeneratorTest {
         PropertyNotRequired b = m.readValue("{}", PropertyNotRequired.class);
         assertEquals("{}", m.writeValueAsString(new PropertyNotRequired(Optional.empty())));
         assertFalse(b.name().isPresent());
+    }
+    
+    @Test
+    public void testPropertyAnonymous() throws JsonMappingException, JsonProcessingException {
+        String json = "{}";
+        PropertyAnonymous a = m.readValue(json, PropertyAnonymous.class);
+        assertFalse(a.name().isPresent());
+        json = "{\"name\":{\"first\":\"Anne\",\"second\":\"Smith\"}}";
+        PropertyAnonymous b = m.readValue(json, PropertyAnonymous.class);
+        assertEquals("Anne", b.name().get().first().get());
+        
     }
 
     private static void onePublicConstructor(Class<?> c) {

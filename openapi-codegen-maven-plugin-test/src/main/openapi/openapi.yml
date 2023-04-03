@@ -1421,5 +1421,16 @@ components:
       type: object
       properties:
         name: 
-          type: string              
+          type: string      
+          
+    PropertyAnonymous:
+      type: object
+      properties:
+       name: 
+         type: object
+         properties:
+           first:
+             type: string
+           second:
+             type: string        
               
