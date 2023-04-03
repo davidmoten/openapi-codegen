@@ -768,7 +768,7 @@ public class Generator {
         if (schemaPath.size() <= 1) {
             return isPrimitive(last.schema) || isRef(last.schema);
         } else {
-            return contains(schemaPath.secondLast().schema.getRequired(), last.name);
+            return contains(schemaPath.secondLast().schema.getRequired(), last.name) || isAllOf(schemaPath.secondLast().schema);
         }
     }
 
@@ -788,7 +788,7 @@ public class Generator {
             }
             cls.discriminator = new Discriminator(propertyName, Names.toFieldName(propertyName), map);
         }
-        if (cls.polymorphicType == PolymorphicType.ONE_OF|| cls.polymorphicType == PolymorphicType.ANY_OF) {
+        if (cls.polymorphicType == PolymorphicType.ONE_OF || cls.polymorphicType == PolymorphicType.ANY_OF) {
             if (discriminator != null) {
                 cls.classType = ClassType.ONE_OR_ANY_OF_DISCRIMINATED;
             } else {
@@ -889,6 +889,32 @@ public class Generator {
             } else {
                 // allof
                 writeFields(out, imports, indent, cls);
+
+                indent.right().right();
+                final String parametersNullable;
+                parametersNullable = cls.fields.stream()
+                        .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName(cls)))
+                        .collect(Collectors.joining(","));
+                indent.left().left();
+                out.println();
+                out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersNullable);
+                indent.right();
+                ifValidate(out, indent, imports, names, //
+                        out2 -> cls.fields.stream().forEach(x -> {
+                            if (!x.isPrimitive() && x.required) {
+                                out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
+                                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
+                                        x.fieldName(cls), x.fieldName(cls));
+                            } else {
+                                out.format("%s// ???\n", indent);
+                            }
+                            validateMore(out2, imports, indent, cls, x, false);
+                        }));
+                cls.fields.stream().forEach(x -> {
+                    assignField(out, indent, cls, x);
+                });
+                indent.left();
+                closeParen(out, indent);
             }
             out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
             out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
