@@ -1461,3 +1461,19 @@ components:
             type: integer
             format: int32
       required: [counts]
+      
+    ArrayOfObjectInProperty:
+      type: object
+      properties:
+        records: 
+          type: array
+          items: 
+            type: object
+            properties:
+              number:
+                type: integer
+                format: int32
+              description: 
+                type: string
+            required: [number, description]
+      required: [records]
