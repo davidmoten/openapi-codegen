@@ -141,10 +141,10 @@ public class Generator {
         Apis.visitSchemas(names.api(), v);
 
         Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
-        for (MyVisitor.Result result : v.results) {
+        for (MyVisitor.Result result : v.results()) {
             findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
         }
-        for (MyVisitor.Result result : v.results) {
+        for (MyVisitor.Result result : v.results()) {
             ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
             Indent indent = new Indent();
             out.format("package %s;\n", result.cls.pkg());
@@ -425,8 +425,21 @@ public class Generator {
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
                 cls.topLevel = true;
-            }
+            } 
             if (isArray(schema)) {
+                Optional<Cls> previous = Optional.ofNullable(stack.peek());
+                previous.ifPresent(c -> c.classes.add(cls));
+                if (previous.isPresent()) {
+                    Optional<String> fieldName = Optional.of(previous.get().nextFieldName(last.name));
+                    String fullClassName = previous.get().fullClassName + "."
+                            + Names.simpleClassNameFromSimpleName(fieldName.get());
+                    cls.fullClassName = fullClassName;
+                    boolean required = fieldIsRequired(schemaPath);
+                    previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, true));
+                } else {
+                    cls.fullClassName = names.schemaNameToClassName(last.name);
+                }
+                cls.classType = ClassType.CLASS;
                 stack.push(cls);
                 return;
             }
@@ -494,6 +507,9 @@ public class Generator {
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
                     boolean exclusiveMin = orElse(schema.getExclusiveMinimum(), false);
                     boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
+                    if ("listyItem".equals(last.name)) {
+                        System.out.println();
+                    }
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (isRef(schema)) {
@@ -525,7 +541,7 @@ public class Generator {
             }
         }
 
-        public List<Result> result() {
+        public List<Result> results() {
             return results;
         }
 
@@ -623,7 +639,6 @@ public class Generator {
                     + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
         }
         if (cls.description != null) {
-            System.out.println(cls.description);
             Javadoc.printJavadoc(out, indent, cls.description);
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
@@ -892,7 +907,6 @@ public class Generator {
         // this code will write one public constructor or one private and one public.
         // The private one is to be annotated
         // with JsonCreator for use by Jackson.
-
         // TODO javadoc
         indent.right().right();
         final String parametersNullable;

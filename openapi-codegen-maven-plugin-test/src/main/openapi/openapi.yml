@@ -1452,3 +1452,11 @@ components:
       - $ref: '#/components/schemas/Pet'
       - $ref: '#/components/schemas/Breeding'            
               
+    ArrayInProperty:
+      type: object
+      properties:
+        list: 
+          type: array
+          items: 
+            type: integer
+            format: int32
