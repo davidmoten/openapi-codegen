@@ -145,7 +145,7 @@ public class Generator {
             Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
             results.add(v.result());
         });
-        if (false) {
+        if (true) {
             names.api().getPaths().forEach((pathName, pathItem) -> {
                 pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
                     if (operation.getResponses() != null) {
