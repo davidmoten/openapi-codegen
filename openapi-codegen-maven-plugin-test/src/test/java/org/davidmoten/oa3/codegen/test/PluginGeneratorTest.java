@@ -26,6 +26,8 @@ import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOf.ArrayOfOneOf
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import org.davidmoten.oa3.codegen.test.generated.model.Bike;
+import org.davidmoten.oa3.codegen.test.generated.model.Dog;
+import org.davidmoten.oa3.codegen.test.generated.model.Dog.Anonymous2;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumCollision;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.generated.model.ExclusiveMinMaxInteger;
@@ -36,6 +38,7 @@ import org.davidmoten.oa3.codegen.test.generated.model.MinMaxLength;
 import org.davidmoten.oa3.codegen.test.generated.model.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectNoOptionalFields;
+import org.davidmoten.oa3.codegen.test.generated.model.Pet;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRef;
 import org.davidmoten.oa3.codegen.test.generated.model.PropertyRefOptional;
 import org.davidmoten.oa3.codegen.test.generated.model.Ref;
@@ -555,6 +558,12 @@ public class PluginGeneratorTest {
     @Test
     public void testEnumRepeated() {
         assertEquals(2, EnumRepeated.values().length);
+    }
+    
+    @Test
+    public void testAllOfWithAnonymousType() {
+        String json = "";
+        new Dog(new Pet("brown and curly"), new Anonymous2()); //bad already, Anonymous2 should be enum typed
     }
 
     private static void onePublicConstructor(Class<?> c) {
