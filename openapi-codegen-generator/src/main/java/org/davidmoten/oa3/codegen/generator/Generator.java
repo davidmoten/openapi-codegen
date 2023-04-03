@@ -57,8 +57,6 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class Generator {
 
@@ -139,18 +137,17 @@ public class Generator {
 //            Visitor v = new Visitor();
 //            Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
 //        });
-        List<MyVisitor.Result> results = new ArrayList<>();
+        MyVisitor v = new MyVisitor(names);
         names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
-            MyVisitor v = new MyVisitor(names);
             Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
-            results.add(v.result());
         });
+        Apis.visitSchemas(names.api(), v);
 
         Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
-        for (MyVisitor.Result result : results) {
+        for (MyVisitor.Result result : v.results) {
             findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
         }
-        for (MyVisitor.Result result : results) {
+        for (MyVisitor.Result result : v.results) {
             ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
             Indent indent = new Indent();
             out.format("package %s;\n", result.cls.pkg());
@@ -167,29 +164,6 @@ public class Generator {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-        }
-    }
-
-    private static void visitParameter(Names names, List<MyVisitor.Result> results, Parameter parameter,
-            String prefix) {
-        if (parameter.getContent() != null) {
-            parameter.getContent().forEach((mimeType, mediaType) -> {
-                MyVisitor v = new MyVisitor(names);
-                Apis.visitSchemas(prefix + " Parameter " + parameter.getName() + " Content " + mimeType,
-                        mediaType.getSchema(), v);
-                results.add(v.result());
-            });
-        }
-    }
-
-    private static void visitResponse(Names names, List<MyVisitor.Result> results, ApiResponse response,
-            String prefix) {
-        if (response.getContent() != null) {
-            response.getContent().forEach((mimeType, mediaType) -> {
-                MyVisitor v = new MyVisitor(names);
-                Apis.visitSchemas(prefix + " Response Content " + mimeType, mediaType.getSchema(), v);
-                results.add(v.result());
-            });
         }
     }
 
@@ -436,7 +410,7 @@ public class Generator {
         private final Names names;
         private Imports imports;
         private LinkedStack<Cls> stack = new LinkedStack<>();
-        private Result result;
+        private List<Result> results = new ArrayList<>();
 
         public MyVisitor(Names names) {
             this.names = names;
@@ -549,13 +523,13 @@ public class Generator {
                     || (schemaPath.size() == 1)) {
                 stack.pop();
                 if (stack.isEmpty()) {
-                    this.result = new Result(cls, imports, schemaPath.first().name);
+                    this.results.add(new Result(cls, imports, schemaPath.first().name));
                 }
             }
         }
 
-        public Result result() {
-            return result;
+        public List<Result> result() {
+            return results;
         }
 
         public static final class Result {
@@ -784,7 +758,8 @@ public class Generator {
         }
     }
 
-    private static void handleEnum(ImmutableList<SchemaWithName> schemaPath, Cls cls, Optional<Cls> previous, boolean isArray, Optional<String> fieldName) {
+    private static void handleEnum(ImmutableList<SchemaWithName> schemaPath, Cls cls, Optional<Cls> previous,
+            boolean isArray, Optional<String> fieldName) {
         Schema<?> schema = schemaPath.last().schema;
         cls.classType = ClassType.ENUM;
         Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
@@ -799,7 +774,8 @@ public class Generator {
         }
         cls.addField(cls.enumFullType, "value", "value", true, false);
         boolean required = fieldIsRequired(schemaPath);
-        previous.ifPresent(p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required, isArray));
+        previous.ifPresent(
+                p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required, isArray));
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
