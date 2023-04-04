@@ -50,7 +50,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         } else if (type == PolymorphicType.ONE_OF) {
             return deserializeOneOf(mapper, json, classes, cls, ctxt);
         } else {
-            return deserializeAllOf(mapper, json, classes, cls, ctxt);
+            return deserializeAllOf(mapper, json, classes, cls);
         }
     }
 
@@ -61,9 +61,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
             try {
                 Object o = mapper.readValue(json, c);
                 return newInstance(cls, o);
-            } catch (DatabindException e) {
-                // ignore because does not match
-            }
+            } catch (DatabindException e) {} // NOPMD
         }
         throw JsonMappingException.from(ctxt,
                 "json did not match any of the possible classes: " + classes + ", json=\n" + json);
@@ -77,14 +75,12 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
             // try to deserialize with each of the member classes
             try {
                 // Jackson very permissive with readValue so we will tighten things up a bit
-                if (!c.equals(String.class) || (json.startsWith("\"") && json.endsWith("\""))) {
+                if (!c.equals(String.class) || json.startsWith("\"") && json.endsWith("\"")) {
                     Object o = mapper.readValue(json, c);
                     v = newInstance(cls, o);
                     count++;
                 }
-            } catch (DatabindException e) {
-                // ignore because does not match
-            }
+            } catch (DatabindException e) {} // NOPMD
         }
         if (count == 1) {
             return v;
@@ -96,8 +92,8 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                 "json did not match any of the possible classes: " + classes + ", json=\n" + json);
     }
 
-    private static <T> T deserializeAllOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls,
-            DeserializationContext ctxt) throws JsonMappingException, JsonProcessingException {
+    private static <T> T deserializeAllOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls) 
+            throws JsonMappingException, JsonProcessingException {
         ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         List<Object> list = new ArrayList<>();
         for (Class<?> c : classes) {
