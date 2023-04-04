@@ -34,13 +34,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>junit-extras</artifactId>
-            <version>0.4</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
