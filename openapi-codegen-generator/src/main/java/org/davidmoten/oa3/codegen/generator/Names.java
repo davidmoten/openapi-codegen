@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -33,6 +34,8 @@ final class Names {
             "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString");
 
+    private static final boolean LOG_SCHEMA_PATHS = false;
+
     private final Definition definition;
 
     private final OpenAPI api;
@@ -46,17 +49,18 @@ final class Names {
         }
         this.api = result.getOpenAPI();
         superSchemas(api);
-        schemaFullClassNames(api);
+        logSchemaFullClassNames(api);
     }
 
-    private static Map<Schema<?>, String> schemaFullClassNames(OpenAPI api) {
-        Apis.visitSchemas(api, schemaPath -> {
-            if (!Apis.isComplexSchema(schemaPath.last().schema)) {
-//                System.out.println(schemaPath);
-            }
-        });
-//        System.out.println("////////////////////////////////////////////////");
-        return null;
+    private static void logSchemaFullClassNames(OpenAPI api) {
+        if (LOG_SCHEMA_PATHS) {
+            Apis.visitSchemas(api, schemaPath -> {
+                if (!Apis.isComplexSchema(schemaPath.last().schema)) {
+                    System.out.println(schemaPath);
+                }
+            });
+            System.out.println("////////////////////////////////////////////////");
+        }
     }
 
     OpenAPI api() {
@@ -132,11 +136,11 @@ final class Names {
     }
 
     static String upperFirst(String name) {
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
+        return name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
     }
 
     private static String lowerFirst(String name) {
-        return name.substring(0, 1).toLowerCase() + name.substring(1);
+        return name.substring(0, 1).toLowerCase(Locale.ENGLISH) + name.substring(1);
     }
 
     private static String getLastItemInDotDelimitedString(String name) {
@@ -235,8 +239,7 @@ final class Names {
         values.forEach(o -> set.add(o.toString()));
         for (String o : set) {
             int i = 0;
-            String value = o.toString();
-            String name = enumNameToEnumConstant(value);
+            String name = enumNameToEnumConstant(o);
             while (true) {
                 String candidate = name + (i == 0 ? "" : "_" + i);
                 if (!map.containsValue(candidate)) {
@@ -247,6 +250,10 @@ final class Names {
             }
         }
         return map;
+    }
+
+    public boolean mapIntegerToBigInteger() {
+        return definition.mapIntegerToBigInteger();
     }
 
 }

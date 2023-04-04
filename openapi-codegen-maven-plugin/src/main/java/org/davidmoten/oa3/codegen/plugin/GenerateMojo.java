@@ -46,6 +46,9 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "excludeSchemas")
     private List<String> excludeSchemas;
+    
+    @Parameter(name="mapIntegerToBigInteger", defaultValue = "false")
+    private boolean mapIntegerToBigInteger;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -71,7 +74,7 @@ public final class GenerateMojo extends AbstractMojo {
                 Packages packages = new Packages(basePackage);
                 Definition d = new Definition(definition, packages, outputDirectory, x -> x,
                         Sets.newHashSet(Util.orElse(includeSchemas, Collections.emptyList())),
-                        Sets.newHashSet(Util.orElse(excludeSchemas, Collections.emptyList())));
+                        Sets.newHashSet(Util.orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger);
                 new Generator(d).generate();
             }
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());

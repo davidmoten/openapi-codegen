@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FindBugsFilter>
+  <And>
+    <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
+    <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
+    <Bug code="RV"/>
+  </And>
+  <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+  <Bug pattern="EI_EXPOSE_REP"/>
+  <Bug pattern="EI_EXPOSE_REP2"/>
+  <And>
+    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
+  </And>
+  <And>
+    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
+  </And>
+  <And>
+    <Bug category="STYLE"/>
+    <Bug code="UwF"/>
+    <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+  </And>
+</FindBugsFilter>

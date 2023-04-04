@@ -69,23 +69,27 @@ public final class Imports {
                                                        // to specify an import
                 .filter(c -> !c.startsWith(fullClassName + ".")) // is member class
                 .filter(c -> !pkg(c).equals(pkgFullClassName)) //
-                .map(new Function<String, String>() {
-
-                    String previous;
-
-                    @Override
-                    public String apply(String c) {
-                        String firstSegment = firstSegment(c);
-                        boolean insertBlankLine = previous != null && !firstSegment.equals(previous);
-                        previous = firstSegment;
-                        return (insertBlankLine ? "\n" : "") + "import " + c + ";";
-                    }
-                }) //
+                .map(process()) //
                 .collect(Collectors.joining("\n"));
         if (!x.isEmpty()) {
             x = x + "\n";
         }
         return x;
+    }
+
+    private static Function<String, String> process() {
+        return new Function<String, String>() {
+
+            String previous;
+
+            @Override
+            public String apply(String c) {
+                String firstSegment = firstSegment(c);
+                boolean insertBlankLine = previous != null && !firstSegment.equals(previous);
+                previous = firstSegment;
+                return (insertBlankLine ? "\n" : "") + "import " + c + ";";
+            }
+        };
     }
 
     private static String pkg(String fullClassName) {

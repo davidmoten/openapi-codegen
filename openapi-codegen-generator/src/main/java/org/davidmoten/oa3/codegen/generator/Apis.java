@@ -169,11 +169,8 @@ class Apis {
             if (a.getAnyOf() != null) {
                 a.getAnyOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
-        } else if (schema instanceof MapSchema) {
-            // nothing to add here
-        } else if (schema instanceof ObjectSchema) {
-            // nothing to add here
-        }
+        } 
+        // MapSchema and ObjectSchema have nothing to add
         visitor.finishSchema(schemaPath);
     }
 

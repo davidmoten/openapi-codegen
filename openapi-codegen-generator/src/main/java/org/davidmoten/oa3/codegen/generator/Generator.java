@@ -328,7 +328,7 @@ public class Generator {
                     fieldName = Optional.empty();
                 }
                 if (isEnum(schema)) {
-                    handleEnum(schemaPath, cls, previous, isArray, fieldName);
+                    handleEnum(schemaPath, cls, previous, isArray, fieldName, names);
                 } else if (isObject(schema)) {
                     handleObject(schemaPath, last, schema, cls, isArray, previous, fieldName);
                 } else if (isOneOf(schema) || isAnyOf(schema) || isAllOf(schema)) {
@@ -345,7 +345,7 @@ public class Generator {
                 Cls current = stack.peek();
                 final String fullClassName;
                 if (isPrimitive(schema)) {
-                    Class<?> c = toClass(schema.getType(), schema.getFormat());
+                    Class<?> c = toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
                     final Optional<Integer> maxLength;
@@ -509,10 +509,10 @@ public class Generator {
     }
 
     private static void handleEnum(ImmutableList<SchemaWithName> schemaPath, Cls cls, Optional<Cls> previous,
-            boolean isArray, Optional<String> fieldName) {
+            boolean isArray, Optional<String> fieldName, Names names) {
         Schema<?> schema = schemaPath.last().schema;
         cls.classType = ClassType.ENUM;
-        Class<?> valueCls = toClass(schema.getType(), schema.getFormat());
+        Class<?> valueCls = toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
         cls.enumFullType = valueCls.getCanonicalName();
         Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
         Set<String> used = new HashSet<>();
@@ -625,7 +625,7 @@ public class Generator {
         }
     }
 
-    private static Class<?> toClass(String type, String format) {
+    private static Class<?> toClass(String type, String format, boolean mapIntegerToBigInteger) {
         Preconditions.checkNotNull(type);
         if ("string".equals(type)) {
             if ("date-time".equals(format)) {
@@ -649,7 +649,7 @@ public class Generator {
             } else if ("int64".equals(format)) {
                 return Long.class;
             } else {
-                return Definition.MAP_INTEGER_TO_BIG_INTEGER ? BigInteger.class : Long.class;
+                return mapIntegerToBigInteger ? BigInteger.class : Long.class;
             }
         } else if ("number".equals(type)) {
             if ("float".equals(format)) {

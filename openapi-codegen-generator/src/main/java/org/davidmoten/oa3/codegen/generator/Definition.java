@@ -1,13 +1,10 @@
 package org.davidmoten.oa3.codegen.generator;
 
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
 public final class Definition {
-
-    public static boolean MAP_INTEGER_TO_BIG_INTEGER = false;
 
     private final String definition;
     private final File generatedSourceDirectory;
@@ -15,15 +12,18 @@ public final class Definition {
     private final Function<String, String> externalRefClassNames;
     private final Set<String> includeSchemas;
     private final Set<String> excludeSchemas;
+    private final boolean mapIntegerToBigInteger;
 
     public Definition(String definition, Packages packages, File generatedSourceDirectory,
-            Function<String, String> externalRefClassNames, Set<String> includeSchemas, Set<String> excludeSchemas) {
+            Function<String, String> externalRefClassNames, Set<String> includeSchemas, Set<String> excludeSchemas,
+            boolean mapIntegerToBigInteger) {
         this.definition = definition;
         this.packages = packages;
         this.generatedSourceDirectory = generatedSourceDirectory;
         this.externalRefClassNames = externalRefClassNames;
         this.includeSchemas = includeSchemas;
         this.excludeSchemas = excludeSchemas;
+        this.mapIntegerToBigInteger = mapIntegerToBigInteger;
     }
 
     public String definition() {
@@ -48,6 +48,10 @@ public final class Definition {
     
     public Set<String> excludeSchemas() {
         return excludeSchemas;
+    }
+    
+    public boolean mapIntegerToBigInteger() {
+        return mapIntegerToBigInteger;
     }
 
 }
