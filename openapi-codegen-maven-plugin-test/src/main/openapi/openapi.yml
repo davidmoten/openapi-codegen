@@ -1477,3 +1477,11 @@ components:
                 type: string
             required: [number, description]
       required: [records]
+      
+    Table:
+      type: array
+      items: 
+        type: array
+        items: 
+          type: integer
+          format: int32      

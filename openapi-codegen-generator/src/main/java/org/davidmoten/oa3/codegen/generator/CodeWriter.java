@@ -60,6 +60,8 @@ final class CodeWriter {
 
     private static final String version = readVersion();
 
+    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
+
     private static String readVersion() {
         Properties p = new Properties();
         try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
@@ -76,8 +78,10 @@ final class CodeWriter {
         Indent indent = new Indent();
         CodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
-//          System.out.println("////////////////////////////////////////////////");
-//          System.out.println(content);
+        if (DEBUG) {
+            System.out.println("////////////////////////////////////////////////");
+            System.out.println(content);
+        }
         out.close();
         File file = names.schemaNameToJavaFile(schemaName);
         file.getParentFile().mkdirs();
@@ -113,8 +117,8 @@ final class CodeWriter {
         out.format("%s}\n", indent);
         indent.left();
         out.format("%s}\n", indent);
-        System.out.println("////////////////////////////////////////////////");
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
+//        System.out.println("////////////////////////////////////////////////");
 //        System.out.println(content);
         out.close();
         File file = names.fullClassNameToJavaFile(fullClassName);
