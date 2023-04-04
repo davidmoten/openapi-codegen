@@ -1,6 +1,7 @@
 package org.davidmoten.oa3.codegen.generator;
 
 import java.util.List;
+import java.util.Locale;
 
 import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Preconditions;
@@ -59,7 +60,7 @@ public class Apis {
     public static void visitSchemas(ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
         if (pathItem.readOperationsMap() != null) {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                visitSchemas(names.add(httpMethod.toString()), operation, visitor);
+                visitSchemas(names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))), operation, visitor);
             });
         }
         if (pathItem.getParameters() != null) {
