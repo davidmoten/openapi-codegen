@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,9 @@ import org.apache.maven.shared.utils.io.FileUtils;
 import org.davidmoten.oa3.codegen.generator.Definition;
 import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Packages;
+import org.davidmoten.oa3.codegen.generator.internal.Util;
+
+import com.github.davidmoten.guavamini.Sets;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES, threadSafe = false)
 public final class GenerateMojo extends AbstractMojo {
@@ -36,6 +40,12 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
+
+    @Parameter(name = "includeSchemas")
+    private List<String> includeSchemas;
+
+    @Parameter(name = "excludeSchemas")
+    private List<String> excludeSchemas;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -59,7 +69,9 @@ public final class GenerateMojo extends AbstractMojo {
                 getLog().info(file.toString());
                 String definition = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
                 Packages packages = new Packages(basePackage);
-                Definition d = new Definition(definition, packages, outputDirectory, x -> x);
+                Definition d = new Definition(definition, packages, outputDirectory, x -> x,
+                        Sets.newHashSet(Util.orElse(includeSchemas, Collections.emptyList())),
+                        Sets.newHashSet(Util.orElse(excludeSchemas, Collections.emptyList())));
                 new Generator(d).generate();
             }
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
