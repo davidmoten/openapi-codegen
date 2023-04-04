@@ -93,6 +93,21 @@
                             </sources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>cts</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <basePackage>org.davidmoten.oa3.codegen.test.generated.cts</basePackage>
+                            <sources>
+                                <directory>${project.basedir}/src/main/openapi</directory>
+                                <includes>
+                                    <include>cts.yml</include>
+                                </includes>
+                            </sources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -114,9 +129,7 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
-
     </build>
 
 </project>

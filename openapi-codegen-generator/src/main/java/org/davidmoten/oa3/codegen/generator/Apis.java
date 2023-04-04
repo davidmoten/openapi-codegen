@@ -125,10 +125,10 @@ class Apis {
 
     private static void visitSchemas(ImmutableList<String> list, Parameter parameter, Visitor visitor) {
         if (parameter != null) {
-            visitSchemas(list.add(parameter.getName()), parameter.getSchema(), visitor);
+            visitSchemas(list.add("Parameter").add(parameter.getName()), parameter.getSchema(), visitor);
         }
     }
-    
+
     private static void visitSchemas(ImmutableList<String> list, Schema<?> schema, Visitor visitor) {
         if (schema != null) {
             ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
