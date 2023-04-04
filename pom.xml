@@ -22,6 +22,9 @@
     </prerequisites>
 
     <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -34,6 +37,7 @@
         <taglist.version>3.0.0</taglist.version>
         <changelog.version>2.2</changelog.version>
         <nexus.staging.version>1.6.13</nexus.staging.version>
+        <compiler.plugin.version>3.8.1</compiler.plugin.version>
 
         <jackson.version>2.14.2</jackson.version>
         <jackson.databind.version>2.14.2</jackson.databind.version>
