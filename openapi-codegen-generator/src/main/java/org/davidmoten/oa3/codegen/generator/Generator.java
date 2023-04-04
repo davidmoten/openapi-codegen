@@ -149,9 +149,9 @@ public class Generator {
             out.format("package %s;\n", result.cls.pkg());
             out.format("\nIMPORTS_HERE");
             writeClass(out, result.imports, indent, result.cls, fullClassNameInterfaces, names);
-            System.out.println("////////////////////////////////////////////////");
             String content = out.text().replace("IMPORTS_HERE", result.imports.toString());
-            System.out.println(content);
+//            System.out.println("////////////////////////////////////////////////");
+//            System.out.println(content);
             out.close();
             File file = names.schemaNameToJavaFile(result.name);
             file.getParentFile().mkdirs();

@@ -94,7 +94,13 @@ public class Apis {
 
     private static void visitSchemas(ImmutableList<String> list, Content content, Visitor visitor) {
         if (content != null) {
-            content.forEach((mimeType, mediaType) -> visitSchemas(list.add(mimeType), mediaType, visitor));
+            content.forEach((mimeType, mediaType) -> {
+                if (mimeType.equals("application/json")) {
+                    visitSchemas(list, mediaType, visitor);
+                } else {
+                    visitSchemas(list.add(mimeType), mediaType, visitor);
+                }
+            });
         }
     }
 
