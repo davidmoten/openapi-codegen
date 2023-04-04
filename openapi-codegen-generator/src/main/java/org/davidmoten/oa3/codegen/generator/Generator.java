@@ -27,8 +27,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.annotation.Generated;
-
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.runtime.Config;
@@ -57,6 +55,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import jakarta.annotation.Generated;
 
 public class Generator {
 
@@ -253,7 +252,8 @@ public class Generator {
         }
 
         public boolean unwrapSingleField() {
-            return !hasProperties && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER || (topLevel && fields.size() == 1));
+            return !hasProperties && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
+                    || (topLevel && fields.size() == 1));
         }
     }
 
@@ -425,7 +425,7 @@ public class Generator {
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
                 cls.topLevel = true;
-            } 
+            }
             if (isArray(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 previous.ifPresent(c -> c.classes.add(cls));
