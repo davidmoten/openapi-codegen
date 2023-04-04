@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
@@ -20,7 +22,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
-public final class Names {
+final class Names {
 
     // note that hashCode and toString added to this set so that generated getters
     // without a get prefix don't get into trouble
@@ -35,7 +37,7 @@ public final class Names {
 
     private final OpenAPI api;
 
-    public Names(Definition definition) {
+    Names(Definition definition) {
         this.definition = definition;
         SwaggerParseResult result = new OpenAPIParser().readContents(definition.definition(), null, null);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
@@ -57,27 +59,27 @@ public final class Names {
         return null;
     }
 
-    public OpenAPI api() {
+    OpenAPI api() {
         return api;
     }
 
-    public String schemaNameToClassName(String schemaName) {
+    String schemaNameToClassName(String schemaName) {
         return definition.packages().basePackage() + ".model." + schemaNameToSimpleClassName(schemaName);
     }
 
-    public String schemaNameToSimpleClassName(String schemaName) {
+    String schemaNameToSimpleClassName(String schemaName) {
         return upperFirst(toIdentifier(schemaName));
     }
 
-    public File schemaNameToJavaFile(String schemaName) {
+    File schemaNameToJavaFile(String schemaName) {
         return fullClassNameToJavaFile(schemaNameToClassName(schemaName));
     }
 
-    public File fullClassNameToJavaFile(String fullClassName) {
+    File fullClassNameToJavaFile(String fullClassName) {
         return new File(definition.generatedSourceDirectory(), fullClassName.replace(".", File.separator) + ".java");
     }
 
-    public String refToFullClassName(String ref) {
+    String refToFullClassName(String ref) {
         Preconditions.checkNotNull(ref);
         final String fullClassName;
         if (!ref.startsWith("#")) {
@@ -89,15 +91,15 @@ public final class Names {
         return fullClassName;
     }
 
-    public static String simpleClassName(String fullClassName) {
+    static String simpleClassName(String fullClassName) {
         return getLastItemInDotDelimitedString(fullClassName);
     }
 
-    public static String pkg(String className) {
+    static String pkg(String className) {
         return className.substring(0, className.lastIndexOf("."));
     }
 
-    public static String toIdentifier(String s) {
+    static String toIdentifier(String s) {
         StringBuilder b = new StringBuilder();
         char lastCh = ' ';
         for (int i = 0; i < s.length(); i++) {
@@ -125,11 +127,11 @@ public final class Names {
         }
     }
 
-    public static String propertyNameToClassSimpleName(String propertyName) {
+    static String propertyNameToClassSimpleName(String propertyName) {
         return upperFirst(toIdentifier(propertyName));
     }
 
-    public static String upperFirst(String name) {
+    static String upperFirst(String name) {
         return name.substring(0, 1).toUpperCase() + name.substring(1);
     }
 
@@ -146,32 +148,32 @@ public final class Names {
         }
     }
 
-    public String clientClassName() {
+    String clientClassName() {
         return definition.packages().basePackage() + "client.Client";
     }
 
-    public File clientClassJavaFile() {
+    File clientClassJavaFile() {
         return new File(definition.generatedSourceDirectory(),
                 clientClassName().replace(".", File.separator) + ".java");
     }
 
-    public static String propertyNameToFieldName(String propertyName) {
+    static String propertyNameToFieldName(String propertyName) {
         return lowerFirst(toIdentifier(propertyName));
     }
 
-    public static String schemaNameToFieldName(String schemaName) {
+    static String schemaNameToFieldName(String schemaName) {
         return lowerFirst(toIdentifier(schemaName));
     }
 
-    public static String toFieldName(String name) {
+    static String toFieldName(String name) {
         return lowerFirst(toIdentifier(name));
     }
 
-    public static String simpleClassNameFromSimpleName(String name) {
+    static String simpleClassNameFromSimpleName(String name) {
         return upperFirst(toIdentifier(name));
     }
 
-    public static String enumNameToEnumConstant(String s) {
+    static String enumNameToEnumConstant(String s) {
         return camelToUpper(toIdentifier(s));
     }
 
@@ -219,22 +221,15 @@ public final class Names {
         return list;
     }
 
-    public String externalRefClassName(String ref) {
+    String externalRefClassName(String ref) {
         return definition.externalRefClassName(ref);
     }
 
-    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "double", "float", "long", "boolean",
-            "byte", "short");
-
-    public static boolean isPrimitiveFullClassName(String className) {
-        return PRIMITIVE_CLASS_NAMES.contains(className);
-    }
-
-    public String globalsFullClassName() {
+    String globalsFullClassName() {
         return definition.packages().basePackage() + ".Globals";
     }
 
-    public static Map<String, String> getEnumValueToIdentifierMap(List<?> values) {
+    static Map<String, String> getEnumValueToIdentifierMap(List<?> values) {
         Map<String, String> map = new HashMap<>();
         Set<String> set = new LinkedHashSet<>();
         values.forEach(o -> set.add(o.toString()));

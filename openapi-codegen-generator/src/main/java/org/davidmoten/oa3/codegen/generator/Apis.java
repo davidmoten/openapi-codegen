@@ -3,6 +3,8 @@ package org.davidmoten.oa3.codegen.generator;
 import java.util.List;
 import java.util.Locale;
 
+import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+
 import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Preconditions;
 
@@ -20,9 +22,9 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
-public class Apis {
+class Apis {
 
-    public static void visitSchemas(OpenAPI api, Visitor visitor) {
+    static void visitSchemas(OpenAPI api, Visitor visitor) {
         if (api.getPaths() != null) {
             api.getPaths().forEach((name, pathItem) -> visitSchemas(ImmutableList.of("Path", name), pathItem, visitor));
         }
@@ -44,7 +46,7 @@ public class Apis {
         }
     }
 
-    public static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
+    static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
         Preconditions.checkArgument(name != null);
         visitSchemas(ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)), visitor);
     }
@@ -57,10 +59,11 @@ public class Apis {
         }
     }
 
-    public static void visitSchemas(ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
+    static void visitSchemas(ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
         if (pathItem.readOperationsMap() != null) {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                visitSchemas(names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))), operation, visitor);
+                visitSchemas(names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))), operation,
+                        visitor);
             });
         }
         if (pathItem.getParameters() != null) {
@@ -109,13 +112,6 @@ public class Apis {
         visitSchemas(list, mediaType.getSchema(), visitor);
     }
 
-    private static void visitSchemas(ImmutableList<String> list, Schema<?> schema, Visitor visitor) {
-        if (schema != null) {
-            ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
-            visitSchemas(schemaPath, visitor);
-        }
-    }
-
     private static String toName(ImmutableList<String> list) {
         StringBuilder b = new StringBuilder();
         for (String s : list) {
@@ -128,6 +124,16 @@ public class Apis {
     }
 
     private static void visitSchemas(ImmutableList<String> list, Parameter parameter, Visitor visitor) {
+        if (parameter != null) {
+            visitSchemas(list.add(parameter.getName()), parameter.getSchema(), visitor);
+        }
+    }
+    
+    private static void visitSchemas(ImmutableList<String> list, Schema<?> schema, Visitor visitor) {
+        if (schema != null) {
+            ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
+            visitSchemas(schemaPath, visitor);
+        }
     }
 
     static void visitSchemas(ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
@@ -171,7 +177,7 @@ public class Apis {
         visitor.finishSchema(schemaPath);
     }
 
-    public static final boolean isComplexSchema(Schema<?> schema) {
+    static final boolean isComplexSchema(Schema<?> schema) {
         for (Class<? extends Schema<?>> cls : COMPLEX_SCHEMA_CLASSES) {
             if (cls.isAssignableFrom(schema.getClass())) {
                 return true;

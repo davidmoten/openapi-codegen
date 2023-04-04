@@ -1,30 +1,30 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-final class ImmutableList<T> implements Iterable<T> {
+public final class ImmutableList<T> implements Iterable<T> {
 
     private final List<T> list;
 
-    ImmutableList() {
+    public ImmutableList() {
         this(new ArrayList<>());
     }
 
-    ImmutableList(List<T> list) {
+    public ImmutableList(List<T> list) {
         this.list = list;
     }
 
-    ImmutableList<T> add(T value) {
+    public ImmutableList<T> add(T value) {
         List<T> list2 = new ArrayList<>(list);
         list2.add(value);
         return new ImmutableList<T>(list2);
     }
 
     @SafeVarargs
-    static <T> ImmutableList<T> of(T... values) {
+    public static <T> ImmutableList<T> of(T... values) {
         List<T> list = Arrays.asList(values);
         return new ImmutableList<>(list);
     }

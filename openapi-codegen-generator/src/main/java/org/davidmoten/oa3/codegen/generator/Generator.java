@@ -19,6 +19,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+import org.davidmoten.oa3.codegen.generator.internal.Imports;
+import org.davidmoten.oa3.codegen.generator.internal.LinkedStack;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
 
 import com.github.davidmoten.guavamini.Preconditions;
@@ -42,9 +45,6 @@ public class Generator {
         // Names object for each Packages object
         Names names = new Names(definition);
 
-        // generate methods on singleton client object in client package
-//        writeClientClass(names);
-
         // generate model classes for schema definitions
         writeSchemaClasses(definition, names);
 
@@ -53,11 +53,6 @@ public class Generator {
     }
 
     private static void writeSchemaClasses(Definition definition, Names names) {
-//      Map<String, List<String>> fullClassNameInterfaces = new HashMap<>();
-//      names.api().getComponents().getSchemas().entrySet().forEach(entry -> {
-//          Visitor v = new Visitor();
-//          Apis.visitSchemas(entry.getKey(), entry.getValue(), v);
-//      });
         MyVisitor v = new MyVisitor(names);
         Apis.visitSchemas(names.api(), v);
 
@@ -265,51 +260,6 @@ public class Generator {
 
         public boolean isByteArray() {
             return fullClassName.equals("byte[]");
-        }
-    }
-
-    private static final class LinkedStack<T> {
-        LinkedStackNode<T> last;
-
-        void push(T value) {
-            LinkedStackNode<T> node = new LinkedStackNode<>(value);
-            if (last == null) {
-                last = node;
-            } else {
-                node.previous = last;
-                last = node;
-            }
-        }
-
-        T pop() {
-            if (last == null) {
-                return null;
-            } else {
-                T v = last.value;
-                last = last.previous;
-                return v;
-            }
-        }
-
-        T peek() {
-            if (last == null) {
-                return null;
-            } else {
-                return last.value;
-            }
-        }
-
-        public boolean isEmpty() {
-            return last == null;
-        }
-    }
-
-    private static final class LinkedStackNode<T> {
-        final T value;
-        LinkedStackNode<T> previous;
-
-        LinkedStackNode(T value) {
-            this.value = value;
         }
     }
 

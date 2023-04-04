@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.internal;
 
 import java.io.PrintWriter;
 import java.util.Collections;

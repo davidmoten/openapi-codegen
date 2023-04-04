@@ -1,5 +1,5 @@
 package org.davidmoten.oa3.codegen.generator;
 
-public enum ClassType {
+enum ClassType {
     CLASS, INTERFACE, ENUM;
 }

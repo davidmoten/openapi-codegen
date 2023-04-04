@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
-import org.davidmoten.oa3.codegen.generator.Imports;
+import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.junit.Test;
 
 public class ImportsTest {

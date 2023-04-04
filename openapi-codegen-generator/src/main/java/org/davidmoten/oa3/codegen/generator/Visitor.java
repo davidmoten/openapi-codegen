@@ -1,7 +1,9 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+
 @FunctionalInterface
-public interface Visitor {
+interface Visitor {
     void startSchema(ImmutableList<SchemaWithName> schemaPath);
 
     default void finishSchema(ImmutableList<SchemaWithName> schemaPath) {

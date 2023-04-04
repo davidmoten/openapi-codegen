@@ -2,7 +2,7 @@ package org.davidmoten.oa3.codegen.generator;
 
 import static org.junit.Assert.assertTrue;
 
-import org.davidmoten.oa3.codegen.generator.Indent;
+import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.junit.Test;
 
 public class IndentTest {

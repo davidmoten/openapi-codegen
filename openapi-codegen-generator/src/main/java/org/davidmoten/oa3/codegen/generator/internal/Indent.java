@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.internal;
 
 public final class Indent {
 

@@ -24,6 +24,9 @@ import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
 import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
+import org.davidmoten.oa3.codegen.generator.internal.Imports;
+import org.davidmoten.oa3.codegen.generator.internal.Indent;
+import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicDeserializer;
@@ -47,7 +50,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import jakarta.annotation.Generated;
 
-public class CodeWriter {
+final class CodeWriter {
+
+    private CodeWriter() {
+        // prevent instantiation
+    }
 
     private static final String IMPORTS_HERE = "IMPORTS_HERE";
 
@@ -266,7 +273,7 @@ public class CodeWriter {
                     String className = toPrimitive(f.fullClassName);
                     out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
                     indent.right();
-                    if (Names.isPrimitiveFullClassName(className)) {
+                    if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
                         out.format("%sthis.value = value;\n", indent);
                     } else {
                         out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,

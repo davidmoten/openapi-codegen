@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ public final class Imports {
 
     private final String fullClassName;
 
-    Imports(String fullClassName) {
+    public Imports(String fullClassName) {
         this.fullClassName = fullClassName;
         add(fullClassName);
     }
@@ -23,7 +23,7 @@ public final class Imports {
 
     public String add(String className) {
         if (className.endsWith("[]")
-                && Names.isPrimitiveFullClassName(className.substring(0, className.length() - 2))) {
+                && Util.isPrimitiveFullClassName(className.substring(0, className.length() - 2))) {
             // don't add byte[] etc to imports
             return className;
         }
