@@ -2,6 +2,7 @@ package org.davidmoten.oa3.codegen.runtime.internal;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public final class Preconditions {
@@ -46,16 +47,30 @@ public final class Preconditions {
         }
         return s;
     }
-    
+
     public static <S extends Collection<T>, T> S checkMinSize(S collection, int min, String name) {
         if (collection.size() < min) {
             throw new IllegalArgumentException("collection must be have at least " + min + " elements");
         }
         return collection;
     }
-    
+
+    public static <S extends Collection<T>, T> Optional<S> checkMinSize(Optional<S> collection, int min, String name) {
+        if (collection.isPresent() && collection.get().size() < min) {
+            throw new IllegalArgumentException("collection must be have at least " + min + " elements");
+        }
+        return collection;
+    }
+
     public static <S extends Collection<T>, T> S checkMaxSize(S collection, int max, String name) {
         if (collection.size() > max) {
+            throw new IllegalArgumentException("collection must be have at most " + max + " elements");
+        }
+        return collection;
+    }
+
+    public static <S extends Collection<T>, T> Optional<S> checkMaxSize(Optional<S> collection, int max, String name) {
+        if (collection.isPresent() && collection.get().size() > max) {
             throw new IllegalArgumentException("collection must be have at most " + max + " elements");
         }
         return collection;

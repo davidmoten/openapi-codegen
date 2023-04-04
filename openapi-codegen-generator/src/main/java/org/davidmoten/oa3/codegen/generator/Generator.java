@@ -295,7 +295,8 @@ public class Generator {
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
                     cls.fullClassName = fullClassName;
                     boolean required = fieldIsRequired(schemaPath);
-                    previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, false));
+                    previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
+                            previous.get().classType == ClassType.ARRAY_WRAPPER));
                 } else {
                     cls.fullClassName = names.schemaNameToClassName(last.name);
                 }
@@ -367,9 +368,6 @@ public class Generator {
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
                     boolean exclusiveMin = orElse(schema.getExclusiveMinimum(), false);
                     boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
-                    if ("listyItem".equals(last.name)) {
-                        System.out.println();
-                    }
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (isRef(schema)) {
@@ -437,10 +435,10 @@ public class Generator {
     private static boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath) {
         SchemaWithName last = schemaPath.last();
         if (schemaPath.size() <= 1) {
-            return isPrimitive(last.schema) || isRef(last.schema);
+            return isPrimitive(last.schema) || isRef(last.schema) || isArray(last.schema);
         } else {
             return contains(schemaPath.secondLast().schema.getRequired(), last.name)
-                    || isAllOf(schemaPath.secondLast().schema);
+                    || isAllOf(schemaPath.secondLast().schema) || isArray(schemaPath.secondLast().schema);
         }
     }
 
@@ -535,7 +533,7 @@ public class Generator {
         if (f.encoding == Encoding.OCTET) {
             return imports.add(String.class);
         } else if (f.isArray) {
-            return toList(f, imports);
+            return toList(f.fullClassName, imports, false);
         } else if (f.required) {
             return imports.add(toPrimitive(f.fullClassName));
         } else {
@@ -543,15 +541,20 @@ public class Generator {
         }
     }
 
-    private static String toList(Field f, Imports imports) {
-        return imports.add(List.class) + "<" + imports.add(f.fullClassName) + ">";
+    private static String toList(String fullClassName, Imports imports, boolean useOptional) {
+        if (useOptional) {
+            return String.format("%s<%s<%s>>", imports.add(Optional.class), imports.add(List.class),
+                    imports.add(fullClassName));
+        } else {
+            return String.format("%s<%s>", imports.add(List.class), imports.add(fullClassName));
+        }
     }
 
     private static String resolvedType(Field f, Imports imports) {
         if (f.isOctets()) {
             return "byte[]";
         } else if (f.isArray) {
-            return toList(f, imports);
+            return toList(f.fullClassName, imports, !f.required);
         } else if (f.required) {
             return imports.add(toPrimitive(f.fullClassName));
         } else {

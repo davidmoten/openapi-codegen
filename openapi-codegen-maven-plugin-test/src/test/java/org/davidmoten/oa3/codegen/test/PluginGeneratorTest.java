@@ -67,6 +67,8 @@ import org.davidmoten.oa3.codegen.test.generated.model.SimpleString;
 import org.davidmoten.oa3.codegen.test.generated.model.SimpleTime;
 import org.davidmoten.oa3.codegen.test.generated.model.Square;
 import org.davidmoten.oa3.codegen.test.generated.model.Square2;
+import org.davidmoten.oa3.codegen.test.generated.model.Table;
+import org.davidmoten.oa3.codegen.test.generated.model.Table.TableItem;
 import org.davidmoten.oa3.codegen.test.generated.model.Vehicle;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -607,20 +609,33 @@ public class PluginGeneratorTest {
         PropertyAnonymous b = m.readValue(json, PropertyAnonymous.class);
         assertEquals("Anne", b.name().get().first().get());
     }
-    
+
     @Test
     public void testArrayInProperty() throws JsonMappingException, JsonProcessingException {
         String json = "{\"counts\":[1,2,3]}";
-        ArrayInProperty a= m.readValue(json, ArrayInProperty.class);
-        assertEquals(Arrays.asList(1,2,3), a.counts().value());
+        ArrayInProperty a = m.readValue(json, ArrayInProperty.class);
+        assertEquals(Arrays.asList(1, 2, 3), a.counts().value());
         assertEquals(json, m.writeValueAsString(a));
-        ArrayInProperty b = new ArrayInProperty(new Counts(Arrays.asList(1,2,3)));
+        ArrayInProperty b = new ArrayInProperty(new Counts(Arrays.asList(1, 2, 3)));
         assertEquals(json, m.writeValueAsString(b));
         onePublicConstructor(ArrayInProperty.class);
         onePublicConstructor(Counts.class);
+    }
+
+    @Test
+    public void testArrayOfArray() throws JsonProcessingException {
+        String json = "[[1,2,3],[4,5,6]]";
+        Table a = m.readValue(json, Table.class);
+        assertEquals(Arrays.asList(1,2,3), a.value().get(0).value());
+        Table b = new Table(
+                Arrays.asList(new TableItem(Arrays.asList(1, 2, 3)), new TableItem(Arrays.asList(4, 5, 6))));
+        assertEquals(json, m.writeValueAsString(b));
+        onePublicConstructor(Table.class);
+        onePublicConstructor(TableItem.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
 }
+

@@ -391,7 +391,7 @@ final class CodeWriter {
         } else {
             out.println();
         }
-        boolean hasOptional = !cls.unwrapSingleField() && cls.fields.stream().anyMatch(f -> !f.required);
+        boolean hasOptional =  cls.fields.stream().anyMatch(f -> !f.required);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters
@@ -542,7 +542,7 @@ final class CodeWriter {
             }
             out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName(cls));
             indent.right();
-            if (!f.isOctets() && !f.required && !cls.unwrapSingleField()) {
+            if (!f.isOctets() && !f.required) {
                 out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName(cls));
             } else if (f.isOctets()) {
                 out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName(cls));
