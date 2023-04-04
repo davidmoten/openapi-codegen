@@ -85,6 +85,27 @@
                         </goals>
                         <configuration>
                             <basePackage>org.davidmoten.oa3.codegen.test.generated</basePackage>
+                            <sources>
+                               <directory>${project.basedir}/src/main/openapi</directory>
+                               <includes>
+                                 <include>openapi.yml</include>
+                               </includes>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-from-cts</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <basePackage>org.davidmoten.oa3.codegen.test.generated.cts</basePackage>
+                            <sources>
+                               <directory>${project.basedir}/src/main/openapi</directory>
+                               <includes>
+                                 <include>cts.yml</include>
+                               </includes>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>
