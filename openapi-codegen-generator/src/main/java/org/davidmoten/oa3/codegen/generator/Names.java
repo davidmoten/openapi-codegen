@@ -108,10 +108,8 @@ final class Names {
         char lastCh = ' ';
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
-            if (i == 0) {
-                if (!Character.isJavaIdentifierStart(ch)) {
-                    b.append("_");
-                }
+            if (i == 0 && !Character.isJavaIdentifierStart(ch)) {
+                b.append("_");
             }
             if (Character.isJavaIdentifierPart(ch)) {
                 b.append(ch);

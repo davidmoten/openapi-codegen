@@ -138,7 +138,7 @@ final class CodeWriter {
         }
         writeClassDeclaration(out, imports, indent, cls, fullClassNameInterfaces);
         indent.right();
-        writeEnumMembers(out, imports, indent, cls);
+        writeEnumMembers(out, indent, cls);
         if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
                 || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicClassContent(out, imports, indent, cls, names, fullClassNameInterfaces);
@@ -247,7 +247,7 @@ final class CodeWriter {
                 imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
     }
 
-    private static void writeEnumMembers(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+    private static void writeEnumMembers(PrintWriter out, Indent indent, Cls cls) {
         String text = cls.enumMembers.stream().map(x -> {
             String delim = x.parameter instanceof String ? "\"" : "";
             return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);

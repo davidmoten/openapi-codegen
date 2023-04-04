@@ -65,7 +65,7 @@ public class Generator {
             Imports imports = result.imports;
             String schemaName = result.name;
             if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
-                    && (!definition.excludeSchemas().contains(schemaName))) {
+                    && !definition.excludeSchemas().contains(schemaName)) {
                 CodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, imports, schemaName);
             }
         }
@@ -161,7 +161,7 @@ public class Generator {
 
         public boolean unwrapSingleField() {
             return !hasProperties && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
-                    || (topLevel && fields.size() == 1));
+                    || topLevel && fields.size() == 1);
         }
     }
 
@@ -394,7 +394,7 @@ public class Generator {
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
             if (Apis.isComplexSchema(schemaPath.last().schema) || isEnum(schemaPath.last().schema)
-                    || (schemaPath.size() == 1)) {
+                    || schemaPath.size() == 1) {
                 stack.pop();
                 if (stack.isEmpty()) {
                     this.results.add(new Result(cls, imports, schemaPath.first().name));
@@ -574,7 +574,7 @@ public class Generator {
     }
 
     private static boolean isObject(Schema<?> schema) {
-        return (schema.getType() == null && schema.getProperties() != null) || "object".equals(schema.getType());
+        return schema.getType() == null && schema.getProperties() != null || "object".equals(schema.getType());
     }
 
     private static boolean isArray(Schema<?> schema) {
@@ -616,7 +616,7 @@ public class Generator {
 
     private static ClassType classType(Schema<?> schema) {
         if (schema instanceof ComposedSchema
-                && ((((ComposedSchema) schema).getOneOf() != null) || ((ComposedSchema) schema).getAnyOf() != null)) {
+                && (((ComposedSchema) schema).getOneOf() != null || ((ComposedSchema) schema).getAnyOf() != null)) {
             return ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         } else if (schema.getEnum() != null) {
             return ClassType.ENUM;
