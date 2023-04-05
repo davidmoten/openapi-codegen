@@ -7,7 +7,7 @@ Jackson annotated Java 8+ code generator (via a maven plugin) from all Schema se
 
 As much as possible make sure you put your types in the components/schemas section of your openapi yaml/json file (use $ref!). Don't use anonymous types, it makes for an ugly experience with generated code.
 
-**Status**: in development 
+**Status**: in development, alpha release on Maven Central
 
 This project is born out of the insufficiences of [openapi-generator](https://github.com/OpenAPITools/openapi-generator). Great work by that team but VERY ambitious. That team is up against it, 37 target languages, 46 server frameworks, 200K lines of java code, 30K lines of templates. April 2023 there were 3,500 open issues (whew!).
 
