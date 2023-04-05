@@ -33,13 +33,7 @@ Here's what's good about this project:
 
 ## Usage
 
-Add this to the build/plugins section of your pom.xml:
-
-```xml
-TODO
-```
-
-Unfortunately the import mappings configuration of *openapi-generator-plugin* does not work well at all except for simple single class bandaids. I got cooperation between *openapi-generator* and *openapi-codegen* working by following this process:
+Unfortunately the import mappings configuration of *openapi-generator-plugin* 6.4.0 does not work well at all except for simple single class bandaids. I got cooperation between *openapi-generator* and *openapi-codegen* working by following this process:
 
 * generate with openapi-generator-plugin to packages `my.company.server` and `my.company.model`
 * use maven-antrun-plugin to 
