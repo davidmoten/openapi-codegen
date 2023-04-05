@@ -37,7 +37,7 @@ Unfortunately the import mappings configuration of *openapi-generator-plugin* 6.
 
 * generate with openapi-generator-plugin to packages `my.company.server` and `my.company.model`
 * use maven-antrun-plugin to 
-  * replace all references to `my.company.model` to `my.company.alt.model` in `my/company/server/.*.java
+  * replace all references to `my.company.model` to `my.company.alt.model` in `my/company/server/.*.java`
   * delete classes in `my/company/model`
 * generate with openapi-codegen-plugin to base package `my.company.alt` (which creates `my.company.alt.model` classes)
 
