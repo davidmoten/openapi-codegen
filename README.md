@@ -15,7 +15,7 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * field types should be primitives in constructors, getters when mandatory (means a compile-time error instead of a runtime error) 
 * testing approach in the project lacks JSON serialization and deserialization tests at a unit level (as opposed to starting up servers and doing integration tests)
 
-So what's good about this project:
+Here's what's good about this project:
 * very clean generated code
 * Lots of type safety
 * Immutable generated classes
