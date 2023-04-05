@@ -37,7 +37,7 @@
         <taglist.version>3.0.0</taglist.version>
         <changelog.version>2.2</changelog.version>
         <nexus.staging.version>1.6.13</nexus.staging.version>
-        <compiler.plugin.version>3.8.1</compiler.plugin.version>
+        <compiler.plugin.version>3.11.0</compiler.plugin.version>
 
         <jackson.version>2.14.2</jackson.version>
         <jackson.databind.version>2.14.2</jackson.databind.version>
