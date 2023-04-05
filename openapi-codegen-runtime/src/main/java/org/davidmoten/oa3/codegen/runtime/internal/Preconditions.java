@@ -14,6 +14,14 @@ public final class Preconditions {
         return t;
     }
 
+    public static void checkMinimum(Number x, String min, String name) {
+        checkMinimum(x, min, name, false);
+    }
+    
+    public static void checkMaximum(Number x, String max, String name) {
+        checkMaximum(x, max, name, false);
+    }
+    
     public static void checkMinimum(Number x, String min, String name, boolean exclusive) {
         int compare = new BigDecimal(min).compareTo(BigDecimal.valueOf(x.doubleValue()));
         if (!exclusive && compare > 0) {
