@@ -29,6 +29,8 @@ import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString;
 import org.davidmoten.oa3.codegen.test.generated.model.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import org.davidmoten.oa3.codegen.test.generated.model.Bike;
 import org.davidmoten.oa3.codegen.test.generated.model.Breeding;
+import org.davidmoten.oa3.codegen.test.generated.model.Broadcast;
+import org.davidmoten.oa3.codegen.test.generated.model.Circle;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog.Object1.Breed;
 import org.davidmoten.oa3.codegen.test.generated.model.Dog2;
@@ -36,10 +38,17 @@ import org.davidmoten.oa3.codegen.test.generated.model.DogBreed;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumCollision;
 import org.davidmoten.oa3.codegen.test.generated.model.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.generated.model.ExclusiveMinMaxInteger;
+import org.davidmoten.oa3.codegen.test.generated.model.Geometry;
+import org.davidmoten.oa3.codegen.test.generated.model.Latitude;
+import org.davidmoten.oa3.codegen.test.generated.model.Longitude;
+import org.davidmoten.oa3.codegen.test.generated.model.MetBroadcast;
+import org.davidmoten.oa3.codegen.test.generated.model.MetBroadcastArea;
 import org.davidmoten.oa3.codegen.test.generated.model.MinMaxDouble;
 import org.davidmoten.oa3.codegen.test.generated.model.MinMaxInteger;
 import org.davidmoten.oa3.codegen.test.generated.model.MinMaxItems;
 import org.davidmoten.oa3.codegen.test.generated.model.MinMaxLength;
+import org.davidmoten.oa3.codegen.test.generated.model.Msi;
+import org.davidmoten.oa3.codegen.test.generated.model.MsiId;
 import org.davidmoten.oa3.codegen.test.generated.model.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.generated.model.ObjectNoOptionalFields;
@@ -67,6 +76,7 @@ import org.davidmoten.oa3.codegen.test.generated.model.SimpleString;
 import org.davidmoten.oa3.codegen.test.generated.model.SimpleTime;
 import org.davidmoten.oa3.codegen.test.generated.model.Square;
 import org.davidmoten.oa3.codegen.test.generated.model.Square2;
+import org.davidmoten.oa3.codegen.test.generated.model.Status;
 import org.davidmoten.oa3.codegen.test.generated.model.Table;
 import org.davidmoten.oa3.codegen.test.generated.model.Table.TableItem;
 import org.davidmoten.oa3.codegen.test.generated.model.Vehicle;
@@ -626,7 +636,7 @@ public class PluginGeneratorTest {
     public void testArrayOfArray() throws JsonProcessingException {
         String json = "[[1,2,3],[4,5,6]]";
         Table a = m.readValue(json, Table.class);
-        assertEquals(Arrays.asList(1,2,3), a.value().get(0).value());
+        assertEquals(Arrays.asList(1, 2, 3), a.value().get(0).value());
         Table b = new Table(
                 Arrays.asList(new TableItem(Arrays.asList(1, 2, 3)), new TableItem(Arrays.asList(4, 5, 6))));
         assertEquals(json, m.writeValueAsString(b));
@@ -634,8 +644,32 @@ public class PluginGeneratorTest {
         onePublicConstructor(TableItem.class);
     }
 
+    @Test
+    public void testMsi() throws JsonProcessingException {
+        String json = "{\"id\":\"8ds9f8sd98-dsfds8989\",\"broadcast\":{\"area\":{\"lat\":25.1,\"lon\":-33.1,\"radiusNm\":1.0}},\"createdTime\":\"2023-04-05T12:15:26.025+10:00\",\"startTime\":\"2023-04-05T14:15:26.025+10:00\",\"endTime\":\"2023-04-06T12:00:26.025+10:00\",\"status\":\"ACTIVE\"}\n";
+        {
+            Msi a = m.readValue(json, Msi.class);
+            MetBroadcast b = (MetBroadcast) a.broadcast().value();
+            Geometry g = (Geometry) b.area().value();
+            Circle c = (Circle) g.value();
+            assertEquals(25.1, c.lat().value(), 0.0001);
+        }
+        {
+            Circle circle = new Circle(new Latitude(25.1F), new Longitude(-33.1F), 1);
+            MetBroadcastArea mbca = new MetBroadcastArea(new Geometry(circle));
+            MetBroadcast mbc = new MetBroadcast(mbca, Optional.empty());
+            Broadcast broadcast = new Broadcast(mbc);
+            OffsetDateTime createdTime = OffsetDateTime.parse("2023-04-05T12:15:26.025+10:00");
+            OffsetDateTime startTime = OffsetDateTime.parse("2023-04-05T14:15:26.025+10:00");
+            OffsetDateTime endTime = OffsetDateTime.parse("2023-04-06T12:00:26.025+10:00");
+            MsiId msiId = new MsiId("8ds9f8sd98-dsfds8989");
+            Msi msi = new Msi(msiId, broadcast, createdTime, Optional.empty(), startTime, endTime, Optional.empty(),
+                    Status.ACTIVE, Optional.empty(), Optional.empty(), Optional.empty());
+            assertEquals(m.readTree(json), m.readTree(m.writeValueAsString(msi)));
+        }
+    }
+
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
 }
-
