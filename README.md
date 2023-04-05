@@ -1,4 +1,8 @@
 # openapi-codegen
+<a href="https://github.com/davidmoten/openapi-codegen/actions/workflows/ci.yml"><img src="https://github.com/davidmoten/openapi-codegen/actions/workflows/ci.yml/badge.svg"/></a><br/>
+[![codecov](https://codecov.io/gh/davidmoten/openapi-codegen/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/openapi-codegen)<br/>
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.gov.amsa/openapi-codegen/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.gov.amsa/openapi-codegen)<br/>
+
 Jackson annotated Java 8+ code generator (via a maven plugin) from all Schema sections of an OpenAPI 3.0.1 definition file. Can be used with [openapi-generator](https://github.com/OpenAPITools/openapi-generator) to fill in the functionality gaps of that project.
 
 **Status**: in development 
