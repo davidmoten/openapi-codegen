@@ -20,6 +20,7 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * should be able to create oneOf member without specifying discriminator value in constructor (is constant)
 * field types should be primitives in constructors, getters when mandatory (means a compile-time error instead of a runtime error) 
 * testing approach in the project lacks JSON serialization and deserialization tests at a unit level (as opposed to starting up servers and doing integration tests)
+* import mapping is very poor, doesn't handle related objects and doesn't update service classes (non-model classes)
 
 Here's what's good about this project:
 * very clean generated code
@@ -29,7 +30,116 @@ Here's what's good about this project:
 * Java 8+ date/time classes
 * `java.util.Optional` used in generated classes to make clear what is required
 * JSON serialization and deserialization unit tested thoroughly (and easy to add more)
-* can be combined with openapi-generator-maven-plugin using [Bring your own models](https://openapi-generator.tech/docs/customization/#bringing-your-own-models)
+
+## Usage
+
+Add this to the build/plugins section of your pom.xml:
+
+```xml
+TODO
+```
+
+Unfortunately the import mappings configuration of *openapi-generator-plugin* does not work well at all except for simple single class bandaids. I got cooperation between *openapi-generator* and *openapi-codegen* working by following this process:
+
+* generate with openapi-generator-plugin to packages `my.company.server` and `my.company.model`
+* use maven-antrun-plugin to 
+  * replace all references to `my.company.model` to `my.company.alt.model` in `my/company/server/.*.java
+  * delete classes in `my/company/model`
+* generate with openapi-codegen-plugin to base package `my.company.alt` (which creates `my.company.alt.model` classes)
+
+Here are the plugins doing the above (example):
+```xml
+<plugin>
+    <groupId>org.openapitools</groupId>
+    <artifactId>openapi-generator-maven-plugin</artifactId>
+    <version>6.4.0</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <inputSpec>${project.basedir}/src/main/resources/api.yml</inputSpec>
+                <generatorName>spring</generatorName>
+                <apiPackage>au.gov.amsa.er.egc.openapi.api</apiPackage>
+                <modelPackage>au.gov.amsa.er.egc.openapi.model</modelPackage>
+                <configOptions>
+                    <delegatePattern>true</delegatePattern>
+                </configOptions>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+    <artifactId>maven-antrun-plugin</artifactId>
+    <version>3.1.0</version>
+    <executions>
+        <execution>
+            <phase>generate-sources</phase>
+            <configuration>
+                <target>
+                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="MsiGet200Response" value="Path_msi_Get_200" failOnNoReplacements="true">
+                        <include name="**/api/*.java" />
+                    </replace>
+                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="openapi.model" value="openapi.alt.model" failOnNoReplacements="true">
+                        <include name="**/api/*.java" />
+                        <include name="org/openapitools/**/*.java" />
+                    </replace>
+                    <delete>
+                        <fileset dir="${project.build.directory}/generated-sources/openapi/src/main/java" includes="**/egc/openapi/model/*.java" />
+                    </delete>
+                </target>
+            </configuration>
+            <goals>
+                <goal>run</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>openapi-codegen-maven-plugin</artifactId>
+    <version>${openapi.codegen.version}</version>
+    <executions>
+        <execution>
+            <id>generate-more</id>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <basePackage>au.gov.amsa.er.egc.openapi.alt</basePackage>
+                <outputDirectory>${project.build.directory}/generated-sources/openapi/src/main/java</outputDirectory>
+                <sources>
+                    <directory>${project.basedir}/src/main/resources</directory>
+                    <includes>
+                        <include>api.yml</include>
+                    </includes>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <version>3.3.0</version>
+    <executions>
+        <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>add-source</goal>
+            </goals>
+            <configuration>
+                <sources>
+                    <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+
+```
 
 ## TODO
 * `additionalProperties` (Dictionary) support
