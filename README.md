@@ -21,7 +21,7 @@ So what's good about this project:
 * Immutable generated classes
 * oneOf, anyOf, allOf support (MUCH better than openapi-generator at the moment)
 * Java 8+ date/time classes
-* `java.util.Optional` used in generated classes to make clear what is mandatory and what is not
+* `java.util.Optional` used in generated classes to make clear what is required
 * JSON serialization and deserialization unit tested thoroughly (and easy to add more)
 * can be combined with openapi-generator-maven-plugin using [Bring your own models](https://openapi-generator.tech/docs/customization/#bringing-your-own-models)
 
