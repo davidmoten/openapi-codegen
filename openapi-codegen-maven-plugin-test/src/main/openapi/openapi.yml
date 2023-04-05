@@ -746,7 +746,6 @@ components:
       - $ref: '#/components/schemas/Rectangle'
       - $ref: '#/components/schemas/Circle'
       example:
-        geometryType: Circle
         lat: -42.5
         lon: 135.884
         radiusNm: 100.5
@@ -760,7 +759,6 @@ components:
       - $ref: '#/components/schemas/PiracyBroadcast'
       example:
         geometry: 
-          geometryType: Circle
           lat: -34.5
           lon: 145.44
           radiusNm: 150
@@ -1008,7 +1006,7 @@ components:
         of results. The token is not expected to be anywhere near as
         long as 4096 characters but good to put an upper bound on it. 
       example: 10
-      
+
 ##########################################
 ### End of egc-api, start of unit tests
 ##########################################      
