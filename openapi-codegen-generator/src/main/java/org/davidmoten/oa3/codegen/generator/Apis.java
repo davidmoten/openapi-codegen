@@ -92,7 +92,7 @@ class Apis {
 
     private static void visitSchemas(ImmutableList<String> list, RequestBody requestBody, Visitor visitor) {
         if (requestBody != null) {
-            visitSchemas(list, requestBody.getContent(), visitor);
+            visitSchemas(list.add("Request"), requestBody.getContent(), visitor);
         }
     }
 

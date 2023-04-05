@@ -70,7 +70,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <basePackage>org.davidmoten.oa3.codegen.test.generated</basePackage>
+                            <basePackage>pet.store</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
