@@ -1,6 +1,8 @@
 # openapi-codegen
 Jackson annotated Java 8+ code generator (via a maven plugin) from all Schema sections of an OpenAPI 3.0.1 definition file. Can be used with [openapi-generator](https://github.com/OpenAPITools/openapi-generator) to fill in the functionality gaps of that project.
 
+**Status**: in development 
+
 This project is born out of the insufficiences of [openapi-generator](https://github.com/OpenAPITools/openapi-generator). Great work by that team but VERY ambitious. That team is up against it, 37 target languages, 46 server frameworks, 200K lines of java code, 30K lines of templates. April 2023 there were 3,500 open issues (whew!).
 
 So what's missing and what can we do about it? Quite understandably there is a simplified approach in *openapi-generator* code to minimize the work across many languages with varying capabilities. For Java this means a lot of hassles:
@@ -33,3 +35,4 @@ Here's what's good about this project:
 * add equals and hashCode
 * workaround JsonCreator not being able to pass `5` into a double argument, must be `5.0` (https://github.com/FasterXML/jackson-core/issues/532)
 * support external schema refs
+* write docs
