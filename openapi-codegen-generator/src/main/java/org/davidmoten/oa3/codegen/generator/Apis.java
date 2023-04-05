@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+import org.davidmoten.oa3.codegen.generator.internal.Util;
 
 import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Preconditions;
@@ -92,7 +93,7 @@ class Apis {
 
     private static void visitSchemas(ImmutableList<String> list, RequestBody requestBody, Visitor visitor) {
         if (requestBody != null) {
-            visitSchemas(list, requestBody.getContent(), visitor);
+            visitSchemas(list.add("Request"), requestBody.getContent(), visitor);
         }
     }
 
@@ -125,7 +126,10 @@ class Apis {
 
     private static void visitSchemas(ImmutableList<String> list, Parameter parameter, Visitor visitor) {
         if (parameter != null) {
-            visitSchemas(list.add("Parameter").add(parameter.getName()), parameter.getSchema(), visitor);
+            if (parameter.getSchema() != null && !Util.isPrimitive(parameter.getSchema())) {
+                visitSchemas(list.add("Parameter").add(parameter.getName()), parameter.getSchema(), visitor);
+            }
+            visitSchemas(list.add("Parameter").add(parameter.getName()), parameter.getContent(), visitor);
         }
     }
 
@@ -169,7 +173,7 @@ class Apis {
             if (a.getAnyOf() != null) {
                 a.getAnyOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
-        } 
+        }
         // MapSchema and ObjectSchema have nothing to add
         visitor.finishSchema(schemaPath);
     }

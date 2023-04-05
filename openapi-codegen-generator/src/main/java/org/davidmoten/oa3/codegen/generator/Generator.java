@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.generator.internal.Util.orElse;
 import static org.davidmoten.oa3.codegen.runtime.internal.Util.toPrimitive;
 
 import java.math.BigDecimal;
@@ -22,6 +21,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.LinkedStack;
+import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
 
 import com.github.davidmoten.guavamini.Preconditions;
@@ -29,7 +29,6 @@ import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator {
@@ -289,7 +288,7 @@ public class Generator {
                 cls.classType = classType(schema);
                 cls.topLevel = true;
             }
-            if (isArray(schema)) {
+            if (Util.isArray(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 previous.ifPresent(c -> c.classes.add(cls));
                 if (previous.isPresent()) {
@@ -312,8 +311,8 @@ public class Generator {
                     : Optional.empty();
             Optional<Integer> maxItems = isArray ? Optional.ofNullable(schemaPath.secondLast().schema.getMaxItems())
                     : Optional.empty();
-            if (isObject(schema) || isMap(schema) || isEnum(schema) || isOneOf(schema) || isAnyOf(schema)
-                    || isAllOf(schema)) {
+            if (Util.isObject(schema) || Util.isMap(schema) || Util.isEnum(schema) || Util.isOneOf(schema) || Util.isAnyOf(schema)
+                    || Util.isAllOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 stack.push(cls);
                 previous.ifPresent(p -> p.classes.add(cls));
@@ -327,11 +326,11 @@ public class Generator {
                     cls.fullClassName = names.schemaNameToClassName(last.name);
                     fieldName = Optional.empty();
                 }
-                if (isEnum(schema)) {
+                if (Util.isEnum(schema)) {
                     handleEnum(schemaPath, cls, previous, isArray, fieldName, names);
-                } else if (isObject(schema)) {
+                } else if (Util.isObject(schema)) {
                     handleObject(schemaPath, last, schema, cls, isArray, previous, fieldName);
-                } else if (isOneOf(schema) || isAnyOf(schema) || isAllOf(schema)) {
+                } else if (Util.isOneOf(schema) || Util.isAnyOf(schema) || Util.isAllOf(schema)) {
                     handlePolymorphism(schemaPath, cls, names, previous, fieldName, isArray);
                 } else {
                     // TODO
@@ -344,7 +343,7 @@ public class Generator {
                 }
                 Cls current = stack.peek();
                 final String fullClassName;
-                if (isPrimitive(schema)) {
+                if (Util.isPrimitive(schema)) {
                     Class<?> c = toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
@@ -369,11 +368,11 @@ public class Generator {
                     }
                     Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
-                    boolean exclusiveMin = orElse(schema.getExclusiveMinimum(), false);
-                    boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
+                    boolean exclusiveMin = Util.orElse(schema.getExclusiveMinimum(), false);
+                    boolean exclusiveMax = Util.orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
-                } else if (isRef(schema)) {
+                } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     final String fieldNameCandidate;
                     if (last.name == null) {
@@ -393,7 +392,7 @@ public class Generator {
         @Override
         public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
-            if (Apis.isComplexSchema(schemaPath.last().schema) || isEnum(schemaPath.last().schema)
+            if (Apis.isComplexSchema(schemaPath.last().schema) || Util.isEnum(schemaPath.last().schema)
                     || schemaPath.size() == 1) {
                 stack.pop();
                 if (stack.isEmpty()) {
@@ -422,7 +421,7 @@ public class Generator {
     private static void handleObject(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last, Schema<?> schema,
             final Cls cls, boolean isArray, Optional<Cls> previous, final Optional<String> fieldName) {
         cls.classType = ClassType.CLASS;
-        cls.hasProperties = isObject(schema);
+        cls.hasProperties = Util.isObject(schema);
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
     }
@@ -438,10 +437,10 @@ public class Generator {
     private static boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath) {
         SchemaWithName last = schemaPath.last();
         if (schemaPath.size() <= 1) {
-            return isPrimitive(last.schema) || isRef(last.schema) || isArray(last.schema);
+            return Util.isPrimitive(last.schema) || Util.isRef(last.schema) || Util.isArray(last.schema);
         } else {
             return contains(schemaPath.secondLast().schema.getRequired(), last.name)
-                    || isAllOf(schemaPath.secondLast().schema) || isArray(schemaPath.secondLast().schema);
+                    || Util.isAllOf(schemaPath.secondLast().schema) || Util.isArray(schemaPath.secondLast().schema);
         }
     }
 
@@ -476,9 +475,9 @@ public class Generator {
 
     private static PolymorphicType polymorphicType(Schema<?> schema) {
         final PolymorphicType pt;
-        if (isOneOf(schema)) {
+        if (Util.isOneOf(schema)) {
             pt = PolymorphicType.ONE_OF;
-        } else if (isAnyOf(schema)) {
+        } else if (Util.isAnyOf(schema)) {
             pt = PolymorphicType.ANY_OF;
         } else {
             pt = PolymorphicType.ALL_OF;
@@ -563,55 +562,6 @@ public class Generator {
         } else {
             return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
         }
-    }
-
-    private static boolean isEnum(Schema<?> schema) {
-        return schema.getEnum() != null && !schema.getEnum().isEmpty();
-    }
-
-    private static boolean isRef(Schema<?> schema) {
-        return schema.get$ref() != null;
-    }
-
-    private static boolean isObject(Schema<?> schema) {
-        return schema.getType() == null && schema.getProperties() != null || "object".equals(schema.getType());
-    }
-
-    private static boolean isArray(Schema<?> schema) {
-        return schema instanceof ArraySchema;
-    }
-
-    private static boolean isOneOf(Schema<?> schema) {
-        if (!(schema instanceof ComposedSchema)) {
-            return false;
-        }
-        ComposedSchema sch = (ComposedSchema) schema;
-        return sch.getOneOf() != null && !sch.getOneOf().isEmpty();
-    }
-
-    private static boolean isAnyOf(Schema<?> schema) {
-        if (!(schema instanceof ComposedSchema)) {
-            return false;
-        }
-        ComposedSchema sch = (ComposedSchema) schema;
-        return sch.getAnyOf() != null && !sch.getAnyOf().isEmpty();
-    }
-
-    private static boolean isAllOf(Schema<?> schema) {
-        if (!(schema instanceof ComposedSchema)) {
-            return false;
-        }
-        ComposedSchema sch = (ComposedSchema) schema;
-        return sch.getAllOf() != null && !sch.getAllOf().isEmpty();
-    }
-
-    private static boolean isPrimitive(Schema<?> schema) {
-        String type = schema.getType();
-        return type != null && !"array".equals(type) && !"object".equals(type);
-    }
-
-    private static boolean isMap(Schema<?> schema) {
-        return schema instanceof MapSchema;
     }
 
     private static ClassType classType(Schema<?> schema) {

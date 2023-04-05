@@ -90,6 +90,7 @@
         <module>openapi-codegen-generator</module>
         <module>openapi-codegen-maven-plugin</module>
         <module>openapi-codegen-maven-plugin-test</module>
+        <module>openapi-codegen-example-pet-store</module>
     </modules>
 
     <build>
