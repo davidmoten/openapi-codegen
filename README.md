@@ -31,6 +31,8 @@ Here's what's good about this project:
 * Java 8+ date/time classes
 * `java.util.Optional` used in generated classes to make clear what is required
 * JSON serialization and deserialization unit tested thoroughly (and easy to add more)
+* Reduced target means not much generator code to maintain (<3K lines of java code)
+* Plenty of unit tests (good ones, full serialization and deserialization tests)
 
 ## Usage
 
