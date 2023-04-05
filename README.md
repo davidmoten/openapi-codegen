@@ -21,6 +21,7 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * field types should be primitives in constructors, getters when mandatory (means a compile-time error instead of a runtime error) 
 * testing approach in the project lacks JSON serialization and deserialization tests at a unit level (as opposed to starting up servers and doing integration tests)
 * import mapping is very poor, doesn't handle related objects and doesn't update service classes (non-model classes)
+* a LOT of bugs (3,500 issues is an indicator)
 
 Here's what's good about this project:
 * very clean generated code
