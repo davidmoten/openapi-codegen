@@ -87,7 +87,7 @@ class Apis {
     }
 
     private static void visitSchemas(ImmutableList<String> list, ApiResponse response, Visitor visitor) {
-        visitSchemas(list, response.getContent(), visitor);
+        visitSchemas(list.add("Response"), response.getContent(), visitor);
     }
 
     private static void visitSchemas(ImmutableList<String> list, RequestBody requestBody, Visitor visitor) {
