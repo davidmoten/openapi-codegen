@@ -30,25 +30,17 @@
         <scm.url>scm:git:https://github.com/davidmoten/openapi-codegen.git</scm.url>
         <javadoc.version>3.5.0</javadoc.version>
         <pmd.version>3.20.0</pmd.version>
-        <project.info.version>3.4.2</project.info.version>
         <jxr.version>3.3.0</jxr.version>
-        <taglist.version>3.0.0</taglist.version>
-        <changelog.version>2.2</changelog.version>
         <nexus.staging.version>1.6.13</nexus.staging.version>
         <compiler.plugin.version>3.11.0</compiler.plugin.version>
         <slf4j.version>1.7.36</slf4j.version>
 
         <jackson.version>2.14.2</jackson.version>
-        <jackson.databind.version>2.14.2</jackson.databind.version>
         <junit.version>4.13.2</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
-        <olingo.version>4.9.0</olingo.version>
-        <httpclient.version>4.5.14</httpclient.version>
-        <release.plugin.version>2.5.1</release.plugin.version>
         <jacoco.version>0.8.9</jacoco.version>
         <spotbugs.plugin.version>4.7.3.3</spotbugs.plugin.version>
         <bundle.plugin.version>5.1.8</bundle.plugin.version>
-        <log4j.version>2.20.0</log4j.version>
         <build.helper.version>3.3.0</build.helper.version>
     </properties>
 
