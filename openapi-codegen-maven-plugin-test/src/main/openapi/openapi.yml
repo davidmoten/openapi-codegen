@@ -396,6 +396,7 @@ paths:
             a `continuationToken`.
           schema:
             type: integer
+            format: int32
             minimum: 1
             default: 10
         - in: query
@@ -632,6 +633,7 @@ components:
             token. The token should be refreshed before the expiry 
             time to avoid auth related failures.
           type: integer
+          format: int32
           minimum: 1
           example: 60
       required: [username, password]
@@ -934,6 +936,7 @@ components:
           
     NavAreaCode:
       type: integer
+      format: int32
       minimum: 1
       maximum: 21
           
@@ -941,6 +944,7 @@ components:
       properties: 
         metAreaCode:
           type: integer
+          format: int32
           minimum: 1
           maximum: 21
       required: [metAreaCode]
@@ -989,6 +993,7 @@ components:
             is the broadcast happens twice)
         intervalHours: 
           type: integer
+          format: int32
           enum: [1,2,3,4,5,6,12,18,24,30,36,48,60,72,96,120]  
           description: |
             the time gap between broadcasts of the same MSI   
@@ -1003,6 +1008,10 @@ components:
         of results. The token is not expected to be anywhere near as
         long as 4096 characters but good to put an upper bound on it. 
       example: 10
+      
+##########################################
+### End of egc-api, start of unit tests
+##########################################      
             
     Nested:
       type: object
