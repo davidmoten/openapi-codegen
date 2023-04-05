@@ -55,8 +55,8 @@ Here are the plugins doing the above (example):
             <configuration>
                 <inputSpec>${project.basedir}/src/main/resources/api.yml</inputSpec>
                 <generatorName>spring</generatorName>
-                <apiPackage>au.gov.amsa.er.egc.openapi.api</apiPackage>
-                <modelPackage>au.gov.amsa.er.egc.openapi.model</modelPackage>
+                <apiPackage>my.company.api</apiPackage>
+                <modelPackage>my.company.model</modelPackage>
                 <configOptions>
                     <delegatePattern>true</delegatePattern>
                 </configOptions>
@@ -75,12 +75,12 @@ Here are the plugins doing the above (example):
                     <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="MsiGet200Response" value="Path_msi_Get_200" failOnNoReplacements="true">
                         <include name="**/api/*.java" />
                     </replace>
-                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="openapi.model" value="openapi.alt.model" failOnNoReplacements="true">
-                        <include name="**/api/*.java" />
+                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="my.company.model" value="my.company.alt.model" failOnNoReplacements="true">
+                        <include name="my/company/api/*.java" />
                         <include name="org/openapitools/**/*.java" />
                     </replace>
                     <delete>
-                        <fileset dir="${project.build.directory}/generated-sources/openapi/src/main/java" includes="**/egc/openapi/model/*.java" />
+                        <fileset dir="${project.build.directory}/generated-sources/openapi/src/main/java" includes="my/company/model/*.java" />
                     </delete>
                 </target>
             </configuration>
@@ -101,7 +101,7 @@ Here are the plugins doing the above (example):
                 <goal>generate</goal>
             </goals>
             <configuration>
-                <basePackage>au.gov.amsa.er.egc.openapi.alt</basePackage>
+                <basePackage>my.company.alt</basePackage>
                 <outputDirectory>${project.build.directory}/generated-sources/openapi/src/main/java</outputDirectory>
                 <sources>
                     <directory>${project.basedir}/src/main/resources</directory>
