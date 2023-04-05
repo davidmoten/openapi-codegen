@@ -709,13 +709,6 @@ components:
     Circle:
       type: object
       properties:
-        geometryType:
-          description: |
-            Including the geometry type in the JSON is helpful
-            in that a human viewer doesn't have to infer the 
-            geometry type from the presence of the radiusNm field. 
-          type: string
-          enum: [Circle]
         lat:
           $ref: '#/components/schemas/Latitude' 
         lon:
@@ -728,13 +721,6 @@ components:
     Rectangle:
       type: object
       properties: 
-        geometryType:
-          description: |
-            Including the geometry type in the JSON is helpful
-            in that a human viewer doesn't have to infer the 
-            geometry type from the presence of extent fields.
-          type: string
-          enum: [Rectangle]
         minLat: 
           $ref: '#/components/schemas/Latitude'
         leftLon: 
@@ -917,7 +903,9 @@ components:
     NavBroadcast:
       type: object
       properties:
-        area:
+        ## need to differentiate from PiracyBroadcast so that 
+        ## oneOf resolution works
+        navBroadcastArea:
           $ref: '#/components/schemas/NavOrPiracyBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
@@ -926,7 +914,7 @@ components:
     PiracyBroadcast:
       type: object
       properties:
-        area:
+        piracyBroadcastArea:
           $ref: '#/components/schemas/NavOrPiracyBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
