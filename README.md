@@ -98,7 +98,7 @@ Here are the plugins doing the above (example):
 <plugin>
     <groupId>com.github.davidmoten</groupId>
     <artifactId>openapi-codegen-maven-plugin</artifactId>
-    <version>${openapi.codegen.version}</version>
+    <version>VERSION_HERE</version>
     <executions>
         <execution>
             <id>generate-more</id>
