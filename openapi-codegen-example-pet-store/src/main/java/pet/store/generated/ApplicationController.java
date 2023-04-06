@@ -1,4 +1,4 @@
-package pet.store;
+package pet.store.generated;
 
 import org.davidmoten.oa3.codegen.runtime.internal.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
-// This would be generated code
 @RestController
 public class ApplicationController {
 

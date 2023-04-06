@@ -1,10 +1,10 @@
-package pet.store;
+package pet.store.generated;
 
 import org.springframework.http.ResponseEntity;
 
 import pet.store.model.Path_pets_Get_200_Response;
-
-// this would be generated code
+import pet.store.runtime.DefaultError;
+import pet.store.runtime.ServiceException;
 
 public interface Service {
 
@@ -21,7 +21,7 @@ public interface Service {
         }
         return ResponseEntity.status(statusCode).body(errorResponseBody(statusCode, e));
     }
-    
+
     default Object errorResponseBody(int statusCode, Throwable e) {
         return new DefaultError(statusCode, e);
     }

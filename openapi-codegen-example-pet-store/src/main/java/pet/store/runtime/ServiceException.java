@@ -1,4 +1,4 @@
-package pet.store;
+package pet.store.runtime;
 
 public final class ServiceException extends Exception {
 

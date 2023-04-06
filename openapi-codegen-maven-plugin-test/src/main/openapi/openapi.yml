@@ -487,6 +487,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403': 
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'          
         '500':    
           $ref: '#/components/responses/ServerError'
       security: 
@@ -510,7 +512,9 @@ paths:
         '401': 
           $ref: '#/components/responses/Unauthorized'
         '403': 
-          $ref: '#/components/responses/Forbidden'          
+          $ref: '#/components/responses/Forbidden'    
+        '404':
+          $ref: '#/components/responses/NotFound'                
         '500':    
           $ref: '#/components/responses/ServerError'
       security: 
@@ -535,7 +539,9 @@ paths:
         '401': 
           $ref: '#/components/responses/Unauthorized'
         '403': 
-          $ref: '#/components/responses/Forbidden'          
+          $ref: '#/components/responses/Forbidden'   
+        '404':
+          $ref: '#/components/responses/NotFound'                 
         '500':    
           $ref: '#/components/responses/ServerError'       
       security: 
@@ -565,6 +571,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'            
             
     Unauthorized:
       description: Unauthorized (must authenticate)
