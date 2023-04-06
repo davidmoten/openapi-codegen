@@ -21,12 +21,12 @@ public class ApplicationController {
             Preconditions.checkMaximum(limit, "10", "limit", false);
             return ResponseEntity.ok(service.pets(limit));
         } catch (ServiceException e) {
-            return ResponseEntity.status(e.statusCode()).body(new Error(e.statusCode(), e.getMessage()));
+            return ResponseEntity.status(e.statusCode()).body(new Error(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body(new Error(400, e.getMessage()));
+            return ResponseEntity.status(400).body(new Error(e.getMessage()));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(501).body(new Error(501, e.getMessage()));
+            return ResponseEntity.status(501).body(new Error(e.getMessage()));
         }
     }
-
+    
 }
