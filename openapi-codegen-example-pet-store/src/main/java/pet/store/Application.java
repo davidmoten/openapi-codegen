@@ -1,9 +1,9 @@
-package pet.store.generated;
+package pet.store;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "pet.store")
+@SpringBootApplication
 public class Application {
 
     public static void main(String[] args) {
