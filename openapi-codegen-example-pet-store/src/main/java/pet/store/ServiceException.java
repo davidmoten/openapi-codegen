@@ -7,7 +7,7 @@ public final class ServiceException extends Exception {
     private final int statusCode;
 
     public ServiceException(int statusCode, String message) {
-        super("statusCode=" + statusCode + ", " + message);
+        super(message);
         this.statusCode = statusCode;
     }
     
