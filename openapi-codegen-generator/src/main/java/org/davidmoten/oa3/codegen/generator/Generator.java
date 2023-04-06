@@ -28,7 +28,6 @@ import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator {
@@ -279,6 +278,13 @@ public class Generator {
         public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
             SchemaWithName last = schemaPath.last();
             Schema<?> schema = last.schema;
+//            {
+//                final String fullClassName;
+//                if (stack.isEmpty()) {
+//                    fullClassName = names.schemaNameToClassName(last.name);
+//                }
+//            }
+
             final Cls cls = new Cls();
             cls.description = schema.getDescription();
             if (stack.isEmpty()) {
@@ -311,8 +317,8 @@ public class Generator {
                     : Optional.empty();
             Optional<Integer> maxItems = isArray ? Optional.ofNullable(schemaPath.secondLast().schema.getMaxItems())
                     : Optional.empty();
-            if (Util.isObject(schema) || Util.isMap(schema) || Util.isEnum(schema) || Util.isOneOf(schema) || Util.isAnyOf(schema)
-                    || Util.isAllOf(schema)) {
+            if (Util.isObject(schema) || Util.isMap(schema) || Util.isEnum(schema) || Util.isOneOf(schema)
+                    || Util.isAnyOf(schema) || Util.isAllOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 stack.push(cls);
                 previous.ifPresent(p -> p.classes.add(cls));
@@ -565,11 +571,12 @@ public class Generator {
     }
 
     private static ClassType classType(Schema<?> schema) {
-        if (schema instanceof ComposedSchema
-                && (((ComposedSchema) schema).getOneOf() != null || ((ComposedSchema) schema).getAnyOf() != null)) {
+        if (Util.isOneOf(schema) || Util.isAnyOf(schema)) {
             return ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
-        } else if (schema.getEnum() != null) {
+        } else if (Util.isEnum(schema)) {
             return ClassType.ENUM;
+        } else if (Util.isArray(schema)) {
+            return ClassType.ARRAY_WRAPPER;
         } else {
             return ClassType.CLASS;
         }

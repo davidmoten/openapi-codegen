@@ -22,7 +22,7 @@ public class SpringBootGenerator {
     }
 
     private void handlePathItem(ImmutableList<String> list, PathItem pathItem) {
-        pathItem.get$ref(); // TODO
+//        pathItem.get$ref(); // TODO
         pathItem.readOperationsMap() //
                 .forEach((method, operation) -> handleOperation(list.add(method.name()), operation));
     }
@@ -35,14 +35,12 @@ public class SpringBootGenerator {
     }
 
     private void handleParameter(ImmutableList<String> list, Parameter parameter) {
-        parameter.get$ref();
-        parameter.getSchema();
+//        parameter.get$ref();
+//        parameter.getSchema();
+        System.out.println(list);
         parameter.getContent().forEach((mimeType, mediaType) -> {
+            System.out.println("thing");
         });
-    }
-
-    private static final class Method {
-
     }
 
 }
