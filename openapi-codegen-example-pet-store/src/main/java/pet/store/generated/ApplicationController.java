@@ -24,5 +24,5 @@ public class ApplicationController {
             return service.errorResponse(e);
         }
     }
-    
+
 }
