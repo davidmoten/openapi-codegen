@@ -54,7 +54,7 @@ final class Names {
 
     private static void logSchemaFullClassNames(OpenAPI api) {
         if (LOG_SCHEMA_PATHS) {
-            Apis.visitSchemas(api, schemaPath -> {
+            Apis.visitSchemas(api, (category, schemaPath) -> {
                 if (!Apis.isComplexSchema(schemaPath.last().schema)) {
                     System.out.println(schemaPath);
                 }
@@ -67,16 +67,16 @@ final class Names {
         return api;
     }
 
-    String schemaNameToClassName(String schemaName) {
-        return definition.packages().basePackage() + ".model." + schemaNameToSimpleClassName(schemaName);
+    String schemaNameToClassName(SchemaCategory category, String schemaName) {
+        return definition.packages().basePackage() + "." + category.getPackageFragment() + "." + schemaNameToSimpleClassName(schemaName);
     }
 
     String schemaNameToSimpleClassName(String schemaName) {
         return upperFirst(toIdentifier(schemaName));
     }
 
-    File schemaNameToJavaFile(String schemaName) {
-        return fullClassNameToJavaFile(schemaNameToClassName(schemaName));
+    File schemaNameToJavaFile(SchemaCategory category, String schemaName) {
+        return fullClassNameToJavaFile(schemaNameToClassName(category, schemaName));
     }
 
     File fullClassNameToJavaFile(String fullClassName) {
@@ -89,8 +89,24 @@ final class Names {
         if (!ref.startsWith("#")) {
             fullClassName = externalRefClassName(ref);
         } else {
+            final SchemaCategory category;
+            if (ref.startsWith("#/components/schemas")) {
+                category = SchemaCategory.SCHEMA;
+            } else if (ref.startsWith("#/components/schemas")) {
+                category = SchemaCategory.SCHEMA;
+            } else if (ref.startsWith("#/components/responses")) {
+                category = SchemaCategory.SCHEMA;
+            } else if (ref.startsWith("#/components/parameters")) {
+                category = SchemaCategory.SCHEMA;
+            } else if (ref.startsWith("#/components/requestBodies")) {
+                category = SchemaCategory.SCHEMA;
+            } else if (ref.startsWith("#/components/pathItems")) {
+                category = SchemaCategory.SCHEMA;
+            } else {
+                throw new RuntimeException("unexpected ref: " + ref);
+            }   
             String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
-            fullClassName = schemaNameToClassName(schemaName);
+            fullClassName = schemaNameToClassName(category, schemaName);
         }
         return fullClassName;
     }
@@ -198,7 +214,7 @@ final class Names {
                 .getSchemas() //
                 .entrySet() //
                 .stream() //
-                .flatMap(x -> findSchemas(x.getKey(), x.getValue(), predicate).stream()) //
+                .flatMap(x -> findSchemas(SchemaCategory.SCHEMA, x.getKey(), x.getValue(), predicate).stream()) //
                 .map(x -> (ComposedSchema) x) //
                 .forEach(x -> {
                     for (Schema<?> sch : x.getOneOf()) {
@@ -213,9 +229,9 @@ final class Names {
         return map;
     }
 
-    private static List<Schema<?>> findSchemas(String name, Schema<?> schema, Predicate<Schema<?>> predicate) {
+    private static List<Schema<?>> findSchemas(SchemaCategory category, String name, Schema<?> schema, Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
-        Apis.visitSchemas(ImmutableList.of(new SchemaWithName(name, schema)), schemaPath -> {
+        Apis.visitSchemas(category, ImmutableList.of(new SchemaWithName(name, schema)), (c, schemaPath) -> {
             if (predicate.test(schemaPath.last().schema)) {
                 list.add(schemaPath.last().schema);
             }

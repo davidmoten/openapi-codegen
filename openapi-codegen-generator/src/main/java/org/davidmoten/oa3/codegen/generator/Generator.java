@@ -83,6 +83,7 @@ public class Generator {
     }
 
     static final class Cls {
+        SchemaCategory category;
         String fullClassName;
         ClassType classType;
         List<Field> fields = new ArrayList<>();
@@ -275,7 +276,7 @@ public class Generator {
         }
 
         @Override
-        public void startSchema(ImmutableList<SchemaWithName> schemaPath) {
+        public void startSchema(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath) {
             SchemaWithName last = schemaPath.last();
             Schema<?> schema = last.schema;
 //            {
@@ -286,10 +287,11 @@ public class Generator {
 //            }
 
             final Cls cls = new Cls();
+            cls.category = category;
             cls.description = schema.getDescription();
             if (stack.isEmpty()) {
                 // should be top-level class
-                cls.fullClassName = names.schemaNameToClassName(last.name);
+                cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
                 cls.topLevel = true;
@@ -306,7 +308,7 @@ public class Generator {
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
                             previous.get().classType == ClassType.ARRAY_WRAPPER));
                 } else {
-                    cls.fullClassName = names.schemaNameToClassName(last.name);
+                    cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                 }
                 cls.classType = ClassType.ARRAY_WRAPPER;
                 stack.push(cls);
@@ -329,7 +331,7 @@ public class Generator {
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
                     cls.fullClassName = fullClassName;
                 } else {
-                    cls.fullClassName = names.schemaNameToClassName(last.name);
+                    cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                     fieldName = Optional.empty();
                 }
                 if (Util.isEnum(schema)) {
@@ -396,7 +398,7 @@ public class Generator {
         }
 
         @Override
-        public void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
+        public void finishSchema(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
             if (Apis.isComplexSchema(schemaPath.last().schema) || Util.isEnum(schemaPath.last().schema)
                     || schemaPath.size() == 1) {

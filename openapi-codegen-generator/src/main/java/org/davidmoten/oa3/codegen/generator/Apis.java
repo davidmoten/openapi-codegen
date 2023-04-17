@@ -27,21 +27,23 @@ class Apis {
 
     static void visitSchemas(OpenAPI api, Visitor visitor) {
         if (api.getPaths() != null) {
-            api.getPaths().forEach((name, pathItem) -> visitSchemas(ImmutableList.of("Path", name), pathItem, visitor));
+            api.getPaths().forEach((name, pathItem) -> visitSchemas(SchemaCategory.PATH, ImmutableList.of(name),
+                    pathItem, visitor));
         }
         if (api.getComponents() != null) {
             if (api.getComponents().getParameters() != null)
-                api.getComponents().getParameters().forEach(
-                        (name, parameter) -> visitSchemas(ImmutableList.of("Parameter").add(name), parameter, visitor));
+                api.getComponents().getParameters().forEach((name, parameter) -> visitSchemas(SchemaCategory.PARAMETER,
+                        ImmutableList.of(name), parameter, visitor));
             if (api.getComponents().getPathItems() != null)
-                api.getComponents().getPathItems().forEach(
-                        (name, pathItem) -> visitSchemas(ImmutableList.of("PathItem").add(name), pathItem, visitor));
+                api.getComponents().getPathItems().forEach((name, pathItem) -> visitSchemas(SchemaCategory.PATH_ITEM,
+                        ImmutableList.of(name), pathItem, visitor));
             if (api.getComponents().getRequestBodies() != null)
-                api.getComponents().getRequestBodies().forEach((name,
-                        requestBody) -> visitSchemas(ImmutableList.of("RequestBody").add(name), requestBody, visitor));
+                api.getComponents().getRequestBodies()
+                        .forEach((name, requestBody) -> visitSchemas(SchemaCategory.REQUEST_BODY,
+                                ImmutableList.of(name), requestBody, visitor));
             if (api.getComponents().getResponses() != null)
-                api.getComponents().getResponses().forEach(
-                        (name, response) -> visitSchemas(ImmutableList.of("Response").add(name), response, visitor));
+                api.getComponents().getResponses().forEach((name, response) -> visitSchemas(SchemaCategory.RESPONSE,
+                        ImmutableList.of(name), response, visitor));
             if (api.getComponents().getSchemas() != null)
                 api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
         }
@@ -49,7 +51,8 @@ class Apis {
 
     static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
         Preconditions.checkArgument(name != null);
-        visitSchemas(ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)), visitor);
+        visitSchemas(SchemaCategory.SCHEMA, ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)),
+                visitor);
     }
 
     private static String stripLeadingSlash(String name) {
@@ -60,122 +63,133 @@ class Apis {
         }
     }
 
-    static void visitSchemas(ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
+    static void visitSchemas(SchemaCategory category, ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
         if (pathItem.readOperationsMap() != null) {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                visitSchemas(names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))), operation,
+                visitSchemas(category, names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))), operation,
                         visitor);
             });
         }
         if (pathItem.getParameters() != null) {
-            pathItem.getParameters().forEach(p -> visitSchemas(names.add(p.getName()), p, visitor));
+            pathItem.getParameters().forEach(p -> visitSchemas(category, names.add(p.getName()), p, visitor));
         }
     }
 
-    private static void visitSchemas(ImmutableList<String> list, Operation operation, Visitor visitor) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Operation operation,
+            Visitor visitor) {
         if (operation == null) {
             return;
         }
         if (operation.getParameters() != null) {
-            operation.getParameters().forEach(p -> visitSchemas(list.add(p.getName()), p, visitor));
+            operation.getParameters().forEach(p -> visitSchemas(category, list.add(p.getName()), p, visitor));
         }
-        visitSchemas(list, operation.getRequestBody(), visitor);
+        visitSchemas(category, list, operation.getRequestBody(), visitor);
         if (operation.getResponses() != null) {
             operation.getResponses().forEach((statusCode, response) -> {
-                visitSchemas(list.add(statusCode), response, visitor);
+                visitSchemas(category, list.add(statusCode), response, visitor);
             });
         }
     }
 
-    private static void visitSchemas(ImmutableList<String> list, ApiResponse response, Visitor visitor) {
-        visitSchemas(list.add("Response"), response.getContent(), visitor);
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, ApiResponse response, Visitor visitor) {
+        visitSchemas(category, list.add("Response"), response.getContent(), visitor);
     }
 
-    private static void visitSchemas(ImmutableList<String> list, RequestBody requestBody, Visitor visitor) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, RequestBody requestBody,
+            Visitor visitor) {
         if (requestBody != null) {
-            visitSchemas(list.add("Request"), requestBody.getContent(), visitor);
+            visitSchemas(category, list.add("Request"), requestBody.getContent(), visitor);
         }
     }
 
-    private static void visitSchemas(ImmutableList<String> list, Content content, Visitor visitor) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Content content,
+            Visitor visitor) {
         if (content != null) {
             content.forEach((mimeType, mediaType) -> {
                 if (mimeType.equals("application/json")) {
-                    visitSchemas(list, mediaType, visitor);
+                    visitSchemas(category, list, mediaType, visitor);
                 } else {
-                    visitSchemas(list.add(mimeType), mediaType, visitor);
+                    visitSchemas(category, list.add(mimeType), mediaType, visitor);
                 }
             });
         }
     }
 
-    private static void visitSchemas(ImmutableList<String> list, MediaType mediaType, Visitor visitor) {
-        visitSchemas(list, mediaType.getSchema(), visitor);
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, MediaType mediaType,
+            Visitor visitor) {
+        visitSchemas(category, list, mediaType.getSchema(), visitor);
     }
 
     private static String toName(ImmutableList<String> list) {
         StringBuilder b = new StringBuilder();
         for (String s : list) {
-            if (b.length() > 0) {
-                b.append("_");
-            }
-            b.append(s);
+            b.append(Names.upperFirst(skipForwardSlash(s)));
         }
-        return b.toString();
+        return Names.toIdentifier( b.toString());
     }
-
-    private static void visitSchemas(ImmutableList<String> list, Parameter parameter, Visitor visitor) {
+    
+    private static String skipForwardSlash(String s) {
+        if (s.startsWith("/")) {
+            return s.substring(1);
+        } else {
+            return s;
+        }
+    }
+    
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Parameter parameter,
+            Visitor visitor) {
         if (parameter != null) {
             if (parameter.getSchema() != null && !Util.isPrimitive(parameter.getSchema())) {
-                visitSchemas(list.add("Parameter").add(parameter.getName()), parameter.getSchema(), visitor);
+                visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getSchema(), visitor);
             }
-            visitSchemas(list.add("Parameter").add(parameter.getName()), parameter.getContent(), visitor);
+            visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getContent(), visitor);
         }
     }
 
-    private static void visitSchemas(ImmutableList<String> list, Schema<?> schema, Visitor visitor) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Schema<?> schema,
+            Visitor visitor) {
         if (schema != null) {
             ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
-            visitSchemas(schemaPath, visitor);
+            visitSchemas(category, schemaPath, visitor);
         }
     }
 
-    static void visitSchemas(ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
+    static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
-        visitor.startSchema(schemaPath);
+        visitor.startSchema(category, schemaPath);
         if (schema.getAdditionalProperties() instanceof Schema) {
-            visitSchemas(
+            visitSchemas(category,
                     schemaPath.add(
                             new SchemaWithName("additionalProperties", (Schema<?>) schema.getAdditionalProperties())),
                     visitor);
         }
         if (schema.getNot() != null) {
-            visitSchemas(schemaPath.add(new SchemaWithName("not", schema.getNot())), visitor);
+            visitSchemas(category, schemaPath.add(new SchemaWithName("not", schema.getNot())), visitor);
         }
         if (schema.getProperties() != null) {
-            schema.getProperties().entrySet()
-                    .forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), visitor));
+            schema.getProperties().entrySet().forEach(
+                    x -> visitSchemas(category, schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), visitor));
         }
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
             if (a.getItems() != null) {
-                visitSchemas(schemaPath.add(new SchemaWithName(schemaPath.last().name + "Item", a.getItems())),
-                        visitor);
+                visitSchemas(category,
+                        schemaPath.add(new SchemaWithName(schemaPath.last().name + "Item", a.getItems())), visitor);
             }
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;
             if (a.getAllOf() != null) {
-                a.getAllOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
+                a.getAllOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
             if (a.getOneOf() != null) {
-                a.getOneOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
+                a.getOneOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
             if (a.getAnyOf() != null) {
-                a.getAnyOf().forEach(x -> visitSchemas(schemaPath.add(new SchemaWithName(null, x)), visitor));
+                a.getAnyOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), visitor));
             }
         }
         // MapSchema and ObjectSchema have nothing to add
-        visitor.finishSchema(schemaPath);
+        visitor.finishSchema(category, schemaPath);
     }
 
     static final boolean isComplexSchema(Schema<?> schema) {
