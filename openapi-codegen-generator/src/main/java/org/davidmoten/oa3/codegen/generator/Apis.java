@@ -27,8 +27,8 @@ class Apis {
 
     static void visitSchemas(OpenAPI api, Visitor visitor) {
         if (api.getPaths() != null) {
-            api.getPaths().forEach((name, pathItem) -> visitSchemas(SchemaCategory.PATH, ImmutableList.of(name),
-                    pathItem, visitor));
+            api.getPaths().forEach(
+                    (name, pathItem) -> visitSchemas(SchemaCategory.PATH, ImmutableList.of(name), pathItem, visitor));
         }
         if (api.getComponents() != null) {
             if (api.getComponents().getParameters() != null)
@@ -66,8 +66,8 @@ class Apis {
     static void visitSchemas(SchemaCategory category, ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
         if (pathItem.readOperationsMap() != null) {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                visitSchemas(category, names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))), operation,
-                        visitor);
+                visitSchemas(category, names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))),
+                        operation, visitor);
             });
         }
         if (pathItem.getParameters() != null) {
@@ -91,7 +91,8 @@ class Apis {
         }
     }
 
-    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, ApiResponse response, Visitor visitor) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, ApiResponse response,
+            Visitor visitor) {
         visitSchemas(category, list.add("Response"), response.getContent(), visitor);
     }
 
@@ -123,19 +124,30 @@ class Apis {
     private static String toName(ImmutableList<String> list) {
         StringBuilder b = new StringBuilder();
         for (String s : list) {
-            b.append(Names.upperFirst(skipForwardSlash(s)));
+            b.append(Names.upperFirst(camelifyOnSeparatorCharacters(s)));
         }
-        return Names.toIdentifier( b.toString());
+        return Names.toIdentifier(b.toString());
     }
-    
-    private static String skipForwardSlash(String s) {
-        if (s.startsWith("/")) {
-            return s.substring(1);
-        } else {
-            return s;
+
+    private static String camelifyOnSeparatorCharacters(String s) {
+        StringBuilder b = new StringBuilder();
+        boolean start = true;
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (ch == '/' || ch == '{' || ch == '}' || ch == '-' || ch == '_' || ch == '.') {
+                start = true;
+            } else {
+                if (start) {
+                    b.append(Character.toUpperCase(ch));
+                } else {
+                    b.append(ch);
+                }
+                start = false;
+            }
         }
+        return b.toString();
     }
-    
+
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Parameter parameter,
             Visitor visitor) {
         if (parameter != null) {
