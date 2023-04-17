@@ -599,7 +599,6 @@ public class Generator {
     private static String resolveCandidateFullClassName(Cls cls, String candidateFullClassName) {
         String s = candidateFullClassName;
         Set<String> ownersAndSiblings = cls.ownersAndSiblingsSimpleNames();
-        System.out.println(candidateFullClassName + " -> " + ownersAndSiblings);
         if (ownersAndSiblings.contains(Names.simpleClassName(s)) || s.equals(cls.fullClassName)) {
             int i = 2;
             while (ownersAndSiblings.contains(Names.simpleClassName(s + i))) {

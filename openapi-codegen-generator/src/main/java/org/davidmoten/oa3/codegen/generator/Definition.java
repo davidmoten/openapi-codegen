@@ -13,10 +13,11 @@ public final class Definition {
     private final Set<String> includeSchemas;
     private final Set<String> excludeSchemas;
     private final boolean mapIntegerToBigInteger;
+    private final boolean failOnParseErrors;
 
     public Definition(String definition, Packages packages, File generatedSourceDirectory,
             Function<String, String> externalRefClassNames, Set<String> includeSchemas, Set<String> excludeSchemas,
-            boolean mapIntegerToBigInteger) {
+            boolean mapIntegerToBigInteger, boolean failOnParseErrors) {
         this.definition = definition;
         this.packages = packages;
         this.generatedSourceDirectory = generatedSourceDirectory;
@@ -24,6 +25,7 @@ public final class Definition {
         this.includeSchemas = includeSchemas;
         this.excludeSchemas = excludeSchemas;
         this.mapIntegerToBigInteger = mapIntegerToBigInteger;
+        this.failOnParseErrors = failOnParseErrors;
     }
 
     public String definition() {
@@ -52,6 +54,10 @@ public final class Definition {
     
     public boolean mapIntegerToBigInteger() {
         return mapIntegerToBigInteger;
+    }
+
+    public boolean failOnParseErrors() {
+        return failOnParseErrors;
     }
 
 }

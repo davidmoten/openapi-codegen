@@ -21,6 +21,7 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 final class Names {
@@ -42,9 +43,12 @@ final class Names {
 
     Names(Definition definition) {
         this.definition = definition;
-        SwaggerParseResult result = new OpenAPIParser().readContents(definition.definition(), null, null);
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIParser parser = new OpenAPIParser();
+        SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
-        if (!errors.isEmpty()) {
+        if (!errors.isEmpty() && definition.failOnParseErrors()) {
             throw new RuntimeException(errors);
         }
         this.api = result.getOpenAPI();
