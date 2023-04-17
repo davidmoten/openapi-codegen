@@ -83,7 +83,7 @@ final class CodeWriter {
             System.out.println(content);
         }
         out.close();
-        File file = names.schemaNameToJavaFile(schemaName);
+        File file = names.schemaNameToJavaFile(cls.category, schemaName);
         file.getParentFile().mkdirs();
         try {
             Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));

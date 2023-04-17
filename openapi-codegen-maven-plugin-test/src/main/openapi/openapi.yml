@@ -1287,20 +1287,20 @@ components:
     ######################
     
     Ref:
-      $ref: '#components/schemas/SimpleInteger'
+      $ref: '#/components/schemas/SimpleInteger'
       
     PropertyRef:
       type: object
       properties:
         first: 
-          $ref: '#components/schemas/SimpleInteger'
+          $ref: '#/components/schemas/SimpleInteger'
       required: [first]
       
     PropertyRefOptional:
       type: object
       properties:
         first: 
-          $ref: '#components/schemas/SimpleInteger'
+          $ref: '#/components/schemas/SimpleInteger'
       
     SimpleEnum:
       type: string
@@ -1492,4 +1492,16 @@ components:
         type: array
         items: 
           type: integer
-          format: int32      
+          format: int32
+
+    ## Name collision (cannot hide a class name in the heirarchy)         
+    Items:
+      type: object
+      properties:
+        items:
+          type: array
+          description: An arraylist of all the items.
+          items:
+            type: string 
+
+                

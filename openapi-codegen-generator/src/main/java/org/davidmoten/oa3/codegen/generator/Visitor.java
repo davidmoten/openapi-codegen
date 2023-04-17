@@ -4,9 +4,9 @@ import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
 
 @FunctionalInterface
 interface Visitor {
-    void startSchema(ImmutableList<SchemaWithName> schemaPath);
+    void startSchema(SchemaCategory schema, ImmutableList<SchemaWithName> schemaPath);
 
-    default void finishSchema(ImmutableList<SchemaWithName> schemaPath) {
+    default void finishSchema(SchemaCategory schema, ImmutableList<SchemaWithName> schemaPath) {
         // do nothing
     }
 }

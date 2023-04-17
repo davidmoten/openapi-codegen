@@ -6,22 +6,22 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import pet.store.generated.Service;
-import pet.store.model.NewPet;
-import pet.store.model.Path_pets_Get_200_Response;
-import pet.store.model.Pet;
-import pet.store.model.PetId;
+import pet.store.path.PetsGet200Response;
 import pet.store.runtime.ServiceException;
+import pet.store.schema.NewPet;
+import pet.store.schema.Pet;
+import pet.store.schema.PetId;
 
 @Component
 public class ServiceImpl implements Service {
 
     @Override
-    public Path_pets_Get_200_Response pets(int limit) throws ServiceException {
+    public PetsGet200Response pets(int limit) throws ServiceException {
         if (System.currentTimeMillis() % 2 == 0) {
             throw new ServiceException(405, "something went wrong");
         }
         Pet pet = new Pet(new NewPet("fido", Optional.empty()), new PetId(123));
-        return new Path_pets_Get_200_Response(Collections.singletonList(pet));
+        return new PetsGet200Response(Collections.singletonList(pet));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
