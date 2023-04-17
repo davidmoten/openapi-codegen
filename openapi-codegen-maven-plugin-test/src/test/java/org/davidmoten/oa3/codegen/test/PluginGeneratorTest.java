@@ -464,7 +464,7 @@ public class PluginGeneratorTest {
     public void testTurnValidateOff() {
         Config old = Globals.config();
         try {
-            Config config = Config.builder().mapper(Globals.config().mapper()).validate(false).build();
+            Config config = Config.builder().mapper(Globals.config().mapper()).validateInConstructor(x -> false).build();
             Globals.setConfig(config);
             new MinMaxLength("abc", Optional.of("defgh"));
         } finally {

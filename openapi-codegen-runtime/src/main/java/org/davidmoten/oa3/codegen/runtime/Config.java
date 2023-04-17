@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.runtime;
 
+import java.util.function.Predicate;
+
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -8,13 +10,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public final class Config {
 
-    private ObjectMapper mapper;
-    private boolean validateInConstructor;
+    private final ObjectMapper mapper;
+    private final Predicate<? super Class<?>> validateInConstructor;
 
     // Use a builder so we can add fields without making a breaking change
-    private Config(ObjectMapper mapper, boolean validate) {
+    private Config(ObjectMapper mapper, Predicate<? super Class<?>> validateInConstructor) {
         this.mapper = mapper;
-        this.validateInConstructor = validate;
+        this.validateInConstructor = validateInConstructor;
     }
 
     public static Builder builder() {
@@ -30,7 +32,7 @@ public final class Config {
                 .build() //
                 .registerModule(new JavaTimeModule());
 
-        private boolean validate = true;
+        private Predicate<? super Class<?>> validateInConstructor = x -> true;
 
         Builder() {
 
@@ -41,13 +43,13 @@ public final class Config {
             return this;
         }
 
-        public Builder validate(boolean validate) {
-            this.validate = validate;
+        public Builder validateInConstructor(Predicate<? super Class<?>> validateInConstructor) {
+            this.validateInConstructor = validateInConstructor;
             return this;
         }
 
         public Config build() {
-            return new Config(mapper, validate);
+            return new Config(mapper, validateInConstructor);
         }
     }
 
@@ -55,7 +57,7 @@ public final class Config {
         return mapper;
     }
 
-    public boolean validateInConstructor() {
+    public Predicate<? super Class<?>> validateInConstructor() {
         return validateInConstructor;
     }
 

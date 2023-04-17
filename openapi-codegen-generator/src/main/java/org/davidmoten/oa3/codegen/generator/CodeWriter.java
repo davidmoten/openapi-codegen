@@ -302,7 +302,7 @@ final class CodeWriter {
                 out.println();
                 out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersNullable);
                 indent.right();
-                ifValidate(out, indent, imports, names, //
+                ifValidate(cls, out, indent, imports, names, //
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
                                 out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
@@ -401,7 +401,7 @@ final class CodeWriter {
                 : "public";
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
-        ifValidate(out, indent, imports, names, //
+        ifValidate(cls, out, indent, imports, names, //
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                         out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
@@ -427,7 +427,7 @@ final class CodeWriter {
             out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             // validate
-            ifValidate(out, indent, imports, names, //
+            ifValidate(cls, out, indent, imports, names, //
                     out2 -> cls.fields.stream().forEach(x -> {
                         Optional<Discriminator> disc = interfaces.stream()
                                 .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator)
@@ -505,7 +505,7 @@ final class CodeWriter {
         }
     }
 
-    private static void ifValidate(PrintWriter out, Indent indent, Imports imports, Names names,
+    private static void ifValidate(Cls cls, PrintWriter out, Indent indent, Imports imports, Names names,
             Consumer<PrintWriter> r) {
         ByteArrayPrintWriter b = ByteArrayPrintWriter.create();
         indent.right();
@@ -516,8 +516,8 @@ final class CodeWriter {
         if (text.isEmpty()) {
             return;
         } else {
-            out.format("%sif (%s.config().validateInConstructor()) {\n", indent,
-                    imports.add(names.globalsFullClassName()));
+            out.format("%sif (%s.config().validateInConstructor().test(%s.class)) {\n", indent,
+                    imports.add(names.globalsFullClassName()), cls.simpleName());
             out.print(text);
             closeParen(out, indent);
         }
