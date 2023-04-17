@@ -1492,4 +1492,16 @@ components:
         type: array
         items: 
           type: integer
-          format: int32      
+          format: int32
+
+    ## Name collision (cannot hide a class name in the heirarchy)         
+    Items:
+      type: object
+      properties:
+        items:
+          type: array
+          description: An arraylist of all the items.
+          items:
+            type: string 
+
+                

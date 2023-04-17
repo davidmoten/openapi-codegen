@@ -97,6 +97,8 @@ public class Generator {
         boolean topLevel = false;
         boolean hasProperties = false;
         PolymorphicType polymorphicType;
+        Optional<Cls> owner = Optional.empty(); // the owning heirarchy, we cannot name our class any one of
+                                                // these classes (disallowed by java)
 
         String nextAnonymousFieldName() {
             num++;
@@ -161,6 +163,17 @@ public class Generator {
         public boolean unwrapSingleField() {
             return !hasProperties && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
                     || topLevel && fields.size() == 1);
+        }
+
+        public Set<String> ownersAndSiblingsSimpleNames() {
+            Cls c = this;
+            Set<String> set = new HashSet<>();
+            while (c.owner.isPresent()) {
+                set.add(c.owner.get().simpleName());
+                c = c.owner.get();
+            }
+            classes.forEach(x -> set.add(x.simpleName()));
+            return set;
         }
     }
 
@@ -298,15 +311,16 @@ public class Generator {
             }
             if (Util.isArray(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
-                previous.ifPresent(c -> c.classes.add(cls));
+                updateLinks(cls, previous);
                 if (previous.isPresent()) {
                     Optional<String> fieldName = Optional.of(previous.get().nextFieldName(last.name));
-                    String fullClassName = previous.get().fullClassName + "."
+                    String candidate = previous.get().fullClassName + "."
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
-                    cls.fullClassName = fullClassName;
+                    cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
                             previous.get().classType == ClassType.ARRAY_WRAPPER));
+                    
                 } else {
                     cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                 }
@@ -323,15 +337,18 @@ public class Generator {
                     || Util.isAnyOf(schema) || Util.isAllOf(schema)) {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 stack.push(cls);
-                previous.ifPresent(p -> p.classes.add(cls));
+                updateLinks(cls, previous);
                 final Optional<String> fieldName;
                 if (previous.isPresent()) {
                     fieldName = Optional.of(previous.get().nextFieldName(last.name));
-                    String fullClassName = previous.get().fullClassName + "."
+                    // Now get the wrapping class name using the field name and avoiding collisions
+                    // both with the owning class heirarchy and with siblings
+                    String candidate = previous.get().fullClassName + "."
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
-                    cls.fullClassName = fullClassName;
+                    cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                 } else {
-                    cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
+                    String candidate = names.schemaNameToClassName(cls.category, last.name);
+                    cls.fullClassName = candidate;
                     fieldName = Optional.empty();
                 }
                 if (Util.isEnum(schema)) {
@@ -395,6 +412,13 @@ public class Generator {
                     throw new RuntimeException("unexpected");
                 }
             }
+        }
+
+        private void updateLinks(final Cls cls, Optional<Cls> previous) {
+            previous.ifPresent(p -> {
+                p.classes.add(cls);
+                cls.owner = Optional.of(p);
+            });
         }
 
         @Override
@@ -570,6 +594,20 @@ public class Generator {
         } else {
             return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
         }
+    }
+
+    private static String resolveCandidateFullClassName(Cls cls, String candidateFullClassName) {
+        String s = candidateFullClassName;
+        Set<String> ownersAndSiblings = cls.ownersAndSiblingsSimpleNames();
+        System.out.println(candidateFullClassName + " -> " + ownersAndSiblings);
+        if (ownersAndSiblings.contains(Names.simpleClassName(s)) || s.equals(cls.fullClassName)) {
+            int i = 2;
+            while (ownersAndSiblings.contains(Names.simpleClassName(s + i))) {
+                i++;
+            }
+            s = s + i;
+        }
+        return s;
     }
 
     private static ClassType classType(Schema<?> schema) {

@@ -672,4 +672,5 @@ public class PluginGeneratorTest {
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
+    
 }
