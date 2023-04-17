@@ -1503,5 +1503,8 @@ components:
           description: An arraylist of all the items.
           items:
             type: string 
+            
+    External:
+      $ref: './fragment.yml#/components/schemas/Exter'
 
                 

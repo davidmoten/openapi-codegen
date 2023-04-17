@@ -38,6 +38,7 @@ import org.davidmoten.oa3.codegen.test.generated.schema.DogBreed;
 import org.davidmoten.oa3.codegen.test.generated.schema.EnumCollision;
 import org.davidmoten.oa3.codegen.test.generated.schema.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.generated.schema.ExclusiveMinMaxInteger;
+import org.davidmoten.oa3.codegen.test.generated.schema.External;
 import org.davidmoten.oa3.codegen.test.generated.schema.Geometry;
 import org.davidmoten.oa3.codegen.test.generated.schema.Latitude;
 import org.davidmoten.oa3.codegen.test.generated.schema.Longitude;
@@ -666,6 +667,17 @@ public class PluginGeneratorTest {
             Msi msi = new Msi(msiId, broadcast, createdTime, Optional.empty(), startTime, endTime, Optional.empty(),
                     Status.ACTIVE, Optional.empty(), Optional.empty(), Optional.empty());
             assertEquals(m.readTree(json), m.readTree(m.writeValueAsString(msi)));
+        }
+    }
+    
+    @Test
+    public void testExternalRefIsResolved() {
+        new External("hello");
+        try {
+            new External("hellotherehowareyou");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // all good
         }
     }
 
