@@ -21,12 +21,12 @@ public final class Util {
     public static boolean isPrimitiveFullClassName(String className) {
         return PRIMITIVE_CLASS_NAMES.contains(className);
     }
-    
+
     public static boolean isPrimitive(Schema<?> schema) {
         String type = schema.getType();
         return type != null && !"array".equals(type) && !"object".equals(type);
     }
-    
+
     public static boolean isEnum(Schema<?> schema) {
         return schema.getEnum() != null && !schema.getEnum().isEmpty();
     }
@@ -70,5 +70,5 @@ public final class Util {
     public static boolean isMap(Schema<?> schema) {
         return schema instanceof MapSchema;
     }
-
+    
 }

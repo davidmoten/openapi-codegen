@@ -99,6 +99,7 @@ public class Generator {
         PolymorphicType polymorphicType;
         Optional<Cls> owner = Optional.empty(); // the owning heirarchy, we cannot name our class any one of
                                                 // these classes (disallowed by java)
+        Optional<String> name = Optional.empty();
 
         String nextAnonymousFieldName() {
             num++;
@@ -305,6 +306,7 @@ public class Generator {
             if (stack.isEmpty()) {
                 // should be top-level class
                 cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
+                cls.name = Optional.of(last.name);
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
                 cls.topLevel = true;
@@ -320,7 +322,7 @@ public class Generator {
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
                             previous.get().classType == ClassType.ARRAY_WRAPPER));
-                    
+
                 } else {
                     cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                 }

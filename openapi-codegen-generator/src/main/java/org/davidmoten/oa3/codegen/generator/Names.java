@@ -281,4 +281,31 @@ final class Names {
         return definition.mapIntegerToBigInteger();
     }
 
+    static String toIdentifier(ImmutableList<String> list) {
+        StringBuilder b = new StringBuilder();
+        for (String s : list) {
+            b.append(Names.upperFirst(camelifyOnSeparatorCharacters(s)));
+        }
+        return Names.toIdentifier(b.toString());
+    }
+
+    private static String camelifyOnSeparatorCharacters(String s) {
+        StringBuilder b = new StringBuilder();
+        boolean start = true;
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (ch == '/' || ch == '{' || ch == '}' || ch == '-' || ch == '_' || ch == '.') {
+                start = true;
+            } else {
+                if (start) {
+                    b.append(Character.toUpperCase(ch));
+                } else {
+                    b.append(ch);
+                }
+                start = false;
+            }
+        }
+        return b.toString();
+    }
+
 }

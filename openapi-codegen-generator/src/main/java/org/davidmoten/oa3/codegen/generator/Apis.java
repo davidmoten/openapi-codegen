@@ -121,33 +121,6 @@ class Apis {
         visitSchemas(category, list, mediaType.getSchema(), visitor);
     }
 
-    private static String toName(ImmutableList<String> list) {
-        StringBuilder b = new StringBuilder();
-        for (String s : list) {
-            b.append(Names.upperFirst(camelifyOnSeparatorCharacters(s)));
-        }
-        return Names.toIdentifier(b.toString());
-    }
-
-    private static String camelifyOnSeparatorCharacters(String s) {
-        StringBuilder b = new StringBuilder();
-        boolean start = true;
-        for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
-            if (ch == '/' || ch == '{' || ch == '}' || ch == '-' || ch == '_' || ch == '.') {
-                start = true;
-            } else {
-                if (start) {
-                    b.append(Character.toUpperCase(ch));
-                } else {
-                    b.append(ch);
-                }
-                start = false;
-            }
-        }
-        return b.toString();
-    }
-
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Parameter parameter,
             Visitor visitor) {
         if (parameter != null) {
@@ -161,7 +134,8 @@ class Apis {
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Schema<?> schema,
             Visitor visitor) {
         if (schema != null) {
-            ImmutableList<SchemaWithName> schemaPath = ImmutableList.of(new SchemaWithName(toName(list), schema));
+            ImmutableList<SchemaWithName> schemaPath = ImmutableList
+                    .of(new SchemaWithName(Names.toIdentifier(list), schema));
             visitSchemas(category, schemaPath, visitor);
         }
     }
@@ -201,6 +175,7 @@ class Apis {
             }
         }
         // MapSchema and ObjectSchema have nothing to add
+
         visitor.finishSchema(category, schemaPath);
     }
 
