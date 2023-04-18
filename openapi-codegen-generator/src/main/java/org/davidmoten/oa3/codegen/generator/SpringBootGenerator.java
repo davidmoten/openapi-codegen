@@ -36,11 +36,15 @@ public class SpringBootGenerator {
 
     private void handleParameter(ImmutableList<String> list, Parameter parameter) {
 //        parameter.get$ref();
-//        parameter.getSchema();
-        System.out.println(list);
-        parameter.getContent().forEach((mimeType, mediaType) -> {
-            System.out.println("thing");
-        });
+        System.out.println(list.add(parameter.getName()));
+        if (parameter.getContent() != null) {
+            parameter.getContent().forEach((mimeType, mediaType) -> {
+                System.out.println(mimeType + ": " + mediaType);
+            });
+        }
+        if (parameter.getSchema()!= null) {
+            System.out.println(parameter.getSchema());
+        }
     }
 
 }
