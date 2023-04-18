@@ -48,8 +48,13 @@ final class Names {
         OpenAPIParser parser = new OpenAPIParser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
-        if (!errors.isEmpty() && definition.failOnParseErrors()) {
-            throw new RuntimeException(errors);
+        if (!errors.isEmpty()) {
+            if (definition.failOnParseErrors()) {
+                throw new RuntimeException(errors);
+            } else {
+                // Destined for maven plugin output so following their logging format
+                System.out.println("[WARNING] Swagger Parse Errors:\n" + errors);
+            }
         }
         this.api = result.getOpenAPI();
         superSchemas(api);
@@ -72,7 +77,8 @@ final class Names {
     }
 
     String schemaNameToClassName(SchemaCategory category, String schemaName) {
-        return definition.packages().basePackage() + "." + category.getPackageFragment() + "." + schemaNameToSimpleClassName(schemaName);
+        return definition.packages().basePackage() + "." + category.getPackageFragment() + "."
+                + schemaNameToSimpleClassName(schemaName);
     }
 
     String schemaNameToSimpleClassName(String schemaName) {
@@ -108,7 +114,7 @@ final class Names {
                 category = SchemaCategory.SCHEMA;
             } else {
                 throw new RuntimeException("unexpected ref: " + ref);
-            }   
+            }
             String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
             fullClassName = schemaNameToClassName(category, schemaName);
         }
@@ -233,7 +239,8 @@ final class Names {
         return map;
     }
 
-    private static List<Schema<?>> findSchemas(SchemaCategory category, String name, Schema<?> schema, Predicate<Schema<?>> predicate) {
+    private static List<Schema<?>> findSchemas(SchemaCategory category, String name, Schema<?> schema,
+            Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
         Apis.visitSchemas(category, ImmutableList.of(new SchemaWithName(name, schema)), (c, schemaPath) -> {
             if (predicate.test(schemaPath.last().schema)) {
