@@ -3,10 +3,6 @@ package org.davidmoten.oa3.codegen.generator;
 import static org.davidmoten.oa3.codegen.runtime.internal.Util.toPrimitive;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +20,6 @@ import org.davidmoten.oa3.codegen.generator.internal.LinkedStack;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
 
-import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -371,7 +366,7 @@ public class Generator {
                 Cls current = stack.peek();
                 final String fullClassName;
                 if (Util.isPrimitive(schema)) {
-                    Class<?> c = toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
+                    Class<?> c = Util.toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
                     final Optional<Integer> maxLength;
@@ -545,7 +540,7 @@ public class Generator {
             boolean isArray, Optional<String> fieldName, Names names) {
         Schema<?> schema = schemaPath.last().schema;
         cls.classType = ClassType.ENUM;
-        Class<?> valueCls = toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
+        Class<?> valueCls = Util.toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
         cls.enumFullType = valueCls.getCanonicalName();
         Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
         Set<String> used = new HashSet<>();
@@ -620,49 +615,6 @@ public class Generator {
             return ClassType.ARRAY_WRAPPER;
         } else {
             return ClassType.CLASS;
-        }
-    }
-
-    private static Class<?> toClass(String type, String format, boolean mapIntegerToBigInteger) {
-        Preconditions.checkNotNull(type);
-        if ("string".equals(type)) {
-            if ("date-time".equals(format)) {
-                return OffsetDateTime.class;
-            } else if ("date".equals(format)) {
-                return LocalDate.class;
-            } else if ("time".equals(format)) {
-                return OffsetTime.class;
-            } else if ("byte".equals(format)) {
-                return byte[].class;
-            } else if ("binary".equals(format)) {
-                return byte[].class;
-            } else {
-                return String.class;
-            }
-        } else if ("boolean".equals(type)) {
-            return Boolean.class;
-        } else if ("integer".equals(type)) {
-            if ("int32".equals(format)) {
-                return Integer.class;
-            } else if ("int64".equals(format)) {
-                return Long.class;
-            } else {
-                return mapIntegerToBigInteger ? BigInteger.class : Long.class;
-            }
-        } else if ("number".equals(type)) {
-            if ("float".equals(format)) {
-                return Float.class;
-            } else if ("double".equals(format)) {
-                return Double.class;
-            } else {
-                return BigDecimal.class;
-            }
-        } else if ("array".equals(type)) {
-            return List.class;
-        } else if ("object".equals(type)) {
-            return Object.class;
-        } else {
-            throw new RuntimeException("unexpected type and format: " + type + ", " + format);
         }
     }
 

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
@@ -12,10 +13,12 @@ import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor.Result;
 import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+import org.davidmoten.oa3.codegen.generator.internal.Util;
 
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 
 @NotThreadSafe
@@ -49,6 +52,7 @@ public class SpringBootGenerator {
         names.api().getPaths().forEach((pathName, pathItem) -> {
             gatherMethods(pathName, pathItem, methods);
         });
+        methods.forEach(System.out::println);
     }
 
     private void gatherMethods(String pathName, PathItem pathItem, List<Method> methods) {
@@ -65,9 +69,26 @@ public class SpringBootGenerator {
             operation.getParameters() //
                     .forEach(p -> {
                         // TODO p.ref$
-                        p.getSchema();
+                        boolean isArray = false;
+                        Schema<?> s = p.getSchema();
+                        if (Util.isArray(s)) {
+                            isArray = true;
+                            s = s.getItems();
+                        }
+                        // handle simple schemas
+                        if (s != null && Util.isPrimitive(s)) {
+                            Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
+                            Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
+                            params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                                    p.getRequired(), cls, isArray));
+                        }
+                        // TODO handle object schema and explode
+                        // TODO handle refs
+                        // TODO complex schemas?
                     });
         }
+        Method m = new Method(methodName, params, returnCls, pathName, method);
+        methods.add(m);
     }
 
     private static final class Method {
@@ -84,21 +105,39 @@ public class SpringBootGenerator {
             this.path = path;
             this.httpMethod = httpMethod;
         }
+
+        @Override
+        public String toString() {
+            return "Method [path=" + path + ", httpMethod=" + httpMethod + ", methodName=" + methodName + ", returnCls="
+                    + returnCls + ", parameters="
+                    + parameters.stream().map(Object::toString).map(x -> "\n    " + x).collect(Collectors.joining())
+                    + "]";
+        }
+
     }
 
     private static final class Param {
         final String name;
         final String identifier;
-        final Optional<String> defaultValue;
+        final Optional<Object> defaultValue;
         final boolean required;
         final Class<?> cls;
+        final boolean isArray;
 
-        Param(String name, String identifier, Optional<String> defaultValue, boolean required, Class<?> cls) {
+        Param(String name, String identifier, Optional<Object> defaultValue, boolean required, Class<?> cls,
+                boolean isArray) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
             this.required = required;
             this.cls = cls;
+            this.isArray = isArray;
+        }
+
+        @Override
+        public String toString() {
+            return "Param [" + identifier + ", name=" + name + ", defaultValue=" + defaultValue
+                    + ", required=" + required + ", cls=" + cls + ", isArray=" + isArray + "]";
         }
     }
 
