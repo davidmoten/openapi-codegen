@@ -109,7 +109,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/../openapi-codegen-maven-plugin-test/src/main/openapi/ebay.yml</inputSpec>
+                            <inputSpec>${project.basedir}/../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>demo.api</apiPackage>
                             <modelPackage>demo.model</modelPackage>

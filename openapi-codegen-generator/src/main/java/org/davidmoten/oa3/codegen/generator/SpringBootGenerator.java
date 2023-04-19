@@ -27,6 +27,11 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class SpringBootGenerator {
 
+    private static final String SPRING_REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
+    private static final String SPRING_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
+    private static final String SPRING_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
+    private static final String SPRING_REQUEST_METHOD = "org.springframework.web.bind.annotation.RequestMethod";
+
     private final Names names;
     private final Map<String, Cls> refCls;
     private final Map<Schema<?>, Cls> schemaCls;
@@ -69,13 +74,11 @@ public class SpringBootGenerator {
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (m.hasRequestBody) {
-                    return String.format("\n%s@%s %s %s", indent,
-                            imports.add("org.springframework.web.bind.annotation.RequestBody"),
+                    return String.format("\n%s@%s %s %s", indent, imports.add(SPRING_REQUEST_BODY),
                             toImportedType(p, imports), "requestBody");
                 } else {
-                    return String.format("\n%s@%s(name = \"%s\") %s %s", indent,
-                            imports.add("org.springframework.web.bind.annotation.RequestParam"), p.name,
-                            toImportedType(p, imports), p.identifier);
+                    return String.format("\n%s@%s(name = \"%s\") %s %s", indent, imports.add(SPRING_REQUEST_PARAM),
+                            p.name, toImportedType(p, imports), p.identifier);
                 }
             }).collect(Collectors.joining(", "));
             indent.left().left();
@@ -85,7 +88,15 @@ public class SpringBootGenerator {
             } else {
                 importedReturnType = imports.add(m.returnFullClassName);
             }
-            out.format("\n\n%s %s %s(%s);", indent, importedReturnType, m.methodName, params);
+//            @RequestMapping(
+//                    method = RequestMethod.POST,
+//                    value = "/postWithRequestBodyNotRequired",
+//                    produces = { "application/json" },
+//                    consumes = { "application/json" }
+//                )
+            out.format("\n\n%s@%s(method = %s.%s, value=\"%s\")\n", indent, imports.add(SPRING_REQUEST_MAPPING),
+                    imports.add(SPRING_REQUEST_METHOD), m.httpMethod.toString(), m.path);
+            out.format("%s%s %s(%s);", indent, importedReturnType, m.methodName, params);
         });
         indent.left();
         out.println("\n}\n");

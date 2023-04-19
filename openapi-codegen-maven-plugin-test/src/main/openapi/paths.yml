@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+    
+  title: path tests
+  version: 0.1
+
+paths:
+
+  /postWithRequestBodyRequired:
+
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody1'
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1' 
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /postWithRequestBodyNotRequired:
+            
+    post:
+      requestBody:
+        required: false
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody1'
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1' 
+        default:    
+          $ref: '#/components/responses/Error'       
+                        
+components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'            
+            
+    Unauthorized:
+      description: Unauthorized (must authenticate)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+            
+    Forbidden:
+      description: Not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+                                    
+    ServerError:
+      description: Unexpected error on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+                      
+  schemas:
+    Error:
+      description: an error message (response)
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        errorMessage: 
+          type: string
+
+    RequestBody1:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+      required: [username]
+        
+    Response1:
+      type: object
+      properties:
+        token: 
+          type: string
+          minLength: 1
+      required: [token]
+                      
+    RequestBody2:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+      required: [username]
+        
+    Response2:
+      type: object
+      properties:
+        token: 
+          type: string
+          minLength: 1
+      required: [token]                      
