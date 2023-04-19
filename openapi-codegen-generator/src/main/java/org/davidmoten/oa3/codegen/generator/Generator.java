@@ -95,6 +95,7 @@ public class Generator {
         Optional<Cls> owner = Optional.empty(); // the owning heirarchy, we cannot name our class any one of
                                                 // these classes (disallowed by java)
         Optional<String> name = Optional.empty();
+        Optional<Schema<?>> schema = Optional.empty();
 
         String nextAnonymousFieldName() {
             num++;
@@ -302,6 +303,7 @@ public class Generator {
                 // should be top-level class
                 cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                 cls.name = Optional.of(last.name);
+                cls.schema = Optional.of(schema);
                 imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
                 cls.topLevel = true;
