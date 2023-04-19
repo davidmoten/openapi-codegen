@@ -63,22 +63,32 @@ public class SpringBootGenerator {
         Imports imports = new Imports("Api");
         PrintStream out = System.out;
         Indent indent = new Indent();
-        out.println("\npublic interface Api {\n");
+        out.println("\npublic interface Api {");
         indent.right();
         methods.forEach(m -> {
             indent.right().right();
-            String params = m.parameters.stream()
-                    .map(p -> String.format("\n%s@%s(name = \"%s\") %s %s",
-                            indent,
-                            imports.add("org.springframework.web.bind.annotation.RequestParam"),
-                            p.name,
-                            toImportedType(p, imports), p.identifier))
-                    .collect(Collectors.joining());
+            String params = m.parameters.stream().map(p -> {
+                if (m.hasRequestBody) {
+                    return String.format("\n%s@%s %s %s", indent,
+                            imports.add("org.springframework.web.bind.annotation.RequestBody"),
+                            toImportedType(p, imports), "requestBody");
+                } else {
+                    return String.format("\n%s@%s(name = \"%s\") %s %s", indent,
+                            imports.add("org.springframework.web.bind.annotation.RequestParam"), p.name,
+                            toImportedType(p, imports), p.identifier);
+                }
+            }).collect(Collectors.joining(", "));
             indent.left().left();
-            out.format("%s %s %s(%s);\n", indent, imports.add(m.returnFullClassName), m.methodName, params);
+            final String importedReturnType;
+            if (m.returnFullClassName.equals(Void.class.getCanonicalName())) {
+                importedReturnType = "void";
+            } else {
+                importedReturnType = imports.add(m.returnFullClassName);
+            }
+            out.format("\n\n%s %s %s(%s);", indent, importedReturnType, m.methodName, params);
         });
         indent.left();
-        out.println("}");
+        out.println("\n}\n");
     }
 
     private static String toImportedType(Param p, Imports imports) {
@@ -102,6 +112,7 @@ public class SpringBootGenerator {
                 .toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
         List<Param> params = new ArrayList<>();
         String returnFullClassName = Void.class.getCanonicalName();
+        boolean hasRequestBody = false;
         if (operation.getParameters() != null) {
             operation.getParameters() //
                     .forEach(p -> {
@@ -125,6 +136,7 @@ public class SpringBootGenerator {
                     });
         }
         if (operation.getRequestBody() != null) {
+            hasRequestBody = true;
             RequestBody b = operation.getRequestBody();
             // TODO handle ref
             MediaType mediaType = b.getContent().get("application/json");
@@ -155,7 +167,7 @@ public class SpringBootGenerator {
             }
             // TODO handle other mediaTypes
         }
-        Method m = new Method(methodName, params, returnFullClassName, pathName, method);
+        Method m = new Method(methodName, params, returnFullClassName, pathName, method, hasRequestBody);
         methods.add(m);
     }
 
@@ -165,14 +177,16 @@ public class SpringBootGenerator {
         final String returnFullClassName; // arrays always wrapped ?
         final String path;
         final HttpMethod httpMethod;
+        final boolean hasRequestBody;
 
         Method(String methodName, List<Param> parameters, String returnFullClassName, String path,
-                HttpMethod httpMethod) {
+                HttpMethod httpMethod, boolean hasRequestBody) {
             this.methodName = methodName;
             this.parameters = parameters;
             this.returnFullClassName = returnFullClassName;
             this.path = path;
             this.httpMethod = httpMethod;
+            this.hasRequestBody = hasRequestBody;
         }
 
         @Override
