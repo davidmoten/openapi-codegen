@@ -17,11 +17,23 @@ public final class Preconditions {
     public static void checkMinimum(Number x, String min, String name) {
         checkMinimum(x, min, name, false);
     }
-    
+
+    public static void checkMinimum(Optional<? extends Number> x, String min, String name) {
+        if (x.isPresent()) {
+            checkMinimum(x.get(), min, name, false);
+        }
+    }
+
     public static void checkMaximum(Number x, String max, String name) {
         checkMaximum(x, max, name, false);
     }
-    
+
+    public static void checkMaximum(Optional<? extends Number> x, String max, String name) {
+        if (x.isPresent()) {
+            checkMaximum(x.get(), max, name, false);
+        }
+    }
+
     public static void checkMinimum(Number x, String min, String name, boolean exclusive) {
         int compare = new BigDecimal(min).compareTo(BigDecimal.valueOf(x.doubleValue()));
         if (!exclusive && compare > 0) {
@@ -29,6 +41,12 @@ public final class Preconditions {
         }
         if (exclusive && compare >= 0) {
             throw new IllegalArgumentException(name + " must be > " + min);
+        }
+    }
+
+    public static void checkMinimum(Optional<? extends Number> x, String min, String name, boolean exclusive) {
+        if (x.isPresent()) {
+            checkMinimum(x.get(), min, name, exclusive);
         }
     }
 
@@ -41,6 +59,12 @@ public final class Preconditions {
             throw new IllegalArgumentException(name + " must be < " + max);
         }
     }
+    
+    public static void checkMaximum(Optional<? extends Number> x, String min, String name, boolean exclusive) {
+        if (x.isPresent()) {
+            checkMaximum(x.get(), min, name, exclusive);
+        }
+    }
 
     public static String checkMinLength(String s, int minLength, String name) {
         if (s.length() < minLength) {
@@ -48,10 +72,24 @@ public final class Preconditions {
         }
         return s;
     }
+    
+    public static Optional<String> checkMinLength(Optional<String> s, int minLength, String name) {
+        if (s.isPresent()) {
+            checkMinLength(s.get(), minLength, name);
+        }
+        return s;
+    }
 
     public static String checkMaxLength(String s, int maxLength, String name) {
         if (s.length() > maxLength) {
             throw new IllegalArgumentException(name + " must have a length of at most " + maxLength);
+        }
+        return s;
+    }
+    
+    public static Optional<String> checkMaxLength(Optional<String> s, int maxLength, String name) {
+        if (s.isPresent()) {
+            checkMaxLength(s.get(), maxLength, name);
         }
         return s;
     }

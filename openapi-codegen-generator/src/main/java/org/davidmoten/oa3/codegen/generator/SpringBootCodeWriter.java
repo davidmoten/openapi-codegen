@@ -158,6 +158,7 @@ public class SpringBootCodeWriter {
                 indent.right();
                 out.format("%stry {\n", indent);
                 indent.right();
+                out.format("%s// TODO check constraints\n", indent);
                 if (m.returnFullClassName.isPresent()) {
                     out.format("%sreturn %s.ok(service.%s(%s));\n", indent, imports.add(ResponseEntity.class),
                             m.methodName,

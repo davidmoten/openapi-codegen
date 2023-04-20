@@ -1,5 +1,8 @@
 package pet.store.generated;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.davidmoten.oa3.codegen.runtime.internal.Preconditions;
 import org.davidmoten.oa3.codegen.runtime.internal.Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import pet.store.service.Service;
 
 @RestController
 public class ServiceController {
@@ -19,11 +24,11 @@ public class ServiceController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/pets", produces = { "application/json" })
-    public ResponseEntity<?> pets(@RequestParam(name = "limit", defaultValue = "10") int limit) {
+    public ResponseEntity<?> petsGet(@RequestParam(name="tags") List<String> tags, @RequestParam(name = "limit", defaultValue = "10") Optional<Integer> limit) {
         try {
             Preconditions.checkMinimum(limit, "1", "limit", false);
             Preconditions.checkMaximum(limit, "10", "limit", false);
-            return ResponseEntity.ok(service.pets(limit));
+            return ResponseEntity.ok(service.petsGet(tags, limit));
         } catch (Throwable e) {
             return service.errorResponse(e);
         }

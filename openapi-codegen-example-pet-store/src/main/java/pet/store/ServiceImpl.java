@@ -1,23 +1,24 @@
 package pet.store;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import pet.store.generated.Service;
 import pet.store.path.PetsGet200Response;
 import pet.store.schema.NewPet;
 import pet.store.schema.Pet;
 import pet.store.schema.PetId;
+import pet.store.service.Service;
 
 @Component
 public class ServiceImpl implements Service {
 
     @Override
-    public PetsGet200Response pets(int limit) throws ServiceException {
+    public PetsGet200Response petsGet(List<String> tags, Optional<Integer> limit) throws ServiceException {
         long t = System.currentTimeMillis();
         if (t % 3 == 0) {
             throw new ServiceException(405, "something went wrong");
