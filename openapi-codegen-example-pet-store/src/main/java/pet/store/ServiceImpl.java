@@ -19,6 +19,7 @@ public class ServiceImpl implements Service {
 
     @Override
     public PetsGet200Response petsGet(List<String> tags, Optional<Integer> limit) throws ServiceException {
+        System.out.println(tags);
         long t = System.currentTimeMillis();
         if (t % 3 == 0) {
             throw new ServiceException(405, "something went wrong");
