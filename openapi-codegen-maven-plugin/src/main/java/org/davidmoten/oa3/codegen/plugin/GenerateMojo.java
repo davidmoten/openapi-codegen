@@ -17,6 +17,7 @@ import org.apache.maven.shared.utils.io.FileUtils;
 import org.davidmoten.oa3.codegen.generator.Definition;
 import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Packages;
+import org.davidmoten.oa3.codegen.generator.SpringBootGenerator;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 
 import com.github.davidmoten.guavamini.Sets;
@@ -50,6 +51,9 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "failOnParseErrors", defaultValue = "true")
     private boolean failOnParseErrors;
+    
+    @Parameter(name = "generator")
+    private String generator; 
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -78,6 +82,9 @@ public final class GenerateMojo extends AbstractMojo {
                         Sets.newHashSet(Util.orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
                         failOnParseErrors);
                 new Generator(d).generate();
+                if("spring".equals(generator)) {
+                    new SpringBootGenerator(d).generate();
+                }
             }
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
         } catch (IOException e) {

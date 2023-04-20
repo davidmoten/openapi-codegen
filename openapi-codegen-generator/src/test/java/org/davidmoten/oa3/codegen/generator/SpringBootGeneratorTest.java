@@ -14,7 +14,7 @@ public class SpringBootGeneratorTest {
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
                 Collections.emptySet(), Collections.emptySet(), false, true);
-        new SpringBootGenerator(new Names(d)).generate();
+        new SpringBootGenerator(d).generate();
     }
 
 }

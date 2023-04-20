@@ -91,7 +91,7 @@ final class CodeWriter {
             throw new UncheckedIOException(e);
         }
     }
-
+    
     public static void writeGlobalsClass(Names names) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();

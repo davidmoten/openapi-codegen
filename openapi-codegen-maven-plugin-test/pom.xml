@@ -70,6 +70,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <generator>spring</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.generated</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
@@ -85,6 +86,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <generator>spring</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.generated.cts</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
@@ -100,6 +102,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <generator>spring</generator>
                             <basePackage>org.davidmoten.oa3.codegen.ebay.generated</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
@@ -115,6 +118,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <generator>spring</generator>
                             <basePackage>org.davidmoten.oa3.codegen.marqueta.generated</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>

@@ -6,7 +6,7 @@ info:
 
 paths:
 
-  /postWithRequestBodyRequired:
+  /requestBodyRequired:
 
     post:
       requestBody:
@@ -25,7 +25,7 @@ paths:
         default:    
           $ref: '#/components/responses/Error'
           
-  /postWithRequestBodyNotRequired:
+  /requestBodyNotRequired:
             
     post:
       requestBody:

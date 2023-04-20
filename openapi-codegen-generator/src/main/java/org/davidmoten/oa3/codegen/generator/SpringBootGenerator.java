@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,8 +12,6 @@ import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor.Result;
 import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
-import org.davidmoten.oa3.codegen.generator.internal.Imports;
-import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 
 import io.swagger.v3.oas.models.Operation;
@@ -27,17 +24,12 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class SpringBootGenerator {
 
-    private static final String SPRING_REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
-    private static final String SPRING_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
-    private static final String SPRING_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
-    private static final String SPRING_REQUEST_METHOD = "org.springframework.web.bind.annotation.RequestMethod";
-
     private final Names names;
     private final Map<String, Cls> refCls;
     private final Map<Schema<?>, Cls> schemaCls;
 
-    public SpringBootGenerator(Names names) {
-        this.names = names;
+    public SpringBootGenerator(Definition definition) {
+        this.names = new Names(definition);
         // make a ref map
         Map<String, Cls> refCls = new HashMap<String, Cls>();
         Map<Schema<?>, Cls> schemaCls = new HashMap<Schema<?>, Cls>();
@@ -47,7 +39,7 @@ public class SpringBootGenerator {
             Cls c = result.cls;
             if (c.topLevel) {
                 String refPrefix = c.category.refPrefix();
-                String ref = refPrefix + c.name;
+                String ref = refPrefix + c.name.get();
                 refCls.put(ref, c);
                 schemaCls.put(c.schema.get(), c);
             }
@@ -63,53 +55,8 @@ public class SpringBootGenerator {
         names.api().getPaths().forEach((pathName, pathItem) -> {
             gatherMethods(pathName, pathItem, methods);
         });
-        methods.forEach(System.out::println);
 
-        Imports imports = new Imports("Api");
-        PrintStream out = System.out;
-        Indent indent = new Indent();
-        out.println("\npublic interface Api {");
-        indent.right();
-        methods.forEach(m -> {
-            indent.right().right();
-            String params = m.parameters.stream().map(p -> {
-                if (m.hasRequestBody) {
-                    return String.format("\n%s@%s %s %s", indent, imports.add(SPRING_REQUEST_BODY),
-                            toImportedType(p, imports), "requestBody");
-                } else {
-                    return String.format("\n%s@%s(name = \"%s\") %s %s", indent, imports.add(SPRING_REQUEST_PARAM),
-                            p.name, toImportedType(p, imports), p.identifier);
-                }
-            }).collect(Collectors.joining(", "));
-            indent.left().left();
-            final String importedReturnType;
-            if (m.returnFullClassName.equals(Void.class.getCanonicalName())) {
-                importedReturnType = "void";
-            } else {
-                importedReturnType = imports.add(m.returnFullClassName);
-            }
-//            @RequestMapping(
-//                    method = RequestMethod.POST,
-//                    value = "/postWithRequestBodyNotRequired",
-//                    produces = { "application/json" },
-//                    consumes = { "application/json" }
-//                )
-            out.format("\n\n%s@%s(method = %s.%s, value=\"%s\")\n", indent, imports.add(SPRING_REQUEST_MAPPING),
-                    imports.add(SPRING_REQUEST_METHOD), m.httpMethod.toString(), m.path);
-            out.format("%s%s %s(%s);", indent, importedReturnType, m.methodName, params);
-        });
-        indent.left();
-        out.println("\n}\n");
-    }
-
-    private static String toImportedType(Param p, Imports imports) {
-        if (p.isArray) {
-            return String.format("%s<%s>", imports.add(List.class), imports.add(p.fullClassName));
-        } else if (p.required) {
-            return imports.add(p.fullClassName);
-        } else {
-            return String.format("%s<%s>", imports.add(Optional.class), imports.add(p.fullClassName));
-        }
+        SpringBootCodeWriter.writeServiceClass(names, methods);
     }
 
     private void gatherMethods(String pathName, PathItem pathItem, List<Method> methods) {
@@ -122,7 +69,7 @@ public class SpringBootGenerator {
         String methodName = Names
                 .toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
         List<Param> params = new ArrayList<>();
-        String returnFullClassName = Void.class.getCanonicalName();
+        Optional<String> returnFullClassName = Optional.empty();
         boolean hasRequestBody = false;
         if (operation.getParameters() != null) {
             operation.getParameters() //
@@ -157,24 +104,34 @@ public class SpringBootGenerator {
                     if (schemaCls.get(schema) != null) {
                         String fullClassName = schemaCls.get(schema).fullClassName;
                         params.add(new Param("requestBody", "requestBody",
-                                Optional.ofNullable((Object) schema.getDefault()), true, fullClassName, false));
+                                Optional.ofNullable((Object) schema.getDefault()), Util.orElse(b.getRequired(), false), fullClassName,
+                                false));
                     } else {
-                        // TODO unexpected?
+                        throw new RuntimeException("unexpected");
                     }
                 }
-            } else {
-                // for each other request mimeType
-//                params.add(new Param("requestBody", "requestBody", Optional.ofNullable((Object) schema.getDefault()),
-//                        true, byte[].class.getCanonicalName(), false));
-            }
+            } 
+//            else {
+//                // for each other request mimeType
+////                params.add(new Param("requestBody", "requestBody", Optional.ofNullable((Object) schema.getDefault()),
+////                        true, byte[].class.getCanonicalName(), false));
+//                
+//            }
         }
         ApiResponse response = operation.getResponses().get("200");
         if (response != null) {
             if (response.getContent() != null) {
                 MediaType mediaType = response.getContent().get("application/json");
                 if (mediaType != null) {
-                    returnFullClassName = schemaCls.get(mediaType.getSchema()).fullClassName;
+                    String ref = mediaType.getSchema().get$ref();
+                    if (mediaType.getSchema().get$ref() == null) {
+                        returnFullClassName = Optional.of(schemaCls.get(mediaType.getSchema()).fullClassName);
+                    } else {
+                        returnFullClassName = Optional.of(refCls.get(ref).fullClassName);
+                    }
                 }
+            } else {
+                System.out.println("TODO handle response ref");
             }
             // TODO handle other mediaTypes
         }
@@ -182,15 +139,15 @@ public class SpringBootGenerator {
         methods.add(m);
     }
 
-    private static final class Method {
+    public static final class Method {
         final String methodName;
         final List<Param> parameters;
-        final String returnFullClassName; // arrays always wrapped ?
+        final Optional<String> returnFullClassName; // arrays always wrapped ?
         final String path;
         final HttpMethod httpMethod;
         final boolean hasRequestBody;
 
-        Method(String methodName, List<Param> parameters, String returnFullClassName, String path,
+        Method(String methodName, List<Param> parameters, Optional<String> returnFullClassName, String path,
                 HttpMethod httpMethod, boolean hasRequestBody) {
             this.methodName = methodName;
             this.parameters = parameters;
@@ -203,14 +160,14 @@ public class SpringBootGenerator {
         @Override
         public String toString() {
             return "Method [path=" + path + ", httpMethod=" + httpMethod + ", methodName=" + methodName + ", returnCls="
-                    + returnFullClassName + ", parameters="
+                    + returnFullClassName.orElse("") + ", parameters="
                     + parameters.stream().map(Object::toString).map(x -> "\n    " + x).collect(Collectors.joining())
                     + "]";
         }
 
     }
 
-    private static final class Param {
+    public static final class Param {
         final String name;
         final String identifier;
         final Optional<Object> defaultValue;

@@ -308,4 +308,8 @@ final class Names {
         return b.toString();
     }
 
+    public String serviceFullClassName() {
+        return definition.packages().basePackage() + ".service.Api";
+    }
+
 }

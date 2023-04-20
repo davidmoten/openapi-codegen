@@ -3,7 +3,10 @@
 <FindBugsFilter>
   <And>
     <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
-    <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
+    <Or>
+        <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
+        <Class name="org.davidmoten.oa3.codegen.generator.SpringBootCodeWriter"/>
+    </Or>
     <Bug code="RV"/>
   </And>
   <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
