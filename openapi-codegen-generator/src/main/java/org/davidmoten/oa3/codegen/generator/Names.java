@@ -311,5 +311,9 @@ final class Names {
     public String serviceControllerFullClassName() {
         return definition.packages().basePackage() + ".service.ServiceController";
     }
+    
+    public String serviceInterfaceFullClassName() {
+        return definition.packages().basePackage() + ".service.Service";
+    }
 
 }

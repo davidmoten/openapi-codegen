@@ -28,7 +28,12 @@ public class SpringBootCodeWriter {
     private static final String SPRING_REST_CONTROLLER = "org.springframework.web.bind.annotation.RestController";
     private static final String SPRING_RESPONSE_ENTITY = "org.springframework.http.ResponseEntity";
 
-    static void writeServiceClass(Names names, List<Method> methods) {
+    public static void writeServiceClasses(Names names, List<Method> methods) {
+        writeServiceControllerClass(names, methods);
+        writeServiceInterfaceClass(names, methods);
+    }
+
+    private static void writeServiceControllerClass(Names names, List<Method> methods) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Imports imports = new Imports(names.serviceControllerFullClassName());
         writeServiceControllerClass(out, imports, names, methods);
@@ -45,6 +50,38 @@ public class SpringBootCodeWriter {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static void writeServiceInterfaceClass(Names names, List<Method> methods) {
+        String fullClassName = names.serviceInterfaceFullClassName();
+        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        Imports imports = new Imports(fullClassName);
+        writeServiceInterfaceClass(out, imports, names, methods);
+        String content = out.text().replace(IMPORTS_HERE, imports.toString());
+        if (DEBUG) {
+            System.out.println("////////////////////////////////////////////////");
+            System.out.println(content);
+        }
+        out.close();
+        File file = names.fullClassNameToJavaFile(fullClassName);
+        file.getParentFile().mkdirs();
+        try {
+            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static void writeServiceInterfaceClass(ByteArrayPrintWriter out, Imports imports, Names names,
+            List<Method> methods) {
+        Indent indent = new Indent();
+        out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
+        out.format("\n%s", IMPORTS_HERE);
+        out.format("\npublic interface %s {\n", Names.simpleClassName(names.serviceInterfaceFullClassName()));
+        indent.right();
+        writeMethods(out, imports, methods, indent, false);
+        indent.left();
+        out.println("\n}\n");
     }
 
     private static void writeServiceControllerClass(ByteArrayPrintWriter out, Imports imports, Names names,
@@ -90,8 +127,7 @@ public class SpringBootCodeWriter {
             } else if (!m.returnFullClassName.isPresent()) {
                 importedReturnType = "void";
             } else {
-                importedReturnType = String.format("%s<%s>", imports.add(SPRING_RESPONSE_ENTITY),
-                        imports.add(m.returnFullClassName.get()));
+                importedReturnType = imports.add(m.returnFullClassName.get());
             }
 //            @RequestMapping(
 //                    method = RequestMethod.POST,
@@ -99,17 +135,17 @@ public class SpringBootCodeWriter {
 //                    produces = { "application/json" },
 //                    consumes = { "application/json" }
 //                )
-            out.format("\n%s@%s(\n", indent, imports.add(SPRING_REQUEST_MAPPING));
-            indent.right();
-            out.format("%smethod = %s.%s,\n", indent, imports.add(SPRING_REQUEST_METHOD), m.httpMethod);
-            out.format("%svalue = \"%s\")\n", indent, m.path);
-            indent.left();
             if (isController) {
+                out.format("\n%s@%s(\n", indent, imports.add(SPRING_REQUEST_MAPPING));
+                indent.right();
+                out.format("%smethod = %s.%s,\n", indent, imports.add(SPRING_REQUEST_METHOD), m.httpMethod);
+                out.format("%svalue = \"%s\")\n", indent, m.path);
+                indent.left();
                 out.format("%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
                 out.format("%sreturn null;\n", indent.right());
                 out.format("%s}\n", indent.left());
             } else {
-                out.format("%s%s %s(%s);\n", indent, importedReturnType, m.methodName, params);
+                out.format("\n%s%s %s(%s);\n", indent, importedReturnType, m.methodName, params);
             }
         });
     }
@@ -123,4 +159,5 @@ public class SpringBootCodeWriter {
             return String.format("%s<%s>", imports.add(Optional.class), imports.add(p.fullClassName));
         }
     }
+
 }

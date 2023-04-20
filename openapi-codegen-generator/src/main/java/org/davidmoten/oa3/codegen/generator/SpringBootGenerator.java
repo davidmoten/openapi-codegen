@@ -58,7 +58,7 @@ public class SpringBootGenerator {
             gatherMethods(pathName, pathItem, methods);
         });
 
-        SpringBootCodeWriter.writeServiceClass(names, methods);
+        SpringBootCodeWriter.writeServiceClasses(names, methods);
     }
 
     private void gatherMethods(String pathName, PathItem pathItem, List<Method> methods) {
