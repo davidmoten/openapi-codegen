@@ -42,7 +42,7 @@ public class SpringBootCodeWriter {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         String fullClassName = names.applicationFullClassName();
         Imports imports = new Imports(fullClassName);
-        writeApplicationClass(out, imports, names, fullClassName);
+        writeApplicationClass(out, imports, fullClassName);
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
         if (DEBUG) {
             System.out.println("////////////////////////////////////////////////");
@@ -58,7 +58,7 @@ public class SpringBootCodeWriter {
         }
     }
 
-    private static void writeApplicationClass(ByteArrayPrintWriter out, Imports imports, Names names, String fullClassName) {
+    private static void writeApplicationClass(ByteArrayPrintWriter out, Imports imports, String fullClassName) {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(fullClassName));
         out.format("\n%s", IMPORTS_HERE);
