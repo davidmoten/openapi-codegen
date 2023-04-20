@@ -14,12 +14,13 @@ import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Param;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
+import org.davidmoten.oa3.codegen.generator.internal.Util;
 
 public class SpringBootCodeWriter {
 
     private static final String IMPORTS_HERE = "IMPORTS_HERE";
     private static final boolean DEBUG = true;
-    
+
     private static final String SPRING_REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
     private static final String SPRING_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
     private static final String SPRING_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
@@ -80,20 +81,19 @@ public class SpringBootCodeWriter {
             out.format("\n\n%s@%s(\n", indent, imports.add(SPRING_REQUEST_MAPPING));
             indent.right();
             out.format("%smethod = %s.%s,\n", indent, imports.add(SPRING_REQUEST_METHOD), m.httpMethod);
-            out.format("%svalue = \"%s\"\n", indent, m.path);
+            out.format("%svalue = \"%s\")\n", indent, m.path);
             indent.left();
-            out.format("%s)\n", indent);
             out.format("%s%s %s(%s);", indent, importedReturnType, m.methodName, params);
         });
         indent.left();
         out.println("\n}\n");
     }
-    
+
     private static String toImportedType(Param p, Imports imports) {
         if (p.isArray) {
             return String.format("%s<%s>", imports.add(List.class), imports.add(p.fullClassName));
         } else if (p.required) {
-            return imports.add(p.fullClassName);
+            return imports.add(Util.toPrimitive(p.fullClassName));
         } else {
             return String.format("%s<%s>", imports.add(Optional.class), imports.add(p.fullClassName));
         }

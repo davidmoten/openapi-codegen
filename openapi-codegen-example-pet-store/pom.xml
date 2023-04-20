@@ -84,6 +84,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <generator>spring</generator>
                             <basePackage>pet.store</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>

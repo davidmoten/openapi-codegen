@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
 import static org.davidmoten.oa3.codegen.generator.internal.Util.orElse;
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.toPrimitive;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +90,7 @@ final class CodeWriter {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     public static void writeGlobalsClass(Names names) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
@@ -274,7 +273,7 @@ final class CodeWriter {
                         imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
                 out.format("%s}\n", indent.left());
                 cls.fields.forEach(f -> {
-                    String className = toPrimitive(f.fullClassName);
+                    String className = org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive(f.fullClassName);
                     out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
                     indent.right();
                     if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
@@ -326,7 +325,9 @@ final class CodeWriter {
             indent.right();
             out.format("\n%spublic Deserializer() {\n", indent);
             indent.right();
-            String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
+            String classes = cls.fields.stream()
+                    .map(x -> imports.add(
+                            org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
             out.format("%ssuper(%s.config(), %s.%s, %s.class, %s);\n", indent,
                     imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
@@ -391,7 +392,7 @@ final class CodeWriter {
         } else {
             out.println();
         }
-        boolean hasOptional =  cls.fields.stream().anyMatch(f -> !f.required);
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters

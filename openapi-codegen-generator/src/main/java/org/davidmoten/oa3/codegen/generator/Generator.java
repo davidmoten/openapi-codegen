@@ -1,7 +1,5 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.toPrimitive;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -257,7 +255,7 @@ public class Generator {
         }
 
         public boolean isPrimitive() {
-            return required && PRIMITIVE_CLASS_NAMES.contains(toPrimitive(fullClassName));
+            return required && PRIMITIVE_CLASS_NAMES.contains(Util.toPrimitive(fullClassName));
         }
 
         public boolean isOctets() {
@@ -568,7 +566,7 @@ public class Generator {
         } else if (f.isArray) {
             return toList(f.fullClassName, imports, false);
         } else if (f.required) {
-            return imports.add(toPrimitive(f.fullClassName));
+            return imports.add(Util.toPrimitive(f.fullClassName));
         } else {
             return imports.add(f.fullClassName);
         }
@@ -589,7 +587,7 @@ public class Generator {
         } else if (f.isArray) {
             return toList(f.fullClassName, imports, !f.required);
         } else if (f.required) {
-            return imports.add(toPrimitive(f.fullClassName));
+            return imports.add(Util.toPrimitive(f.fullClassName));
         } else {
             return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
         }
