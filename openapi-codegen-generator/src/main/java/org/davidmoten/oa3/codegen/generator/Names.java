@@ -309,7 +309,7 @@ final class Names {
     }
 
     public String serviceFullClassName() {
-        return definition.packages().basePackage() + ".service.Api";
+        return definition.packages().basePackage() + ".service.Service";
     }
 
 }
