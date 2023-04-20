@@ -52,7 +52,7 @@ public class SpringBootCodeWriter {
         out.format("\n%s", IMPORTS_HERE);
         out.format("\n@%s\n", imports.add(SpringBootApplication.class));
         String simpleClassName = Names.simpleClassName(fullClassName);
-        out.format("public final class %s {\n", simpleClassName);
+        out.format("public class %s {\n", simpleClassName);
         indent.right();
         out.format("\n%spublic static void main(%s[] args) {\n", indent, imports.add(String.class));
         indent.right();
@@ -129,7 +129,8 @@ public class SpringBootCodeWriter {
                 } else {
                     final String annotations;
                     if (isController) {
-                        annotations = String.format("@%s(name = \"%s\") ", imports.add(RequestParam.class), p.name);
+                        String defValue = p.defaultValue.map(x -> ", defaultValue = \"" + x + "\"").orElse(""); 
+                        annotations = String.format("@%s(name = \"%s\"%s) ", imports.add(RequestParam.class), p.name, defValue);
                     } else {
                         annotations = "";
                     }
