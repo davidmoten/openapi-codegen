@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ApplicationController {
+public class ServiceController {
 
     @Autowired
     private Service service;

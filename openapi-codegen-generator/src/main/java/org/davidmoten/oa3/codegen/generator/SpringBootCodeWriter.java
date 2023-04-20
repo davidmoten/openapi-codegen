@@ -29,15 +29,15 @@ public class SpringBootCodeWriter {
 
     static void writeServiceClass(Names names, List<Method> methods) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
-        Imports imports = new Imports(names.serviceFullClassName());
-        writeServiceClass(out, imports, names, methods);
+        Imports imports = new Imports(names.serviceControllerFullClassName());
+        writeServiceControllerClass(out, imports, names, methods);
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
         if (DEBUG) {
             System.out.println("////////////////////////////////////////////////");
             System.out.println(content);
         }
         out.close();
-        File file = names.fullClassNameToJavaFile(names.serviceFullClassName());
+        File file = names.fullClassNameToJavaFile(names.serviceControllerFullClassName());
         file.getParentFile().mkdirs();
         try {
             Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
@@ -46,13 +46,19 @@ public class SpringBootCodeWriter {
         }
     }
 
-    private static void writeServiceClass(ByteArrayPrintWriter out, Imports imports, Names names,
+    private static void writeServiceControllerClass(ByteArrayPrintWriter out, Imports imports, Names names,
             List<Method> methods) {
         Indent indent = new Indent();
-        out.format("package %s;\n", Names.pkg(names.serviceFullClassName()));
+        out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
-        out.format("\npublic interface %s {", Names.simpleClassName(names.serviceFullClassName()));
+        out.format("\npublic interface %s {", Names.simpleClassName(names.serviceControllerFullClassName()));
         indent.right();
+        writeMethods(out, imports, methods, indent);
+        indent.left();
+        out.println("\n}\n");
+    }
+
+    private static void writeMethods(ByteArrayPrintWriter out, Imports imports, List<Method> methods, Indent indent, boolean isServiceInterface) {
         methods.forEach(m -> {
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
@@ -85,8 +91,6 @@ public class SpringBootCodeWriter {
             indent.left();
             out.format("%s%s %s(%s);", indent, importedReturnType, m.methodName, params);
         });
-        indent.left();
-        out.println("\n}\n");
     }
 
     private static String toImportedType(Param p, Imports imports) {

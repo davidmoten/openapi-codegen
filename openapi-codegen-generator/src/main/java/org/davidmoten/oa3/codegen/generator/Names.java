@@ -308,8 +308,8 @@ final class Names {
         return b.toString();
     }
 
-    public String serviceFullClassName() {
-        return definition.packages().basePackage() + ".service.Service";
+    public String serviceControllerFullClassName() {
+        return definition.packages().basePackage() + ".service.ServiceController";
     }
 
 }

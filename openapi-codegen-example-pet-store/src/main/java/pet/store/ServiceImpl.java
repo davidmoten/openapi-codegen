@@ -3,6 +3,7 @@ package pet.store;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import pet.store.generated.Service;
@@ -17,8 +18,11 @@ public class ServiceImpl implements Service {
 
     @Override
     public PetsGet200Response pets(int limit) throws ServiceException {
-        if (System.currentTimeMillis() % 2 == 0) {
+        long t = System.currentTimeMillis();
+        if (t % 3 == 0) {
             throw new ServiceException(405, "something went wrong");
+        } else if (t % 3 == 1) {
+            throw new ServiceException(ResponseEntity.status(409).body("problem"));
         }
         Pet pet = new Pet(new NewPet("fido", Optional.empty()), new PetId(123));
         return new PetsGet200Response(Collections.singletonList(pet));
