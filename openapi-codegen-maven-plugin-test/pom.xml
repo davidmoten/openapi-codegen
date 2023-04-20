@@ -19,6 +19,12 @@
             <artifactId>openapi-codegen-runtime</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>openapi-codegen-spring-runtime</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>

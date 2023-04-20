@@ -17,6 +17,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 
 public class SpringBootCodeWriter {
 
@@ -156,7 +157,8 @@ public class SpringBootCodeWriter {
                 indent.right();
                 out.format("%stry {\n", indent);
                 indent.right();
-                out.format("%sreturn null;\n", indent);
+                out.format("%sreturn %s.ok(service.%s(%s));\n", indent, imports.add(ResponseEntity.class), m.methodName,
+                        m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
                 indent.left();
                 out.format("%s} catch (%s e) {\n", indent, imports.add(Throwable.class));
                 indent.right();
