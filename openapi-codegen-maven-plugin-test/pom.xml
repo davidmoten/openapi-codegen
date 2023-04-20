@@ -71,7 +71,7 @@
                 <version>${project.parent.version}</version>
                 <executions>
                     <execution>
-                        <id>unit-test</id>
+                        <id>unit-test-schemas</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -82,6 +82,22 @@
                                 <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
                                     <include>openapi.yml</include>
+                                </includes>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unit-test-paths</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generator>spring</generator>
+                            <basePackage>org.davidmoten.oa3.codegen.paths.generated</basePackage>
+                            <sources>
+                                <directory>${project.basedir}/src/main/openapi</directory>
+                                <includes>
+                                    <include>paths.yml</include>
                                 </includes>
                             </sources>
                         </configuration>

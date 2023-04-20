@@ -50,7 +50,7 @@ public class SpringBootCodeWriter {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(names.serviceFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
-        out.format("\npublic interface %s {\n", Names.simpleClassName(names.serviceFullClassName()));
+        out.format("\npublic interface %s {", Names.simpleClassName(names.serviceFullClassName()));
         indent.right();
         methods.forEach(m -> {
             indent.right().right();
