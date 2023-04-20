@@ -20,12 +20,17 @@ import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SpringBootCodeWriter {
 
@@ -34,6 +39,7 @@ public class SpringBootCodeWriter {
 
     public static void writeServiceClasses(Names names, List<Method> methods) {
         writeApplicationClass(names);
+        writeJacksonConfigurationClass(names);
         writeServiceControllerClass(names, methods);
         writeServiceInterfaceClass(names, methods);
     }
@@ -61,6 +67,34 @@ public class SpringBootCodeWriter {
         out.format("%s}\n", indent);
         indent.left();
         out.println("\n}\n");        
+    }
+    
+    private static void writeJacksonConfigurationClass(Names names) {
+        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        String fullClassName = names.jacksonConfigurationFullClassName();
+        Imports imports = new Imports(fullClassName);
+        writeJacksonConfigurationClass(out, imports, names, fullClassName);
+        writeContent(names, out, fullClassName, imports);
+    }
+
+    private static void writeJacksonConfigurationClass(ByteArrayPrintWriter out, Imports imports, Names names,
+            String fullClassName) {
+        Indent indent = new Indent();
+        out.format("package %s;\n", Names.pkg(fullClassName));
+        out.format("\n%s", IMPORTS_HERE);
+        out.format("\n@%s\n", imports.add(Configuration.class));
+        String simpleClassName = Names.simpleClassName(fullClassName);
+        out.format("public class %s {\n", simpleClassName);
+        indent.right();
+        out.format("\n%s@%s\n", indent, imports.add(Bean.class));
+        out.format("%s@%s\n", indent, imports.add(Primary.class));
+        out.format("%spublic %s objectMapper() {\n", indent, imports.add(ObjectMapper.class));
+        indent.right();
+        out.format("%sreturn %s.config().mapper();\n", indent, imports.add(names.globalsFullClassName()));
+        indent.left();
+        out.format("%s}\n", indent);
+        indent.left();
+        out.println("\n}\n");     
     }
 
     private static void writeServiceControllerClass(Names names, List<Method> methods) {

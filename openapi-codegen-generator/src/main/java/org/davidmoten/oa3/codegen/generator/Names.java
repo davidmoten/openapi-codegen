@@ -320,4 +320,8 @@ final class Names {
         return definition.packages().basePackage() + ".Application";
     }
 
+    public String jacksonConfigurationFullClassName() {
+        return definition.packages().basePackage() + ".service.JacksonConfiguration";
+    }
+
 }
