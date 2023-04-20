@@ -16,6 +16,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
+import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
@@ -157,8 +158,15 @@ public class SpringBootCodeWriter {
                 indent.right();
                 out.format("%stry {\n", indent);
                 indent.right();
-                out.format("%sreturn %s.ok(service.%s(%s));\n", indent, imports.add(ResponseEntity.class), m.methodName,
-                        m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
+                if (m.returnFullClassName.isPresent()) {
+                    out.format("%sreturn %s.ok(service.%s(%s));\n", indent, imports.add(ResponseEntity.class),
+                            m.methodName,
+                            m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
+                } else {
+                    out.format("%sservice.%s(%s);\n", indent, m.methodName,
+                            m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
+                    out.format("%sreturn %s.ok();\n", indent, imports.add(ResponseEntity.class));
+                }
                 indent.left();
                 out.format("%s} catch (%s e) {\n", indent, imports.add(Throwable.class));
                 indent.right();
@@ -169,8 +177,8 @@ public class SpringBootCodeWriter {
                 out.format("%s}\n", indent);
             } else {
                 out.format("\n%sdefault %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
-                // TODO throw spring specific ServiceException
-                out.format("%sthrow new %s();\n", indent.right(), imports.add(UnsupportedOperationException.class));
+                out.format("%sthrow new %s(501, \"Not implemented\");\n", indent.right(),
+                        imports.add(ServiceException.class));
                 out.format("%s}\n", indent.left());
             }
         });
