@@ -19,18 +19,16 @@ import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 public class SpringBootCodeWriter {
 
     private static final String IMPORTS_HERE = "IMPORTS_HERE";
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
-
-    private static final String SPRING_REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
-    private static final String SPRING_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
-    private static final String SPRING_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
-    private static final String SPRING_REQUEST_METHOD = "org.springframework.web.bind.annotation.RequestMethod";
-    private static final String SPRING_REST_CONTROLLER = "org.springframework.web.bind.annotation.RestController";
-    private static final String SPRING_RESPONSE_ENTITY = "org.springframework.http.ResponseEntity";
 
     public static void writeServiceClasses(Names names, List<Method> methods) {
         writeServiceControllerClass(names, methods);
@@ -94,7 +92,7 @@ public class SpringBootCodeWriter {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
-        out.format("\n@%s\n", imports.add(SPRING_REST_CONTROLLER));
+        out.format("\n@%s\n", imports.add(RestController.class));
         String simpleClassName = Names.simpleClassName(names.serviceControllerFullClassName());
         out.format("public class %s {\n", simpleClassName);
         indent.right();
@@ -118,7 +116,7 @@ public class SpringBootCodeWriter {
                 if (p.isRequestBody) {
                     final String annotations;
                     if (isController) {
-                        annotations = String.format("@%s ", imports.add(SPRING_REQUEST_BODY));
+                        annotations = String.format("@%s ", imports.add(RequestBody.class));
                     } else {
                         annotations = "";
                     }
@@ -126,7 +124,7 @@ public class SpringBootCodeWriter {
                 } else {
                     final String annotations;
                     if (isController) {
-                        annotations = String.format("@%s(name = \"%s\") ", imports.add(SPRING_REQUEST_PARAM), p.name);
+                        annotations = String.format("@%s(name = \"%s\") ", imports.add(RequestParam.class), p.name);
                     } else {
                         annotations = "";
                     }
@@ -136,7 +134,7 @@ public class SpringBootCodeWriter {
             indent.left().left();
             final String importedReturnType;
             if (isController) {
-                importedReturnType = String.format("%s<?>", imports.add(SPRING_RESPONSE_ENTITY));
+                importedReturnType = String.format("%s<?>", imports.add(ResponseEntity.class));
             } else if (!m.returnFullClassName.isPresent()) {
                 importedReturnType = "void";
             } else {
@@ -149,9 +147,9 @@ public class SpringBootCodeWriter {
 //                    consumes = { "application/json" }
 //                )
             if (isController) {
-                out.format("\n%s@%s(\n", indent, imports.add(SPRING_REQUEST_MAPPING));
+                out.format("\n%s@%s(\n", indent, imports.add(RequestMapping.class));
                 indent.right();
-                out.format("%smethod = %s.%s,\n", indent, imports.add(SPRING_REQUEST_METHOD), m.httpMethod);
+                out.format("%smethod = %s.%s,\n", indent, imports.add(RequestMethod.class), m.httpMethod);
                 out.format("%svalue = \"%s\")\n", indent, m.path);
                 indent.left();
                 out.format("%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
