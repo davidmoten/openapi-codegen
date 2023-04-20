@@ -36,6 +36,7 @@
         <slf4j.version>1.7.36</slf4j.version>
 
         <jackson.version>2.15.0</jackson.version>
+        <spring.version>2.7.10</spring.version>
         <junit.version>4.13.2</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
         <jacoco.version>0.8.10</jacoco.version>
@@ -88,6 +89,7 @@
     <modules>
         <module>openapi-codegen-runtime</module>
         <module>openapi-codegen-generator</module>
+        <module>openapi-codegen-spring-runtime</module>
         <module>openapi-codegen-maven-plugin</module>
         <module>openapi-codegen-maven-plugin-test</module>
         <module>openapi-codegen-example-pet-store</module>

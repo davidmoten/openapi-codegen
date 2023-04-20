@@ -1,4 +1,4 @@
-package pet.store.runtime;
+package org.davidmoten.oa3.codegen.spring.runtime;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -26,5 +26,13 @@ public final class DefaultError {
 
     public DefaultError(int statusCode, Throwable e) {
         this(statusCode, e.getMessage());
+    }
+    
+    public int statusCode() {
+        return statusCode;
+    }
+    
+    public String message() {
+        return message;
     }
 }

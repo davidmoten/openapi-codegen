@@ -105,7 +105,7 @@ public class SpringBootCodeWriter {
                 if (p.isRequestBody) {
                     final String annotations;
                     if (isController) {
-                        annotations = String.format("@%s(name = \"%s\") ", imports.add(SPRING_REQUEST_BODY), p.name);
+                        annotations = String.format("@%s ", imports.add(SPRING_REQUEST_BODY));
                     } else {
                         annotations = "";
                     }

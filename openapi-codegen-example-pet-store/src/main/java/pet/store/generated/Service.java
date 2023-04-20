@@ -1,8 +1,9 @@
 package pet.store.generated;
 
+import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
+import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+
 import pet.store.path.PetsGet200Response;
-import pet.store.runtime.ErrorHandler;
-import pet.store.runtime.ServiceException;
 
 public interface Service extends ErrorHandler {
 

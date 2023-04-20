@@ -3,12 +3,12 @@ package pet.store;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import pet.store.generated.Service;
 import pet.store.path.PetsGet200Response;
-import pet.store.runtime.ServiceException;
 import pet.store.schema.NewPet;
 import pet.store.schema.Pet;
 import pet.store.schema.PetId;

@@ -1,4 +1,4 @@
-package pet.store.runtime;
+package org.davidmoten.oa3.codegen.spring.runtime;
 
 import java.util.Optional;
 

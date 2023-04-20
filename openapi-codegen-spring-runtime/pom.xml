@@ -7,22 +7,40 @@
         <artifactId>openapi-codegen-parent</artifactId>
         <version>0.1-alpha-2-SNAPSHOT</version>
     </parent>
-    <artifactId>openapi-codegen-maven-example-pet-store</artifactId>
+    <artifactId>openapi-codegen-spring-runtime</artifactId>
     <name>${project.artifactId}</name>
-    <description />
     <packaging>jar</packaging>
+
     <dependencies>
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-runtime</artifactId>
-            <version>${project.parent.version}</version>
+            <artifactId>guava-mini</artifactId>
+            <version>0.1.6</version>
         </dependency>
-        
+
         <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-spring-runtime</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>2.1.1</version>
         </dependency>
 
         <dependency>
@@ -38,15 +56,23 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>junit-extras</artifactId>
+            <version>${junit.extras.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.version}</version>
-            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler.plugin.version}</version>
@@ -76,59 +102,33 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.github.davidmoten</groupId>
-                <artifactId>openapi-codegen-maven-plugin</artifactId>
-                <version>${project.parent.version}</version>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs.plugin.version}</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <xmlOutput>true</xmlOutput>
+                    <excludeFilterFile>${project.basedir}/src/main/spotbugs/filter.xml</excludeFilterFile>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>unit-test</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>check</goal>
                         </goals>
-                        <configuration>
-                            <generator>spring</generator>
-                            <basePackage>pet.store</basePackage>
-                            <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
-                                <includes>
-                                    <include>openapi.yml</include>
-                                </includes>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cts</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <basePackage>org.davidmoten.oa3.codegen.test.generated.cts</basePackage>
-                            <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
-                                <includes>
-                                    <include>cts.yml</include>
-                                </includes>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${build.helper.version}</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${pmd.version}</version>
                 <executions>
                     <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>add-source</goal>
+                            <goal>check</goal>
+                            <goal>cpd-check</goal>
                         </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/java</source>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
