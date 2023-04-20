@@ -70,7 +70,6 @@ public class SpringBootGenerator {
                 .toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
         List<Param> params = new ArrayList<>();
         Optional<String> returnFullClassName = Optional.empty();
-        boolean hasRequestBody = false;
         if (operation.getParameters() != null) {
             operation.getParameters() //
                     .forEach(p -> {
@@ -86,7 +85,7 @@ public class SpringBootGenerator {
                             Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
                             Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
                             params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
-                                    p.getRequired(), cls.getCanonicalName(), isArray));
+                                    p.getRequired(), cls.getCanonicalName(), isArray, false));
                         }
                         // TODO handle object schema and explode
                         // TODO handle refs
@@ -94,7 +93,6 @@ public class SpringBootGenerator {
                     });
         }
         if (operation.getRequestBody() != null) {
-            hasRequestBody = true;
             RequestBody b = operation.getRequestBody();
             // TODO handle ref
             MediaType mediaType = b.getContent().get("application/json");
@@ -105,7 +103,7 @@ public class SpringBootGenerator {
                         String fullClassName = schemaCls.get(schema).fullClassName;
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()), Util.orElse(b.getRequired(), false), fullClassName,
-                                false));
+                                false, true));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
@@ -135,7 +133,7 @@ public class SpringBootGenerator {
             }
             // TODO handle other mediaTypes
         }
-        Method m = new Method(methodName, params, returnFullClassName, pathName, method, hasRequestBody);
+        Method m = new Method(methodName, params, returnFullClassName, pathName, method);
         methods.add(m);
     }
 
@@ -145,16 +143,14 @@ public class SpringBootGenerator {
         final Optional<String> returnFullClassName; // arrays always wrapped ?
         final String path;
         final HttpMethod httpMethod;
-        final boolean hasRequestBody;
 
         Method(String methodName, List<Param> parameters, Optional<String> returnFullClassName, String path,
-                HttpMethod httpMethod, boolean hasRequestBody) {
+                HttpMethod httpMethod) {
             this.methodName = methodName;
             this.parameters = parameters;
             this.returnFullClassName = returnFullClassName;
             this.path = path;
             this.httpMethod = httpMethod;
-            this.hasRequestBody = hasRequestBody;
         }
 
         @Override
@@ -174,15 +170,17 @@ public class SpringBootGenerator {
         final boolean required;
         final String fullClassName;
         final boolean isArray;
+        final boolean isRequestBody;
 
         Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
-                boolean isArray) {
+                boolean isArray, boolean isRequestBody) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
             this.required = required;
             this.fullClassName = fullClassName;
             this.isArray = isArray;
+            this.isRequestBody = isRequestBody;
         }
 
         @Override

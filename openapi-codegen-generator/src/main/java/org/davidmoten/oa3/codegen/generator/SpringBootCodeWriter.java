@@ -55,7 +55,7 @@ public class SpringBootCodeWriter {
         methods.forEach(m -> {
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
-                if (m.hasRequestBody) {
+                if (p.isRequestBody) {
                     return String.format("\n%s@%s %s %s", indent, imports.add(SPRING_REQUEST_BODY),
                             toImportedType(p, imports), "requestBody");
                 } else {
