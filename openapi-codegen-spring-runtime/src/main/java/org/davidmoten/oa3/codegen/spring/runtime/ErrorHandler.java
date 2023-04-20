@@ -18,4 +18,5 @@ public interface ErrorHandler {
     default Object errorResponseBody(int statusCode, Throwable e) {
         return new DefaultError(statusCode, e);
     }
+    
 }

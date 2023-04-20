@@ -91,7 +91,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.github.davidmoten.guavamini.Lists;
 
-public class PluginGeneratorTest {
+public class PluginGeneratorSchemasTest {
 
     private static final ObjectMapper m = Globals.config().mapper();
 

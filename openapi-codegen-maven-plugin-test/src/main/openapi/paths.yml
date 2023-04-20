@@ -33,14 +33,14 @@ paths:
         content:
           application/json: 
             schema:
-              $ref: '#/components/schemas/RequestBody1'
+              $ref: '#/components/schemas/RequestBody2'
       responses:
         '200':    
           description: ok response
           content:
             application/json:
               schema: 
-                $ref: '#/components/schemas/Response1' 
+                $ref: '#/components/schemas/Response2' 
         default:    
           $ref: '#/components/responses/Error'       
                         

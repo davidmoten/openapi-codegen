@@ -19,7 +19,7 @@
             <artifactId>openapi-codegen-runtime</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>openapi-codegen-spring-runtime</artifactId>
@@ -36,6 +36,13 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.11.0</version>
             <scope>test</scope>
         </dependency>
 
