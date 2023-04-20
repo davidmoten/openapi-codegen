@@ -1,7 +1,5 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.generator.internal.Util.orElse;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -385,7 +383,7 @@ final class CodeWriter {
                     .collect(Collectors.joining(","));
         }
         indent.left().left();
-        Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
+        Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
 
         if (cls.classType != ClassType.ENUM) {
             out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
@@ -534,7 +532,7 @@ final class CodeWriter {
 
     private static void writeGetters(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
-        Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
+        Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
             if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
                 out.format("\n%s@%s\n", indent, imports.add(Override.class));

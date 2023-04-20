@@ -390,8 +390,8 @@ public class Generator {
                     }
                     Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
-                    boolean exclusiveMin = Util.orElse(schema.getExclusiveMinimum(), false);
-                    boolean exclusiveMax = Util.orElse(schema.getExclusiveMaximum(), false);
+                    boolean exclusiveMin = org.davidmoten.oa3.codegen.runtime.internal.Util.orElse(schema.getExclusiveMinimum(), false);
+                    boolean exclusiveMax = org.davidmoten.oa3.codegen.runtime.internal.Util.orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (Util.isRef(schema)) {

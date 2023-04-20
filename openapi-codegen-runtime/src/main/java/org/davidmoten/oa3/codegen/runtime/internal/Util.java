@@ -11,5 +11,9 @@ public final class Util {
     public static byte[] decodeOctets(String s) {
         return new BigInteger(s, 16).toByteArray();
     }
+    
+    public static <T> T orElse(T value, T defaultValue) {
+        return value == null ? defaultValue : value;
+    }
 
 }

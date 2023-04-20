@@ -6,6 +6,8 @@ import pet.store.runtime.ServiceException;
 
 public interface Service extends ErrorHandler {
 
-    PetsGet200Response pets(int limit) throws ServiceException;
+    default PetsGet200Response pets(int limit) throws ServiceException {
+        throw new ServiceException(501, "Not implemented");
+    };
 
 }

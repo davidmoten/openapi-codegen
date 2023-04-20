@@ -18,10 +18,6 @@ import io.swagger.v3.oas.models.media.Schema;
 
 public final class Util {
 
-    public static <T> T orElse(T value, T defaultValue) {
-        return value == null ? defaultValue : value;
-    }
-
     private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "double", "float", "long", "boolean",
             "byte", "short");
 

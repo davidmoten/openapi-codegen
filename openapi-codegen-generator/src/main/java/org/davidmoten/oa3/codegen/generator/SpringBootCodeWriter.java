@@ -25,6 +25,7 @@ public class SpringBootCodeWriter {
     private static final String SPRING_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
     private static final String SPRING_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
     private static final String SPRING_REQUEST_METHOD = "org.springframework.web.bind.annotation.RequestMethod";
+    private static final String SPRING_REST_CONTROLLER = "org.springframework.web.bind.annotation.RestController";
     private static final String SPRING_RESPONSE_ENTITY = "org.springframework.http.ResponseEntity";
 
     static void writeServiceClass(Names names, List<Method> methods) {
@@ -51,28 +52,42 @@ public class SpringBootCodeWriter {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
-        out.format("\npublic interface %s {", Names.simpleClassName(names.serviceControllerFullClassName()));
+        out.format("\n@%s\n", imports.add(SPRING_REST_CONTROLLER));
+        out.format("public class %s {\n", Names.simpleClassName(names.serviceControllerFullClassName()));
         indent.right();
-        writeMethods(out, imports, methods, indent);
+        writeMethods(out, imports, methods, indent, true);
         indent.left();
         out.println("\n}\n");
     }
 
-    private static void writeMethods(ByteArrayPrintWriter out, Imports imports, List<Method> methods, Indent indent, boolean isServiceInterface) {
+    private static void writeMethods(ByteArrayPrintWriter out, Imports imports, List<Method> methods, Indent indent,
+            boolean isController) {
         methods.forEach(m -> {
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
-                    return String.format("\n%s@%s %s %s", indent, imports.add(SPRING_REQUEST_BODY),
-                            toImportedType(p, imports), "requestBody");
+                    final String annotations;
+                    if (isController) {
+                        annotations = String.format("@%s(name = \"%s\") ", imports.add(SPRING_REQUEST_BODY), p.name);
+                    } else {
+                        annotations = "";
+                    }
+                    return String.format("\n%s%s%s %s", indent, annotations, toImportedType(p, imports), "requestBody");
                 } else {
-                    return String.format("\n%s@%s(name = \"%s\") %s %s", indent, imports.add(SPRING_REQUEST_PARAM),
-                            p.name, toImportedType(p, imports), p.identifier);
+                    final String annotations;
+                    if (isController) {
+                        annotations = String.format("@%s(name = \"%s\") ", imports.add(SPRING_REQUEST_PARAM), p.name);
+                    } else {
+                        annotations = "";
+                    }
+                    return String.format("\n%s%s%s %s", indent, annotations, toImportedType(p, imports), p.identifier);
                 }
             }).collect(Collectors.joining(", "));
             indent.left().left();
             final String importedReturnType;
-            if (!m.returnFullClassName.isPresent()) {
+            if (isController) {
+                importedReturnType = String.format("%s<?>", imports.add(SPRING_RESPONSE_ENTITY));
+            } else if (!m.returnFullClassName.isPresent()) {
                 importedReturnType = "void";
             } else {
                 importedReturnType = String.format("%s<%s>", imports.add(SPRING_RESPONSE_ENTITY),
@@ -84,12 +99,18 @@ public class SpringBootCodeWriter {
 //                    produces = { "application/json" },
 //                    consumes = { "application/json" }
 //                )
-            out.format("\n\n%s@%s(\n", indent, imports.add(SPRING_REQUEST_MAPPING));
+            out.format("\n%s@%s(\n", indent, imports.add(SPRING_REQUEST_MAPPING));
             indent.right();
             out.format("%smethod = %s.%s,\n", indent, imports.add(SPRING_REQUEST_METHOD), m.httpMethod);
             out.format("%svalue = \"%s\")\n", indent, m.path);
             indent.left();
-            out.format("%s%s %s(%s);", indent, importedReturnType, m.methodName, params);
+            if (isController) {
+                out.format("%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
+                out.format("%sreturn null;\n", indent.right());
+                out.format("%s}\n", indent.left());
+            } else {
+                out.format("%s%s %s(%s);\n", indent, importedReturnType, m.methodName, params);
+            }
         });
     }
 

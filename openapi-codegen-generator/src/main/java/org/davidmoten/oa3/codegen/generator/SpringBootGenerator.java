@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,13 +104,14 @@ public class SpringBootGenerator {
                     if (schemaCls.get(schema) != null) {
                         String fullClassName = schemaCls.get(schema).fullClassName;
                         params.add(new Param("requestBody", "requestBody",
-                                Optional.ofNullable((Object) schema.getDefault()), Util.orElse(b.getRequired(), false), fullClassName,
-                                false, true));
+                                Optional.ofNullable((Object) schema.getDefault()),
+                                orElse(b.getRequired(), false),
+                                fullClassName, false, true));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
                 }
-            } 
+            }
 //            else {
 //                // for each other request mimeType
 ////                params.add(new Param("requestBody", "requestBody", Optional.ofNullable((Object) schema.getDefault()),
