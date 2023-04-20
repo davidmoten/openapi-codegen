@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 public class SpringBootCodeWriter {
 
     private static final String IMPORTS_HERE = "IMPORTS_HERE";
-    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));;
+    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
 
     private static final String SPRING_REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
     private static final String SPRING_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
