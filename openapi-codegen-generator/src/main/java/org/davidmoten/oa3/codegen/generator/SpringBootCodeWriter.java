@@ -145,7 +145,10 @@ public class SpringBootCodeWriter {
                 out.format("%sreturn null;\n", indent.right());
                 out.format("%s}\n", indent.left());
             } else {
-                out.format("\n%s%s %s(%s);\n", indent, importedReturnType, m.methodName, params);
+                out.format("\n%sdefault %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
+                // TODO throw spring specific ServiceException
+                out.format("%sthrow new %s();\n", indent.right(), imports.add(UnsupportedOperationException.class));
+                out.format("%s}\n", indent.left());
             }
         });
     }
