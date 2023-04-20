@@ -33,12 +33,12 @@ public class SpringBootCodeWriter {
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
 
     public static void writeServiceClasses(Names names, List<Method> methods) {
-        writeApplicationClass(names, methods);
+        writeApplicationClass(names);
         writeServiceControllerClass(names, methods);
         writeServiceInterfaceClass(names, methods);
     }
 
-    private static void writeApplicationClass(Names names, List<Method> methods) {
+    private static void writeApplicationClass(Names names) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         String fullClassName = names.applicationFullClassName();
         Imports imports = new Imports(fullClassName);
