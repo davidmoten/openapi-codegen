@@ -15,6 +15,8 @@ import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SpringBootCodeWriter {
 
@@ -77,7 +79,8 @@ public class SpringBootCodeWriter {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
-        out.format("\npublic interface %s {\n", Names.simpleClassName(names.serviceInterfaceFullClassName()));
+        out.format("\npublic interface %s extends %s {\n", Names.simpleClassName(names.serviceInterfaceFullClassName()),
+                imports.add(ErrorHandler.class));
         indent.right();
         writeMethods(out, imports, methods, indent, false);
         indent.left();
@@ -90,8 +93,16 @@ public class SpringBootCodeWriter {
         out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
         out.format("\n@%s\n", imports.add(SPRING_REST_CONTROLLER));
-        out.format("public class %s {\n", Names.simpleClassName(names.serviceControllerFullClassName()));
+        String simpleClassName = Names.simpleClassName(names.serviceControllerFullClassName());
+        out.format("public class %s {\n", simpleClassName);
         indent.right();
+        out.format("\n%sprivate final %s service;\n", indent, imports.add(names.serviceInterfaceFullClassName()));
+        out.format("\n%spublic %s(@%s(required = false) %s service) {\n", indent, simpleClassName,
+                imports.add(Autowired.class), imports.add(names.serviceInterfaceFullClassName()));
+        out.format("%sthis.service = %s.orElse(service, new %s() {});\n", indent.right(),
+                imports.add(org.davidmoten.oa3.codegen.runtime.internal.Util.class),
+                imports.add(names.serviceInterfaceFullClassName()));
+        out.format("%s}\n", indent.left());
         writeMethods(out, imports, methods, indent, true);
         indent.left();
         out.println("\n}\n");
@@ -142,8 +153,18 @@ public class SpringBootCodeWriter {
                 out.format("%svalue = \"%s\")\n", indent, m.path);
                 indent.left();
                 out.format("%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
-                out.format("%sreturn null;\n", indent.right());
-                out.format("%s}\n", indent.left());
+                indent.right();
+                out.format("%stry {\n", indent);
+                indent.right();
+                out.format("%sreturn null;\n", indent);
+                indent.left();
+                out.format("%s} catch (%s e) {\n", indent, imports.add(Throwable.class));
+                indent.right();
+                out.format("%sreturn service.errorResponse(e);\n", indent);
+                indent.left();
+                out.format("%s}\n", indent);
+                indent.left();
+                out.format("%s}\n", indent);
             } else {
                 out.format("\n%sdefault %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
                 // TODO throw spring specific ServiceException
