@@ -15,6 +15,7 @@ import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +67,9 @@ public class SpringBootCodeWriter {
         indent.left();
         out.format("%s}\n", indent);
         indent.left();
-        out.println("\n}\n");        
+        out.println("\n}\n");
     }
-    
+
     private static void writeJacksonConfigurationClass(Names names) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         String fullClassName = names.jacksonConfigurationFullClassName();
@@ -86,15 +87,21 @@ public class SpringBootCodeWriter {
         String simpleClassName = Names.simpleClassName(fullClassName);
         out.format("public class %s {\n", simpleClassName);
         indent.right();
+        out.format("\n%sprivate final %s config;\n", indent, imports.add(Config.class));
+        out.format("\n%spublic %s(@%s(required = false) %s config) {\n", indent, simpleClassName,
+                imports.add(Autowired.class), imports.add(Config.class));
+        out.format("%sthis.config = config == null ? %s.config() : config;\n", indent.right(),
+                imports.add(names.globalsFullClassName()));
+        out.format("%s}\n", indent.left());
         out.format("\n%s@%s\n", indent, imports.add(Bean.class));
         out.format("%s@%s\n", indent, imports.add(Primary.class));
         out.format("%spublic %s objectMapper() {\n", indent, imports.add(ObjectMapper.class));
         indent.right();
-        out.format("%sreturn %s.config().mapper();\n", indent, imports.add(names.globalsFullClassName()));
+        out.format("%sreturn config.mapper();\n", indent);
         indent.left();
         out.format("%s}\n", indent);
         indent.left();
-        out.println("\n}\n");     
+        out.println("\n}\n");
     }
 
     private static void writeServiceControllerClass(Names names, List<Method> methods) {
@@ -163,9 +170,10 @@ public class SpringBootCodeWriter {
                 } else {
                     final String annotations;
                     if (isController) {
-                        String defValue = p.defaultValue.map(x -> ", defaultValue = \"" + x + "\"").orElse(""); 
+                        String defValue = p.defaultValue.map(x -> ", defaultValue = \"" + x + "\"").orElse("");
                         String required = ", required = " + p.required;
-                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(RequestParam.class), p.name, defValue, required);
+                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(RequestParam.class), p.name,
+                                defValue, required);
                     } else {
                         annotations = "";
                     }
@@ -224,7 +232,7 @@ public class SpringBootCodeWriter {
             }
         });
     }
-    
+
     private static void writeContent(Names names, ByteArrayPrintWriter out, String fullClassName, Imports imports) {
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
         if (DEBUG) {
