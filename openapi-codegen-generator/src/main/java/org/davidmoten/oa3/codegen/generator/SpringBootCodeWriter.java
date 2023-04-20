@@ -130,7 +130,8 @@ public class SpringBootCodeWriter {
                     final String annotations;
                     if (isController) {
                         String defValue = p.defaultValue.map(x -> ", defaultValue = \"" + x + "\"").orElse(""); 
-                        annotations = String.format("@%s(name = \"%s\"%s) ", imports.add(RequestParam.class), p.name, defValue);
+                        String required = ", required = " + p.required;
+                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(RequestParam.class), p.name, defValue, required);
                     } else {
                         annotations = "";
                     }

@@ -25,8 +25,12 @@ public class ServiceImpl implements Service {
         } else if (t % 3 == 1) {
             throw new ServiceException(ResponseEntity.status(409).body("problem"));
         }
-        Pet pet = new Pet(new NewPet("fido", Optional.empty()), new PetId(123));
-        return new PetsGet200Response(Collections.singletonList(pet));
+        if (limit.orElse(10) != 3) {
+            Pet pet = new Pet(new NewPet("fido", Optional.empty()), new PetId(123));
+            return new PetsGet200Response(Collections.singletonList(pet));
+        } else {
+            return new PetsGet200Response(Collections.emptyList());
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
