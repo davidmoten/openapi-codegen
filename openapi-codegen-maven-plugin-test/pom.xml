@@ -115,7 +115,7 @@
                         </goals>
                         <configuration>
                             <generator>spring</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.test.generated.cts</basePackage>
+                            <basePackage>org.davidmoten.oa3.codegen.cts.generated</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
