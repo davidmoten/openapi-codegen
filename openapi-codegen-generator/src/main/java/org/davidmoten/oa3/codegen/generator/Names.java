@@ -316,4 +316,8 @@ final class Names {
         return definition.packages().basePackage() + ".service.Service";
     }
 
+    public String applicationFullClassName() {
+        return definition.packages().basePackage() + ".Application";
+    }
+
 }

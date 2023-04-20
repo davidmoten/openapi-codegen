@@ -18,6 +18,8 @@ import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,21 +33,60 @@ public class SpringBootCodeWriter {
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
 
     public static void writeServiceClasses(Names names, List<Method> methods) {
+        writeApplicationClass(names, methods);
         writeServiceControllerClass(names, methods);
         writeServiceInterfaceClass(names, methods);
     }
 
-    private static void writeServiceControllerClass(Names names, List<Method> methods) {
+    private static void writeApplicationClass(Names names, List<Method> methods) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
-        Imports imports = new Imports(names.serviceControllerFullClassName());
-        writeServiceControllerClass(out, imports, names, methods);
+        String fullClassName = names.applicationFullClassName();
+        Imports imports = new Imports(fullClassName);
+        writeApplicationClass(out, imports, names, fullClassName);
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
         if (DEBUG) {
             System.out.println("////////////////////////////////////////////////");
             System.out.println(content);
         }
         out.close();
-        File file = names.fullClassNameToJavaFile(names.serviceControllerFullClassName());
+        File file = names.fullClassNameToJavaFile(fullClassName);
+        file.getParentFile().mkdirs();
+        try {
+            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static void writeApplicationClass(ByteArrayPrintWriter out, Imports imports, Names names, String fullClassName) {
+        Indent indent = new Indent();
+        out.format("package %s;\n", Names.pkg(fullClassName));
+        out.format("\n%s", IMPORTS_HERE);
+        out.format("\n@%s\n", imports.add(SpringBootApplication.class));
+        String simpleClassName = Names.simpleClassName(fullClassName);
+        out.format("public final class %s {\n", simpleClassName);
+        indent.right();
+        out.format("\n%spublic static void main(%s[] args) {\n", indent, imports.add(String.class));
+        indent.right();
+        out.format("%s%s.run(%s.class, args);\n", indent, imports.add(SpringApplication.class), simpleClassName);
+        indent.left();
+        out.format("%s}\n", indent);
+        indent.left();
+        out.println("\n}\n");        
+    }
+
+    private static void writeServiceControllerClass(Names names, List<Method> methods) {
+        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        String fullClassName = names.serviceControllerFullClassName();
+        Imports imports = new Imports(fullClassName);
+        writeServiceControllerClass(out, imports, names, methods, fullClassName);
+        String content = out.text().replace(IMPORTS_HERE, imports.toString());
+        if (DEBUG) {
+            System.out.println("////////////////////////////////////////////////");
+            System.out.println(content);
+        }
+        out.close();
+        File file = names.fullClassNameToJavaFile(fullClassName);
         file.getParentFile().mkdirs();
         try {
             Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
@@ -88,12 +129,12 @@ public class SpringBootCodeWriter {
     }
 
     private static void writeServiceControllerClass(ByteArrayPrintWriter out, Imports imports, Names names,
-            List<Method> methods) {
+            List<Method> methods, String fullClassName) {
         Indent indent = new Indent();
-        out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
+        out.format("package %s;\n", Names.pkg(fullClassName));
         out.format("\n%s", IMPORTS_HERE);
         out.format("\n@%s\n", imports.add(RestController.class));
-        String simpleClassName = Names.simpleClassName(names.serviceControllerFullClassName());
+        String simpleClassName = Names.simpleClassName(fullClassName);
         out.format("public class %s {\n", simpleClassName);
         indent.right();
         out.format("\n%sprivate final %s service;\n", indent, imports.add(names.serviceInterfaceFullClassName()));
