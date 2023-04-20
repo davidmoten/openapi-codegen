@@ -43,19 +43,7 @@ public class SpringBootCodeWriter {
         String fullClassName = names.applicationFullClassName();
         Imports imports = new Imports(fullClassName);
         writeApplicationClass(out, imports, fullClassName);
-        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-        if (DEBUG) {
-            System.out.println("////////////////////////////////////////////////");
-            System.out.println(content);
-        }
-        out.close();
-        File file = names.fullClassNameToJavaFile(fullClassName);
-        file.getParentFile().mkdirs();
-        try {
-            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeApplicationClass(ByteArrayPrintWriter out, Imports imports, String fullClassName) {
@@ -80,19 +68,7 @@ public class SpringBootCodeWriter {
         String fullClassName = names.serviceControllerFullClassName();
         Imports imports = new Imports(fullClassName);
         writeServiceControllerClass(out, imports, names, methods, fullClassName);
-        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-        if (DEBUG) {
-            System.out.println("////////////////////////////////////////////////");
-            System.out.println(content);
-        }
-        out.close();
-        File file = names.fullClassNameToJavaFile(fullClassName);
-        file.getParentFile().mkdirs();
-        try {
-            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeServiceInterfaceClass(Names names, List<Method> methods) {
@@ -100,19 +76,7 @@ public class SpringBootCodeWriter {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Imports imports = new Imports(fullClassName);
         writeServiceInterfaceClass(out, imports, names, methods);
-        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-        if (DEBUG) {
-            System.out.println("////////////////////////////////////////////////");
-            System.out.println(content);
-        }
-        out.close();
-        File file = names.fullClassNameToJavaFile(fullClassName);
-        file.getParentFile().mkdirs();
-        try {
-            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeServiceInterfaceClass(ByteArrayPrintWriter out, Imports imports, Names names,
@@ -223,6 +187,22 @@ public class SpringBootCodeWriter {
                 out.format("%s}\n", indent.left());
             }
         });
+    }
+    
+    private static void writeContent(Names names, ByteArrayPrintWriter out, String fullClassName, Imports imports) {
+        String content = out.text().replace(IMPORTS_HERE, imports.toString());
+        if (DEBUG) {
+            System.out.println("////////////////////////////////////////////////");
+            System.out.println(content);
+        }
+        out.close();
+        File file = names.fullClassNameToJavaFile(fullClassName);
+        file.getParentFile().mkdirs();
+        try {
+            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private static String toImportedType(Param p, Imports imports) {
