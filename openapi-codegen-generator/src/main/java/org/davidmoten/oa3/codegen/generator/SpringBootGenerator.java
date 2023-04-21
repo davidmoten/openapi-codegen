@@ -74,6 +74,7 @@ public class SpringBootGenerator {
     private void gatherMethods(String pathName, HttpMethod method, Operation operation, List<Method> methods) {
         String methodName = Names
                 .toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
+        Optional<Integer> statusCode = Optional.empty();
         List<Param> params = new ArrayList<>();
         Optional<String> returnFullClassName = Optional.empty();
         if (operation.getParameters() != null) {
@@ -109,8 +110,7 @@ public class SpringBootGenerator {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()), orElse(b.getRequired(), false),
-                                fullClassName, false, true,
-                                constraints(schema)));
+                                fullClassName, false, true, constraints(schema)));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
@@ -123,45 +123,52 @@ public class SpringBootGenerator {
 //                
 //            }
         }
-        Optional<ApiResponse> response = primaryResponse(operation.getResponses());
+        Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
         if (response.isPresent()) {
-            if (response.get().getContent() != null) {
-                MediaType mediaType = response.get().getContent().get("application/json");
+            if (response.get().response.getContent() != null) {
+                MediaType mediaType = response.get().response.getContent().get("application/json");
                 if (mediaType != null) {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
+                    statusCode = Optional.of(response.get().statusCode);
                 }
             } else {
                 System.out.println("TODO handle response ref");
             }
             // TODO handle other mediaTypes
         }
-        Method m = new Method(methodName, params, returnFullClassName, pathName, method);
+        Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method);
         methods.add(m);
     }
 
     private static Constraints constraints(Schema<?> schema) {
-        return new Constraints(Optional.ofNullable(schema.getMinLength()),
-                Optional.ofNullable(schema.getMaxLength()),
-                Optional.ofNullable(schema.getMinimum()),
-                Optional.ofNullable(schema.getMaximum()),
+        return new Constraints(Optional.ofNullable(schema.getMinLength()), Optional.ofNullable(schema.getMaxLength()),
+                Optional.ofNullable(schema.getMinimum()), Optional.ofNullable(schema.getMaximum()),
                 Optional.ofNullable(schema.getExclusiveMinimumValue()),
-                Optional.ofNullable(schema.getExclusiveMaximumValue()),
-                Optional.ofNullable(schema.getMinItems()),
-                Optional.ofNullable(schema.getMaxItems()),
-                Optional.ofNullable(schema.getPattern()));
+                Optional.ofNullable(schema.getExclusiveMaximumValue()), Optional.ofNullable(schema.getMinItems()),
+                Optional.ofNullable(schema.getMaxItems()), Optional.ofNullable(schema.getPattern()));
     }
 
-    private static Optional<ApiResponse> primaryResponse(ApiResponses responses) {
+    private static Optional<StatusCodeApiResponse> primaryResponse(ApiResponses responses) {
         if (responses.get("200") != null) {
-            return Optional.of(responses.get("200"));
+            return Optional.of(new StatusCodeApiResponse(200, responses.get("200")));
         } else {
             for (Entry<String, ApiResponse> r : responses.entrySet()) {
                 if (is2XX(r.getKey())) {
-                    return Optional.of(r.getValue());
+                    return Optional.of(new StatusCodeApiResponse(Integer.parseInt(r.getKey()), r.getValue()));
                 }
             }
         }
         return Optional.empty();
+    }
+
+    private static final class StatusCodeApiResponse {
+        final int statusCode;
+        final ApiResponse response;
+
+        StatusCodeApiResponse(int statusCode, ApiResponse response) {
+            this.statusCode = statusCode;
+            this.response = response;
+        }
     }
 
     private static boolean is2XX(String key) {
@@ -193,10 +200,12 @@ public class SpringBootGenerator {
         final Optional<String> returnFullClassName; // arrays always wrapped ?
         final String path;
         final HttpMethod httpMethod;
+        final Optional<Integer> statusCode;
 
-        Method(String methodName, List<Param> parameters, Optional<String> returnFullClassName, String path,
-                HttpMethod httpMethod) {
+        Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
+                Optional<String> returnFullClassName, String path, HttpMethod httpMethod) {
             this.methodName = methodName;
+            this.statusCode = statusCode;
             this.parameters = parameters;
             this.returnFullClassName = returnFullClassName;
             this.path = path;
@@ -224,10 +233,9 @@ public class SpringBootGenerator {
         final Optional<Integer> maxItems;
         final Optional<String> pattern;
 
-        public Constraints(Optional<Integer> minLength, Optional<Integer> maxLength,
-                Optional<BigDecimal> min, Optional<BigDecimal> max, Optional<BigDecimal> minExclusive,
-                Optional<BigDecimal> maxExclusive, Optional<Integer> minItems, Optional<Integer> maxItems,
-                Optional<String> pattern) {
+        public Constraints(Optional<Integer> minLength, Optional<Integer> maxLength, Optional<BigDecimal> min,
+                Optional<BigDecimal> max, Optional<BigDecimal> minExclusive, Optional<BigDecimal> maxExclusive,
+                Optional<Integer> minItems, Optional<Integer> maxItems, Optional<String> pattern) {
             this.minLength = minLength;
             this.maxLength = maxLength;
             this.min = min;

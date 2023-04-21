@@ -255,8 +255,10 @@ public class SpringBootCodeWriter {
                     }
                 });
                 if (m.returnFullClassName.isPresent()) {
-                    out.format("%sreturn %s.ok(service.%s(%s));\n", indent, imports.add(ResponseEntity.class),
-                            m.methodName,
+                    out.format("%sreturn %s.status(%s).body(service.%s(%s));\n", indent,
+                            imports.add(ResponseEntity.class), //
+                            m.statusCode.get(), //
+                            m.methodName, //
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
                 } else {
                     out.format("%sservice.%s(%s);\n", indent, m.methodName,
