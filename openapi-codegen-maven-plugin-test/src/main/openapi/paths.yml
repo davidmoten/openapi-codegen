@@ -102,10 +102,10 @@ components:
     Response1:
       type: object
       properties:
-        token: 
+        thing: 
           type: string
           minLength: 1
-      required: [token]
+      required: [thing]
                       
     RequestBody2:
       type: object

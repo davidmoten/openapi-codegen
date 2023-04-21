@@ -123,15 +123,7 @@ public class SpringBootGenerator {
             if (response.getContent() != null) {
                 MediaType mediaType = response.getContent().get("application/json");
                 if (mediaType != null) {
-                    String ref = mediaType.getSchema().get$ref();
-                    if (mediaType.getSchema().get$ref() == null) {
-                        returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
-                    } else {
-                        while (refCls.get(ref).schema.get().get$ref() != null) {
-                            ref = refCls.get(ref).schema.get().get$ref();
-                        }
-                        returnFullClassName = Optional.of(refCls.get(ref).fullClassName);
-                    }
+                    returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
                 }
             } else {
                 System.out.println("TODO handle response ref");
