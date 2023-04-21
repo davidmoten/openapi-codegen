@@ -263,7 +263,8 @@ public class SpringBootCodeWriter {
                 } else {
                     out.format("%sservice.%s(%s);\n", indent, m.methodName,
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
-                    out.format("%sreturn %s.ok().build();\n", indent, imports.add(ResponseEntity.class));
+                    out.format("%sreturn %s.status(%s).build();\n", indent, imports.add(ResponseEntity.class),
+                            m.statusCode.orElse(200));
                 }
                 indent.left();
                 out.format("%s} catch (%s e) {\n", indent, imports.add(Throwable.class));
