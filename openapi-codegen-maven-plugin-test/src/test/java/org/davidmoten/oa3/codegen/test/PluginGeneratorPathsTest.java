@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.test;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.paths.generated.schema.RequestBody1;
@@ -35,17 +36,31 @@ public class PluginGeneratorPathsTest {
     public void testGetReturns200() throws ServiceException {
         Response2 response = service.itemGet();
     }
-    
+
     @Test
     public void testGetReturns201() throws ServiceException {
         Response2 response = service.item201Get();
     }
-    
+
     @Test
-    public void testGetEmpty() throws ServiceException, NoSuchMethodException, SecurityException {
+    public void testGetEmpty() throws ServiceException {
         service.emptyGet();
-        Method m = Service.class.getMethod("emptyGet");
+        isVoid("emptyGet");
+    }
+
+    private static void isVoid(String methodName) {
+        Method m;
+        try {
+            m = Service.class.getMethod(methodName);
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
         assertTrue(m.getReturnType() == Void.TYPE);
+    }
+
+    @Test
+    public void testParams() throws ServiceException {
+        Response2 response = service.paramsGet(OffsetDateTime.now(), Optional.of(123L));
     }
 
 }

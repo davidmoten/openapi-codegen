@@ -7,7 +7,6 @@ info:
 paths:
 
   /requestBodyRequired:
-
     post:
       requestBody:
         required: true
@@ -26,7 +25,6 @@ paths:
           $ref: '#/components/responses/Error'
           
   /requestBodyNotRequired:
-            
     post:
       requestBody:
         required: false
@@ -72,7 +70,30 @@ paths:
     get:
       responses:
         default:    
-          $ref: '#/components/responses/Error'              
+          $ref: '#/components/responses/Error'   
+          
+  /params:
+    get:
+      parameters:
+        - in: query
+          name: first
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: second
+          schema:
+            type: integer
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'                   
     
 components:
   responses:
