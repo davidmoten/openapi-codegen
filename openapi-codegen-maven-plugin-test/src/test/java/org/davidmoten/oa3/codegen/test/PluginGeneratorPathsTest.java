@@ -1,5 +1,8 @@
 package org.davidmoten.oa3.codegen.test;
 
+import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.Method;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.paths.generated.schema.RequestBody1;
@@ -36,6 +39,13 @@ public class PluginGeneratorPathsTest {
     @Test
     public void testGetReturns201() throws ServiceException {
         Response2 response = service.item201Get();
+    }
+    
+    @Test
+    public void testGetEmpty() throws ServiceException, NoSuchMethodException, SecurityException {
+        service.emptyGet();
+        Method m = Service.class.getMethod("emptyGet");
+        assertTrue(m.getReturnType() == Void.TYPE);
     }
 
 }
