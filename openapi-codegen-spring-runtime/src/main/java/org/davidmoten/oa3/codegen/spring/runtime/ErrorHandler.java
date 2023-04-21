@@ -19,4 +19,8 @@ public interface ErrorHandler {
         return new DefaultError(statusCode, e);
     }
     
+    default ServiceException notImplemented() {
+        return new ServiceException(501, "Not implemented");
+    }
+    
 }

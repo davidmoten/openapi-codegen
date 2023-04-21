@@ -226,8 +226,7 @@ public class SpringBootCodeWriter {
             } else {
                 out.format("\n%sdefault %s %s(%s) throws %s {\n", indent, importedReturnType, m.methodName, params,
                         imports.add(ServiceException.class));
-                out.format("%sthrow new %s(501, \"Not implemented\");\n", indent.right(),
-                        imports.add(ServiceException.class));
+                out.format("%sthrow notImplemented();\n", indent.right());
                 out.format("%s}\n", indent.left());
             }
         });
