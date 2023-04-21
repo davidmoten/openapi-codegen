@@ -18,7 +18,7 @@ import pet.store.service.Service;
 public class ServiceImpl implements Service {
 
     @Override
-    public PetsGet200Response petsGet(List<String> tags, Optional<Integer> limit) throws ServiceException {
+    public PetsGet200Response petsGet(List<String> tags, int limit) throws ServiceException {
         System.out.println(tags);
         long t = System.currentTimeMillis();
         if (t % 3 == 0) {
@@ -26,7 +26,7 @@ public class ServiceImpl implements Service {
         } else if (t % 3 == 1) {
             throw new ServiceException(ResponseEntity.status(409).body("problem"));
         }
-        if (limit.orElse(10) != 3) {
+        if (limit != 3) {
             Pet pet = new Pet(new NewPet("fido", Optional.empty()), new PetId(123));
             return new PetsGet200Response(Collections.singletonList(pet));
         } else {
