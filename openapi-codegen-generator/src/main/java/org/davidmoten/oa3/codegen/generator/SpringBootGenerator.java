@@ -75,23 +75,27 @@ public class SpringBootGenerator {
         if (operation.getParameters() != null) {
             operation.getParameters() //
                     .forEach(p -> {
-                        // TODO p.ref$
-                        boolean isArray = false;
-                        Schema<?> s = p.getSchema();
-                        if (Util.isArray(s)) {
-                            isArray = true;
-                            s = s.getItems();
+                        if (p.get$ref() != null) {
+                            System.out.println("TODO resolve parameter ref");
+                        } else {
+                            boolean isArray = false;
+                            Schema<?> s = p.getSchema();
+                            if (Util.isArray(s)) {
+                                isArray = true;
+                                s = s.getItems();
+                            }
+                            s = resolveRefs(s);
+                            // handle simple schemas
+                            if (Util.isPrimitive(s)) {
+                                Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
+                                Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
+                                params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                                        p.getRequired(), cls.getCanonicalName(), isArray, false));
+                            }
+                            // TODO handle object schema and explode
+                            // TODO handle refs
+                            // TODO complex schemas?
                         }
-                        // handle simple schemas
-                        if (s != null && Util.isPrimitive(s)) {
-                            Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
-                            Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
-                            params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
-                                    p.getRequired(), cls.getCanonicalName(), isArray, false));
-                        }
-                        // TODO handle object schema and explode
-                        // TODO handle refs
-                        // TODO complex schemas?
                     });
         }
         if (operation.getRequestBody() != null) {
@@ -135,12 +139,15 @@ public class SpringBootGenerator {
     }
 
     private String resolveRefsFullClassName(Schema<?> schema) {
+        return schemaCls.get(resolveRefs(schema)).fullClassName;
+    }
+
+    private Schema<?> resolveRefs(Schema<?> schema) {
         Schema<?> s = schema;
         while (s.get$ref() != null) {
             s = refCls.get(s.get$ref()).schema.get();
         }
-        String fullClassName = schemaCls.get(s).fullClassName;
-        return fullClassName;
+        return s;
     }
 
     public static final class Method {
