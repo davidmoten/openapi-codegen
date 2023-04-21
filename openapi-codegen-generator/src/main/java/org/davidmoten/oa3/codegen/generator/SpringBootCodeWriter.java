@@ -197,10 +197,19 @@ public class SpringBootCodeWriter {
 //                    consumes = { "application/json" }
 //                )
             if (isController) {
+                
                 out.format("\n%s@%s(\n", indent, imports.add(RequestMapping.class));
                 indent.right();
+                String consumes = m.consumes.stream().map(x -> "\"" + x +"\"").collect(Collectors.joining(", "));
+                if (!consumes.isEmpty()) {
+                    consumes = String.format(",\n%sconsumes = {%s}", indent, consumes);
+                }
+                String produces = m.produces.stream().map(x -> "\"" + x +"\"").collect(Collectors.joining(", "));
+                if (!produces.isEmpty()) {
+                    produces = String.format(",\n%sproduces = {%s}", indent, produces);
+                }
                 out.format("%smethod = %s.%s,\n", indent, imports.add(RequestMethod.class), m.httpMethod);
-                out.format("%svalue = \"%s\")\n", indent, m.path);
+                out.format("%svalue = \"%s\"%s%s)\n", indent, m.path, consumes, produces);
                 indent.left();
                 out.format("%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
                 indent.right();

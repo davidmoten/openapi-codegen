@@ -21,6 +21,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Util;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -77,6 +78,8 @@ public class SpringBootGenerator {
         Optional<Integer> statusCode = Optional.empty();
         List<Param> params = new ArrayList<>();
         Optional<String> returnFullClassName = Optional.empty();
+        List<String> consumes = new ArrayList<>();
+        List<String> produces = new ArrayList<>();
         if (operation.getParameters() != null) {
             operation.getParameters() //
                     .forEach(p -> {
@@ -119,6 +122,7 @@ public class SpringBootGenerator {
                     }
                 }
             }
+            consumes = new ArrayList<>(b.getContent().keySet());
 //            else {
 //                // for each other request mimeType
 ////                params.add(new Param("requestBody", "requestBody", Optional.ofNullable((Object) schema.getDefault()),
@@ -128,8 +132,9 @@ public class SpringBootGenerator {
         }
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
         if (response.isPresent()) {
-            if (response.get().response.getContent() != null) {
-                MediaType mediaType = response.get().response.getContent().get("application/json");
+            Content content = response.get().response.getContent();
+            if (content != null) {
+                MediaType mediaType = content.get("application/json");
                 if (mediaType == null) {
                     mediaType = response.get().response.getContent().get("application/xml");
                 }
@@ -137,12 +142,13 @@ public class SpringBootGenerator {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
                     statusCode = Optional.of(response.get().statusCode);
                 }
+                produces = new ArrayList<>(content.keySet()); 
             } else {
                 System.out.println("TODO handle response ref");
             }
             // TODO handle other mediaTypes
         }
-        Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method);
+        Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces);
         methods.add(m);
     }
 
@@ -207,15 +213,19 @@ public class SpringBootGenerator {
         final String path;
         final HttpMethod httpMethod;
         final Optional<Integer> statusCode;
+        final List<String> consumes;
+        final List<String> produces;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
-                Optional<String> returnFullClassName, String path, HttpMethod httpMethod) {
+                Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes, List<String> produces) {
             this.methodName = methodName;
             this.statusCode = statusCode;
             this.parameters = parameters;
             this.returnFullClassName = returnFullClassName;
             this.path = path;
             this.httpMethod = httpMethod;
+            this.consumes = consumes;
+            this.produces = produces;
         }
 
         @Override
