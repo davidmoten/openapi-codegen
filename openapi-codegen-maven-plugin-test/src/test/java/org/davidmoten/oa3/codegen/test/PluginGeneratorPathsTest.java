@@ -43,6 +43,11 @@ public class PluginGeneratorPathsTest {
     }
 
     @Test
+    public void testResponseRef() throws ServiceException {
+        Response2 response = service.responseRefGet();
+    }
+
+    @Test
     public void testGetEmpty() throws ServiceException {
         service.emptyGet();
         isVoid("emptyGet");

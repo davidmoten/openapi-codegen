@@ -66,6 +66,14 @@ paths:
         default:    
           $ref: '#/components/responses/Error'   
 
+  /responseRef:
+    get:
+      responses:
+        '200':
+          $ref: '#/components/responses/Response3' 
+        default:    
+          $ref: '#/components/responses/Error' 
+        
   /empty:
     get:
       responses:
@@ -131,6 +139,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+
+    Response3:
+      description: ok response
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/Response2' 
                       
   schemas:
     Error:
