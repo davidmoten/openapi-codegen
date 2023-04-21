@@ -39,6 +39,7 @@ paths:
           schema:
             type: integer
             format: int32
+            minimum: 1
       responses:
         '200':
           description: pet response

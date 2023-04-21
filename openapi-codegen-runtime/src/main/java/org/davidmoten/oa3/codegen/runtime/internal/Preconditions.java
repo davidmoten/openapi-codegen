@@ -59,7 +59,7 @@ public final class Preconditions {
             throw new IllegalArgumentException(name + " must be < " + max);
         }
     }
-    
+
     public static void checkMaximum(Optional<? extends Number> x, String min, String name, boolean exclusive) {
         if (x.isPresent()) {
             checkMaximum(x.get(), min, name, exclusive);
@@ -72,7 +72,7 @@ public final class Preconditions {
         }
         return s;
     }
-    
+
     public static Optional<String> checkMinLength(Optional<String> s, int minLength, String name) {
         if (s.isPresent()) {
             checkMinLength(s.get(), minLength, name);
@@ -86,7 +86,7 @@ public final class Preconditions {
         }
         return s;
     }
-    
+
     public static Optional<String> checkMaxLength(Optional<String> s, int maxLength, String name) {
         if (s.isPresent()) {
             checkMaxLength(s.get(), maxLength, name);
@@ -102,21 +102,21 @@ public final class Preconditions {
     }
 
     public static <S extends Collection<T>, T> Optional<S> checkMinSize(Optional<S> collection, int min, String name) {
-        if (collection.isPresent() && collection.get().size() < min) {
+        if (collection != null && collection.isPresent() && collection.get().size() < min) {
             throw new IllegalArgumentException("collection must be have at least " + min + " elements");
         }
         return collection;
     }
 
     public static <S extends Collection<T>, T> S checkMaxSize(S collection, int max, String name) {
-        if (collection.size() > max) {
+        if (collection != null && collection.size() > max) {
             throw new IllegalArgumentException("collection must be have at most " + max + " elements");
         }
         return collection;
     }
 
     public static <S extends Collection<T>, T> Optional<S> checkMaxSize(Optional<S> collection, int max, String name) {
-        if (collection.isPresent() && collection.get().size() > max) {
+        if (collection != null && collection.isPresent() && collection.get().size() > max) {
             throw new IllegalArgumentException("collection must be have at most " + max + " elements");
         }
         return collection;
@@ -127,6 +127,15 @@ public final class Preconditions {
             throw new IllegalArgumentException(name + " must match this regex pattern: " + pattern);
         }
         return s;
+    }
+
+    public static Optional<String> checkMatchesPattern(Optional<String> s, String pattern, String name) {
+        if (s.isPresent()) {
+            return Optional.of(checkMatchesPattern(s.get(), pattern, name));
+        } else {
+            return s;
+        }
+
     }
 
 }

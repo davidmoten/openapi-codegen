@@ -2,6 +2,7 @@ package org.davidmoten.oa3.codegen.generator;
 
 import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,7 +92,7 @@ public class SpringBootGenerator {
                             Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
                             Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
                             params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
-                                    p.getRequired(), cls.getCanonicalName(), isArray, false));
+                                    p.getRequired(), cls.getCanonicalName(), isArray, false, constraints(s)));
                         }
                         // TODO handle object schema and explode
                         // TODO complex schemas?
@@ -108,7 +109,8 @@ public class SpringBootGenerator {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()), orElse(b.getRequired(), false),
-                                fullClassName, false, true));
+                                fullClassName, false, true,
+                                constraints(schema)));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
@@ -135,6 +137,18 @@ public class SpringBootGenerator {
         }
         Method m = new Method(methodName, params, returnFullClassName, pathName, method);
         methods.add(m);
+    }
+
+    private static Constraints constraints(Schema<?> schema) {
+        return new Constraints(Optional.ofNullable(schema.getMinLength()),
+                Optional.ofNullable(schema.getMaxLength()),
+                Optional.ofNullable(schema.getMinimum()),
+                Optional.ofNullable(schema.getMaximum()),
+                Optional.ofNullable(schema.getExclusiveMinimumValue()),
+                Optional.ofNullable(schema.getExclusiveMaximumValue()),
+                Optional.ofNullable(schema.getMinItems()),
+                Optional.ofNullable(schema.getMaxItems()),
+                Optional.ofNullable(schema.getPattern()));
     }
 
     private static Optional<ApiResponse> primaryResponse(ApiResponses responses) {
@@ -199,6 +213,34 @@ public class SpringBootGenerator {
 
     }
 
+    public static final class Constraints {
+        final Optional<Integer> minLength;
+        final Optional<Integer> maxLength;
+        final Optional<BigDecimal> min;
+        final Optional<BigDecimal> max;
+        final Optional<BigDecimal> minExclusive;
+        final Optional<BigDecimal> maxExclusive;
+        final Optional<Integer> minItems;
+        final Optional<Integer> maxItems;
+        final Optional<String> pattern;
+
+        public Constraints(Optional<Integer> minLength, Optional<Integer> maxLength,
+                Optional<BigDecimal> min, Optional<BigDecimal> max, Optional<BigDecimal> minExclusive,
+                Optional<BigDecimal> maxExclusive, Optional<Integer> minItems, Optional<Integer> maxItems,
+                Optional<String> pattern) {
+            this.minLength = minLength;
+            this.maxLength = maxLength;
+            this.min = min;
+            this.max = max;
+            this.minExclusive = minExclusive;
+            this.maxExclusive = maxExclusive;
+            this.minItems = minItems;
+            this.maxItems = maxItems;
+            this.pattern = pattern;
+        }
+
+    }
+
     public static final class Param {
         final String name;
         final String identifier;
@@ -207,9 +249,10 @@ public class SpringBootGenerator {
         final String fullClassName;
         final boolean isArray;
         final boolean isRequestBody;
+        final Constraints constraints;
 
         Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
-                boolean isArray, boolean isRequestBody) {
+                boolean isArray, boolean isRequestBody, Constraints constraints) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
@@ -217,6 +260,7 @@ public class SpringBootGenerator {
             this.fullClassName = fullClassName;
             this.isArray = isArray;
             this.isRequestBody = isRequestBody;
+            this.constraints = constraints;
         }
 
         @Override
