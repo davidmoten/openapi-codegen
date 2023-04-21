@@ -87,6 +87,7 @@ paths:
        required: true
        schema:
          type: string
+         minLength: 1
     get:
       parameters:
         - in: query
@@ -99,6 +100,12 @@ paths:
           name: second
           schema:
             type: integer
+        - in: query
+          name: third
+          schema:
+            type: integer
+            format: int32
+            default: 10
       responses:
         '203':    
           description: ok response

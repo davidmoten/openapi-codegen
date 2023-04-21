@@ -2,6 +2,7 @@ package org.davidmoten.oa3.codegen.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.time.OffsetDateTime;
@@ -56,6 +57,26 @@ public class PathsTest {
         isVoid("emptyGet");
     }
 
+    @Test
+    public void testParams() throws ServiceException {
+        Response2 response = service.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45);
+        hasSignature(Service.class, "paramsGet", String.class, OffsetDateTime.class, Optional.class, int.class);
+    }
+
+    @Test
+    public void testParamsResponseStatusCode() throws ServiceException {
+        Service svc = new Service() {
+            @Override
+            public Response2 paramsGet(String id, OffsetDateTime first, Optional<Long> second, int third)
+                    throws ServiceException {
+                return new Response2("token123");
+            }
+        };
+        ServiceController c = new ServiceController(svc);
+        ResponseEntity<?> r = c.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45);
+        assertEquals(203, r.getStatusCodeValue());
+    }
+
     private static void isVoid(String methodName) {
         Method m;
         try {
@@ -66,24 +87,12 @@ public class PathsTest {
         assertTrue(m.getReturnType() == Void.TYPE);
     }
 
-    @Test
-    public void testParams() throws ServiceException {
-        Response2 response = service.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L));
-    }
-    
-    @Test
-    public void testParamsResponseStatusCode() throws ServiceException {
-        Service svc = new Service() {
-
-            @Override
-            public Response2 paramsGet(String id, OffsetDateTime first, Optional<Long> second) throws ServiceException {
-                return new Response2("token123");
-            }
-            
-        };
-        ServiceController c = new ServiceController(svc);
-        ResponseEntity<?> r = c.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L));
-        assertEquals(203, r.getStatusCodeValue());
+    private static void hasSignature(Class<?> c, String methodName, Class<?>... classes) {
+        try {
+            c.getMethod(methodName, classes);
+        } catch (NoSuchMethodException | SecurityException e) {
+            fail(e.getMessage());
+        }
     }
 
 }
