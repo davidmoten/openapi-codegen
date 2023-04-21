@@ -142,11 +142,6 @@ public class SpringBootGenerator {
         return p;
     }
 
-    private static String lastComponent(String ref) {
-        int i = ref.lastIndexOf('/');
-        return ref.substring(i + 1);
-    }
-
     private String resolveRefsFullClassName(Schema<?> schema) {
         return schemaCls.get(resolveRefs(schema)).fullClassName;
     }

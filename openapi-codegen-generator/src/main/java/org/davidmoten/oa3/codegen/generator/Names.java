@@ -312,7 +312,7 @@ final class Names {
     public String serviceControllerFullClassName() {
         return definition.packages().basePackage() + ".service.ServiceController";
     }
-    
+
     public String serviceInterfaceFullClassName() {
         return definition.packages().basePackage() + ".service.Service";
     }
@@ -326,7 +326,12 @@ final class Names {
     }
 
     public Parameter lookupParameter(String name) {
-        return api.getComponents().getParameters().get(name);
+        return api.getComponents().getParameters().get(lastComponent(name));
+    }
+
+    private static String lastComponent(String ref) {
+        int i = ref.lastIndexOf('/');
+        return ref.substring(i + 1);
     }
 
 }
