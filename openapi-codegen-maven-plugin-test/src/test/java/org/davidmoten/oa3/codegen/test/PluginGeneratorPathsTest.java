@@ -65,7 +65,7 @@ public class PluginGeneratorPathsTest {
 
     @Test
     public void testParams() throws ServiceException {
-        Response2 response = service.paramsGet(OffsetDateTime.now(), Optional.of(123L));
+        Response2 response = service.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L));
     }
 
 }

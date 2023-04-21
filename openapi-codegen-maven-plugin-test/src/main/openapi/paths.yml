@@ -81,6 +81,12 @@ paths:
           $ref: '#/components/responses/Error'   
           
   /params:
+    parameters:
+     - in: query
+       name: id
+       required: true
+       schema:
+         type: string
     get:
       parameters:
         - in: query
