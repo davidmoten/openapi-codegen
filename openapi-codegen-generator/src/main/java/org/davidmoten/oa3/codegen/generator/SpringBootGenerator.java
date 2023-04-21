@@ -103,6 +103,9 @@ public class SpringBootGenerator {
             RequestBody b = operation.getRequestBody();
             // TODO handle ref
             MediaType mediaType = b.getContent().get("application/json");
+            if (mediaType == null) {
+                mediaType = b.getContent().get("application/xml");
+            }
             if (mediaType != null) {
                 Schema<?> schema = mediaType.getSchema();
                 if (schema != null) {
@@ -127,6 +130,9 @@ public class SpringBootGenerator {
         if (response.isPresent()) {
             if (response.get().response.getContent() != null) {
                 MediaType mediaType = response.get().response.getContent().get("application/json");
+                if (mediaType == null) {
+                    mediaType = response.get().response.getContent().get("application/xml");
+                }
                 if (mediaType != null) {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
                     statusCode = Optional.of(response.get().statusCode);
