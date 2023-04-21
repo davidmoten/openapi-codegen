@@ -102,10 +102,9 @@ public class SpringBootGenerator {
                 Schema<?> schema = mediaType.getSchema();
                 if (schema != null) {
                     if (schemaCls.get(schema) != null) {
-                        String fullClassName = schemaCls.get(schema).fullClassName;
+                        String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
-                                Optional.ofNullable((Object) schema.getDefault()),
-                                orElse(b.getRequired(), false),
+                                Optional.ofNullable((Object) schema.getDefault()), orElse(b.getRequired(), false),
                                 fullClassName, false, true));
                     } else {
                         throw new RuntimeException("unexpected");
@@ -126,8 +125,11 @@ public class SpringBootGenerator {
                 if (mediaType != null) {
                     String ref = mediaType.getSchema().get$ref();
                     if (mediaType.getSchema().get$ref() == null) {
-                        returnFullClassName = Optional.of(schemaCls.get(mediaType.getSchema()).fullClassName);
+                        returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
                     } else {
+                        while (refCls.get(ref).schema.get().get$ref() != null) {
+                            ref = refCls.get(ref).schema.get().get$ref();
+                        }
                         returnFullClassName = Optional.of(refCls.get(ref).fullClassName);
                     }
                 }
@@ -138,6 +140,15 @@ public class SpringBootGenerator {
         }
         Method m = new Method(methodName, params, returnFullClassName, pathName, method);
         methods.add(m);
+    }
+
+    private String resolveRefsFullClassName(Schema<?> schema) {
+        Schema<?> s = schema;
+        while (s.get$ref() != null) {
+            s = refCls.get(s.get$ref()).schema.get();
+        }
+        String fullClassName = schemaCls.get(s).fullClassName;
+        return fullClassName;
     }
 
     public static final class Method {

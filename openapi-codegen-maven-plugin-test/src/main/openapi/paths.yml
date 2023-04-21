@@ -110,10 +110,10 @@ components:
     RequestBody2:
       type: object
       properties:
-        username:
+        identity:
           type: string
           minLength: 1
-      required: [username]
+      required: [identity]
         
     Response2:
       type: object
