@@ -43,7 +43,31 @@ paths:
                 $ref: '#/components/schemas/Response2' 
         default:    
           $ref: '#/components/responses/Error'       
-                        
+            
+  /item:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /item201:
+    get:
+      responses:
+        '201':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'          
+    
 components:
   responses:
     BadRequest:

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 
 public class SpringBootGenerator {
 
@@ -119,10 +121,10 @@ public class SpringBootGenerator {
 //                
 //            }
         }
-        ApiResponse response = operation.getResponses().get("200");
-        if (response != null) {
-            if (response.getContent() != null) {
-                MediaType mediaType = response.getContent().get("application/json");
+        Optional<ApiResponse> response = primaryResponse(operation.getResponses());
+        if (response.isPresent()) {
+            if (response.get().getContent() != null) {
+                MediaType mediaType = response.get().getContent().get("application/json");
                 if (mediaType != null) {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
                 }
@@ -133,6 +135,23 @@ public class SpringBootGenerator {
         }
         Method m = new Method(methodName, params, returnFullClassName, pathName, method);
         methods.add(m);
+    }
+
+    private static Optional<ApiResponse> primaryResponse(ApiResponses responses) {
+        if (responses.get("200") != null) {
+            return Optional.of(responses.get("200"));
+        } else {
+            for (Entry<String, ApiResponse> r : responses.entrySet()) {
+                if (is2XX(r.getKey())) {
+                    return Optional.of(r.getValue());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static boolean is2XX(String key) {
+        return key.length() == 3 && key.startsWith("2");
     }
 
     private Parameter resolveParameterRefs(Parameter p) {

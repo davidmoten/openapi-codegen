@@ -11,6 +11,7 @@ import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+@SuppressWarnings("unused")
 public class PluginGeneratorPathsTest {
 
     private static final Service service = Mockito.mock(Service.class);
@@ -18,15 +19,23 @@ public class PluginGeneratorPathsTest {
     @Test
     public void testRequestBodyRequired() throws ServiceException {
         RequestBody1 r = new RequestBody1("fred");
-        @SuppressWarnings("unused")
         Response1 response = service.requestBodyRequiredPost(r);
     }
 
     @Test
     public void testRequestBodyNotRequired() throws ServiceException {
         RequestBody2 r = new RequestBody2("fred");
-        @SuppressWarnings("unused")
         Response2 response = service.requestBodyNotRequiredPost(Optional.of(r));
+    }
+
+    @Test
+    public void testGetReturns200() throws ServiceException {
+        Response2 response = service.itemGet();
+    }
+    
+    @Test
+    public void testGetReturns201() throws ServiceException {
+        Response2 response = service.item201Get();
     }
 
 }
