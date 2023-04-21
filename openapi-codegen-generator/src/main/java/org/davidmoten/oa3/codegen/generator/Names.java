@@ -21,6 +21,7 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -322,6 +323,10 @@ final class Names {
 
     public String jacksonConfigurationFullClassName() {
         return definition.packages().basePackage() + ".service.JacksonConfiguration";
+    }
+
+    public Parameter lookupParameter(String name) {
+        return api.getComponents().getParameters().get(name);
     }
 
 }

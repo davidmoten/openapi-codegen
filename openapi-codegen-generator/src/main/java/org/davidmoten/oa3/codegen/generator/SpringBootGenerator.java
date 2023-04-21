@@ -21,6 +21,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
@@ -75,27 +76,23 @@ public class SpringBootGenerator {
         if (operation.getParameters() != null) {
             operation.getParameters() //
                     .forEach(p -> {
-                        if (p.get$ref() != null) {
-                            System.out.println("TODO resolve parameter ref");
-                        } else {
-                            boolean isArray = false;
-                            Schema<?> s = p.getSchema();
-                            if (Util.isArray(s)) {
-                                isArray = true;
-                                s = s.getItems();
-                            }
-                            s = resolveRefs(s);
-                            // handle simple schemas
-                            if (Util.isPrimitive(s)) {
-                                Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
-                                Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
-                                params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
-                                        p.getRequired(), cls.getCanonicalName(), isArray, false));
-                            }
-                            // TODO handle object schema and explode
-                            // TODO handle refs
-                            // TODO complex schemas?
+                        p = resolveParameterRefs(p);
+                        boolean isArray = false;
+                        Schema<?> s = p.getSchema();
+                        if (Util.isArray(s)) {
+                            isArray = true;
+                            s = s.getItems();
                         }
+                        s = resolveRefs(s);
+                        // handle simple schemas
+                        if (Util.isPrimitive(s)) {
+                            Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
+                            Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
+                            params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                                    p.getRequired(), cls.getCanonicalName(), isArray, false));
+                        }
+                        // TODO handle object schema and explode
+                        // TODO complex schemas?
                     });
         }
         if (operation.getRequestBody() != null) {
@@ -136,6 +133,18 @@ public class SpringBootGenerator {
         }
         Method m = new Method(methodName, params, returnFullClassName, pathName, method);
         methods.add(m);
+    }
+
+    private Parameter resolveParameterRefs(Parameter p) {
+        while (p.get$ref() != null) {
+            p = names.lookupParameter(p.get$ref());
+        }
+        return p;
+    }
+
+    private static String lastComponent(String ref) {
+        int i = ref.lastIndexOf('/');
+        return ref.substring(i + 1);
     }
 
     private String resolveRefsFullClassName(Schema<?> schema) {
