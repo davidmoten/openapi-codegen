@@ -51,7 +51,7 @@ public class PathsServerTest {
 
     @Test
     public void testCustomResponse() {
-        // normally returns a Response3 but we will get to return Response1 with a 500 status code
+        // primary return is Response3 but we will get to return Response1 with a 500 status code
         Response1 r = Http.readError("http://localhost:8080/responseRef", HttpMethod.GET, Response1.class, m);
         assertEquals("beehive", r.thing());
     }

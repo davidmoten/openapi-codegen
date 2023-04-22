@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.paths;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -10,8 +9,6 @@ import java.net.URL;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ch.qos.logback.core.recovery.ResilientSyslogOutputStream;
 
 public final class Http {
 
