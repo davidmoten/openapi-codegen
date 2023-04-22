@@ -115,7 +115,26 @@ paths:
                 $ref: '#/components/schemas/Response2' 
         default:    
           $ref: '#/components/responses/Error'                   
-    
+
+  /params/{id}:
+    get:
+       parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            minLength: 1
+       responses:
+         '200':    
+           description: ok response
+           content:
+             application/json:
+               schema: 
+                 $ref: '#/components/schemas/Response2' 
+         default:    
+           $ref: '#/components/responses/Error'                 
+             
 components:
   responses:
     BadRequest:

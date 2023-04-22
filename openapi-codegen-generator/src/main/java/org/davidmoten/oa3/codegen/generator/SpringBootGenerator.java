@@ -96,7 +96,9 @@ public class SpringBootGenerator {
                             Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
                             Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
                             params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
-                                    p.getRequired(), cls.getCanonicalName(), isArray, false, constraints(s)));
+                                    p.getRequired(), cls.getCanonicalName(), isArray, false, constraints(s),
+                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH))));
+
                         }
                         // TODO handle object schema and explode
                         // TODO complex schemas?
@@ -116,7 +118,7 @@ public class SpringBootGenerator {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()), orElse(b.getRequired(), false),
-                                fullClassName, false, true, constraints(schema)));
+                                fullClassName, false, true, constraints(schema), ParamType.BODY));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
@@ -142,13 +144,14 @@ public class SpringBootGenerator {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
                     statusCode = Optional.of(response.get().statusCode);
                 }
-                produces = new ArrayList<>(content.keySet()); 
+                produces = new ArrayList<>(content.keySet());
             } else {
                 System.out.println("TODO handle response ref");
             }
             // TODO handle other mediaTypes
         }
-        Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces);
+        Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes,
+                produces);
         methods.add(m);
     }
 
@@ -206,6 +209,10 @@ public class SpringBootGenerator {
         return s;
     }
 
+    public enum ParamType {
+        PATH, QUERY, HEADER, COOKIE, BODY;
+    }
+
     public static final class Method {
         final String methodName;
         final List<Param> parameters;
@@ -217,7 +224,8 @@ public class SpringBootGenerator {
         final List<String> produces;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
-                Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes, List<String> produces) {
+                Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
+                List<String> produces) {
             this.methodName = methodName;
             this.statusCode = statusCode;
             this.parameters = parameters;
@@ -274,9 +282,10 @@ public class SpringBootGenerator {
         final boolean isArray;
         final boolean isRequestBody;
         final Constraints constraints;
+        final ParamType type;
 
         Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
-                boolean isArray, boolean isRequestBody, Constraints constraints) {
+                boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
@@ -285,6 +294,7 @@ public class SpringBootGenerator {
             this.isArray = isArray;
             this.isRequestBody = isRequestBody;
             this.constraints = constraints;
+            this.type = type;
         }
 
         @Override

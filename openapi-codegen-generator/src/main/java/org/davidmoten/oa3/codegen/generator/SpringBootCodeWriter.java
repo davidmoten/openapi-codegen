@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Constraints;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Param;
+import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
@@ -26,7 +27,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -173,7 +177,7 @@ public class SpringBootCodeWriter {
                     if (isController) {
                         String defValue = p.defaultValue.map(x -> ", defaultValue = \"" + x + "\"").orElse("");
                         String required = ", required = " + p.required;
-                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(RequestParam.class), p.name,
+                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(annotation(p.type)), p.name,
                                 defValue, required);
                     } else {
                         annotations = "";
@@ -197,14 +201,14 @@ public class SpringBootCodeWriter {
 //                    consumes = { "application/json" }
 //                )
             if (isController) {
-                
+
                 out.format("\n%s@%s(\n", indent, imports.add(RequestMapping.class));
                 indent.right();
-                String consumes = m.consumes.stream().map(x -> "\"" + x +"\"").collect(Collectors.joining(", "));
+                String consumes = m.consumes.stream().map(x -> "\"" + x + "\"").collect(Collectors.joining(", "));
                 if (!consumes.isEmpty()) {
                     consumes = String.format(",\n%sconsumes = {%s}", indent, consumes);
                 }
-                String produces = m.produces.stream().map(x -> "\"" + x +"\"").collect(Collectors.joining(", "));
+                String produces = m.produces.stream().map(x -> "\"" + x + "\"").collect(Collectors.joining(", "));
                 if (!produces.isEmpty()) {
                     produces = String.format(",\n%sproduces = {%s}", indent, produces);
                 }
@@ -245,53 +249,69 @@ public class SpringBootCodeWriter {
         });
     }
 
+    private static Class<?> annotation(ParamType t) {
+        if (t == ParamType.BODY) {
+            return RequestBody.class;
+        } else if (t == ParamType.QUERY) {
+            return RequestParam.class;
+        } else if (t == ParamType.PATH) {
+            return PathVariable.class;
+        } else if (t == ParamType.HEADER) {
+            return RequestHeader.class;
+        } else if (t == ParamType.COOKIE) {
+            return CookieValue.class;
+        } else {
+            throw new IllegalArgumentException("unexpected " + t);
+        }
+    }
+
     private static void addValidationChecks(ByteArrayPrintWriter out, Imports imports, Indent indent, Method m) {
         m.parameters.forEach(p -> {
             Constraints x = p.constraints;
             if (x.minLength.isPresent()) {
                 out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.minLength.get(), p.identifier);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.minLength.get(), p.identifier);
             }
             if (x.maxLength.isPresent()) {
                 out.format("%s%s.checkMaxLength(%s, %s, \"%s\");\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.maxLength.get(), p.identifier);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.maxLength.get(), p.identifier);
             }
             if (x.pattern.isPresent()) {
                 out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.pattern.get(), p.identifier);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.pattern.get(), p.identifier);
             }
             if (x.min.isPresent()) {
                 out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.min.get().toString(), p.identifier, false);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.min.get().toString(), p.identifier, false);
             }
             if (x.max.isPresent()) {
                 out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.max.get().toString(), p.identifier, false);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.max.get().toString(), p.identifier, false);
             }
             if (x.minExclusive.isPresent()) {
                 out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.minExclusive.get().toString(), p.identifier, true);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.minExclusive.get().toString(), p.identifier, true);
             }
             if (x.maxExclusive.isPresent()) {
                 out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.maxExclusive.get().toString(), p.identifier, true);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.maxExclusive.get().toString(), p.identifier, true);
             }
             if (p.isArray && x.minItems.isPresent()) {
                 out.format("%s%s.checkMinSize(%s, %s, \"%s\");\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.minItems.get(), p.identifier);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.minItems.get(), p.identifier);
             }
             if (p.isArray && x.maxItems.isPresent()) {
                 out.format("%s%s.checkMaxSize(%s, %s, \"%s\");\n", indent,
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                        p.identifier, x.maxItems.get(), p.identifier);
+                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), p.identifier,
+                        x.maxItems.get(), p.identifier);
             }
         });
     }
