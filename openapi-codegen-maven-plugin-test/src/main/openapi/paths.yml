@@ -125,6 +125,18 @@ paths:
           schema:
             type: string
             minLength: 1
+        - in: header
+          name: ApiKey
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: cookie
+          name: bickie
+          required: true
+          schema:
+            type: string
+            minLength: 1                                 
        responses:
          '200':    
            description: ok response
