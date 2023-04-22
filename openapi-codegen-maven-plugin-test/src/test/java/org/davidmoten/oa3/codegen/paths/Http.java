@@ -1,5 +1,6 @@
-package org.davidmoten.oa3.codegen.test;
+package org.davidmoten.oa3.codegen.paths;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -9,6 +10,8 @@ import java.net.URL;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ch.qos.logback.core.recovery.ResilientSyslogOutputStream;
 
 public final class Http {
 
@@ -47,5 +50,15 @@ public final class Http {
             throw new UncheckedIOException(e);
         }
     }
+    
+//    private static byte[] read(InputStream in) throws IOException {
+//        byte[] buffer = new byte[8192];
+//        int n = 0;
+//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//        while ((n = in.read(buffer))!= -1) {
+//            bytes.write(buffer, 0, n);
+//        }
+//        return bytes.toByteArray();
+//    }
 
 }

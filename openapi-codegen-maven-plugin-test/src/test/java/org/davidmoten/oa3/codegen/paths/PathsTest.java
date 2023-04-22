@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.test;
+package org.davidmoten.oa3.codegen.paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
