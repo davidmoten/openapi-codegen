@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.paths.generated.schema.RequestBody1;
@@ -18,6 +20,8 @@ import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @SuppressWarnings("unused")
 public class PathsTest {
@@ -28,6 +32,7 @@ public class PathsTest {
     public void testRequestBodyRequired() throws ServiceException {
         RequestBody1 r = new RequestBody1("fred");
         Response1 response = service.requestBodyRequiredPost(r);
+        hasParameterAnnotation(ServiceController.class, RequestBody.class, "requestBodyRequiredPost", 0, RequestBody1.class);
     }
 
     @Test
@@ -75,6 +80,22 @@ public class PathsTest {
         ServiceController c = new ServiceController(svc);
         ResponseEntity<?> r = c.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45);
         assertEquals(203, r.getStatusCodeValue());
+    }
+
+    @Test
+    public void testPathVariable() throws ServiceException {
+        service.paramsIdGet("abc");
+        hasParameterAnnotation(ServiceController.class, PathVariable.class, "paramsIdGet", 0, String.class);
+    }
+
+    private static void hasParameterAnnotation(Class<?> c, Class<? extends Annotation> annotation, String methodName,
+            int argNo, Class<?>... args) {
+        try {
+            Method m = c.getMethod(methodName, args);
+            assertTrue(Arrays.stream(m.getParameters()).anyMatch(p -> p.isAnnotationPresent(annotation)));
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void isVoid(String methodName) {
