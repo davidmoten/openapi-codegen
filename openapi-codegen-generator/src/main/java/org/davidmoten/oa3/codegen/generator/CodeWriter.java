@@ -71,6 +71,11 @@ final class CodeWriter {
 
     static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls, Imports imports,
             String schemaName) {
+        if ((cls.category == SchemaCategory.PATH || cls.category == SchemaCategory.RESPONSE) && cls.schema.isPresent()
+                && cls.schema.get().get$ref() != null) {
+//            System.out.println("[INFO] not writing wrapper class " + cls.fullClassName + " because ref type used instead");
+            return;
+        }
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
         CodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
