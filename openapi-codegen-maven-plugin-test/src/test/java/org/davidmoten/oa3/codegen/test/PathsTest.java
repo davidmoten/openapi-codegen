@@ -10,12 +10,12 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.davidmoten.oa3.codegen.paths.generated.schema.RequestBody1;
-import org.davidmoten.oa3.codegen.paths.generated.schema.RequestBody2;
-import org.davidmoten.oa3.codegen.paths.generated.schema.Response1;
-import org.davidmoten.oa3.codegen.paths.generated.schema.Response2;
-import org.davidmoten.oa3.codegen.paths.generated.service.Service;
-import org.davidmoten.oa3.codegen.paths.generated.service.ServiceController;
+import org.davidmoten.oa3.codegen.paths.schema.RequestBody1;
+import org.davidmoten.oa3.codegen.paths.schema.RequestBody2;
+import org.davidmoten.oa3.codegen.paths.schema.Response1;
+import org.davidmoten.oa3.codegen.paths.schema.Response2;
+import org.davidmoten.oa3.codegen.paths.service.Service;
+import org.davidmoten.oa3.codegen.paths.service.ServiceController;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.junit.Test;
 import org.mockito.Mockito;
