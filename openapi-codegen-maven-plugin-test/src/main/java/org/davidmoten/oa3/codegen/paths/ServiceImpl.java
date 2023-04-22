@@ -13,4 +13,9 @@ public class ServiceImpl implements Service {
         return new Response2("abcToken");
     }
 
+    @Override
+    public Response2 item201Get() throws ServiceException {
+        throw new ServiceException(520, "todo sale mal");
+    }
+
 }

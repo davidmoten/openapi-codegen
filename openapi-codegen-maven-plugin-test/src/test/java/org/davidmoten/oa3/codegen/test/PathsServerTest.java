@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.davidmoten.oa3.codegen.paths.Application;
 import org.davidmoten.oa3.codegen.paths.Globals;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
+import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,10 +33,22 @@ public class PathsServerTest {
     }
 
     @Test
+    public void testObjectMapperIsCorrect() {
+        assertTrue(m == Globals.config().mapper());
+    }
+    
+    @Test
     public void testGet() {
         Response2 r = Http.read("http://localhost:8080/item", HttpMethod.GET, Response2.class, m);
         assertEquals("abcToken", r.token());
-        assertTrue(m == Globals.config().mapper());
+    }
+
+    @Test
+    public void testError() {
+        DefaultError error = Http.readError("http://localhost:8080/item201", HttpMethod.GET,
+                DefaultError.class, m);
+        assertEquals("todo sale mal", error.message());
+        assertEquals(520, error.statusCode());
     }
 
 }
