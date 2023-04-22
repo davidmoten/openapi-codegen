@@ -145,7 +145,26 @@ paths:
                schema: 
                  $ref: '#/components/schemas/Response2' 
          default:    
-           $ref: '#/components/responses/Error'                 
+           $ref: '#/components/responses/Error'          
+
+  /query-object:
+    get:
+      parameters:
+        - in: query
+          name: id
+          required: true
+          explode: true
+          schema:
+            type: object
+            properties:
+              first:
+                type: string
+              second:
+                type: integer
+            required: [first, second]
+      responses:
+        '200':    
+          description: ok response            
              
 components:
   responses:

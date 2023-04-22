@@ -99,7 +99,7 @@ public class SpringBootGenerator {
                                     p.getRequired(), cls.getCanonicalName(), isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH))));
 
-                        }
+                        } 
                         // TODO handle object schema and explode
                         // TODO complex schemas?
                     });
