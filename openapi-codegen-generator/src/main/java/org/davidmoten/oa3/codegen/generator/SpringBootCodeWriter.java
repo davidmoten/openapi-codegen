@@ -181,6 +181,8 @@ public class SpringBootCodeWriter {
                         Class<?> ann = annotation(p.type);
                         if (ann.equals(RequestParam.class) && p.isComplexQueryParameter) {
                             ann = ModelAttribute.class;
+                            required = "";
+                            defValue = "";
                         }
                         annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(ann), p.name, defValue,
                                 required);
