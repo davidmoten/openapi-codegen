@@ -1,13 +1,11 @@
 package org.davidmoten.oa3.codegen.paths;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
