@@ -28,7 +28,7 @@ public class ServiceImpl implements Service {
 
     @Override
     public void queryObjectGet(QueryObjectGetIdParameterId id) throws ServiceException {
-        System.out.println(id.first() + ", " + id.second());
+        System.out.println(id.first() + ", " + id.second().get());
     }
 
 }

@@ -19,7 +19,7 @@ public final class DefaultError {
     private final String message;
 
     @JsonCreator
-    private DefaultError(@JsonProperty("statusCode") int statusCode, @JsonProperty("message") String message) {
+    public DefaultError(@JsonProperty("statusCode") int statusCode, @JsonProperty("message") String message) {
         this.statusCode = statusCode;
         this.message = message;
     }
@@ -35,4 +35,10 @@ public final class DefaultError {
     public String message() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "DefaultError [statusCode=" + statusCode + ", message=" + message + "]";
+    }
+    
 }

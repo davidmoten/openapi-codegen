@@ -153,7 +153,7 @@ paths:
         - in: query
           name: id
           required: true
-          explode: true
+          ## explode: true (is default)
           schema:
             type: object
             properties:
@@ -161,7 +161,7 @@ paths:
                 type: string
               second:
                 type: integer
-            required: [first, second]
+            required: [first]
       responses:
         '200':    
           description: ok response            

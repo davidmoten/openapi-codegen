@@ -51,13 +51,19 @@ public class PathsServerTest {
 
     @Test
     public void testCustomResponse() {
-        // primary return is Response3 but we will get to return Response1 with a 500 status code
+        // primary return is Response3 but we will get to return Response1 with a 500
+        // status code
         Response1 r = Http.readError("http://localhost:8080/responseRef", HttpMethod.GET, Response1.class, m);
         assertEquals("beehive", r.thing());
     }
-    
+
     @Test
     public void testQueryObjectModelAttribute() {
         assertEquals(200, Http.readEmpty("http://localhost:8080/query-object?first=abc&second=12", HttpMethod.GET));
+    }
+
+    @Test
+    public void testQueryObjectBadParams() {
+        assertEquals(400, Http.readEmpty("http://localhost:8080/query-object?first=abc&second=bad", HttpMethod.GET));
     }
 }
