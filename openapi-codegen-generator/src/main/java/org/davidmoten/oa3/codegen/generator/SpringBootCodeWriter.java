@@ -18,6 +18,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.runtime.Config;
+import org.davidmoten.oa3.codegen.spring.runtime.ControllerExceptionHandler;
 import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +147,7 @@ public class SpringBootCodeWriter {
         out.format("\n%s", IMPORTS_HERE);
         out.format("\n@%s\n", imports.add(RestController.class));
         String simpleClassName = Names.simpleClassName(fullClassName);
-        out.format("public class %s {\n", simpleClassName);
+        out.format("public class %s implements %s {\n", simpleClassName, imports.add(ControllerExceptionHandler.class));
         indent.right();
         out.format("\n%sprivate final %s service;\n", indent, imports.add(names.serviceInterfaceFullClassName()));
         out.format("\n%spublic %s(@%s(required = false) %s service) {\n", indent, simpleClassName,

@@ -31,7 +31,7 @@ public final class Http {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     public static int readStatusCodeOnly(String url, HttpMethod method) {
         try {
             URL u = new URL(url);
@@ -62,14 +62,14 @@ public final class Http {
         }
     }
 
-    private static byte[] read(InputStream in) throws IOException {
-        byte[] buffer = new byte[8192];
-        int n = 0;
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        while ((n = in.read(buffer))!= -1) {
-            bytes.write(buffer, 0, n);
-        }
-        return bytes.toByteArray();
-    }
+//    private static byte[] read(InputStream in) throws IOException {
+//        byte[] buffer = new byte[8192];
+//        int n = 0;
+//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//        while ((n = in.read(buffer))!= -1) {
+//            bytes.write(buffer, 0, n);
+//        }
+//        return bytes.toByteArray();
+//    }
 
 }
