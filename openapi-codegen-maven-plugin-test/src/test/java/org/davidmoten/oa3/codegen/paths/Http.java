@@ -32,7 +32,7 @@ public final class Http {
         }
     }
     
-    public static int readEmpty(String url, HttpMethod method) {
+    public static int readStatusCodeOnly(String url, HttpMethod method) {
         try {
             URL u = new URL(url);
             HttpURLConnection con = (HttpURLConnection) u.openConnection();

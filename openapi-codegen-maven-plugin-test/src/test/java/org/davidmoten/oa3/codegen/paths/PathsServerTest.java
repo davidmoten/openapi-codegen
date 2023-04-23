@@ -59,16 +59,16 @@ public class PathsServerTest {
 
     @Test
     public void testQueryObjectModelAttribute() {
-        assertEquals(200, Http.readEmpty("http://localhost:8080/query-object?first=abc&second=12", HttpMethod.GET));
+        assertEquals(200, Http.readStatusCodeOnly("http://localhost:8080/query-object?first=abc&second=12", HttpMethod.GET));
     }
 
     @Test
     public void testQueryObjectBadParamType() {
-        assertEquals(400, Http.readEmpty("http://localhost:8080/query-object?first=abc&second=bad", HttpMethod.GET));
+        assertEquals(400, Http.readStatusCodeOnly("http://localhost:8080/query-object?first=abc&second=bad", HttpMethod.GET));
     }
     
     @Test
     public void testQueryObjectParamMissing() {
-        assertEquals(500, Http.readEmpty("http://localhost:8080/query-object?second=12", HttpMethod.GET));
+        assertEquals(500, Http.readStatusCodeOnly("http://localhost:8080/query-object?second=12", HttpMethod.GET));
     }
 }
