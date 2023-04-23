@@ -8,8 +8,8 @@ public interface ControllerExceptionHandler {
     
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     @ExceptionHandler(IllegalArgumentException.class)
-    default void handleIllegalArgumentException() {
-        // Nothing to do
+    default DefaultError handleIllegalArgumentException(IllegalArgumentException e) {
+        return new DefaultError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 
 }
