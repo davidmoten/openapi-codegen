@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -177,8 +178,12 @@ public class SpringBootCodeWriter {
                     if (isController) {
                         String defValue = p.defaultValue.map(x -> ", defaultValue = \"" + x + "\"").orElse("");
                         String required = ", required = " + p.required;
-                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(annotation(p.type)), p.name,
-                                defValue, required);
+                        Class<?> ann = annotation(p.type);
+                        if (ann.equals(RequestParam.class) && p.isComplexQueryParameter) {
+                            ann = ModelAttribute.class;
+                        }
+                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(ann), p.name, defValue,
+                                required);
                     } else {
                         annotations = "";
                     }

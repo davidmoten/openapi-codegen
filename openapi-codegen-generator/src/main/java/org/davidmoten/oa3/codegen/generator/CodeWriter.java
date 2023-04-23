@@ -29,6 +29,7 @@ import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.internal.Util;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -236,6 +237,7 @@ final class CodeWriter {
         if (cls.topLevel) {
             addGeneratedAnnotation(out, imports, indent);
         }
+        out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
     }
 

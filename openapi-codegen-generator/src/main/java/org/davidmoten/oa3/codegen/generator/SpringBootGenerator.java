@@ -91,15 +91,21 @@ public class SpringBootGenerator {
                             s = s.getItems();
                         }
                         s = resolveRefs(s);
-                        // handle simple schemas
+                        Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
                         if (Util.isPrimitive(s)) {
-                            Class<?> cls = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
-                            Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
+                            // handle simple schemas
+                            Class<?> c = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
                             params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
-                                    p.getRequired(), cls.getCanonicalName(), isArray, false, constraints(s),
-                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH))));
-
-                        } 
+                                    p.getRequired(), c.getCanonicalName(), isArray, false, constraints(s),
+                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false));
+                        } else {
+                            // is complex schema
+                            // TODO use @ModelAttribute annotation on the parameter?
+                            Cls cls = schemaCls.get(s);
+                            params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                                    p.getRequired(), cls.fullClassName, isArray, false, constraints(s),
+                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true));
+                        }
                         // TODO handle object schema and explode
                         // TODO complex schemas?
                     });
@@ -118,7 +124,7 @@ public class SpringBootGenerator {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()), orElse(b.getRequired(), false),
-                                fullClassName, false, true, constraints(schema), ParamType.BODY));
+                                fullClassName, false, true, constraints(schema), ParamType.BODY, false));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
@@ -283,9 +289,11 @@ public class SpringBootGenerator {
         final boolean isRequestBody;
         final Constraints constraints;
         final ParamType type;
+        final boolean isComplexQueryParameter;
 
         Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
-                boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type) {
+                boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
+                boolean isComplexQueryParameter) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
@@ -295,6 +303,7 @@ public class SpringBootGenerator {
             this.isRequestBody = isRequestBody;
             this.constraints = constraints;
             this.type = type;
+            this.isComplexQueryParameter = isComplexQueryParameter;
         }
 
         @Override
