@@ -237,8 +237,11 @@ final class CodeWriter {
         if (cls.topLevel) {
             addGeneratedAnnotation(out, imports, indent);
         }
-        out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
+    }
+
+    private static void addConstructorBindingAnnotation(PrintWriter out, Imports imports, Indent indent) {
+        out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
     }
 
     private static void writePolymorphicDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent,
@@ -273,6 +276,8 @@ final class CodeWriter {
                 out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
 
                 // add constructor for each member of the oneOf (fieldTypes)
+                // as there are multiple constructors we cannot add ConstructorBinding annotations
+                // so polymorphic stuff can't be used to bind to rest method parameters
                 out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
                 out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
                 out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
@@ -406,6 +411,9 @@ final class CodeWriter {
         final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
                 ? "private"
                 : "public";
+        if (visibility.equals("public")) {
+            addConstructorBindingAnnotation(out, imports, indent);
+        }
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
         ifValidate(cls, out, indent, imports, names, //
