@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.paths;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.davidmoten.oa3.codegen.paths.path.QueryObjectGetIdParameterId;
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
@@ -55,5 +56,11 @@ public class PathsServerTest {
         Response1 r = Http.readError("http://localhost:8080/responseRef", HttpMethod.GET, Response1.class, m);
         assertEquals("beehive", r.thing());
     }
+    
+    @Test
+    public void testQueryObjectModelAttribute() {
+        assertEquals(200, Http.readEmpty("http://localhost:8080/query-object?first=abc&second=12", HttpMethod.GET));
+    }
+
 
 }

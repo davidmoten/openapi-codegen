@@ -29,6 +29,18 @@ public final class Http {
             throw new UncheckedIOException(e);
         }
     }
+    
+    public static int readEmpty(String url, HttpMethod method) {
+        try {
+            URL u = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) u.openConnection();
+            con.setRequestMethod(method.toString());
+            con.setDoInput(true);
+            return con.getResponseCode();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
     public static <T> T readError(String url, HttpMethod method, Class<T> cls, ObjectMapper mapper) {
         try {
