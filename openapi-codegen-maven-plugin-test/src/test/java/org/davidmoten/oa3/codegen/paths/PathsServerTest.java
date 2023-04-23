@@ -15,6 +15,11 @@ import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * See {@link PathsService} class for implementations being called by these
+ * tests.
+ *
+ */
 public class PathsServerTest {
 
     private static ConfigurableApplicationContext context;
@@ -59,14 +64,16 @@ public class PathsServerTest {
 
     @Test
     public void testQueryObjectModelAttribute() {
-        assertEquals(200, Http.readStatusCodeOnly("http://localhost:8080/query-object?first=abc&second=12", HttpMethod.GET));
+        assertEquals(200,
+                Http.readStatusCodeOnly("http://localhost:8080/query-object?first=abc&second=12", HttpMethod.GET));
     }
 
     @Test
     public void testQueryObjectBadParamType() {
-        assertEquals(400, Http.readStatusCodeOnly("http://localhost:8080/query-object?first=abc&second=bad", HttpMethod.GET));
+        assertEquals(400,
+                Http.readStatusCodeOnly("http://localhost:8080/query-object?first=abc&second=bad", HttpMethod.GET));
     }
-    
+
     @Test
     public void testQueryObjectParamMissing() {
         assertEquals(400, Http.readStatusCodeOnly("http://localhost:8080/query-object?second=12", HttpMethod.GET));

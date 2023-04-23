@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceImpl implements Service {
+public class PathsService implements Service {
 
     @Override
     public Response2 itemGet() throws ServiceException {
