@@ -1,4 +1,6 @@
-package org.davidmoten.oa3.codegen.spring.runtime;
+package org.davidmoten.oa3.codegen.spring.runtime.internal;
+
+import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 
 public final class Util {
 

@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public interface ControllerExceptionHandler {
     
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
-    @ExceptionHandler(IllegalArgumentException.class)
-    default DefaultError handleIllegalArgumentException(IllegalArgumentException e) {
+    @ExceptionHandler(BadRequestException.class)
+    default DefaultError handleIllegalArgumentException(BadRequestException e) {
         return new DefaultError(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 

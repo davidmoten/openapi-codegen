@@ -76,8 +76,8 @@ public class PathsServerTest {
 
     @Test
     public void testQueryObjectParamMissing() {
-        DefaultError error = Http.readError("http://localhost:8080/query-object?second=12", HttpMethod.GET, DefaultError.class, m);
-        assertEquals(400, error.statusCode());
-        assertEquals("first cannot be null", error.message());
+        // we can't tell with object parameters if the cause was bad request or bad
+        // server-side logic so we defensively return status code 500
+        assertEquals(500, Http.readStatusCodeOnly("http://localhost:8080/query-object?second=12", HttpMethod.GET));
     }
 }
