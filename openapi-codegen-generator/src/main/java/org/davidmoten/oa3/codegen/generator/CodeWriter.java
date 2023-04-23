@@ -439,6 +439,7 @@ final class CodeWriter {
                     .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
             indent.left().left();
+            addConstructorBindingAnnotation(out, imports, indent);
             out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             // validate
