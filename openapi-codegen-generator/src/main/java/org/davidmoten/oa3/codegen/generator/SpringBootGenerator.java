@@ -145,12 +145,25 @@ public class SpringBootGenerator {
             if (content != null) {
                 MediaType mediaType = content.get("application/json");
                 if (mediaType == null) {
-                    mediaType = response.get().response.getContent().get("application/xml");
+                    mediaType = content.get("application/xml");
                 }
                 if (mediaType != null) {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
                 } else {
-                    returnFullClassName = Optional.of(Resource.class.getCanonicalName());
+                    // loop through all mime-types and pick first non-default to infer return class
+                    // name
+                    final String defaultReturnClassFullName = Resource.class.getCanonicalName();
+                    returnFullClassName = Optional.of(content. //
+                            keySet() //
+                            .stream() //
+                            .filter(x -> !"default".equals(x)) //
+                            .map(x -> {
+                                if (x.startsWith("text/")) {
+                                    return String.class.getCanonicalName();
+                                } else {
+                                    return defaultReturnClassFullName;
+                                }
+                            }).findFirst().orElse(defaultReturnClassFullName));
                 }
                 statusCode = Optional.of(response.get().statusCode);
                 produces = new ArrayList<>(content.keySet());

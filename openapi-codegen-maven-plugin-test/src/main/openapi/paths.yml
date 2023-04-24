@@ -83,6 +83,17 @@ paths:
         default:    
           $ref: '#/components/responses/Error'
                 
+  /text:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            text/plain:
+              schema: 
+                type: string
+        default:    
+          $ref: '#/components/responses/Error'
       
   /requestBodyMultiType:
     post:
