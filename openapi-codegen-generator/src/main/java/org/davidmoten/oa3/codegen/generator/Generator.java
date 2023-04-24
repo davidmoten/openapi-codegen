@@ -156,8 +156,10 @@ public class Generator {
         }
 
         public boolean unwrapSingleField() {
-            return !hasProperties && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
-                    || topLevel && fields.size() == 1);
+            return !hasProperties
+                    && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
+                            || topLevel && fields.size() == 1)
+                    || classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         }
 
         public Set<String> ownersAndSiblingsSimpleNames() {
@@ -390,8 +392,10 @@ public class Generator {
                     }
                     Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
-                    boolean exclusiveMin = org.davidmoten.oa3.codegen.runtime.internal.Util.orElse(schema.getExclusiveMinimum(), false);
-                    boolean exclusiveMax = org.davidmoten.oa3.codegen.runtime.internal.Util.orElse(schema.getExclusiveMaximum(), false);
+                    boolean exclusiveMin = org.davidmoten.oa3.codegen.runtime.internal.Util
+                            .orElse(schema.getExclusiveMinimum(), false);
+                    boolean exclusiveMax = org.davidmoten.oa3.codegen.runtime.internal.Util
+                            .orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (Util.isRef(schema)) {

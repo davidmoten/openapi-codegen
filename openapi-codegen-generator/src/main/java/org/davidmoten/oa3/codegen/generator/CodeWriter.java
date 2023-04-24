@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -153,8 +154,66 @@ final class CodeWriter {
         }
         writeEnumCreator(out, imports, indent, cls);
         writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces, names);
+        if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+            writeEqualsMethod(out, imports, indent, cls);
+            writeHashCodeMethod(out, imports, indent, cls);
+        }
         indent.left();
         closeParen(out, indent);
+    }
+
+    private static void writeHashCodeMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+//        @Override
+//        public int hashCode() {
+//          return Objects.hash(lat, lon);
+//        }
+
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic int hashCode() {\n", indent);
+        String s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
+        out.format("%sreturn %s.hash(%s);\n", indent.right(), imports.add(Objects.class), s);
+        indent.left();
+        closeParen(out, indent);
+    }
+
+    private static void writeEqualsMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+//        @Override
+//        public boolean equals(Object o) {
+//          if (this == o) {
+//            return true;
+//          }
+//          if (o == null || getClass() != o.getClass()) {
+//            return false;
+//          }
+//          Point point = (Point) o;
+//          return Objects.equals(this.lat, point.lat) &&
+//              Objects.equals(this.lon, point.lon);
+//        }
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic boolean equals(Object o) {\n", indent);
+        indent.right();
+        out.format("%sif (this == o) {\n", indent);
+        out.format("%sreturn true;\n", indent.right());
+        indent.left();
+        closeParen(out, indent);
+        out.format("%sif (o == null || getClass() != o.getClass()) {\n", indent);
+        out.format("%sreturn false;\n", indent.right());
+        indent.left();
+        closeParen(out, indent);
+        indent.right();
+        String s = cls.fields.stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", indent,
+                imports.add(Objects.class), x.fieldName(cls), x.fieldName(cls))).collect(Collectors.joining(" && "));
+        indent.left();
+        if (!s.isEmpty()) {
+            out.format("%s%s other = (%s) o;\n", indent, cls.simpleName(), cls.simpleName());
+        }
+        out.format("%sreturn %s;\n", indent, s.isEmpty() ? "true" : s);
+        indent.left();
+        closeParen(out, indent);
+    }
+
+    private static void addOverrideAnnotation(PrintWriter out, Imports imports, Indent indent) {
+        out.format("\n%s@%s\n", indent, imports.add(Override.class));
     }
 
     private static void addGeneratedAnnotation(PrintWriter out, Imports imports, Indent indent) {
@@ -276,7 +335,8 @@ final class CodeWriter {
                 out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
 
                 // add constructor for each member of the oneOf (fieldTypes)
-                // as there are multiple constructors we cannot add ConstructorBinding annotations
+                // as there are multiple constructors we cannot add ConstructorBinding
+                // annotations
                 // so polymorphic stuff can't be used to bind to rest method parameters
                 out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
                 out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
@@ -420,8 +480,8 @@ final class CodeWriter {
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                         out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
-                                x.fieldName(cls), x.fieldName(cls));
+                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
+                                x.fieldName(cls));
                     }
                     validateMore(out2, imports, indent, cls, x, false);
                 }));
@@ -486,13 +546,13 @@ final class CodeWriter {
         String raw = x.fieldName(cls) + (useGet ? ".get()" : "");
         if (x.minLength.isPresent()) {
             out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
-                    x.minLength.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.minLength.get(),
+                    x.fieldName(cls));
         }
         if (x.maxLength.isPresent()) {
             out.format("%s%s.checkMaxLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
-                    x.maxLength.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.maxLength.get(),
+                    x.fieldName(cls));
         }
         if (x.pattern.isPresent()) {
             out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
@@ -501,13 +561,13 @@ final class CodeWriter {
         }
         if (x.min.isPresent()) {
             out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
-                    x.min.get().toString(), x.fieldName(cls), x.exclusiveMin);
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.min.get().toString(),
+                    x.fieldName(cls), x.exclusiveMin);
         }
         if (x.max.isPresent()) {
             out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
-                    x.max.get().toString(), x.fieldName(cls), x.exclusiveMax);
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.max.get().toString(),
+                    x.fieldName(cls), x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
             out.format("%s%s.checkMinSize(%s, %s, \"%s\");\n", indent,
@@ -552,7 +612,7 @@ final class CodeWriter {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
             if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
-                out.format("\n%s@%s\n", indent, imports.add(Override.class));
+                addOverrideAnnotation(out, imports, indent);
             } else {
                 out.println();
             }
