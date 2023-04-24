@@ -101,19 +101,15 @@ public class SpringBootGenerator {
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false));
                         } else {
                             // is complex schema
-                            // TODO use @ModelAttribute annotation on the parameter?
                             Cls cls = schemaCls.get(s);
                             params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
                                     p.getRequired(), cls.fullClassName, isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true));
                         }
-                        // TODO handle object schema and explode
-                        // TODO complex schemas?
                     });
         }
         if (operation.getRequestBody() != null) {
-            RequestBody b = operation.getRequestBody();
-            // TODO handle ref
+            RequestBody b = resolveRefs(operation.getRequestBody());
             MediaType mediaType = b.getContent().get("application/json");
             if (mediaType == null) {
                 mediaType = b.getContent().get("application/xml");
@@ -130,14 +126,10 @@ public class SpringBootGenerator {
                         throw new RuntimeException("unexpected");
                     }
                 }
+            } else {
+                System.out.println("TODO handle request body with media types " + b.getContent().keySet());
             }
             consumes = new ArrayList<>(b.getContent().keySet());
-//            else {
-//                // for each other request mimeType
-////                params.add(new Param("requestBody", "requestBody", Optional.ofNullable((Object) schema.getDefault()),
-////                        true, byte[].class.getCanonicalName(), false));
-//                
-//            }
         }
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
         if (response.isPresent()) {
@@ -174,6 +166,13 @@ public class SpringBootGenerator {
         Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes,
                 produces);
         methods.add(m);
+    }
+
+    private RequestBody resolveRefs(RequestBody b) {
+        while (b.get$ref() != null) {
+            b = names.lookupRequestBody(b.get$ref());
+        }
+        return b;
     }
 
     private static Constraints constraints(Schema<?> schema) {

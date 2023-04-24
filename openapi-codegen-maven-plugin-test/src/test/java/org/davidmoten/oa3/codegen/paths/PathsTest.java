@@ -108,6 +108,11 @@ public class PathsTest {
     public void testGetOctetStream() throws ServiceException {
         Resource response = service.bytesGet();
     }
+    
+    @Test
+    public void testGetText() throws ServiceException {
+        String response = service.textGet();
+    }
 
     private static void hasParameterAnnotation(Class<?> c, Class<? extends Annotation> annotation, String methodName,
             int argNo, Class<?>... args) {

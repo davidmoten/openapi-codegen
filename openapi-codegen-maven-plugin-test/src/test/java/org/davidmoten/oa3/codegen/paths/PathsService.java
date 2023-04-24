@@ -70,4 +70,9 @@ public class PathsService implements Service {
         return new InputStreamResource(new ByteArrayInputStream("hello there".getBytes(StandardCharsets.UTF_8)));
     }
 
+    @Override
+    public String textGet() throws ServiceException {
+        return "example text";
+    }
+
 }

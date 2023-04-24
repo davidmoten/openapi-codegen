@@ -69,7 +69,7 @@ public class PathsServerTest {
 
     @Test
     public void testResponseMultiTypeWithAcceptHeaderOctetStream() {
-        String response = Http.readStringFromBytes("http://localhost:8080/responseMultiType?username=fred",
+        String response = Http.readStringFromOctetStream("http://localhost:8080/responseMultiType?username=fred",
                 HttpMethod.GET);
         assertEquals("hello there", response);
     }
@@ -112,7 +112,12 @@ public class PathsServerTest {
 
     @Test
     public void testOctetStream() {
-        assertEquals("hello there", Http.readStringFromBytes("http://localhost:8080/bytes", HttpMethod.GET));
+        assertEquals("hello there", Http.readStringFromOctetStream("http://localhost:8080/bytes", HttpMethod.GET));
+    }
+    
+    @Test
+    public void testText() {
+        assertEquals("example text", Http.readString("http://localhost:8080/text", HttpMethod.GET, "text/plain"));
     }
 
     public static void main(String[] args) {

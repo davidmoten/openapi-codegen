@@ -22,6 +22,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -332,6 +333,10 @@ final class Names {
     private static String lastComponent(String ref) {
         int i = ref.lastIndexOf('/');
         return ref.substring(i + 1);
+    }
+
+    public RequestBody lookupRequestBody(String ref) {
+        return api.getComponents().getRequestBodies().get(lastComponent(ref));
     }
 
 }

@@ -38,20 +38,24 @@ public final class Http {
             throw new UncheckedIOException(e);
         }
     }
-
-    public static String readStringFromBytes(String url, HttpMethod method) {
+    
+    public static String readString(String url, HttpMethod method, String acceptHeader) {
         try {
             URL u = new URL(url);
             HttpURLConnection con = (HttpURLConnection) u.openConnection();
             con.setRequestMethod(method.toString());
             con.setDoInput(true);
-            con.setRequestProperty("Accept", "application/octet-stream");
+            con.setRequestProperty("Accept", acceptHeader);
             try (InputStream in = con.getInputStream()) {
                 return new String(read(in), StandardCharsets.UTF_8);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public static String readStringFromOctetStream(String url, HttpMethod method) {
+        return readString(url, method, "application/octet-stream");
     }
 
     public static <T> T read(String url, HttpMethod method, Class<T> cls, ObjectMapper mapper) {
