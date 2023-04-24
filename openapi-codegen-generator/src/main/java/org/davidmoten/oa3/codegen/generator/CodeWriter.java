@@ -281,7 +281,7 @@ final class CodeWriter {
                 out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
                 out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
                 out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
+                        imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
                 out.format("%s}\n", indent.left());
                 cls.fields.forEach(f -> {
                     String className = org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive(f.fullClassName);
@@ -291,7 +291,7 @@ final class CodeWriter {
                         out.format("%sthis.value = value;\n", indent);
                     } else {
                         out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
-                                imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
+                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
                     }
                     out.format("%s}\n", indent.left());
                 });
@@ -316,7 +316,7 @@ final class CodeWriter {
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
                                 out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
+                                        imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
                                         x.fieldName(cls), x.fieldName(cls));
                             } else {
                                 out.format("%s// ???\n", indent);
@@ -420,7 +420,7 @@ final class CodeWriter {
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                         out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
+                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
                                 x.fieldName(cls), x.fieldName(cls));
                     }
                     validateMore(out2, imports, indent, cls, x, false);
@@ -450,7 +450,7 @@ final class CodeWriter {
                                 .findFirst();
                         if (!disc.isPresent() && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
                             out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
+                                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
                                     x.fieldName(cls), x.fieldName(cls));
                             validateMore(out2, imports, indent, cls, x, !x.required);
                         }
@@ -486,37 +486,37 @@ final class CodeWriter {
         String raw = x.fieldName(cls) + (useGet ? ".get()" : "");
         if (x.minLength.isPresent()) {
             out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
                     x.minLength.get(), x.fieldName(cls));
         }
         if (x.maxLength.isPresent()) {
             out.format("%s%s.checkMaxLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
                     x.maxLength.get(), x.fieldName(cls));
         }
         if (x.pattern.isPresent()) {
             out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw, x.pattern.get(),
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.pattern.get(),
                     x.fieldName(cls));
         }
         if (x.min.isPresent()) {
             out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
                     x.min.get().toString(), x.fieldName(cls), x.exclusiveMin);
         }
         if (x.max.isPresent()) {
             out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
                     x.max.get().toString(), x.fieldName(cls), x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
             out.format("%s%s.checkMinSize(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), x.fieldName(cls),
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.minItems.get(), x.fieldName(cls));
         }
         if (x.isArray && x.maxItems.isPresent()) {
             out.format("%s%s.checkMaxSize(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), x.fieldName(cls),
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.maxItems.get(), x.fieldName(cls));
         }
     }
