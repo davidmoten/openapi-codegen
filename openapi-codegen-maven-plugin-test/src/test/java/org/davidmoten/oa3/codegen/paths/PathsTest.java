@@ -19,6 +19,7 @@ import org.davidmoten.oa3.codegen.paths.service.ServiceController;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,12 @@ public class PathsTest {
     public void testRequestBodyNotRequired() throws ServiceException {
         RequestBody2 r = new RequestBody2("fred");
         Response2 response = service.requestBodyNotRequiredPost(Optional.of(r));
+    }
+
+    @Test
+    public void testResponseMultiType() throws ServiceException {
+        RequestBody2 r = new RequestBody2("fred");
+        Response1 response = service.responseMultiTypeGet(MediaType.APPLICATION_JSON_VALUE, "miyaki");
     }
 
     @Test
