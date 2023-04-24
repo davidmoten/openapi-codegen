@@ -12,6 +12,7 @@ import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.paths.service.Service;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -62,6 +63,11 @@ public class PathsService implements Service {
         } else {
             throw new ServiceException(HttpStatus.BAD_REQUEST.value(), "unsupported Accept header: " + accept);
         }
+    }
+
+    @Override
+    public Resource bytesGet() throws ServiceException {
+        return new InputStreamResource(new ByteArrayInputStream("hello there".getBytes(StandardCharsets.UTF_8)));
     }
 
 }

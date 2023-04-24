@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
-import org.davidmoten.oa3.codegen.paths.schema.RequestBody2;
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
@@ -109,6 +108,11 @@ public class PathsServerTest {
         // server-side logic so we defensively return status code 500
         assertEquals(200, Http.readStatusCodeOnly(
                 "http://localhost:8080/points?a%5Blat%5D=1&a%5Blon%5D=2&b%5Blat%5D=3&b%5Blon%5D=4", HttpMethod.GET));
+    }
+
+    @Test
+    public void testOctetStream() {
+        assertEquals("hello there", Http.readStringFromBytes("http://localhost:8080/bytes", HttpMethod.GET));
     }
 
     public static void main(String[] args) {

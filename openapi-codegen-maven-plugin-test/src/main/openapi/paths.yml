@@ -69,6 +69,20 @@ paths:
                 format: binary
         default:    
           $ref: '#/components/responses/Error'
+          
+  /bytes:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/octet-stream:
+              schema: 
+                type: string
+                format: binary
+        default:    
+          $ref: '#/components/responses/Error'
+                
       
   /requestBodyMultiType:
     post:
@@ -78,7 +92,7 @@ paths:
           application/json: 
             schema:
               $ref: '#/components/schemas/RequestBody1'
-          application/json: 
+          application/octet-stream: 
             schema:
               type: string
               format: binary

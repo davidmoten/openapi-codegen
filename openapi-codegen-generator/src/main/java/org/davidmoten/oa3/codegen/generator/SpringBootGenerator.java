@@ -17,6 +17,7 @@ import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor.Result;
 import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.springframework.core.io.Resource;
 
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -148,13 +149,14 @@ public class SpringBootGenerator {
                 }
                 if (mediaType != null) {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
-                    statusCode = Optional.of(response.get().statusCode);
+                } else {
+                    returnFullClassName = Optional.of(Resource.class.getCanonicalName());
                 }
+                statusCode = Optional.of(response.get().statusCode);
                 produces = new ArrayList<>(content.keySet());
             } else {
                 System.out.println("TODO handle response ref");
             }
-            // TODO handle other mediaTypes
         }
         Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes,
                 produces);

@@ -19,6 +19,7 @@ import org.davidmoten.oa3.codegen.paths.service.ServiceController;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -101,6 +102,11 @@ public class PathsTest {
                 String.class, String.class);
         hasParameterAnnotation(ServiceController.class, CookieValue.class, "paramsIdGet", 2, String.class, String.class,
                 String.class);
+    }
+
+    @Test
+    public void testGetOctetStream() throws ServiceException {
+        Resource response = service.bytesGet();
     }
 
     private static void hasParameterAnnotation(Class<?> c, Class<? extends Annotation> annotation, String methodName,
