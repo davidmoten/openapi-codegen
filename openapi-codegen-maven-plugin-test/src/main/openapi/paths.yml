@@ -165,6 +165,26 @@ paths:
       responses:
         '200':    
           description: ok response            
+
+  ## not supported by spring-boot 
+  /points:
+    get:
+      parameters:
+      - in: query
+        name: a
+        required: true
+        style: deepObject
+        schema:
+          $ref: '#/components/schemas/Point'
+      - in: query
+        name: b
+        required: true
+        style: deepObject
+        schema:
+          $ref: '#/components/schemas/Point'
+      responses:
+        '200':    
+          description: ok response            
              
 components:
   responses:
@@ -250,4 +270,15 @@ components:
         token: 
           type: string
           minLength: 1
-      required: [token]                      
+      required: [token]
+      
+    Point:
+      type: object
+      properties:
+        lat: 
+          type: number
+          format: double
+        lon: 
+          type: number
+          format: double
+      required: [lat, lon]                      

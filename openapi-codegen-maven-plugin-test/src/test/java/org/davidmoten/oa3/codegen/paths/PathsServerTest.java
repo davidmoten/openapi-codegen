@@ -8,10 +8,12 @@ import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -79,5 +81,18 @@ public class PathsServerTest {
         // we can't tell with object parameters if the cause was bad request or bad
         // server-side logic so we defensively return status code 500
         assertEquals(500, Http.readStatusCodeOnly("http://localhost:8080/query-object?second=12", HttpMethod.GET));
+    }
+    
+    @Ignore("deepObject style not supported by spring-boot (a[lat]=1&a[lon]=2)")
+    @Test
+    public void testPoints() {
+        // we can't tell with object parameters if the cause was bad request or bad
+        // server-side logic so we defensively return status code 500
+        assertEquals(200, Http.readStatusCodeOnly("http://localhost:8080/points?a%5Blat%5D=1&a%5Blon%5D=2&b%5Blat%5D=3&b%5Blon%5D=4", HttpMethod.GET));
+    }
+    
+    public static void main(String[] args) {
+        start();
+        DispatcherServlet s;
     }
 }
