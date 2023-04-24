@@ -1,7 +1,5 @@
 package org.davidmoten.oa3.codegen.paths;
 
-import static org.junit.Assert.assertEquals;
-
 import org.davidmoten.oa3.codegen.paths.path.QueryObjectGetIdParameterId;
 import org.davidmoten.oa3.codegen.paths.schema.Point;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
@@ -12,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PathsService implements Service {
-
-    private static final double PRECISION = 0.00001;
 
     @Override
     public Response2 itemGet() throws ServiceException {

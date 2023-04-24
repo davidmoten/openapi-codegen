@@ -93,6 +93,5 @@ public class PathsServerTest {
     
     public static void main(String[] args) {
         start();
-        DispatcherServlet s;
     }
 }
