@@ -424,6 +424,8 @@ final class CodeWriter {
                 : "public";
         if (visibility.equals("public")) {
             addConstructorBindingAnnotation(out, imports, indent);
+        } else {
+            out.println();
         }
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
@@ -451,7 +453,7 @@ final class CodeWriter {
                     .collect(Collectors.joining(","));
             indent.left().left();
             addConstructorBindingAnnotation(out, imports, indent);
-            out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
+            out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             // validate
             ifValidate(cls, out, indent, imports, names, //
