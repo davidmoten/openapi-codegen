@@ -157,57 +157,8 @@ final class CodeWriter {
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeEqualsMethod(out, imports, indent, cls);
             writeHashCodeMethod(out, imports, indent, cls);
+            writeToStringMethod(out, imports, indent, cls);
         }
-        indent.left();
-        closeParen(out, indent);
-    }
-
-    private static void writeHashCodeMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
-//        @Override
-//        public int hashCode() {
-//          return Objects.hash(lat, lon);
-//        }
-
-        addOverrideAnnotation(out, imports, indent);
-        out.format("%spublic int hashCode() {\n", indent);
-        String s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
-        out.format("%sreturn %s.hash(%s);\n", indent.right(), imports.add(Objects.class), s);
-        indent.left();
-        closeParen(out, indent);
-    }
-
-    private static void writeEqualsMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
-//        @Override
-//        public boolean equals(Object o) {
-//          if (this == o) {
-//            return true;
-//          }
-//          if (o == null || getClass() != o.getClass()) {
-//            return false;
-//          }
-//          Point point = (Point) o;
-//          return Objects.equals(this.lat, point.lat) &&
-//              Objects.equals(this.lon, point.lon);
-//        }
-        addOverrideAnnotation(out, imports, indent);
-        out.format("%spublic boolean equals(Object o) {\n", indent);
-        indent.right();
-        out.format("%sif (this == o) {\n", indent);
-        out.format("%sreturn true;\n", indent.right());
-        indent.left();
-        closeParen(out, indent);
-        out.format("%sif (o == null || getClass() != o.getClass()) {\n", indent);
-        out.format("%sreturn false;\n", indent.right());
-        indent.left();
-        closeParen(out, indent);
-        indent.right();
-        String s = cls.fields.stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", indent,
-                imports.add(Objects.class), x.fieldName(cls), x.fieldName(cls))).collect(Collectors.joining(" && "));
-        indent.left();
-        if (!s.isEmpty()) {
-            out.format("%s%s other = (%s) o;\n", indent, cls.simpleName(), cls.simpleName());
-        }
-        out.format("%sreturn %s;\n", indent, s.isEmpty() ? "true" : s);
         indent.left();
         closeParen(out, indent);
     }
@@ -579,6 +530,67 @@ final class CodeWriter {
                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.maxItems.get(), x.fieldName(cls));
         }
+    }
+
+    private static void writeHashCodeMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+//      @Override
+//      public int hashCode() {
+//        return Objects.hash(lat, lon);
+//      }
+
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic int hashCode() {\n", indent);
+        String s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
+        out.format("%sreturn %s.hash(%s);\n", indent.right(), imports.add(Objects.class), s);
+        indent.left();
+        closeParen(out, indent);
+    }
+
+    private static void writeEqualsMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+//      @Override
+//      public boolean equals(Object o) {
+//        if (this == o) {
+//          return true;
+//        }
+//        if (o == null || getClass() != o.getClass()) {
+//          return false;
+//        }
+//        Point point = (Point) o;
+//        return Objects.equals(this.lat, point.lat) &&
+//            Objects.equals(this.lon, point.lon);
+//      }
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic boolean equals(Object o) {\n", indent);
+        indent.right();
+        out.format("%sif (this == o) {\n", indent);
+        out.format("%sreturn true;\n", indent.right());
+        indent.left();
+        closeParen(out, indent);
+        out.format("%sif (o == null || getClass() != o.getClass()) {\n", indent);
+        out.format("%sreturn false;\n", indent.right());
+        indent.left();
+        closeParen(out, indent);
+        indent.right();
+        String s = cls.fields.stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", indent,
+                imports.add(Objects.class), x.fieldName(cls), x.fieldName(cls))).collect(Collectors.joining(" && "));
+        indent.left();
+        if (!s.isEmpty()) {
+            out.format("%s%s other = (%s) o;\n", indent, cls.simpleName(), cls.simpleName());
+        }
+        out.format("%sreturn %s;\n", indent, s.isEmpty() ? "true" : s);
+        indent.left();
+        closeParen(out, indent);
+    }
+
+    private static void writeToStringMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic String toString() {\n", indent);
+        String s = cls.fields.stream().map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
+                .collect(Collectors.joining());
+        out.format("%sreturn %s.toString(%s.class%s);\n", indent.right(), imports.add(Util.class), cls.simpleName(),
+                s);
+        indent.left();
+        closeParen(out, indent);
     }
 
     private static void ifValidate(Cls cls, PrintWriter out, Indent indent, Imports imports, Names names,
