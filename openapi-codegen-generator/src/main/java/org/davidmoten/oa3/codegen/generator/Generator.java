@@ -289,13 +289,6 @@ public class Generator {
         public void startSchema(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath) {
             SchemaWithName last = schemaPath.last();
             Schema<?> schema = last.schema;
-//            {
-//                final String fullClassName;
-//                if (stack.isEmpty()) {
-//                    fullClassName = names.schemaNameToClassName(last.name);
-//                }
-//            }
-
             final Cls cls = new Cls();
             cls.category = category;
             cls.description = schema.getDescription();
