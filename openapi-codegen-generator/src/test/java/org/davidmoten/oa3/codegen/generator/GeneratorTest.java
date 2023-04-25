@@ -13,7 +13,7 @@ public final class GeneratorTest {
     public void testGeneratePaths() throws IOException {
         generate("paths.yml");
     }
-    
+
     @Test
     public void testGenerateOpenApi() throws IOException {
         generate("openapi.yml");

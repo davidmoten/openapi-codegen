@@ -94,7 +94,7 @@ paths:
                 type: string
         default:    
           $ref: '#/components/responses/Error'
-      
+          
   /requestBodyMultiType:
     post:
       requestBody:
@@ -149,6 +149,14 @@ paths:
         default:    
           $ref: '#/components/responses/Error' 
         
+  /responseRef2:
+    get:
+      responses:
+        '200':
+          $ref: '#/components/responses/Response4' 
+        default:    
+          $ref: '#/components/responses/Error' 
+                  
   /empty:
     get:
       responses:
@@ -304,6 +312,21 @@ components:
         application/json:
           schema: 
             $ref: '#/components/schemas/Response2' 
+
+    Response4:
+      description: another response
+      content:
+        application/json:
+          schema: 
+            type: string
+            minLength: 4 
+            
+    Error:
+      description: error response
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/Error'             
                       
   schemas:
     Error:

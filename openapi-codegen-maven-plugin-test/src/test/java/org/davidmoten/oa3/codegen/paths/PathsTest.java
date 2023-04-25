@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.davidmoten.oa3.codegen.paths.response.Response4;
 import org.davidmoten.oa3.codegen.paths.schema.RequestBody1;
 import org.davidmoten.oa3.codegen.paths.schema.RequestBody2;
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
@@ -65,6 +66,11 @@ public class PathsTest {
     @Test
     public void testResponseRef() throws ServiceException {
         Response2 response = service.responseRefGet();
+    }
+    
+    @Test
+    public void testResponseRef2() throws ServiceException {
+        Response4 response = service.responseRef2Get();
     }
 
     @Test
