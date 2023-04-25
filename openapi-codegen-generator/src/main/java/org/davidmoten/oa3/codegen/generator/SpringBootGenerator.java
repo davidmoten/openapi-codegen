@@ -291,6 +291,12 @@ public class SpringBootGenerator {
             this.pattern = pattern;
         }
 
+        public boolean atLeastOnePresent() {
+            return minLength.isPresent() || maxLength.isPresent() || min.isPresent() || max.isPresent()
+                    || minExclusive.isPresent() || maxExclusive.isPresent() || minItems.isPresent()
+                    || maxItems.isPresent() || pattern.isPresent();
+        }
+
     }
 
     public static final class Param {

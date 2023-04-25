@@ -12,11 +12,14 @@ public final class Config {
 
     private final ObjectMapper mapper;
     private final Predicate<? super Class<?>> validateInConstructor;
+    private final Predicate<? super String> validateInControllerMethod;
 
     // Use a builder so we can add fields without making a breaking change
-    private Config(ObjectMapper mapper, Predicate<? super Class<?>> validateInConstructor) {
+    private Config(ObjectMapper mapper, Predicate<? super Class<?>> validateInConstructor,
+            Predicate<? super String> validateInControllerMethod) {
         this.mapper = mapper;
         this.validateInConstructor = validateInConstructor;
+        this.validateInControllerMethod = validateInControllerMethod;
     }
 
     public static Builder builder() {
@@ -33,6 +36,7 @@ public final class Config {
                 .registerModule(new JavaTimeModule());
 
         private Predicate<? super Class<?>> validateInConstructor = x -> true;
+        private Predicate<? super String> validateInControllerMethod = x -> true;
 
         Builder() {
 
@@ -48,8 +52,13 @@ public final class Config {
             return this;
         }
 
+        public Builder validateInControllerMethod(Predicate<? super String> validateInControllerMethod) {
+            this.validateInControllerMethod = validateInControllerMethod;
+            return this;
+        }
+
         public Config build() {
-            return new Config(mapper, validateInConstructor);
+            return new Config(mapper, validateInConstructor, validateInControllerMethod);
         }
     }
 
@@ -59,6 +68,10 @@ public final class Config {
 
     public Predicate<? super Class<?>> validateInConstructor() {
         return validateInConstructor;
+    }
+
+    public Predicate<? super String> validateInControllerMethod() {
+        return validateInControllerMethod;
     }
 
 }
