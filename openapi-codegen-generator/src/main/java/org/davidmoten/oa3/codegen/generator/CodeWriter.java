@@ -424,8 +424,6 @@ final class CodeWriter {
                 : "public";
         if (visibility.equals("public")) {
             addConstructorBindingAnnotation(out, imports, indent);
-        } else {
-            out.println();
         }
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
@@ -452,6 +450,7 @@ final class CodeWriter {
                     .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
             indent.left().left();
+            out.println();
             addConstructorBindingAnnotation(out, imports, indent);
             out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
@@ -534,20 +533,6 @@ final class CodeWriter {
         }
     }
 
-    private static void writeHashCodeMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
-//      @Override
-//      public int hashCode() {
-//        return Objects.hash(lat, lon);
-//      }
-
-        addOverrideAnnotation(out, imports, indent);
-        out.format("%spublic int hashCode() {\n", indent);
-        String s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
-        out.format("%sreturn %s.hash(%s);\n", indent.right(), imports.add(Objects.class), s);
-        indent.left();
-        closeParen(out, indent);
-    }
-
     private static void writeEqualsMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
 //      @Override
 //      public boolean equals(Object o) {
@@ -584,13 +569,44 @@ final class CodeWriter {
         closeParen(out, indent);
     }
 
+    private static void writeHashCodeMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+//      @Override
+//      public int hashCode() {
+//        return Objects.hash(lat, lon);
+//      }
+
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic int hashCode() {\n", indent);
+        final String s;
+        if (cls.fields.size() <= 3) {
+            s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
+        } else {
+            indent.right().right().right();
+            s = cls.fields.stream().map(x -> String.format("\n%s%s", indent, x.fieldName(cls)))
+                    .collect(Collectors.joining(", "));
+            indent.left().left().left();
+        }
+        out.format("%sreturn %s.hash(%s);\n", indent.right(), imports.add(Objects.class), s);
+        indent.left();
+        closeParen(out, indent);
+    }
+    
     private static void writeToStringMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         addOverrideAnnotation(out, imports, indent);
         out.format("%spublic String toString() {\n", indent);
-        String s = cls.fields.stream().map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
-                .collect(Collectors.joining());
-        out.format("%sreturn %s.toString(%s.class%s);\n", indent.right(), imports.add(Util.class), cls.simpleName(),
-                s);
+        final String s;
+        if (cls.fields.size() > 3) {
+            indent.right().right().right();
+            s = cls.fields.stream()
+                    .map(x -> String.format(",\n%s\"%s\", %s", indent, x.fieldName(cls), x.fieldName(cls)))
+                    .collect(Collectors.joining());
+            indent.left().left().left();
+        } else {
+            s = cls.fields.stream()
+                    .map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
+                    .collect(Collectors.joining(""));
+        }
+        out.format("%sreturn %s.toString(%s.class%s);\n", indent.right(), imports.add(Util.class), cls.simpleName(), s);
         indent.left();
         closeParen(out, indent);
     }
