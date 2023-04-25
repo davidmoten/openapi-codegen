@@ -108,9 +108,10 @@ final class CodeWriter {
         addGeneratedAnnotation(out, imports, indent);
         out.format("public final class %s {\n", Names.simpleClassName(fullClassName));
         indent.right();
-        out.format("\n%sprivate static %s config = %s.builder().build();\n", indent, imports.add(Config.class),
+        out.format("\n%sprivate static volatile %s config = %s.builder().build();\n", indent, imports.add(Config.class),
                 imports.add(Config.class));
-        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent, imports.add(Config.class));
+        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent,
+                imports.add(Config.class));
         indent.right();
         out.format("%sconfig = configuration;\n", indent);
         indent.left();
@@ -590,7 +591,7 @@ final class CodeWriter {
         indent.left();
         closeParen(out, indent);
     }
-    
+
     private static void writeToStringMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         addOverrideAnnotation(out, imports, indent);
         out.format("%spublic String toString() {\n", indent);
@@ -602,8 +603,7 @@ final class CodeWriter {
                     .collect(Collectors.joining());
             indent.left().left().left();
         } else {
-            s = cls.fields.stream()
-                    .map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
+            s = cls.fields.stream().map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
                     .collect(Collectors.joining(""));
         }
         out.format("%sreturn %s.toString(%s.class%s);\n", indent.right(), imports.add(Util.class), cls.simpleName(), s);
