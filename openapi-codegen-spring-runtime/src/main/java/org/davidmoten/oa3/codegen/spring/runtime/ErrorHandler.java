@@ -16,6 +16,10 @@ public interface ErrorHandler {
         return ResponseEntity.status(statusCode).body(errorResponseBody(statusCode, e));
     }
 
+    default <T> T response(ResponseEntity<?> response) throws ServiceException {
+        throw new ServiceException(response);
+    }
+    
     default Object errorResponseBody(int statusCode, Throwable e) {
         return new DefaultError(statusCode, e);
     }

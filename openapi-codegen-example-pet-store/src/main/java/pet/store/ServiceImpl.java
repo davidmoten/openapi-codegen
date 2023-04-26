@@ -24,7 +24,7 @@ public class ServiceImpl implements Service {
         if (t % 3 == 0) {
             throw new ServiceException(405, "something went wrong");
         } else if (t % 3 == 1) {
-            throw new ServiceException(ResponseEntity.status(409).body("problem"));
+            return response(ResponseEntity.status(409).body("problem"));
         }
         if (limit != 3) {
             Pet pet = new Pet(new NewPet("fido", Optional.empty()), new PetId(123));
