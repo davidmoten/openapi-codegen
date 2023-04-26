@@ -71,8 +71,9 @@ final class CodeWriter {
         }
     }
 
-    static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls, Imports imports,
+    static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls, 
             String schemaName) {
+        Imports imports = new Imports(cls.fullClassName);
         if ((cls.category == SchemaCategory.PATH || cls.category == SchemaCategory.RESPONSE) && cls.schema.isPresent()
                 && cls.schema.get().get$ref() != null) {
             // when a cls has a ref and is used with a Path or Response then the ref class

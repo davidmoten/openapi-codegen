@@ -53,11 +53,10 @@ public class Generator {
         }
         for (MyVisitor.Result result : v.results()) {
             Cls cls = result.cls;
-            Imports imports = result.imports;
             String schemaName = result.name;
             if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
                     && !definition.excludeSchemas().contains(schemaName)) {
-                CodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, imports, schemaName);
+                CodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
             }
         }
     }
@@ -207,7 +206,7 @@ public class Generator {
             "boolean", "short");
 
     final static class Field {
-        String fullClassName;
+        final String fullClassName;
         final String name;
         final String fieldName;
         final boolean required;
@@ -277,9 +276,8 @@ public class Generator {
 
     static final class MyVisitor implements Visitor {
         private final Names names;
-        private Imports imports;
-        private LinkedStack<Cls> stack = new LinkedStack<>();
-        private List<Result> results = new ArrayList<>();
+        private final LinkedStack<Cls> stack = new LinkedStack<>();
+        private final List<Result> results = new ArrayList<>();
 
         public MyVisitor(Names names) {
             this.names = names;
@@ -297,7 +295,6 @@ public class Generator {
                 cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                 cls.name = Optional.of(last.name);
                 cls.schema = Optional.of(schema);
-                imports = new Imports(cls.fullClassName);
                 cls.classType = classType(schema);
                 cls.topLevel = true;
             }
@@ -422,7 +419,7 @@ public class Generator {
                     || schemaPath.size() == 1) {
                 stack.pop();
                 if (stack.isEmpty()) {
-                    this.results.add(new Result(cls, imports, schemaPath.first().name));
+                    this.results.add(new Result(cls, schemaPath.first().name));
                 }
             }
         }
@@ -433,12 +430,10 @@ public class Generator {
 
         public static final class Result {
             final Cls cls;
-            final Imports imports;
             final String name;
 
-            public Result(Cls cls, Imports imports, String name) {
+            public Result(Cls cls, String name) {
                 this.cls = cls;
-                this.imports = imports;
                 this.name = name;
             }
         }
