@@ -98,7 +98,7 @@ final class CodeWriter {
         }
     }
 
-    public static void writeGlobalsClass(Names names) {
+    static void writeGlobalsClass(Names names) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
         String fullClassName = names.globalsFullClassName();
@@ -137,7 +137,7 @@ final class CodeWriter {
         }
     }
 
-    public static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
+    private static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
         if (cls.topLevel) {
             out.format("package %s;\n", cls.pkg());

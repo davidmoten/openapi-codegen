@@ -229,11 +229,11 @@ public class SpringBootGenerator {
         return s;
     }
 
-    public enum ParamType {
+    enum ParamType {
         PATH, QUERY, HEADER, COOKIE, BODY;
     }
 
-    public static final class Method {
+    static final class Method {
         final String methodName;
         final List<Param> parameters;
         final Optional<String> returnFullClassName; // arrays always wrapped ?
@@ -266,7 +266,7 @@ public class SpringBootGenerator {
 
     }
 
-    public static final class Constraints {
+    static final class Constraints {
         final Optional<Integer> minLength;
         final Optional<Integer> maxLength;
         final Optional<BigDecimal> min;
@@ -277,7 +277,7 @@ public class SpringBootGenerator {
         final Optional<Integer> maxItems;
         final Optional<String> pattern;
 
-        public Constraints(Optional<Integer> minLength, Optional<Integer> maxLength, Optional<BigDecimal> min,
+        Constraints(Optional<Integer> minLength, Optional<Integer> maxLength, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, Optional<BigDecimal> minExclusive, Optional<BigDecimal> maxExclusive,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<String> pattern) {
             this.minLength = minLength;
@@ -291,7 +291,7 @@ public class SpringBootGenerator {
             this.pattern = pattern;
         }
 
-        public boolean atLeastOnePresent() {
+        boolean atLeastOnePresent() {
             return minLength.isPresent() || maxLength.isPresent() || min.isPresent() || max.isPresent()
                     || minExclusive.isPresent() || maxExclusive.isPresent() || minItems.isPresent()
                     || maxItems.isPresent() || pattern.isPresent();
@@ -299,7 +299,7 @@ public class SpringBootGenerator {
 
     }
 
-    public static final class Param {
+    static final class Param {
         final String name;
         final String identifier;
         final Optional<Object> defaultValue;

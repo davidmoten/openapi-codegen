@@ -148,22 +148,22 @@ public class Generator {
                     pattern, min, max, exclusiveMin, exclusiveMax, encoding));
         }
 
-        public String pkg() {
+        String pkg() {
             return Names.pkg(fullClassName);
         }
 
-        public String simpleName() {
+        String simpleName() {
             return Names.simpleClassName(fullClassName);
         }
 
-        public boolean unwrapSingleField() {
+        boolean unwrapSingleField() {
             return !hasProperties
                     && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
                             || topLevel && fields.size() == 1)
                     || classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         }
 
-        public Set<String> ownersAndSiblingsSimpleNames() {
+        Set<String> ownersAndSiblingsSimpleNames() {
             Cls c = this;
             Set<String> set = new HashSet<>();
             while (c.owner.isPresent()) {
@@ -224,7 +224,7 @@ public class Generator {
         final Optional<Integer> minItems;
         final Optional<Integer> maxItems;
 
-        public Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
+        Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding) {
@@ -245,34 +245,34 @@ public class Generator {
             this.max = max;
         }
 
-        public String fieldName(Cls cls) {
+        String fieldName(Cls cls) {
             return cls.fieldName(this);
         }
 
-        public String resolvedType(Imports imports) {
+        String resolvedType(Imports imports) {
             return Generator.resolvedType(this, imports);
         }
 
-        public String resolvedTypeNullable(Imports imports) {
+        String resolvedTypeNullable(Imports imports) {
             return Generator.resolvedTypeNullable(this, imports);
         }
 
-        public boolean isPrimitive() {
+        boolean isPrimitive() {
             return required && PRIMITIVE_CLASS_NAMES.contains(Util.toPrimitive(fullClassName));
         }
 
-        public boolean isOctets() {
+        boolean isOctets() {
             return encoding == Encoding.OCTET;
+        }
+
+        boolean isByteArray() {
+            return fullClassName.equals("byte[]");
         }
 
         @Override
         public String toString() {
             return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
                     + ", required=" + required + ", minLength=" + minLength + ", maxLength=" + maxLength + "]";
-        }
-
-        public boolean isByteArray() {
-            return fullClassName.equals("byte[]");
         }
     }
 
@@ -281,7 +281,7 @@ public class Generator {
         private final LinkedStack<Cls> stack = new LinkedStack<>();
         private final List<Result> results = new ArrayList<>();
 
-        public MyVisitor(Names names) {
+        MyVisitor(Names names) {
             this.names = names;
         }
 
@@ -338,9 +338,9 @@ public class Generator {
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                 } else {
+                    fieldName = Optional.empty();
                     String candidate = names.schemaNameToClassName(cls.category, last.name);
                     cls.fullClassName = candidate;
-                    fieldName = Optional.empty();
                 }
                 if (Util.isEnum(schema)) {
                     handleEnum(schemaPath, cls, previous, isArray, fieldName, names);
@@ -407,15 +407,15 @@ public class Generator {
             }
         }
 
-        public List<Result> results() {
+        List<Result> results() {
             return results;
         }
 
-        public static final class Result {
+        static final class Result {
             final Cls cls;
             final String name;
 
-            public Result(Cls cls, String name) {
+            Result(Cls cls, String name) {
                 this.cls = cls;
                 this.name = name;
             }

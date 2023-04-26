@@ -279,7 +279,7 @@ final class Names {
         return map;
     }
 
-    public boolean mapIntegerToBigInteger() {
+    boolean mapIntegerToBigInteger() {
         return definition.mapIntegerToBigInteger();
     }
 
@@ -310,23 +310,23 @@ final class Names {
         return b.toString();
     }
 
-    public String serviceControllerFullClassName() {
+    String serviceControllerFullClassName() {
         return definition.packages().basePackage() + ".service.ServiceController";
     }
 
-    public String serviceInterfaceFullClassName() {
+    String serviceInterfaceFullClassName() {
         return definition.packages().basePackage() + ".service.Service";
     }
 
-    public String applicationFullClassName() {
+    String applicationFullClassName() {
         return definition.packages().basePackage() + ".Application";
     }
 
-    public String jacksonConfigurationFullClassName() {
+    String jacksonConfigurationFullClassName() {
         return definition.packages().basePackage() + ".service.JacksonConfiguration";
     }
 
-    public Parameter lookupParameter(String name) {
+    Parameter lookupParameter(String name) {
         return api.getComponents().getParameters().get(lastComponent(name));
     }
 
@@ -335,7 +335,7 @@ final class Names {
         return ref.substring(i + 1);
     }
 
-    public RequestBody lookupRequestBody(String ref) {
+    RequestBody lookupRequestBody(String ref) {
         return api.getComponents().getRequestBodies().get(lastComponent(ref));
     }
 

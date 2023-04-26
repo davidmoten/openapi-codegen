@@ -49,7 +49,7 @@ class Apis {
         }
     }
 
-    static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
+    private static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
         Preconditions.checkArgument(name != null);
         visitSchemas(SchemaCategory.SCHEMA, ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)),
                 visitor);
@@ -63,7 +63,7 @@ class Apis {
         }
     }
 
-    static void visitSchemas(SchemaCategory category, ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
         if (pathItem.readOperationsMap() != null) {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
                 visitSchemas(category, names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))),

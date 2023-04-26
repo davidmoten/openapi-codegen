@@ -41,12 +41,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class SpringBootCodeWriter {
+class SpringBootCodeWriter {
 
     private static final String IMPORTS_HERE = "IMPORTS_HERE";
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
 
-    public static void writeServiceClasses(Names names, List<Method> methods) {
+static void writeServiceClasses(Names names, List<Method> methods) {
         writeApplicationClass(names);
         writeJacksonConfigurationClass(names);
         writeServiceControllerClass(names, methods);

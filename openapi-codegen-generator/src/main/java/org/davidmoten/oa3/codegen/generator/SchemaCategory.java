@@ -1,6 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
-public enum SchemaCategory {
+enum SchemaCategory {
 
     SCHEMA("schema", "#/components/schemas/"), //
     PATH("path", "#/components/paths/"), //
@@ -17,11 +17,11 @@ public enum SchemaCategory {
         this.refPrefix = refPrefix;
     }
 
-    public String getPackageFragment() {
+    String getPackageFragment() {
         return packageFragment;
     }
 
-    public String refPrefix() {
+    String refPrefix() {
         return refPrefix;
     }
 
