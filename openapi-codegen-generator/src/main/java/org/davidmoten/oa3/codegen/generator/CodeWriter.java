@@ -161,7 +161,6 @@ final class CodeWriter {
             writeHashCodeMethod(out, imports, indent, cls);
             writeToStringMethod(out, imports, indent, cls);
         }
-        indent.left();
         closeParen(out, indent);
     }
 
@@ -195,13 +194,10 @@ final class CodeWriter {
             out.format("%sif (value.equals(x.value)) {\n", indent);
             indent.right();
             out.format("%sreturn x;\n", indent);
-            indent.left();
             closeParen(out, indent);
-            indent.left();
             closeParen(out, indent);
             out.format("%sthrow new %s(\"unexpected enum value: '\" + value + \"'\");\n", indent,
                     imports.add(IllegalArgumentException.class));
-            indent.left();
             closeParen(out, indent);
         }
     }
@@ -339,7 +335,6 @@ final class CodeWriter {
                 cls.fields.stream().forEach(x -> {
                     assignField(out, indent, cls, x);
                 });
-                indent.left();
                 closeParen(out, indent);
                 writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
             }
@@ -356,9 +351,7 @@ final class CodeWriter {
             out.format("%ssuper(%s.config(), %s.%s, %s.class, %s);\n", indent,
                     imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
                     cls.polymorphicType.name(), cls.simpleName(), classes);
-            indent.left();
             closeParen(out, indent);
-            indent.left();
             closeParen(out, indent);
         }
     }
@@ -443,7 +436,6 @@ final class CodeWriter {
         cls.fields.stream().forEach(x -> {
             assignField(out, indent, cls, x);
         });
-        indent.left();
         closeParen(out, indent);
         if (hasOptional || !interfaces.isEmpty() || hasBinary) {
             indent.right().right();
@@ -490,7 +482,6 @@ final class CodeWriter {
                     assignField(out, indent, cls, x);
                 }
             });
-            indent.left();
             closeParen(out, indent);
         }
     }
@@ -553,11 +544,9 @@ final class CodeWriter {
         indent.right();
         out.format("%sif (this == o) {\n", indent);
         out.format("%sreturn true;\n", indent.right());
-        indent.left();
         closeParen(out, indent);
         out.format("%sif (o == null || getClass() != o.getClass()) {\n", indent);
         out.format("%sreturn false;\n", indent.right());
-        indent.left();
         closeParen(out, indent);
         indent.right();
         String s = cls.fields.stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", indent,
@@ -567,7 +556,6 @@ final class CodeWriter {
             out.format("%s%s other = (%s) o;\n", indent, cls.simpleName(), cls.simpleName());
         }
         out.format("%sreturn %s;\n", indent, s.isEmpty() ? "true" : s);
-        indent.left();
         closeParen(out, indent);
     }
 
@@ -589,7 +577,6 @@ final class CodeWriter {
             indent.left().left().left();
         }
         out.format("%sreturn %s.hash(%s);\n", indent.right(), imports.add(Objects.class), s);
-        indent.left();
         closeParen(out, indent);
     }
 
@@ -608,7 +595,6 @@ final class CodeWriter {
                     .collect(Collectors.joining(""));
         }
         out.format("%sreturn %s.toString(%s.class%s);\n", indent.right(), imports.add(Util.class), cls.simpleName(), s);
-        indent.left();
         closeParen(out, indent);
     }
 
@@ -626,12 +612,12 @@ final class CodeWriter {
             out.format("%sif (%s.config().validateInConstructor().test(%s.class)) {\n", indent,
                     imports.add(names.globalsFullClassName()), cls.simpleName());
             out.print(text);
-            closeParen(out, indent);
+            out.format("%s}\n", indent);
         }
     }
 
     private static PrintWriter closeParen(PrintWriter out, Indent indent) {
-        return out.format("%s}\n", indent);
+        return out.format("%s}\n", indent.left());
     }
 
     private static void assignField(PrintWriter out, Indent indent, Cls cls, Field x) {
@@ -656,7 +642,6 @@ final class CodeWriter {
             } else {
                 out.format("%sreturn %s;\n", indent, f.fieldName(cls));
             }
-            indent.left();
             closeParen(out, indent);
         });
     }

@@ -76,10 +76,14 @@ class SpringBootCodeWriter {
         out.format("\n%spublic static void main(%s[] args) {\n", indent, imports.add(String.class));
         indent.right();
         out.format("%s%s.run(%s.class, args);\n", indent, imports.add(SpringApplication.class), simpleClassName);
-        indent.left();
-        out.format("%s}\n", indent);
+        closeParen(out, indent);
         indent.left();
         out.println("\n}\n");
+    }
+
+    private static void closeParen(ByteArrayPrintWriter out, Indent indent) {
+        indent.left();
+        out.format("%s}\n", indent);
     }
 
     private static void writeJacksonConfigurationClass(Names names) {
@@ -110,8 +114,7 @@ class SpringBootCodeWriter {
         out.format("%spublic %s objectMapper() {\n", indent, imports.add(ObjectMapper.class));
         indent.right();
         out.format("%sreturn config.mapper();\n", indent);
-        indent.left();
-        out.format("%s}\n", indent);
+        closeParen(out, indent);
         indent.left();
         out.println("\n}\n");
     }
@@ -167,7 +170,7 @@ class SpringBootCodeWriter {
         out.format("%sthis.service = %s.orElse(service, new %s() {});\n", indent.right(),
                 imports.add(org.davidmoten.oa3.codegen.runtime.internal.Util.class),
                 imports.add(names.serviceInterfaceFullClassName()));
-        out.format("%s}\n", indent.left());
+        closeParen(out, indent);
         writeServiceMethods(out, imports, methods, indent, true, names);
         indent.left();
         out.println("\n}\n");
@@ -260,15 +263,13 @@ class SpringBootCodeWriter {
                 out.format("%s} catch (%s e) {\n", indent, imports.add(Throwable.class));
                 indent.right();
                 out.format("%sreturn service.errorResponse(e);\n", indent);
-                indent.left();
-                out.format("%s}\n", indent);
-                indent.left();
-                out.format("%s}\n", indent);
+                closeParen(out, indent);
+                closeParen(out, indent);
             } else {
                 out.format("\n%sdefault %s %s(%s) throws %s {\n", indent, importedReturnType, m.methodName, params,
                         imports.add(ServiceException.class));
                 out.format("%sthrow notImplemented();\n", indent.right());
-                out.format("%s}\n", indent.left());
+                closeParen(out, indent);
             }
         });
     }
@@ -337,8 +338,7 @@ class SpringBootCodeWriter {
                     out.format("%s%s.checkMaxSize(%s, %s, \"%s\");\n", indent, imports.add(RequestPreconditions.class),
                             p.identifier, x.maxItems.get(), p.identifier);
                 }
-                indent.left();
-                out.format("%s}\n", indent);
+                closeParen(out, indent);
             }
         });
     }
