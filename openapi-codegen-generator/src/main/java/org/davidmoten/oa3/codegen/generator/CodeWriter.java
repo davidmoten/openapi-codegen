@@ -222,8 +222,8 @@ final class CodeWriter {
             implemented = " implements "
                     + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
         }
-        if (cls.description != null) {
-            Javadoc.printJavadoc(out, indent, cls.description);
+        if (cls.description.isPresent()) {
+            Javadoc.printJavadoc(out, indent, cls.description.get());
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",

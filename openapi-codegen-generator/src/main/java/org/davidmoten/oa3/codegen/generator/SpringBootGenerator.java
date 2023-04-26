@@ -93,19 +93,23 @@ public class SpringBootGenerator {
                         }
                         s = resolveRefs(s);
                         Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
+                        final Param param;
                         if (Util.isPrimitive(s)) {
                             // handle simple schemas
                             Class<?> c = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
-                            params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                            param = new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
                                     p.getRequired(), c.getCanonicalName(), isArray, false, constraints(s),
-                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false));
+                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false,
+                                    Optional.ofNullable(p.getDescription()));
                         } else {
                             // is complex schema
                             Cls cls = schemaCls.get(s);
-                            params.add(new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                            param = new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
                                     p.getRequired(), cls.fullClassName, isArray, false, constraints(s),
-                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true));
+                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true,
+                                    Optional.ofNullable(p.getDescription()));
                         }
+                        params.add(param);
                     });
         }
         if (operation.getRequestBody() != null) {
@@ -121,7 +125,8 @@ public class SpringBootGenerator {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()), orElse(b.getRequired(), false),
-                                fullClassName, false, true, constraints(schema), ParamType.BODY, false));
+                                fullClassName, false, true, constraints(schema), ParamType.BODY, false,
+                                Optional.ofNullable(schema.getDescription())));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
@@ -163,8 +168,8 @@ public class SpringBootGenerator {
                 System.out.println("TODO handle response ref");
             }
         }
-        Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes,
-                produces);
+        Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces,
+                Optional.ofNullable(operation.getDescription()));
         methods.add(m);
     }
 
@@ -242,10 +247,11 @@ public class SpringBootGenerator {
         final Optional<Integer> statusCode;
         final List<String> consumes;
         final List<String> produces;
+        final Optional<String> description;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
                 Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
-                List<String> produces) {
+                List<String> produces, Optional<String> description) {
             this.methodName = methodName;
             this.statusCode = statusCode;
             this.parameters = parameters;
@@ -254,6 +260,7 @@ public class SpringBootGenerator {
             this.httpMethod = httpMethod;
             this.consumes = consumes;
             this.produces = produces;
+            this.description = description;
         }
 
         @Override
@@ -310,10 +317,11 @@ public class SpringBootGenerator {
         final Constraints constraints;
         final ParamType type;
         final boolean isComplexQueryParameter;
+        final Optional<String> description;
 
         Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
                 boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
-                boolean isComplexQueryParameter) {
+                boolean isComplexQueryParameter, Optional<String> description) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
@@ -324,6 +332,7 @@ public class SpringBootGenerator {
             this.constraints = constraints;
             this.type = type;
             this.isComplexQueryParameter = isComplexQueryParameter;
+            this.description = description;
         }
 
         @Override

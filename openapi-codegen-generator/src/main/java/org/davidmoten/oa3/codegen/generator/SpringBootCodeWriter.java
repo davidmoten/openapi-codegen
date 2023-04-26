@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Constraints;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Method;
@@ -16,6 +19,7 @@ import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
+import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.spring.runtime.ControllerExceptionHandler;
@@ -46,7 +50,7 @@ class SpringBootCodeWriter {
     private static final String IMPORTS_HERE = "IMPORTS_HERE";
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
 
-static void writeServiceClasses(Names names, List<Method> methods) {
+    static void writeServiceClasses(Names names, List<Method> methods) {
         writeApplicationClass(names);
         writeJacksonConfigurationClass(names);
         writeServiceControllerClass(names, methods);
@@ -133,6 +137,13 @@ static void writeServiceClasses(Names names, List<Method> methods) {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
+        String text = Stream.of( //
+                Optional.ofNullable(names.api().getInfo().getTitle()), //
+                Optional.ofNullable(names.api().getInfo().getSummary())) //
+                .filter(Optional::isPresent) //
+                .map(Optional::get) //
+                .collect(Collectors.joining("\n\n"));
+        Javadoc.printJavadoc(out, indent, text);
         out.format("\npublic interface %s extends %s {\n", Names.simpleClassName(names.serviceInterfaceFullClassName()),
                 imports.add(ErrorHandler.class));
         indent.right();
@@ -165,6 +176,10 @@ static void writeServiceClasses(Names names, List<Method> methods) {
     private static void writeServiceMethods(ByteArrayPrintWriter out, Imports imports, List<Method> methods,
             Indent indent, boolean isController, Names names) {
         methods.forEach(m -> {
+            Map<String, String> parameterDescriptions = m.parameters.stream().collect(Collectors
+                    .toMap(x -> x.identifier, x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
+            Javadoc.printJavadoc(out, indent, m.description, Collections.emptyList(), Optional.empty(),
+                    Optional.empty(), parameterDescriptions);
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
@@ -274,7 +289,8 @@ static void writeServiceClasses(Names names, List<Method> methods) {
         }
     }
 
-    private static void addValidationChecks(ByteArrayPrintWriter out, Imports imports, Indent indent, Method m, Names names) {
+    private static void addValidationChecks(ByteArrayPrintWriter out, Imports imports, Indent indent, Method m,
+            Names names) {
         m.parameters.forEach(p -> {
             Constraints x = p.constraints;
             if (x.atLeastOnePresent()) {

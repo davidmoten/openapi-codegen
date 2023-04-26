@@ -79,11 +79,11 @@ public class Generator {
     static final class Cls {
         SchemaCategory category;
         String fullClassName;
+        Optional<String> description = Optional.empty();
         ClassType classType;
         List<Field> fields = new ArrayList<>();
         List<EnumMember> enumMembers = new ArrayList<>();
         List<Cls> classes = new ArrayList<>();
-        String description = null;
         Discriminator discriminator = null;
         String enumFullType;
         private int num = 0;
@@ -291,7 +291,7 @@ public class Generator {
             Schema<?> schema = last.schema;
             final Cls cls = new Cls();
             cls.category = category;
-            cls.description = schema.getDescription();
+            cls.description = Optional.ofNullable(schema.getDescription());
             if (stack.isEmpty()) {
                 // should be top-level class
                 cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);

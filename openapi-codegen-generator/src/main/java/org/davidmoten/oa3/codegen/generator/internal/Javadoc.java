@@ -21,7 +21,7 @@ public class Javadoc {
                 Collections.emptyMap());
     }
 
-    private static void printJavadoc(PrintWriter p, Indent indent, Optional<String> text, List<Annotation> annotations,
+    public static void printJavadoc(PrintWriter p, Indent indent, Optional<String> text, List<Annotation> annotations,
             Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc) {
         boolean hasText = text.isPresent() || !annotations.isEmpty();
         boolean addParagraph = false;
