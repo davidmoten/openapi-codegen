@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -374,28 +376,16 @@ public class Generator {
                     }
                     String fieldName = schemaPath.size() == 1 ? "value" : current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
-                    final Encoding encoding;
-                    if ("binary".equals(schema.getFormat())) {
-                        encoding = Encoding.OCTET;
-                    } else {
-                        encoding = Encoding.DEFAULT;
-                    }
+                    Encoding encoding = encoding(schema);
                     Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
-                    boolean exclusiveMin = org.davidmoten.oa3.codegen.runtime.internal.Util
-                            .orElse(schema.getExclusiveMinimum(), false);
-                    boolean exclusiveMax = org.davidmoten.oa3.codegen.runtime.internal.Util
-                            .orElse(schema.getExclusiveMaximum(), false);
+                    boolean exclusiveMin = orElse(schema.getExclusiveMinimum(), false);
+                    boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
-                    final String fieldNameCandidate;
-                    if (last.name == null) {
-                        fieldNameCandidate = Names.simpleClassName(fullClassName);
-                    } else {
-                        fieldNameCandidate = last.name;
-                    }
+                    final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
                     String fieldName = current.nextFieldName(fieldNameCandidate);
                     boolean required = fieldIsRequired(schemaPath);
                     current.addField(fullClassName, last.name, fieldName, required, isArray);
@@ -403,13 +393,6 @@ public class Generator {
                     throw new RuntimeException("unexpected");
                 }
             }
-        }
-
-        private void updateLinks(final Cls cls, Optional<Cls> previous) {
-            previous.ifPresent(p -> {
-                p.classes.add(cls);
-                cls.owner = Optional.of(p);
-            });
         }
 
         @Override
@@ -437,6 +420,21 @@ public class Generator {
                 this.name = name;
             }
         }
+    }
+
+    private static Encoding encoding(Schema<?> schema) {
+        if ("binary".equals(schema.getFormat())) {
+            return Encoding.OCTET;
+        } else {
+            return Encoding.DEFAULT;
+        }
+    }
+
+    private static void updateLinks(final Cls cls, Optional<Cls> previous) {
+        previous.ifPresent(p -> {
+            p.classes.add(cls);
+            cls.owner = Optional.of(p);
+        });
     }
 
     private static void handleObject(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last, Schema<?> schema,
