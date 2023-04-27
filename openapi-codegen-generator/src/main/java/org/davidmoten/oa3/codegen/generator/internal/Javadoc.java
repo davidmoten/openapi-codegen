@@ -15,20 +15,20 @@ public class Javadoc {
 
     private static final int MAX_JAVADOC_WIDTH = 80;
 
-    public static void printJavadoc(PrintWriter out, Indent indent, String text) {
+    public static void printJavadoc(PrintWriter out, Indent indent, String text, boolean isHtml) {
         Preconditions.checkNotNull(text);
         printJavadoc(out, indent, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
-                Collections.emptyMap());
+                Collections.emptyMap(), isHtml);
     }
 
-    private static void printJavadoc(PrintWriter p, Indent indent, Optional<String> text, List<Annotation> annotations,
-            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc) {
-        boolean hasText = text.isPresent() || !annotations.isEmpty();
+    public static void printJavadoc(PrintWriter p, Indent indent, Optional<String> text, List<Annotation> annotations,
+            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml) {
+        boolean hasText = text.isPresent() || !annotations.isEmpty() || returns.isPresent();
         boolean addParagraph = false;
         if (hasText) {
             p.format("\n%s/**\n", indent);
             if (preamble.isPresent()) {
-                p.format("%s * %s\n", indent, encodeAndWrapForJavadoc(preamble.get(), indent));
+                p.format("%s * %s\n", indent, encodeAndWrapForJavadoc(preamble.get(), indent, false));
                 addParagraph = true;
             }
         }
@@ -36,7 +36,7 @@ public class Javadoc {
             if (addParagraph) {
                 p.format("%s * <p>\n", indent);
             }
-            p.format("%s * <i>\u201C%s\u201D</i>\n", indent, encodeAndWrapForJavadoc(text.get(), indent));
+            p.format("%s * %s\n", indent, encodeAndWrapForJavadoc(text.get(), indent, isHtml));
         }
         annotations.forEach(a -> {
             p.format("%s * <p>\n", indent);
@@ -74,18 +74,25 @@ public class Javadoc {
         }
     }
 
-    private static String encodeAndWrapForJavadoc(String s, Indent indent) {
-        return encodeJavadoc(wrap(s.replace("{@", "zz")) //
-                .replace("\n", String.format("\n%s * ", indent))) //
-                        .replace("zz", "{@");
+    private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {
+        s = s.replace("{@", "zxxz");
+        if (!isHtml) {
+            s = wrap(s);
+        }
+        return encodeJavadoc(s, isHtml) //
+                .replace("\n", String.format("\n%s * ", indent)) //
+                .replace("zxxz", "{@");
     }
 
-    private static String encodeJavadoc(String x) {
-        return x.replace("@", "&#064;") //
-                .replace("\\", "{@literal \\}") //
-                .replace("<", "&lt;") //
-                .replace(">", "&gt;") //
-                .replace("&", "&amp;");
+    private static String encodeJavadoc(String x, boolean isHtml) {
+        x = x.replace("@", "&#064;") //
+                .replace("\\", "{@literal \\}");
+//                .replace("&", "&amp;");
+        if (!isHtml) {
+            x = x.replace("<", "&lt;") //
+                    .replace(">", "&gt;");
+        }
+        return x;
     }
 
     private static String wrap(String s) {

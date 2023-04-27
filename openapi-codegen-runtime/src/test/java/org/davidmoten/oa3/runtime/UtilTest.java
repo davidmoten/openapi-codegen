@@ -16,4 +16,9 @@ public class UtilTest {
         assertEquals("616263", b);
         assertEquals("abc", new String(Util.decodeOctets(b), StandardCharsets.UTF_8));
     }
+
+    @Test
+    public void testToString() {
+        assertEquals("Number[lat=1, lon=2]", Util.toString(Number.class, "lat", 1, "lon", 2));
+    }
 }

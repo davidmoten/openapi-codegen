@@ -21,6 +21,8 @@ import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -277,8 +279,64 @@ final class Names {
         return map;
     }
 
-    public boolean mapIntegerToBigInteger() {
+    boolean mapIntegerToBigInteger() {
         return definition.mapIntegerToBigInteger();
+    }
+
+    static String toIdentifier(ImmutableList<String> list) {
+        StringBuilder b = new StringBuilder();
+        for (String s : list) {
+            b.append(Names.upperFirst(camelifyOnSeparatorCharacters(s)));
+        }
+        return Names.toIdentifier(b.toString());
+    }
+
+    private static String camelifyOnSeparatorCharacters(String s) {
+        StringBuilder b = new StringBuilder();
+        boolean start = true;
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (ch == '/' || ch == '{' || ch == '}' || ch == '-' || ch == '_' || ch == '.') {
+                start = true;
+            } else {
+                if (start) {
+                    b.append(Character.toUpperCase(ch));
+                } else {
+                    b.append(ch);
+                }
+                start = false;
+            }
+        }
+        return b.toString();
+    }
+
+    String serviceControllerFullClassName() {
+        return definition.packages().basePackage() + ".service.ServiceController";
+    }
+
+    String serviceInterfaceFullClassName() {
+        return definition.packages().basePackage() + ".service.Service";
+    }
+
+    String applicationFullClassName() {
+        return definition.packages().basePackage() + ".Application";
+    }
+
+    String jacksonConfigurationFullClassName() {
+        return definition.packages().basePackage() + ".service.JacksonConfiguration";
+    }
+
+    Parameter lookupParameter(String name) {
+        return api.getComponents().getParameters().get(lastComponent(name));
+    }
+
+    private static String lastComponent(String ref) {
+        int i = ref.lastIndexOf('/');
+        return ref.substring(i + 1);
+    }
+
+    RequestBody lookupRequestBody(String ref) {
+        return api.getComponents().getRequestBodies().get(lastComponent(ref));
     }
 
 }

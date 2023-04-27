@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.generator.internal.Util.orElse;
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.toPrimitive;
+import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -32,6 +32,7 @@ import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.internal.Util;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -72,8 +73,15 @@ final class CodeWriter {
         }
     }
 
-    static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls, Imports imports,
+    static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls, 
             String schemaName) {
+        Imports imports = new Imports(cls.fullClassName);
+        if ((cls.category == SchemaCategory.PATH || cls.category == SchemaCategory.RESPONSE) && cls.schema.isPresent()
+                && cls.schema.get().get$ref() != null) {
+            // when a cls has a ref and is used with a Path or Response then the ref class
+            // is used in generated code
+            return;
+        }
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
         CodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
@@ -92,7 +100,7 @@ final class CodeWriter {
         }
     }
 
-    public static void writeGlobalsClass(Names names) {
+    static void writeGlobalsClass(Names names) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
         String fullClassName = names.globalsFullClassName();
@@ -103,9 +111,10 @@ final class CodeWriter {
         addGeneratedAnnotation(out, imports, indent);
         out.format("public final class %s {\n", Names.simpleClassName(fullClassName));
         indent.right();
-        out.format("\n%sprivate static %s config = %s.builder().build();\n", indent, imports.add(Config.class),
+        out.format("\n%sprivate static volatile %s config = %s.builder().build();\n", indent, imports.add(Config.class),
                 imports.add(Config.class));
-        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent, imports.add(Config.class));
+        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent,
+                imports.add(Config.class));
         indent.right();
         out.format("%sconfig = configuration;\n", indent);
         indent.left();
@@ -130,7 +139,7 @@ final class CodeWriter {
         }
     }
 
-    public static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
+    private static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
         if (cls.topLevel) {
             out.format("package %s;\n", cls.pkg());
@@ -149,8 +158,16 @@ final class CodeWriter {
         }
         writeEnumCreator(out, imports, indent, cls);
         writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces, names);
-        indent.left();
+        if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+            writeEqualsMethod(out, imports, indent, cls);
+            writeHashCodeMethod(out, imports, indent, cls);
+            writeToStringMethod(out, imports, indent, cls);
+        }
         closeParen(out, indent);
+    }
+
+    private static void addOverrideAnnotation(PrintWriter out, Imports imports, Indent indent) {
+        out.format("\n%s@%s\n", indent, imports.add(Override.class));
     }
 
     private static void addGeneratedAnnotation(PrintWriter out, Imports imports, Indent indent) {
@@ -179,13 +196,10 @@ final class CodeWriter {
             out.format("%sif (value.equals(x.value)) {\n", indent);
             indent.right();
             out.format("%sreturn x;\n", indent);
-            indent.left();
             closeParen(out, indent);
-            indent.left();
             closeParen(out, indent);
             out.format("%sthrow new %s(\"unexpected enum value: '\" + value + \"'\");\n", indent,
                     imports.add(IllegalArgumentException.class));
-            indent.left();
             closeParen(out, indent);
         }
     }
@@ -206,8 +220,8 @@ final class CodeWriter {
             implemented = " implements "
                     + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
         }
-        if (cls.description != null) {
-            Javadoc.printJavadoc(out, indent, cls.description);
+        if (cls.description.isPresent()) {
+            Javadoc.printJavadoc(out, indent, cls.description.get(), true);
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",
@@ -234,6 +248,10 @@ final class CodeWriter {
             addGeneratedAnnotation(out, imports, indent);
         }
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
+    }
+
+    private static void addConstructorBindingAnnotation(PrintWriter out, Imports imports, Indent indent) {
+        out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
     }
 
     private static void writePolymorphicDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent,
@@ -268,10 +286,13 @@ final class CodeWriter {
                 out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
 
                 // add constructor for each member of the oneOf (fieldTypes)
+                // as there are multiple constructors we cannot add ConstructorBinding
+                // annotations
+                // so polymorphic stuff can't be used to bind to rest method parameters
                 out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
                 out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
                 out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
-                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
+                        imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
                 out.format("%s}\n", indent.left());
                 cls.fields.forEach(f -> {
                     String className = toPrimitive(f.fullClassName);
@@ -281,7 +302,7 @@ final class CodeWriter {
                         out.format("%sthis.value = value;\n", indent);
                     } else {
                         out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
-                                imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class));
+                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
                     }
                     out.format("%s}\n", indent.left());
                 });
@@ -306,7 +327,7 @@ final class CodeWriter {
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
                                 out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                        imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
+                                        imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
                                         x.fieldName(cls), x.fieldName(cls));
                             } else {
                                 out.format("%s// ???\n", indent);
@@ -316,7 +337,6 @@ final class CodeWriter {
                 cls.fields.stream().forEach(x -> {
                     assignField(out, indent, cls, x);
                 });
-                indent.left();
                 closeParen(out, indent);
                 writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
             }
@@ -326,14 +346,14 @@ final class CodeWriter {
             indent.right();
             out.format("\n%spublic Deserializer() {\n", indent);
             indent.right();
-            String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
+            String classes = cls.fields.stream()
+                    .map(x -> imports.add(
+                            toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
             out.format("%ssuper(%s.config(), %s.%s, %s.class, %s);\n", indent,
                     imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
                     cls.polymorphicType.name(), cls.simpleName(), classes);
-            indent.left();
             closeParen(out, indent);
-            indent.left();
             closeParen(out, indent);
         }
     }
@@ -384,14 +404,14 @@ final class CodeWriter {
                     .collect(Collectors.joining(","));
         }
         indent.left().left();
-        Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
+        Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
 
         if (cls.classType != ClassType.ENUM) {
             out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
         } else {
             out.println();
         }
-        boolean hasOptional =  cls.fields.stream().anyMatch(f -> !f.required);
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters
@@ -399,14 +419,17 @@ final class CodeWriter {
         final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
                 ? "private"
                 : "public";
+        if (visibility.equals("public")) {
+            addConstructorBindingAnnotation(out, imports, indent);
+        }
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
         ifValidate(cls, out, indent, imports, names, //
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                         out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
-                                x.fieldName(cls), x.fieldName(cls));
+                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
+                                x.fieldName(cls));
                     }
                     validateMore(out2, imports, indent, cls, x, false);
                 }));
@@ -415,7 +438,6 @@ final class CodeWriter {
         cls.fields.stream().forEach(x -> {
             assignField(out, indent, cls, x);
         });
-        indent.left();
         closeParen(out, indent);
         if (hasOptional || !interfaces.isEmpty() || hasBinary) {
             indent.right().right();
@@ -424,7 +446,9 @@ final class CodeWriter {
                     .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
             indent.left().left();
-            out.format("\n%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
+            out.println();
+            addConstructorBindingAnnotation(out, imports, indent);
+            out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             // validate
             ifValidate(cls, out, indent, imports, names, //
@@ -434,7 +458,7 @@ final class CodeWriter {
                                 .findFirst();
                         if (!disc.isPresent() && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
                             out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class),
+                                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
                                     x.fieldName(cls), x.fieldName(cls));
                             validateMore(out2, imports, indent, cls, x, !x.required);
                         }
@@ -460,7 +484,6 @@ final class CodeWriter {
                     assignField(out, indent, cls, x);
                 }
             });
-            indent.left();
             closeParen(out, indent);
         }
     }
@@ -470,39 +493,111 @@ final class CodeWriter {
         String raw = x.fieldName(cls) + (useGet ? ".get()" : "");
         if (x.minLength.isPresent()) {
             out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
-                    x.minLength.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.minLength.get(),
+                    x.fieldName(cls));
         }
         if (x.maxLength.isPresent()) {
             out.format("%s%s.checkMaxLength(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
-                    x.maxLength.get(), x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.maxLength.get(),
+                    x.fieldName(cls));
         }
         if (x.pattern.isPresent()) {
             out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw, x.pattern.get(),
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.pattern.get(),
                     x.fieldName(cls));
         }
         if (x.min.isPresent()) {
             out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
-                    x.min.get().toString(), x.fieldName(cls), x.exclusiveMin);
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.min.get().toString(),
+                    x.fieldName(cls), x.exclusiveMin);
         }
         if (x.max.isPresent()) {
             out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), raw,
-                    x.max.get().toString(), x.fieldName(cls), x.exclusiveMax);
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.max.get().toString(),
+                    x.fieldName(cls), x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
             out.format("%s%s.checkMinSize(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), x.fieldName(cls),
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.minItems.get(), x.fieldName(cls));
         }
         if (x.isArray && x.maxItems.isPresent()) {
             out.format("%s%s.checkMaxSize(%s, %s, \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.internal.Preconditions.class), x.fieldName(cls),
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.maxItems.get(), x.fieldName(cls));
         }
+    }
+
+    private static void writeEqualsMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+//      @Override
+//      public boolean equals(Object o) {
+//        if (this == o) {
+//          return true;
+//        }
+//        if (o == null || getClass() != o.getClass()) {
+//          return false;
+//        }
+//        Point point = (Point) o;
+//        return Objects.equals(this.lat, point.lat) &&
+//            Objects.equals(this.lon, point.lon);
+//      }
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic boolean equals(Object o) {\n", indent);
+        indent.right();
+        out.format("%sif (this == o) {\n", indent);
+        out.format("%sreturn true;\n", indent.right());
+        closeParen(out, indent);
+        out.format("%sif (o == null || getClass() != o.getClass()) {\n", indent);
+        out.format("%sreturn false;\n", indent.right());
+        closeParen(out, indent);
+        indent.right();
+        String s = cls.fields.stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", indent,
+                imports.add(Objects.class), x.fieldName(cls), x.fieldName(cls))).collect(Collectors.joining(" && "));
+        indent.left();
+        if (!s.isEmpty()) {
+            out.format("%s%s other = (%s) o;\n", indent, cls.simpleName(), cls.simpleName());
+        }
+        out.format("%sreturn %s;\n", indent, s.isEmpty() ? "true" : s);
+        closeParen(out, indent);
+    }
+
+    private static void writeHashCodeMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+//      @Override
+//      public int hashCode() {
+//        return Objects.hash(lat, lon);
+//      }
+
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic int hashCode() {\n", indent);
+        final String s;
+        if (cls.fields.size() <= 3) {
+            s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
+        } else {
+            indent.right().right().right();
+            s = cls.fields.stream().map(x -> String.format("\n%s%s", indent, x.fieldName(cls)))
+                    .collect(Collectors.joining(", "));
+            indent.left().left().left();
+        }
+        out.format("%sreturn %s.hash(%s);\n", indent.right(), imports.add(Objects.class), s);
+        closeParen(out, indent);
+    }
+
+    private static void writeToStringMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+        addOverrideAnnotation(out, imports, indent);
+        out.format("%spublic String toString() {\n", indent);
+        final String s;
+        if (cls.fields.size() > 3) {
+            indent.right().right().right();
+            s = cls.fields.stream()
+                    .map(x -> String.format(",\n%s\"%s\", %s", indent, x.fieldName(cls), x.fieldName(cls)))
+                    .collect(Collectors.joining());
+            indent.left().left().left();
+        } else {
+            s = cls.fields.stream().map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
+                    .collect(Collectors.joining(""));
+        }
+        out.format("%sreturn %s.toString(%s.class%s);\n", indent.right(), imports.add(Util.class), cls.simpleName(), s);
+        closeParen(out, indent);
     }
 
     private static void ifValidate(Cls cls, PrintWriter out, Indent indent, Imports imports, Names names,
@@ -519,12 +614,12 @@ final class CodeWriter {
             out.format("%sif (%s.config().validateInConstructor().test(%s.class)) {\n", indent,
                     imports.add(names.globalsFullClassName()), cls.simpleName());
             out.print(text);
-            closeParen(out, indent);
+            out.format("%s}\n", indent);
         }
     }
 
     private static PrintWriter closeParen(PrintWriter out, Indent indent) {
-        return out.format("%s}\n", indent);
+        return out.format("%s}\n", indent.left());
     }
 
     private static void assignField(PrintWriter out, Indent indent, Cls cls, Field x) {
@@ -533,10 +628,10 @@ final class CodeWriter {
 
     private static void writeGetters(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
-        Set<Cls> interfaces = orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
+        Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
             if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
-                out.format("\n%s@%s\n", indent, imports.add(Override.class));
+                addOverrideAnnotation(out, imports, indent);
             } else {
                 out.println();
             }
@@ -549,7 +644,6 @@ final class CodeWriter {
             } else {
                 out.format("%sreturn %s;\n", indent, f.fieldName(cls));
             }
-            indent.left();
             closeParen(out, indent);
         });
     }

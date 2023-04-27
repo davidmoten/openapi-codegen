@@ -1,12 +1,8 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.toPrimitive;
+import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,7 +20,6 @@ import org.davidmoten.oa3.codegen.generator.internal.LinkedStack;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
 
-import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -60,11 +55,10 @@ public class Generator {
         }
         for (MyVisitor.Result result : v.results()) {
             Cls cls = result.cls;
-            Imports imports = result.imports;
             String schemaName = result.name;
             if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
                     && !definition.excludeSchemas().contains(schemaName)) {
-                CodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, imports, schemaName);
+                CodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
             }
         }
     }
@@ -85,11 +79,11 @@ public class Generator {
     static final class Cls {
         SchemaCategory category;
         String fullClassName;
+        Optional<String> description = Optional.empty();
         ClassType classType;
         List<Field> fields = new ArrayList<>();
         List<EnumMember> enumMembers = new ArrayList<>();
         List<Cls> classes = new ArrayList<>();
-        String description = null;
         Discriminator discriminator = null;
         String enumFullType;
         private int num = 0;
@@ -99,6 +93,8 @@ public class Generator {
         PolymorphicType polymorphicType;
         Optional<Cls> owner = Optional.empty(); // the owning heirarchy, we cannot name our class any one of
                                                 // these classes (disallowed by java)
+        Optional<String> name = Optional.empty();
+        Optional<Schema<?>> schema = Optional.empty();
 
         String nextAnonymousFieldName() {
             num++;
@@ -152,20 +148,22 @@ public class Generator {
                     pattern, min, max, exclusiveMin, exclusiveMax, encoding));
         }
 
-        public String pkg() {
+        String pkg() {
             return Names.pkg(fullClassName);
         }
 
-        public String simpleName() {
+        String simpleName() {
             return Names.simpleClassName(fullClassName);
         }
 
-        public boolean unwrapSingleField() {
-            return !hasProperties && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
-                    || topLevel && fields.size() == 1);
+        boolean unwrapSingleField() {
+            return !hasProperties
+                    && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
+                            || topLevel && fields.size() == 1)
+                    || classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         }
 
-        public Set<String> ownersAndSiblingsSimpleNames() {
+        Set<String> ownersAndSiblingsSimpleNames() {
             Cls c = this;
             Set<String> set = new HashSet<>();
             while (c.owner.isPresent()) {
@@ -210,7 +208,7 @@ public class Generator {
             "boolean", "short");
 
     final static class Field {
-        String fullClassName;
+        final String fullClassName;
         final String name;
         final String fieldName;
         final boolean required;
@@ -226,7 +224,7 @@ public class Generator {
         final Optional<Integer> minItems;
         final Optional<Integer> maxItems;
 
-        public Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
+        Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding) {
@@ -247,24 +245,28 @@ public class Generator {
             this.max = max;
         }
 
-        public String fieldName(Cls cls) {
+        String fieldName(Cls cls) {
             return cls.fieldName(this);
         }
 
-        public String resolvedType(Imports imports) {
+        String resolvedType(Imports imports) {
             return Generator.resolvedType(this, imports);
         }
 
-        public String resolvedTypeNullable(Imports imports) {
+        String resolvedTypeNullable(Imports imports) {
             return Generator.resolvedTypeNullable(this, imports);
         }
 
-        public boolean isPrimitive() {
-            return required && PRIMITIVE_CLASS_NAMES.contains(toPrimitive(fullClassName));
+        boolean isPrimitive() {
+            return required && PRIMITIVE_CLASS_NAMES.contains(Util.toPrimitive(fullClassName));
         }
 
-        public boolean isOctets() {
+        boolean isOctets() {
             return encoding == Encoding.OCTET;
+        }
+
+        boolean isByteArray() {
+            return fullClassName.equals("byte[]");
         }
 
         @Override
@@ -272,19 +274,14 @@ public class Generator {
             return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
                     + ", required=" + required + ", minLength=" + minLength + ", maxLength=" + maxLength + "]";
         }
-
-        public boolean isByteArray() {
-            return fullClassName.equals("byte[]");
-        }
     }
 
     static final class MyVisitor implements Visitor {
         private final Names names;
-        private Imports imports;
-        private LinkedStack<Cls> stack = new LinkedStack<>();
-        private List<Result> results = new ArrayList<>();
+        private final LinkedStack<Cls> stack = new LinkedStack<>();
+        private final List<Result> results = new ArrayList<>();
 
-        public MyVisitor(Names names) {
+        MyVisitor(Names names) {
             this.names = names;
         }
 
@@ -292,20 +289,14 @@ public class Generator {
         public void startSchema(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath) {
             SchemaWithName last = schemaPath.last();
             Schema<?> schema = last.schema;
-//            {
-//                final String fullClassName;
-//                if (stack.isEmpty()) {
-//                    fullClassName = names.schemaNameToClassName(last.name);
-//                }
-//            }
-
             final Cls cls = new Cls();
             cls.category = category;
-            cls.description = schema.getDescription();
+            cls.description = Optional.ofNullable(schema.getDescription());
             if (stack.isEmpty()) {
                 // should be top-level class
                 cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
-                imports = new Imports(cls.fullClassName);
+                cls.name = Optional.of(last.name);
+                cls.schema = Optional.of(schema);
                 cls.classType = classType(schema);
                 cls.topLevel = true;
             }
@@ -320,7 +311,7 @@ public class Generator {
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
                             previous.get().classType == ClassType.ARRAY_WRAPPER));
-                    
+
                 } else {
                     cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
                 }
@@ -347,9 +338,9 @@ public class Generator {
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                 } else {
+                    fieldName = Optional.empty();
                     String candidate = names.schemaNameToClassName(cls.category, last.name);
                     cls.fullClassName = candidate;
-                    fieldName = Optional.empty();
                 }
                 if (Util.isEnum(schema)) {
                     handleEnum(schemaPath, cls, previous, isArray, fieldName, names);
@@ -369,7 +360,7 @@ public class Generator {
                 Cls current = stack.peek();
                 final String fullClassName;
                 if (Util.isPrimitive(schema)) {
-                    Class<?> c = toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
+                    Class<?> c = Util.toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
                     final Optional<Integer> maxLength;
@@ -385,26 +376,16 @@ public class Generator {
                     }
                     String fieldName = schemaPath.size() == 1 ? "value" : current.nextFieldName(last.name);
                     boolean required = fieldIsRequired(schemaPath);
-                    final Encoding encoding;
-                    if ("binary".equals(schema.getFormat())) {
-                        encoding = Encoding.OCTET;
-                    } else {
-                        encoding = Encoding.DEFAULT;
-                    }
+                    Encoding encoding = encoding(schema);
                     Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
                     Optional<BigDecimal> max = Optional.ofNullable(schema.getMaximum());
-                    boolean exclusiveMin = Util.orElse(schema.getExclusiveMinimum(), false);
-                    boolean exclusiveMax = Util.orElse(schema.getExclusiveMaximum(), false);
+                    boolean exclusiveMin = orElse(schema.getExclusiveMinimum(), false);
+                    boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
                 } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
-                    final String fieldNameCandidate;
-                    if (last.name == null) {
-                        fieldNameCandidate = Names.simpleClassName(fullClassName);
-                    } else {
-                        fieldNameCandidate = last.name;
-                    }
+                    final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
                     String fieldName = current.nextFieldName(fieldNameCandidate);
                     boolean required = fieldIsRequired(schemaPath);
                     current.addField(fullClassName, last.name, fieldName, required, isArray);
@@ -414,13 +395,6 @@ public class Generator {
             }
         }
 
-        private void updateLinks(final Cls cls, Optional<Cls> previous) {
-            previous.ifPresent(p -> {
-                p.classes.add(cls);
-                cls.owner = Optional.of(p);
-            });
-        }
-
         @Override
         public void finishSchema(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath) {
             final Cls cls = stack.peek();
@@ -428,26 +402,39 @@ public class Generator {
                     || schemaPath.size() == 1) {
                 stack.pop();
                 if (stack.isEmpty()) {
-                    this.results.add(new Result(cls, imports, schemaPath.first().name));
+                    this.results.add(new Result(cls, schemaPath.first().name));
                 }
             }
         }
 
-        public List<Result> results() {
+        List<Result> results() {
             return results;
         }
 
-        public static final class Result {
+        static final class Result {
             final Cls cls;
-            final Imports imports;
             final String name;
 
-            public Result(Cls cls, Imports imports, String name) {
+            Result(Cls cls, String name) {
                 this.cls = cls;
-                this.imports = imports;
                 this.name = name;
             }
         }
+    }
+
+    private static Encoding encoding(Schema<?> schema) {
+        if ("binary".equals(schema.getFormat())) {
+            return Encoding.OCTET;
+        } else {
+            return Encoding.DEFAULT;
+        }
+    }
+
+    private static void updateLinks(final Cls cls, Optional<Cls> previous) {
+        previous.ifPresent(p -> {
+            p.classes.add(cls);
+            cls.owner = Optional.of(p);
+        });
     }
 
     private static void handleObject(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last, Schema<?> schema,
@@ -543,7 +530,7 @@ public class Generator {
             boolean isArray, Optional<String> fieldName, Names names) {
         Schema<?> schema = schemaPath.last().schema;
         cls.classType = ClassType.ENUM;
-        Class<?> valueCls = toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
+        Class<?> valueCls = Util.toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger());
         cls.enumFullType = valueCls.getCanonicalName();
         Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
         Set<String> used = new HashSet<>();
@@ -569,7 +556,7 @@ public class Generator {
         } else if (f.isArray) {
             return toList(f.fullClassName, imports, false);
         } else if (f.required) {
-            return imports.add(toPrimitive(f.fullClassName));
+            return imports.add(Util.toPrimitive(f.fullClassName));
         } else {
             return imports.add(f.fullClassName);
         }
@@ -590,7 +577,7 @@ public class Generator {
         } else if (f.isArray) {
             return toList(f.fullClassName, imports, !f.required);
         } else if (f.required) {
-            return imports.add(toPrimitive(f.fullClassName));
+            return imports.add(Util.toPrimitive(f.fullClassName));
         } else {
             return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
         }
@@ -618,49 +605,6 @@ public class Generator {
             return ClassType.ARRAY_WRAPPER;
         } else {
             return ClassType.CLASS;
-        }
-    }
-
-    private static Class<?> toClass(String type, String format, boolean mapIntegerToBigInteger) {
-        Preconditions.checkNotNull(type);
-        if ("string".equals(type)) {
-            if ("date-time".equals(format)) {
-                return OffsetDateTime.class;
-            } else if ("date".equals(format)) {
-                return LocalDate.class;
-            } else if ("time".equals(format)) {
-                return OffsetTime.class;
-            } else if ("byte".equals(format)) {
-                return byte[].class;
-            } else if ("binary".equals(format)) {
-                return byte[].class;
-            } else {
-                return String.class;
-            }
-        } else if ("boolean".equals(type)) {
-            return Boolean.class;
-        } else if ("integer".equals(type)) {
-            if ("int32".equals(format)) {
-                return Integer.class;
-            } else if ("int64".equals(format)) {
-                return Long.class;
-            } else {
-                return mapIntegerToBigInteger ? BigInteger.class : Long.class;
-            }
-        } else if ("number".equals(type)) {
-            if ("float".equals(format)) {
-                return Float.class;
-            } else if ("double".equals(format)) {
-                return Double.class;
-            } else {
-                return BigDecimal.class;
-            }
-        } else if ("array".equals(type)) {
-            return List.class;
-        } else if ("object".equals(type)) {
-            return Object.class;
-        } else {
-            throw new RuntimeException("unexpected type and format: " + type + ", " + format);
         }
     }
 

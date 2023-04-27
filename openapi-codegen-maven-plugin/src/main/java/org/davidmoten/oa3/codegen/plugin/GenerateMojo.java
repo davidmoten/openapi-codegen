@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.plugin;
 
+import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -17,7 +19,7 @@ import org.apache.maven.shared.utils.io.FileUtils;
 import org.davidmoten.oa3.codegen.generator.Definition;
 import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Packages;
-import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.generator.SpringBootGenerator;
 
 import com.github.davidmoten.guavamini.Sets;
 
@@ -50,6 +52,9 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "failOnParseErrors", defaultValue = "true")
     private boolean failOnParseErrors;
+    
+    @Parameter(name = "generator")
+    private String generator; 
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -74,10 +79,13 @@ public final class GenerateMojo extends AbstractMojo {
                 String definition = file.toURI().toURL().toExternalForm();
                 Packages packages = new Packages(basePackage);
                 Definition d = new Definition(definition, packages, outputDirectory, x -> x,
-                        Sets.newHashSet(Util.orElse(includeSchemas, Collections.emptyList())),
-                        Sets.newHashSet(Util.orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
+                        Sets.newHashSet(orElse(includeSchemas, Collections.emptyList())),
+                        Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
                         failOnParseErrors);
                 new Generator(d).generate();
+                if("spring".equals(generator)) {
+                    new SpringBootGenerator(d).generate();
+                }
             }
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
         } catch (IOException e) {

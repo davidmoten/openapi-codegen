@@ -10,11 +10,11 @@ public class SpringBootGeneratorTest {
     
     @Test
     public void test() throws MalformedURLException {
-        String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/openapi.yml").toURI().toURL().toExternalForm();
+        String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml").toURI().toURL().toExternalForm();
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
                 Collections.emptySet(), Collections.emptySet(), false, true);
-        new SpringBootGenerator(new Names(d)).generate();
+        new SpringBootGenerator(d).generate();
     }
 
 }

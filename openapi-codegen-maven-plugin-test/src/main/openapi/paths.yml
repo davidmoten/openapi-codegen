@@ -1,0 +1,382 @@
+openapi: 3.0.0
+info:
+    
+  title: path tests
+  version: 0.1
+
+paths:
+
+  /requestBodyRequired:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody1'
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1' 
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /requestBodyNotRequired:
+    post:
+      requestBody:
+        required: false
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody2'
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'       
+
+  /responseMultiType:
+    get:
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: 'application/json'   
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1'
+            application/octet-stream:
+              schema: 
+                type: string
+                format: binary
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /bytes:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/octet-stream:
+              schema: 
+                type: string
+                format: binary
+        default:    
+          $ref: '#/components/responses/Error'
+                
+  /text:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            text/plain:
+              schema: 
+                type: string
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /requestBodyMultiType:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody1'
+          application/octet-stream: 
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1'
+        default:    
+          $ref: '#/components/responses/Error'
+            
+  /item:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /item201:
+    get:
+      responses:
+        '201':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'   
+
+  /responseRef:
+    get:
+      responses:
+        '200':
+          $ref: '#/components/responses/Response3' 
+        default:    
+          $ref: '#/components/responses/Error' 
+        
+  /responseRef2:
+    get:
+      responses:
+        '200':
+          $ref: '#/components/responses/Response4' 
+        default:    
+          $ref: '#/components/responses/Error' 
+                  
+  /empty:
+    get:
+      responses:
+        default:    
+          $ref: '#/components/responses/Error'   
+          
+  /params:
+    parameters:
+     - in: query
+       name: id
+       required: true
+       schema:
+         type: string
+         minLength: 1
+    get:
+      parameters:
+        - in: query
+          name: first
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: second
+          schema:
+            type: integer
+        - in: query
+          name: third
+          schema:
+            type: integer
+            format: int32
+            default: 10
+      responses:
+        '203':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'                   
+
+  /params/{id}:
+    get:
+       parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: header
+          name: ApiKey
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: cookie
+          name: bickie
+          required: true
+          schema:
+            type: string
+            minLength: 1                                 
+       responses:
+         '200':    
+           description: ok response
+           content:
+             application/json:
+               schema: 
+                 $ref: '#/components/schemas/Response2' 
+         default:    
+           $ref: '#/components/responses/Error'          
+
+  /query-object:
+    get:
+      parameters:
+        - in: query
+          name: id
+          required: true
+          ## explode: true (is default)
+          schema:
+            type: object
+            properties:
+              first:
+                type: string
+              second:
+                type: integer
+            required: [first]
+      responses:
+        '200':    
+          description: ok response            
+
+  ## not supported by spring-boot 
+  /points:
+    get:
+      parameters:
+      - in: query
+        name: a
+        required: true
+        style: deepObject
+        schema:
+          $ref: '#/components/schemas/Point'
+      - in: query
+        name: b
+        required: true
+        style: deepObject
+        schema:
+          $ref: '#/components/schemas/Point'
+      responses:
+        '200':    
+          description: ok response            
+             
+components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'            
+            
+    Unauthorized:
+      description: Unauthorized (must authenticate)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+            
+    Forbidden:
+      description: Not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+                                    
+    ServerError:
+      description: Unexpected error on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Response3:
+      description: ok response
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/Response2' 
+
+    Response4:
+      description: another response
+      content:
+        application/json:
+          schema: 
+            type: string
+            minLength: 4 
+            
+    Error:
+      description: error response
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/Error'             
+                      
+  schemas:
+    Error:
+      description: an error message (response)
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        errorMessage: 
+          type: string
+
+    RequestBody1:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+      required: [username]
+        
+    Response1:
+      type: object
+      properties:
+        thing: 
+          type: string
+          minLength: 1
+      required: [thing]
+                      
+    RequestBody2:
+      type: object
+      properties:
+        identity:
+          type: string
+          minLength: 1
+      required: [identity]
+        
+    Response2:
+      type: object
+      properties:
+        token: 
+          type: string
+          minLength: 1
+      required: [token]
+      
+    Point:
+      type: object
+      properties:
+        lat: 
+          type: number
+          format: double
+        lon: 
+          type: number
+          format: double
+      required: [lat, lon]                      
