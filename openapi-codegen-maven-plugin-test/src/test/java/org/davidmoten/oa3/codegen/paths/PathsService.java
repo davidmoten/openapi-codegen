@@ -34,8 +34,8 @@ public class PathsService implements Service {
 
     @Override
     public Response2 responseRefGet() throws ServiceException {
-        throw new ServiceException(
-                ResponseEntity.status(500).body(new org.davidmoten.oa3.codegen.paths.schema.Response1("beehive")));
+        return response(
+                ResponseEntity.status(500).body(new Response1("beehive")));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class PathsService implements Service {
             InputStreamResource res = new InputStreamResource(in);
             HttpHeaders headers = new HttpHeaders();
             headers.put(HttpHeaders.CONTENT_LENGTH, Arrays.asList(bytes.length + ""));
-            throw new ServiceException(new ResponseEntity<>(res, headers, HttpStatus.OK));
+            return response(new ResponseEntity<>(res, headers, HttpStatus.OK));
         } else {
             throw new ServiceException(HttpStatus.BAD_REQUEST.value(), "unsupported Accept header: " + accept);
         }
