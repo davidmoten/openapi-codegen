@@ -37,10 +37,11 @@ Here's what's good about this project:
 * Plenty of unit tests (good ones, full serialization and deserialization tests)
 
 ## Usage
+Let's look at the case where we want to generate the server side (spring-boot).
 
 Unfortunately the import mappings configuration of *openapi-generator-plugin* 6.4.0 does not work well at all except for simple single class bandaids. I got cooperation between *openapi-generator* and *openapi-codegen* working by following this process:
 
-* generate with openapi-generator-plugin to packages `my.company.server` and `my.company.model`
+* generate with openapi-generator-plugin to packages `my.company.api` and `my.company.model`
 * use maven-antrun-plugin to 
   * replace all references to `my.company.model` to `my.company.alt.model` in `my/company/server/.*.java`
   * delete `*.java` files in `my/company/model`
@@ -77,10 +78,10 @@ Here are the plugins doing the above (example):
             <phase>generate-sources</phase>
             <configuration>
                 <target>
-                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="MsiGet200Response" value="Path_msi_Get_200" failOnNoReplacements="true">
+                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="model.MsiGet200Response" value="path.MsiGet200Response" failOnNoReplacements="true">
                         <include name="**/api/*.java" />
                     </replace>
-                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="my.company.model" value="my.company.alt.model" failOnNoReplacements="true">
+                    <replace dir="${project.build.directory}/generated-sources/openapi/src/main/java" token="my.company.model" value="my.company.alt.schema" failOnNoReplacements="true">
                         <include name="my/company/api/*.java" />
                         <include name="org/openapitools/**/*.java" />
                     </replace>
