@@ -3,9 +3,9 @@
 [![codecov](https://codecov.io/gh/davidmoten/openapi-codegen/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/openapi-codegen)<br/>
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.gov.amsa/openapi-codegen/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.gov.amsa/openapi-codegen)<br/>
 
-Jackson annotated Java 8+ code generator (via a maven plugin) from all Schema sections of an OpenAPI 3.0.1 definition file. Can be used with [openapi-generator](https://github.com/OpenAPITools/openapi-generator) to fill in the functionality gaps of that project. Can also be used standalone if you take on the often not very onerous task of writing classes for your service methods (e.g. jax-rs).
+Jackson annotated Java 8+ code generator (via a maven plugin) from all Schema sections of an OpenAPI 3.0.1 definition file. Can be used with [openapi-generator](https://github.com/OpenAPITools/openapi-generator) to fill in the functionality gaps of that project or you can generate both the schema classes and the server classes for Spring Boot 2.x or 3.x. Can also be used standalone if you take on the often not very onerous task of writing classes for your service methods (e.g. jax-rs).
 
-As much as possible make sure you put your types in the components/schemas section of your openapi yaml/json file (use $ref!). Don't use anonymous types, it makes for an ugly experience with generated code.
+As much as possible make sure you put your types in the components/schemas section of your openapi yaml/json file (use $ref!). Don't use anonymous types, it makes for an ugly experience with generated code. 
 
 **Status**: in development, alpha release on Maven Central
 
