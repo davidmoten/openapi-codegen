@@ -137,6 +137,7 @@ public class SpringBootGenerator {
             consumes = new ArrayList<>(b.getContent().keySet());
         }
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
+        Optional<Integer> primaryStatusCode = response.map(x -> x.statusCode);
         if (response.isPresent()) {
             Content content = response.get().response.getContent();
             if (content != null) {
@@ -169,7 +170,7 @@ public class SpringBootGenerator {
             }
         }
         Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces,
-                Optional.ofNullable(operation.getDescription()));
+                Optional.ofNullable(operation.getDescription()), primaryStatusCode);
         methods.add(m);
     }
 
@@ -248,10 +249,11 @@ public class SpringBootGenerator {
         final List<String> consumes;
         final List<String> produces;
         final Optional<String> description;
+        final Optional<Integer> primaryStatusCode;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
                 Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
-                List<String> produces, Optional<String> description) {
+                List<String> produces, Optional<String> description, Optional<Integer> primaryStatusCode) {
             this.methodName = methodName;
             this.statusCode = statusCode;
             this.parameters = parameters;
@@ -261,6 +263,7 @@ public class SpringBootGenerator {
             this.consumes = consumes;
             this.produces = produces;
             this.description = description;
+            this.primaryStatusCode = primaryStatusCode;
         }
 
         @Override

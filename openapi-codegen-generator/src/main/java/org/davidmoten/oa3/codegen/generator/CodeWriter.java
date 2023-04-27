@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -219,7 +221,7 @@ final class CodeWriter {
                     + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
         }
         if (cls.description.isPresent()) {
-            Javadoc.printJavadoc(out, indent, cls.description.get());
+            Javadoc.printJavadoc(out, indent, cls.description.get(), true);
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",
@@ -293,7 +295,7 @@ final class CodeWriter {
                         imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
                 out.format("%s}\n", indent.left());
                 cls.fields.forEach(f -> {
-                    String className = org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive(f.fullClassName);
+                    String className = toPrimitive(f.fullClassName);
                     out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
                     indent.right();
                     if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
@@ -346,7 +348,7 @@ final class CodeWriter {
             indent.right();
             String classes = cls.fields.stream()
                     .map(x -> imports.add(
-                            org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive(x.fullClassName)) + ".class")
+                            toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
             out.format("%ssuper(%s.config(), %s.%s, %s.class, %s);\n", indent,
                     imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
