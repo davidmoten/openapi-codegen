@@ -73,7 +73,7 @@ final class CodeWriter {
         }
     }
 
-    static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls, 
+    static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls,
             String schemaName) {
         Imports imports = new Imports(cls.fullClassName);
         if ((cls.category == SchemaCategory.PATH || cls.category == SchemaCategory.RESPONSE) && cls.schema.isPresent()
@@ -113,8 +113,7 @@ final class CodeWriter {
         indent.right();
         out.format("\n%sprivate static volatile %s config = %s.builder().build();\n", indent, imports.add(Config.class),
                 imports.add(Config.class));
-        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent,
-                imports.add(Config.class));
+        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent, imports.add(Config.class));
         indent.right();
         out.format("%sconfig = configuration;\n", indent);
         indent.left();
@@ -250,8 +249,12 @@ final class CodeWriter {
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
     }
 
-    private static void addConstructorBindingAnnotation(PrintWriter out, Imports imports, Indent indent) {
-        out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
+    private static void addConstructorBindingAnnotation(PrintWriter out, Imports imports, Indent indent, Names names) {
+        if (names.generatorIsSpring3()) {
+            out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
+        } else {
+            out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
+        }
     }
 
     private static void writePolymorphicDeserializerAnnotation(PrintWriter out, Imports imports, Indent indent,
@@ -346,9 +349,7 @@ final class CodeWriter {
             indent.right();
             out.format("\n%spublic Deserializer() {\n", indent);
             indent.right();
-            String classes = cls.fields.stream()
-                    .map(x -> imports.add(
-                            toPrimitive(x.fullClassName)) + ".class")
+            String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
             out.format("%ssuper(%s.config(), %s.%s, %s.class, %s);\n", indent,
                     imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
@@ -420,7 +421,7 @@ final class CodeWriter {
                 ? "private"
                 : "public";
         if (visibility.equals("public")) {
-            addConstructorBindingAnnotation(out, imports, indent);
+            addConstructorBindingAnnotation(out, imports, indent, names);
         }
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
@@ -447,7 +448,7 @@ final class CodeWriter {
                     .collect(Collectors.joining(","));
             indent.left().left();
             out.println();
-            addConstructorBindingAnnotation(out, imports, indent);
+            addConstructorBindingAnnotation(out, imports, indent, names);
             out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             // validate

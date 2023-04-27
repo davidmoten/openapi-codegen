@@ -1,6 +1,7 @@
 package org.davidmoten.oa3.codegen.generator;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -14,10 +15,11 @@ public final class Definition {
     private final Set<String> excludeSchemas;
     private final boolean mapIntegerToBigInteger;
     private final boolean failOnParseErrors;
+    private final Optional<String> generator;
 
     public Definition(String definition, Packages packages, File generatedSourceDirectory,
             Function<String, String> externalRefClassNames, Set<String> includeSchemas, Set<String> excludeSchemas,
-            boolean mapIntegerToBigInteger, boolean failOnParseErrors) {
+            boolean mapIntegerToBigInteger, boolean failOnParseErrors, Optional<String> generator) {
         this.definition = definition;
         this.packages = packages;
         this.generatedSourceDirectory = generatedSourceDirectory;
@@ -26,6 +28,7 @@ public final class Definition {
         this.excludeSchemas = excludeSchemas;
         this.mapIntegerToBigInteger = mapIntegerToBigInteger;
         this.failOnParseErrors = failOnParseErrors;
+        this.generator = generator;
     }
 
     public String definition() {
@@ -58,6 +61,10 @@ public final class Definition {
 
     public boolean failOnParseErrors() {
         return failOnParseErrors;
+    }
+
+    public Optional<String> generator() {
+        return generator;
     }
 
 }

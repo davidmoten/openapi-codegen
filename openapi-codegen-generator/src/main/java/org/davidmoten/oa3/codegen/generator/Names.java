@@ -338,5 +338,9 @@ final class Names {
     RequestBody lookupRequestBody(String ref) {
         return api.getComponents().getRequestBodies().get(lastComponent(ref));
     }
+    
+    boolean generatorIsSpring3() {
+        return definition.generator().orElse("").equals("spring3");
+    }
 
 }

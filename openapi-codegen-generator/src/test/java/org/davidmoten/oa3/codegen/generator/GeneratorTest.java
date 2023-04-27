@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -24,7 +25,7 @@ public final class GeneratorTest {
                 .toExternalForm();
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
-                Collections.emptySet(), Collections.emptySet(), false, true);
+                Collections.emptySet(), Collections.emptySet(), false, true, Optional.empty());
         new Generator(d).generate();
     }
 

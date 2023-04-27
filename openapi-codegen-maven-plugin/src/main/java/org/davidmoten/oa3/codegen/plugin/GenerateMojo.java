@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.maven.model.FileSet;
@@ -52,9 +53,12 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "failOnParseErrors", defaultValue = "true")
     private boolean failOnParseErrors;
-    
-    @Parameter(name = "generator")
-    private String generator; 
+
+    @Parameter(name = "generator", defaultValue="spring2")
+    private String generator;
+
+    @Parameter(name = "generateService", defaultValue = "true")
+    private boolean generateService;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -81,9 +85,9 @@ public final class GenerateMojo extends AbstractMojo {
                 Definition d = new Definition(definition, packages, outputDirectory, x -> x,
                         Sets.newHashSet(orElse(includeSchemas, Collections.emptyList())),
                         Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
-                        failOnParseErrors);
+                        failOnParseErrors, Optional.ofNullable(generator));
                 new Generator(d).generate();
-                if("spring".equals(generator)) {
+                if (generateService) {
                     new SpringBootGenerator(d).generate();
                 }
             }
