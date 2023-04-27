@@ -92,6 +92,7 @@
         <module>openapi-codegen-spring-runtime</module>
         <module>openapi-codegen-maven-plugin</module>
         <module>openapi-codegen-maven-plugin-test</module>
+        <module>openapi-generator-demo</module>
         <module>openapi-codegen-example-pet-store</module>
     </modules>
 
