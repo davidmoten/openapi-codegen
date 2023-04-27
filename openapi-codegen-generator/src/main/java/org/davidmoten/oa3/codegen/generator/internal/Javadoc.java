@@ -15,14 +15,14 @@ public class Javadoc {
 
     private static final int MAX_JAVADOC_WIDTH = 80;
 
-    public static void printJavadoc(PrintWriter out, Indent indent, String text, boolean isMarkdown) {
+    public static void printJavadoc(PrintWriter out, Indent indent, String text, boolean isHtml) {
         Preconditions.checkNotNull(text);
         printJavadoc(out, indent, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
-                Collections.emptyMap(), isMarkdown);
+                Collections.emptyMap(), isHtml);
     }
 
     public static void printJavadoc(PrintWriter p, Indent indent, Optional<String> text, List<Annotation> annotations,
-            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isMarkdown) {
+            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml) {
         boolean hasText = text.isPresent() || !annotations.isEmpty() || returns.isPresent();
         boolean addParagraph = false;
         if (hasText) {
@@ -36,7 +36,7 @@ public class Javadoc {
             if (addParagraph) {
                 p.format("%s * <p>\n", indent);
             }
-            p.format("%s * %s\n", indent, encodeAndWrapForJavadoc(text.get(), indent, isMarkdown));
+            p.format("%s * %s\n", indent, encodeAndWrapForJavadoc(text.get(), indent, isHtml));
         }
         annotations.forEach(a -> {
             p.format("%s * <p>\n", indent);
@@ -74,17 +74,21 @@ public class Javadoc {
         }
     }
 
-    private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isMarkdown) {
-        return encodeJavadoc(wrap(s.replace("{@", "zxxz")), isMarkdown) //
+    private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {
+        s = s.replace("{@", "zxxz");
+        if (!isHtml) {
+            s = wrap(s);
+        }
+        return encodeJavadoc(s, isHtml) //
                 .replace("\n", String.format("\n%s * ", indent)) //
-                        .replace("zxxz", "{@");
+                .replace("zxxz", "{@");
     }
 
-    private static String encodeJavadoc(String x, boolean isMarkdown) {
+    private static String encodeJavadoc(String x, boolean isHtml) {
         x = x.replace("@", "&#064;") //
                 .replace("\\", "{@literal \\}");
 //                .replace("&", "&amp;");
-        if (!isMarkdown) {
+        if (!isHtml) {
             x = x.replace("<", "&lt;") //
                     .replace(">", "&gt;");
         }
