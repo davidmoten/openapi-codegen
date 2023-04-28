@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator.client;
+package org.davidmoten.oa3.codegen.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,19 +19,15 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpMethod;
-
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.davidmoten.guavamini.Preconditions;
 
-import io.swagger.models.ParamType;
-
 public final class Http {
 
     public static HttpResponse call(//
-            HttpMethod method, //
+            String method, //
             String basePath, //
             String pathTemplate, //
             ObjectMapper mapper, //
@@ -52,7 +48,7 @@ public final class Http {
     }
 
     public static HttpResponse call(//
-            HttpMethod method, //
+            String method, //
             String basePath, //
             String pathTemplate, //
             ObjectMapper mapper, //
@@ -64,20 +60,20 @@ public final class Http {
         // substitute path parameters
         String path = stripFinalSlash(basePath) + insertParameters(pathTemplate, parameters);
         // build query string
-        String queryString = parameters.stream().filter(p -> p.type() == ParamType.QUERY) //
+        String queryString = parameters.stream().filter(p -> p.type() == ParameterType.QUERY) //
                 .map(p -> urlEncode(p.name() + "=" + p.value().map(x -> valueToString(x)).orElse(""))) //
                 .collect(Collectors.joining("&"));
         String url = path + "?" + queryString;
-        Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParamType.BODY).findFirst();
+        Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY).findFirst();
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
             Headers headers = new Headers(requestHeaders);
-            if (method == HttpMethod.PATCH) {
+            if (method.equals("PATCH")) {
                 // PATCH not supported by HttpURLConnection so use a workaround
-                headers.put("X-HTTP-Method-Override", HttpMethod.PATCH.name());
-                con.setRequestMethod(HttpMethod.POST.name());
+                headers.put("X-HTTP-Method-Override", "PATCH");
+                con.setRequestMethod("POST");
             } else {
-                con.setRequestMethod(method.name());
+                con.setRequestMethod(method);
             }
 
             headers.forEach((key, list) -> {
@@ -162,7 +158,7 @@ public final class Http {
     private static String insertParameters(String pathTemplate, List<ParameterValue> parameters) {
         String s = pathTemplate;
         for (ParameterValue p : parameters) {
-            if (p.type() == ParamType.PATH) {
+            if (p.type() == ParameterType.PATH) {
                 s = insertParameter(s, p.name(), p.value().get());
             }
         }

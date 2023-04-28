@@ -1,17 +1,15 @@
-package org.davidmoten.oa3.codegen.generator.client;
+package org.davidmoten.oa3.codegen.http;
 
 import java.util.Optional;
-
-import io.swagger.models.ParamType;
 
 public final class ParameterValue {
 
     private final String name;
     private final Optional<Object> value;
-    private final ParamType type;
+    private final ParameterType type;
     private final Optional<String> contentType;
 
-    public ParameterValue(String name, Optional<Object> value, ParamType type, Optional<String> contentType) {
+    public ParameterValue(String name, Optional<Object> value, ParameterType type, Optional<String> contentType) {
         this.name = name;
         this.value = value;
         this.type = type;
@@ -26,7 +24,7 @@ public final class ParameterValue {
         return value;
     }
 
-    public ParamType type() {
+    public ParameterType type() {
         return type;
     }
 

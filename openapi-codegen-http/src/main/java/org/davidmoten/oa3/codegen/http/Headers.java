@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator.client;
+package org.davidmoten.oa3.codegen.http;
 
 import java.util.ArrayList;
 import java.util.HashMap;
