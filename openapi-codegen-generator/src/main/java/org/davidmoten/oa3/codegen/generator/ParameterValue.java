@@ -7,11 +7,13 @@ public class ParameterValue {
     private final String name;
     private final Optional<Object> value;
     private final ParamType type;
+    private final Optional<String> contentType;
 
-    public ParameterValue(String name, Optional<Object> value, ParamType type) {
+    public ParameterValue(String name, Optional<Object> value, ParamType type, Optional<String> contentType) {
         this.name = name;
         this.value = value;
         this.type = type;
+        this.contentType = contentType;
     }
 
     public String name() {
@@ -24,5 +26,9 @@ public class ParameterValue {
 
     public ParamType type() {
         return type;
+    }
+
+    public Optional<String> contentType() {
+        return contentType;
     }
 }

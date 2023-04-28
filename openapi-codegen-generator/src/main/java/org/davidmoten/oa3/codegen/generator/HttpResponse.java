@@ -1,15 +1,16 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class HttpResponse<T> {
+public final class HttpResponse {
 
     private final int statusCode;
-    private final Map<String, String> headers;
-    private final Optional<T> data;
+    private final Map<String, List<String>> headers;
+    private final Optional<?> data;
 
-    public HttpResponse(int statusCode, Map<String, String> headers, Optional<T> data) {
+    public HttpResponse(int statusCode, Map<String, List<String>> headers, Optional<?> data) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.data = data;
@@ -19,11 +20,11 @@ public final class HttpResponse<T> {
         return statusCode;
     }
 
-    public Map<String, String> headers() {
+    public Map<String, List<String>> headers() {
         return headers;
     }
 
-    public Optional<T> data() {
+    public Optional<?> data() {
         return data;
     }
 
