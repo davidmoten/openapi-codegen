@@ -1,10 +1,10 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Headers extends HashMap<String, List<String>> {
+public final class Headers extends HashMap<String, List<String>> {
 
     private static final long serialVersionUID = 4670201310662941557L;
 

@@ -1,8 +1,10 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.client;
 
 import java.util.Optional;
 
-public class ParameterValue {
+import io.swagger.models.ParamType;
+
+public final class ParameterValue {
 
     private final String name;
     private final Optional<Object> value;

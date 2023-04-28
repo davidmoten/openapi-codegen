@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,7 +10,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,20 +26,43 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.davidmoten.guavamini.Preconditions;
 
+import io.swagger.models.ParamType;
+
 public final class Http {
 
     public static HttpResponse call(//
-            ObjectMapper mapper, //
             HttpMethod method, //
             String basePath, //
             String pathTemplate, //
+            ObjectMapper mapper, //
+            Headers requestHeaders, //
+            List<ParameterValue> parameters, //
+            // (statusCode, contentType, class)
+            List<ResponseDescriptor> descriptors) {
+        return call(method, basePath, pathTemplate, mapper, requestHeaders, parameters, (statusCode, contentType) -> {
+            List<ResponseDescriptor> matches = new ArrayList<>();
+            for (ResponseDescriptor d : descriptors) {
+                if (d.matches(statusCode, contentType)) {
+                    matches.add(d);
+                }
+            }
+            Collections.sort(matches, (a, b) -> Integer.compare(a.specificity(), b.specificity()));
+            return matches.stream().findFirst().map(d -> d.cls());
+        });
+    }
+
+    public static HttpResponse call(//
+            HttpMethod method, //
+            String basePath, //
+            String pathTemplate, //
+            ObjectMapper mapper, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode x contentType) -> class
-            BiFunction<? super Integer, ? super Optional<String>, Optional<Class<?>>> responseCls) {
+            BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls) {
         Preconditions.checkArgument(pathTemplate.startsWith("/"));
         // substitute path parameters
-        String path = stripFinalSlash(basePath) + insertParameters(pathTemplate, parameters, mapper);
+        String path = stripFinalSlash(basePath) + insertParameters(pathTemplate, parameters);
         // build query string
         String queryString = parameters.stream().filter(p -> p.type() == ParamType.QUERY) //
                 .map(p -> urlEncode(p.name() + "=" + p.value().map(x -> valueToString(x)).orElse(""))) //
@@ -71,7 +96,8 @@ public final class Http {
             con.setDoInput(true);
             int statusCode = con.getResponseCode();
             Map<String, List<String>> responseHeaders = con.getHeaderFields();
-            Optional<String> responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"));
+            String responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"))
+                    .orElse("application/octet-stream");
             Object data;
             Optional<Class<?>> responseType = responseCls.apply(statusCode, responseContentType);
             try (InputStream in = con.getInputStream()) {
@@ -133,18 +159,18 @@ public final class Http {
         }
     }
 
-    private static String insertParameters(String pathTemplate, List<ParameterValue> parameters, ObjectMapper m) {
+    private static String insertParameters(String pathTemplate, List<ParameterValue> parameters) {
         String s = pathTemplate;
         for (ParameterValue p : parameters) {
             if (p.type() == ParamType.PATH) {
-                s = insertParameter(s, p.value().get(), m);
+                s = insertParameter(s, p.name(), p.value().get());
             }
         }
         return s;
     }
 
-    private static String insertParameter(String s, Object object, ObjectMapper m) {
-        return s;
+    private static String insertParameter(String s, String name, Object object) {
+        return s.replace("{" + name + "}", object.toString());
     }
 
 }

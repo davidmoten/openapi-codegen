@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.client;
 
 import java.util.List;
 import java.util.Map;
