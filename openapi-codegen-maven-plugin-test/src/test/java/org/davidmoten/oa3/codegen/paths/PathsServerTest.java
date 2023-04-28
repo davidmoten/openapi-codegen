@@ -1,17 +1,16 @@
 package org.davidmoten.oa3.codegen.paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -29,13 +28,13 @@ public class PathsServerTest {
     private static ConfigurableApplicationContext context;
     private static ObjectMapper m;
 
-    @BeforeClass
+    @BeforeAll
     public static void start() {
         context = SpringApplication.run(Application.class, new String[] {});
         m = context.getBean(ObjectMapper.class);
     }
 
-    @AfterClass
+    @AfterAll
     public static void stop() {
         context.stop();
     }
@@ -101,8 +100,8 @@ public class PathsServerTest {
         assertEquals(500, Http.readStatusCodeOnly("http://localhost:8080/query-object?second=12", HttpMethod.GET));
     }
 
-    @Ignore("deepObject style not supported by spring-boot (a[lat]=1&a[lon]=2)")
-    @Test
+    // deepObject style not supported by spring-boot (a[lat]=1&a[lon]=2)
+    // @Test()
     public void testPoints() {
         // we can't tell with object parameters if the cause was bad request or bad
         // server-side logic so we defensively return status code 500
@@ -114,7 +113,7 @@ public class PathsServerTest {
     public void testOctetStream() {
         assertEquals("hello there", Http.readStringFromOctetStream("http://localhost:8080/bytes", HttpMethod.GET));
     }
-    
+
     @Test
     public void testText() {
         assertEquals("example text", Http.readString("http://localhost:8080/text", HttpMethod.GET, "text/plain"));

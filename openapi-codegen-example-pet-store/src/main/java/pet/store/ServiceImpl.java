@@ -18,7 +18,7 @@ import pet.store.service.Service;
 public class ServiceImpl implements Service {
 
     @Override
-    public PetsGet200Response petsGet(List<String> tags, int limit) throws ServiceException {
+    public PetsGet200Response petsGet(Optional<List<String>> tags, int limit) throws ServiceException {
         System.out.println(tags);
         long t = System.currentTimeMillis();
         if (t % 3 == 0) {

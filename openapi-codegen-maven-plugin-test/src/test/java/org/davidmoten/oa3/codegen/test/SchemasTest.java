@@ -1,10 +1,11 @@
 package org.davidmoten.oa3.codegen.test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -80,9 +81,7 @@ import org.davidmoten.oa3.codegen.test.schema.Status;
 import org.davidmoten.oa3.codegen.test.schema.Table;
 import org.davidmoten.oa3.codegen.test.schema.Table.TableItem;
 import org.davidmoten.oa3.codegen.test.schema.Vehicle;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -330,7 +329,7 @@ public class SchemasTest {
         assertEquals(1, ObjectNoOptionalFields.class.getConstructors().length);
         try {
             m.readValue("{}", ObjectNoOptionalFields.class);
-            Assert.fail();
+            fail();
         } catch (ValueInstantiationException e) {
             // expected
         }
@@ -415,56 +414,65 @@ public class SchemasTest {
         onePublicConstructor(MinMaxLength.class);
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxLengthTooSmall() throws JsonMappingException, JsonProcessingException {
-        String json = "{\"first\":\"\",\"second\":\"def\"}";
-        m.readValue(json, MinMaxLength.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "{\"first\":\"\",\"second\":\"def\"}";
+            m.readValue(json, MinMaxLength.class);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMinMaxLengthTooSmallPublicConstructor() throws JsonMappingException, JsonProcessingException {
-        new MinMaxLength("", Optional.of("def"));
+        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("", Optional.of("def")));
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxLengthTooSmallOptional() throws JsonMappingException, JsonProcessingException {
-        String json = "{\"first\":\"abc\",\"second\":\"d\"}";
-        m.readValue(json, MinMaxLength.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "{\"first\":\"abc\",\"second\":\"d\"}";
+            m.readValue(json, MinMaxLength.class);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMinMaxLengthTooSmallOptionalPublicConstructor()
             throws JsonMappingException, JsonProcessingException {
-        new MinMaxLength("abc", Optional.of("d"));
+        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("abc", Optional.of("d")));
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxLengthTooBig() throws JsonMappingException, JsonProcessingException {
-        String json = "{\"first\":\"abcdef\",\"second\":\"def\"}";
-        m.readValue(json, MinMaxLength.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "{\"first\":\"abcdef\",\"second\":\"def\"}";
+            m.readValue(json, MinMaxLength.class);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMinMaxLengthTooBigPublicConstructor() throws JsonMappingException, JsonProcessingException {
-        new MinMaxLength("abcdef", Optional.of("def"));
+        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("abcdef", Optional.of("def")));
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxLengthTooBigOptional() throws JsonMappingException, JsonProcessingException {
-        String json = "{\"abc\":\"abc\",\"second\":\"defgh\"}";
-        m.readValue(json, MinMaxLength.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "{\"abc\":\"abc\",\"second\":\"defgh\"}";
+            m.readValue(json, MinMaxLength.class);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMinMaxLengthTooBigOptionalPublicConstructor() throws JsonMappingException, JsonProcessingException {
-        new MinMaxLength("abc", Optional.of("defgh"));
+        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("abc", Optional.of("defgh")));
     }
 
     @Test
     public void testTurnValidateOff() {
         Config old = Globals.config();
         try {
-            Config config = Config.builder().mapper(Globals.config().mapper()).validateInConstructor(x -> false).build();
+            Config config = Config.builder().mapper(Globals.config().mapper()).validateInConstructor(x -> false)
+                    .build();
             Globals.setConfig(config);
             new MinMaxLength("abc", Optional.of("defgh"));
         } finally {
@@ -481,16 +489,20 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(new MinMaxInteger(2)));
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxIntegerTooSmall() throws JsonMappingException, JsonProcessingException {
-        String json = "1";
-        m.readValue(json, MinMaxInteger.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "1";
+            m.readValue(json, MinMaxInteger.class);
+        });
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxIntegerTooBig() throws JsonMappingException, JsonProcessingException {
-        String json = "5";
-        m.readValue(json, MinMaxInteger.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "5";
+            m.readValue(json, MinMaxInteger.class);
+        });
     }
 
     @Test
@@ -502,24 +514,29 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(new MinMaxDouble(2.6)));
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxDoubleTooSmall() throws JsonMappingException, JsonProcessingException {
-        String json = "1.2";
-        m.readValue(json, MinMaxDouble.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "1.2";
+            m.readValue(json, MinMaxDouble.class);
+        });
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxDoubleTooBig() throws JsonMappingException, JsonProcessingException {
-        String json = "5.0";
-        m.readValue(json, MinMaxDouble.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "5.0";
+            m.readValue(json, MinMaxDouble.class);
+        });
     }
 
     // TODO need to address this failure
-    @Test(expected = ValueInstantiationException.class)
-    @Ignore
+//    @Test
     public void testMinMaxDoubleTooBigWithNoDecimalPart() throws JsonMappingException, JsonProcessingException {
-        String json = "5";
-        m.readValue(json, MinMaxDouble.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "5";
+            m.readValue(json, MinMaxDouble.class);
+        });
     }
 
     @Test
@@ -531,16 +548,20 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(new ExclusiveMinMaxInteger(3)));
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testExclusiveMinMaxIntegerTooSmall() throws JsonMappingException, JsonProcessingException {
-        String json = "2";
-        m.readValue(json, ExclusiveMinMaxInteger.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "2";
+            m.readValue(json, ExclusiveMinMaxInteger.class);
+        });
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testExclusiveMinMaxIntegerTooBig() throws JsonMappingException, JsonProcessingException {
-        String json = "4";
-        m.readValue(json, ExclusiveMinMaxInteger.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "4";
+            m.readValue(json, ExclusiveMinMaxInteger.class);
+        });
     }
 
     @Test
@@ -557,16 +578,20 @@ public class SchemasTest {
         m.readValue(json, MinMaxItems.class);
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxItemsTooFew() throws JsonMappingException, JsonProcessingException {
-        String json = "[1]";
-        m.readValue(json, MinMaxItems.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "[1]";
+            m.readValue(json, MinMaxItems.class);
+        });
     }
 
-    @Test(expected = ValueInstantiationException.class)
+    @Test
     public void testMinMaxItemsTooMany() throws JsonMappingException, JsonProcessingException {
-        String json = "[1,2,3,4,5]";
-        m.readValue(json, MinMaxItems.class);
+        assertThrows(ValueInstantiationException.class, () -> {
+            String json = "[1,2,3,4,5]";
+            m.readValue(json, MinMaxItems.class);
+        });
     }
 
     @Test
@@ -668,7 +693,7 @@ public class SchemasTest {
             assertEquals(m.readTree(json), m.readTree(m.writeValueAsString(msi)));
         }
     }
-    
+
     @Test
     public void testExternalRefIsResolved() {
         new External("hello");
@@ -683,5 +708,5 @@ public class SchemasTest {
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
-    
+
 }

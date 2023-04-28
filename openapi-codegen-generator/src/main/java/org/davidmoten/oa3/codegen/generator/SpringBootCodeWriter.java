@@ -374,7 +374,12 @@ class SpringBootCodeWriter {
 
     private static String toImportedType(Param p, Imports imports) {
         if (p.isArray) {
-            return String.format("%s<%s>", imports.add(List.class), imports.add(p.fullClassName));
+            if (p.required) {
+                return String.format("%s<%s>", imports.add(List.class), imports.add(p.fullClassName));
+            } else {
+                return String.format("%s<%s<%s>>", imports.add(Optional.class), imports.add(List.class),
+                        imports.add(p.fullClassName));
+            }
         } else if (p.required || p.defaultValue.isPresent()) {
             return imports.add(Util.toPrimitive(p.fullClassName));
         } else {

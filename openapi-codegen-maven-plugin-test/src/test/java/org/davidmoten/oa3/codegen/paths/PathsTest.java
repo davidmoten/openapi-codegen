@@ -1,8 +1,9 @@
 package org.davidmoten.oa3.codegen.paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -18,7 +19,7 @@ import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.paths.service.Service;
 import org.davidmoten.oa3.codegen.paths.service.ServiceController;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
