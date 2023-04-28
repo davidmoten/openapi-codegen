@@ -1,7 +1,9 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +12,7 @@ import java.util.Optional;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -131,10 +133,11 @@ public class SerializationTest {
         assertEquals(json, m.writeValueAsString(g));
     }
 
-    @Test(expected = JsonMappingException.class)
+    @Test
     public void testPolymorphicDeserializationThrows() throws JsonMappingException, JsonProcessingException {
+        assertThrows(JsonMappingException.class, () ->{
         String json = "{\"radiusKm\":3.4}";
-        m.readerFor(OneOf.class).readValue(json);
+        m.readerFor(OneOf.class).readValue(json);});
     }
 
     @JsonDeserialize(using = OneOf.Deserializer.class)

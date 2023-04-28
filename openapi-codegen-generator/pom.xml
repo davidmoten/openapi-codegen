@@ -58,13 +58,12 @@
             <version>0.21.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+       <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>junit-extras</artifactId>
