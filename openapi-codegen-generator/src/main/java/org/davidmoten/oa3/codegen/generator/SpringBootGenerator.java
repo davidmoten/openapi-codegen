@@ -235,10 +235,6 @@ public class SpringBootGenerator {
         return s;
     }
 
-    enum ParamType {
-        PATH, QUERY, HEADER, COOKIE, BODY;
-    }
-
     static final class Method {
         final String methodName;
         final List<Param> parameters;

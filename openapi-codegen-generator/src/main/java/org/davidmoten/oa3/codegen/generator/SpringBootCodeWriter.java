@@ -18,7 +18,6 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Constraints;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Param;
-import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
