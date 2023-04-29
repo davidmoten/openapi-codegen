@@ -48,7 +48,7 @@ public final class Http {
         });
     }
 
-    public static HttpResponse call(//
+    private static HttpResponse call(//
             String method, //
             String basePath, //
             String pathTemplate, //
