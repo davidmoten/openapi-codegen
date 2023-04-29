@@ -26,6 +26,7 @@ public final class ResponseDescriptor {
     }
 
     public int specificity() {
+        // the desired match is the one with the lowest specificity
         if (statusCode.equals("default")) {
             return Integer.MAX_VALUE;
         } else {
