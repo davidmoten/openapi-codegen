@@ -39,6 +39,20 @@
         </dependency>
         
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>http-test-server</artifactId>
             <version>0.1.4</version>

@@ -10,8 +10,6 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.davidmoten.http.test.server.Server;
@@ -83,20 +81,6 @@ public class HttpTest {
             Thing a = (Thing) r.data().get();
             assertEquals("fred", a.name);
             assertEquals(23, a.age);
-        }
-    }
-
-    public static final class Thing {
-        @JsonProperty("name")
-        public String name;
-
-        @JsonProperty("age")
-        public int age;
-
-        @JsonCreator
-        public Thing(@JsonProperty("name") String name, @JsonProperty("age") int age) {
-            this.name = name;
-            this.age = age;
         }
     }
 

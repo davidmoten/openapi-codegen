@@ -147,7 +147,7 @@ public final class Http {
             return matches.stream().findFirst().map(d -> d.cls());
         });
     }
-
+    
     private static HttpResponse call(//
             String method, //
             String basePath, //
