@@ -27,6 +27,101 @@ import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Http {
 
+    public static Builder method(String method) {
+        return new Builder(method);
+    }
+
+    public static final class Builder {
+
+        private final String method;
+        private String basePath;
+        private String pathTemplate;
+        private ObjectMapper objectMapper = new ObjectMapper();
+        private final Headers headers = Headers.create();
+        private final List<ParameterValue> values = new ArrayList<>();
+        private final List<ResponseDescriptor> responseDescriptors = new ArrayList<>();
+
+        Builder(String method) {
+            this.method = method;
+        }
+
+        public Builder basePath(String basePath) {
+            this.basePath = basePath;
+            return this;
+        }
+
+        public Builder pathTemplate(String pathTemplate) {
+            this.pathTemplate = pathTemplate;
+            return this;
+        }
+
+        public Builder objectMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
+            return this;
+        }
+
+        public Builder header(String key, String value) {
+            headers.put(key, value);
+            return this;
+        }
+
+        public Builder param(String name, Optional<Object> value, ParameterType type, Optional<String> contentType) {
+            values.add(new ParameterValue(name, value, type, contentType));
+            return this;
+        }
+
+        public Builder queryParam(String name, Object value) {
+            values.add(ParameterValue.query(name, value));
+            return this;
+        }
+
+        public Builder pathParam(String name, Object value) {
+            values.add(ParameterValue.path(name, value));
+            return this;
+        }
+
+        public Builder headerParam(String name, Object value) {
+            values.add(ParameterValue.header(name, value));
+            return this;
+        }
+
+        public Builder cookieParam(String name, Object value) {
+            values.add(ParameterValue.cookie(name, value));
+            return this;
+        }
+
+        public ResponseDescriptorBuilder statusCode(String statusCode) {
+            return new ResponseDescriptorBuilder(this, statusCode);
+        }
+        
+        public HttpResponse call() {
+            return Http.call(method, basePath, pathTemplate, objectMapper, headers, values, responseDescriptors);
+        }
+
+    }
+
+    public static final class ResponseDescriptorBuilder {
+
+        private final Builder b;
+        private String statusCode;
+        private String contentType;
+
+        ResponseDescriptorBuilder(Builder b, String statusCode) {
+            this.b = b;
+            this.statusCode = statusCode;
+        }
+        
+        public ResponseDescriptorBuilder contentType(String contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+        
+        public Builder cls(Class<?> cls) {
+            b.responseDescriptors.add(new ResponseDescriptor(statusCode, contentType, cls));
+            return b;
+        }
+    }
+
     public static HttpResponse call(//
             String method, //
             String basePath, //

@@ -60,14 +60,13 @@ public class HttpTest {
                 .body(THING_JSON) //
                 .statusCode(205) //
                 .add()) {
-            HttpResponse r = Http.call( //
-                    "GET", //
-                    server.baseUrl() + "app", //
-                    "/msi", //
-                    new ObjectMapper(), //
-                    Headers.create().put("Accept", "application/json"), //
-                    Collections.emptyList(), //
-                    Arrays.asList(new ResponseDescriptor("2XX", "application/json", Thing.class)));
+            HttpResponse r = Http.method("GET") //
+                    .basePath(server.baseUrl() + "app") //
+                    .pathTemplate("/msi") //
+                    .header("Accept", "application/json") //
+                    .statusCode("2XX") //
+                    .contentType("application/json") //
+                    .cls(Thing.class).call();
             assertEquals(205, r.statusCode());
             assertTrue(r.data().isPresent());
             Thing a = (Thing) r.data().get();
