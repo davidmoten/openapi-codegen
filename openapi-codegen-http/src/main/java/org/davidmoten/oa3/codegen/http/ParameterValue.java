@@ -32,8 +32,8 @@ public final class ParameterValue {
         return new ParameterValue(name, Optional.ofNullable(value), ParameterType.HEADER, Optional.empty());
     }
 
-    public static ParameterValue body(String name, Object value) {
-        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.BODY, Optional.empty());
+    public static ParameterValue body(Object value) {
+        return new ParameterValue("requestBody", Optional.ofNullable(value), ParameterType.BODY, Optional.empty());
     }
 
     public String name() {

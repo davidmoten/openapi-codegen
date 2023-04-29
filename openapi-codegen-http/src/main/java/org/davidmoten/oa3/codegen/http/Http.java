@@ -90,8 +90,8 @@ public final class Http {
             return this;
         }
         
-        public Builder bodyParam(String name, Object value) {
-            values.add(ParameterValue.body(name, value));
+        public Builder bodyParam(Object value) {
+            values.add(ParameterValue.body(value));
             return this;
         }
 

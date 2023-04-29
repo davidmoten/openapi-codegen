@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
@@ -52,13 +51,22 @@ public class HttpTest {
     }
 
     @Test
-    public void testReadThingFromServer() throws MalformedURLException {
+    public void testReadThingFromServer200() throws MalformedURLException {
+        readThingFromServer(200);
+    }
+    
+    @Test
+    public void testReadThingFromServer400() throws MalformedURLException {
+        readThingFromServer(400);
+    }
+
+    private void readThingFromServer(int statusCode) {
         try (Server server = Server //
                 .start() //
                 .response() //
                 .header("Content-Type", "application/json") //
                 .body(THING_JSON) //
-                .statusCode(205) //
+                .statusCode(statusCode) //
                 .add()) {
             HttpResponse r = Http //
                     .method("GET") //
@@ -66,11 +74,11 @@ public class HttpTest {
                     .pathTemplate("/msi") //
                     .header("Accept", "application/json") //
                     .queryParam("id", "abc1") //
-                    .statusCode("2XX") //
+                    .statusCode(statusCode + "") //
                     .contentType("application/json") //
                     .cls(Thing.class) //
                     .call();
-            assertEquals(205, r.statusCode());
+            assertEquals(statusCode, r.statusCode());
             assertTrue(r.data().isPresent());
             Thing a = (Thing) r.data().get();
             assertEquals("fred", a.name);
