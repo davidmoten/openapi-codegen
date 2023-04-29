@@ -108,7 +108,7 @@ public final class Http {
     static String buildUrl(String basePath, String pathTemplate, List<ParameterValue> parameters) {
         Preconditions.checkArgument(pathTemplate.startsWith("/"));
         // substitute path parameters
-        String path = stripFinalSlash(basePath) + insertParameters(pathTemplate, parameters);
+        String path = stripFinalSlash(basePath) + insertParametersIntoPath(pathTemplate, parameters);
         // build query string
         String queryString = parameters //
                 .stream() //
@@ -164,7 +164,7 @@ public final class Http {
         }
     }
 
-    private static String insertParameters(String pathTemplate, List<ParameterValue> parameters) {
+    private static String insertParametersIntoPath(String pathTemplate, List<ParameterValue> parameters) {
         String s = pathTemplate;
         for (ParameterValue p : parameters) {
             if (p.type() == ParameterType.PATH) {
@@ -175,7 +175,7 @@ public final class Http {
     }
 
     private static String insertParameter(String s, String name, Object object) {
-        return s.replace("{" + name + "}", object.toString());
+        return s.replace("{" + name + "}", urlEncode(object.toString()));
     }
 
 }
