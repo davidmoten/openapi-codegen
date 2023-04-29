@@ -175,8 +175,8 @@ public final class Http {
             Headers headers = new Headers(requestHeaders);
             if (method.equals(HttpMethod.PATCH)) {
                 // PATCH not supported by HttpURLConnection so use a workaround
-                headers.put("X-HTTP-Method-Override", "PATCH");
-                con.setRequestMethod("POST");
+                headers.put("X-HTTP-Method-Override", HttpMethod.PATCH.name());
+                con.setRequestMethod(HttpMethod.POST.name());
             } else {
                 con.setRequestMethod(method.name());
             }
