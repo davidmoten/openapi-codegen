@@ -65,9 +65,11 @@ public class HttpTest {
                     .basePath(server.baseUrl() + "app") //
                     .pathTemplate("/msi") //
                     .header("Accept", "application/json") //
+                    .queryParam("id", "abc1") //
                     .statusCode("2XX") //
                     .contentType("application/json") //
-                    .cls(Thing.class).call();
+                    .cls(Thing.class) //
+                    .call();
             assertEquals(205, r.statusCode());
             assertTrue(r.data().isPresent());
             Thing a = (Thing) r.data().get();

@@ -89,6 +89,11 @@ public final class Http {
             values.add(ParameterValue.cookie(name, value));
             return this;
         }
+        
+        public Builder bodyParam(String name, Object value) {
+            values.add(ParameterValue.body(name, value));
+            return this;
+        }
 
         public ResponseDescriptorBuilder statusCode(String statusCode) {
             return new ResponseDescriptorBuilder(this, statusCode);
