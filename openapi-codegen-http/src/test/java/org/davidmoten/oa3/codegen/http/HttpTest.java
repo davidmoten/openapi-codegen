@@ -58,13 +58,17 @@ public class HttpTest {
                 .response() //
                 .header("Content-Type", "application/json") //
                 .body(THING_JSON) //
-                .statusCode(200) //
+                .statusCode(205) //
                 .add()) {
-            // hit the url a couple of times and do your asserts
-            HttpResponse r = Http.call("GET", server.baseUrl() + "map", "/msi", new ObjectMapper(), Headers.create(),
+            HttpResponse r = Http.call( //
+                    "GET", //
+                    server.baseUrl() + "map", //
+                    "/msi", //
+                    new ObjectMapper(), //
+                    Headers.create(), //
                     Collections.emptyList(), //
-                    Arrays.asList(new ResponseDescriptor("2XX", "application/*", Thing.class)));
-            assertEquals(200, r.statusCode());
+                    Arrays.asList(new ResponseDescriptor("2XX", "application/json", Thing.class)));
+            assertEquals(205, r.statusCode());
             assertTrue(r.data().isPresent());
             Thing a = (Thing) r.data().get();
             assertEquals("fred", a.name);
