@@ -38,16 +38,16 @@ public class HttpServerTest {
 
     private HttpResponse getResponse(String id) {
         return Http //
-                .method("GET") //
+                .method(HttpMethod.GET)
                 .basePath("http://localhost:" + serverPort) //
                 .path("/thing") //
-                .header("Accept", "application/json") //
+                .acceptApplicationJson() //s
                 .queryParam("id", id) //
                 .responseAs(Thing.class) //
                 .whenStatusCodeMatches("2XX") //
                 .whenContentTypeMatches("application/json") //
                 .responseAs(Problem.class) //
-                .whenStatusCodeMatches("default") //
+                .whenStatusCodeDefault() //
                 .whenContentTypeMatches("application/json") //
                 .call();
     }

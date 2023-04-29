@@ -67,7 +67,7 @@ public class HttpTest {
                 .statusCode(statusCode) //
                 .add()) {
             HttpResponse r = Http //
-                    .method("GET") //
+                    .method(HttpMethod.GET) //
                     .basePath(server.baseUrl() + "app") //
                     .path("/msi") //
                     .header("Accept", "application/json") //

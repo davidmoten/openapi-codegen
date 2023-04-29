@@ -27,13 +27,13 @@ import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Http {
 
-    public static Builder method(String method) {
+    public static Builder method(HttpMethod method) {
         return new Builder(method);
     }
 
     public static final class Builder {
 
-        private final String method;
+        private final HttpMethod method;
         private String basePath;
         private String path;
         private ObjectMapper objectMapper = new ObjectMapper();
@@ -41,7 +41,7 @@ public final class Http {
         private final List<ParameterValue> values = new ArrayList<>();
         private final List<ResponseDescriptor> responseDescriptors = new ArrayList<>();
 
-        Builder(String method) {
+        Builder(HttpMethod method) {
             this.method = method;
         }
 
@@ -58,6 +58,10 @@ public final class Http {
         public Builder objectMapper(ObjectMapper objectMapper) {
             this.objectMapper = objectMapper;
             return this;
+        }
+
+        public Builder acceptApplicationJson() {
+            return header("Accept", "application/json");
         }
 
         public Builder header(String key, String value) {
@@ -121,6 +125,11 @@ public final class Http {
             return this;
         }
 
+        public ResponseDescriptorBuilder whenStatusCodeDefault() {
+            this.statusCode = "default";
+            return this;
+        }
+
         public Builder whenContentTypeMatches(String contentType) {
             b.responseDescriptors.add(new ResponseDescriptor(statusCode, contentType, cls));
             return b;
@@ -129,7 +138,7 @@ public final class Http {
     }
 
     public static HttpResponse call(//
-            String method, //
+            HttpMethod method, //
             String basePath, //
             String pathTemplate, //
             ObjectMapper mapper, //
@@ -150,7 +159,7 @@ public final class Http {
     }
 
     private static HttpResponse call(//
-            String method, //
+            HttpMethod method, //
             String basePath, //
             String pathTemplate, //
             ObjectMapper mapper, //
@@ -169,7 +178,7 @@ public final class Http {
                 headers.put("X-HTTP-Method-Override", "PATCH");
                 con.setRequestMethod("POST");
             } else {
-                con.setRequestMethod(method);
+                con.setRequestMethod(method.name());
             }
 
             headers.forEach((key, list) -> {
