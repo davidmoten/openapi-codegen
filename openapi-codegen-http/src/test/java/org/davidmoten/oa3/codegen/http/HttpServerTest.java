@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 
 @SpringBootTest(classes = { Application.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
@@ -17,22 +18,38 @@ public class HttpServerTest {
     int serverPort;
 
     @Test
-    void testGet() {
-        HttpResponse r = Http //
-                .method("GET") //
-                .basePath("http://localhost:" + serverPort) //
-                .path("/thing") //
-                .header("Accept", "application/json") //
-                .queryParam("id", "abc1") //
-                .responseAs(Thing.class) //
-                .whenStatusCodeMatches("200") //
-                .whenContentTypeMatches("application/json") //
-                .call();
+    void testGetThing() {
+        HttpResponse r = getResponse("a");
         assertEquals(200, r.statusCode());
         assertTrue(r.data().isPresent());
         Thing a = (Thing) r.data().get();
         assertEquals("janice", a.name);
         assertEquals(34, a.age);
+    }
+
+    @Test
+    void testGetProblem() {
+        HttpResponse r = getResponse("b");
+        assertEquals(HttpStatus.BAD_REQUEST.value(), r.statusCode());
+        assertTrue(r.data().isPresent());
+        Problem a = (Problem) r.data().get();
+        assertEquals(HttpStatus.BAD_REQUEST.value(), a.statusCode);
+    }
+
+    private HttpResponse getResponse(String id) {
+        return Http //
+                .method("GET") //
+                .basePath("http://localhost:" + serverPort) //
+                .path("/thing") //
+                .header("Accept", "application/json") //
+                .queryParam("id", id) //
+                .responseAs(Thing.class) //
+                .whenStatusCodeMatches("200") //
+                .whenContentTypeMatches("application/json") //
+                .responseAs(Problem.class) //
+                .whenStatusCodeMatches("default") //
+                .whenContentTypeMatches("application/json") //
+                .call();
     }
 
 }
