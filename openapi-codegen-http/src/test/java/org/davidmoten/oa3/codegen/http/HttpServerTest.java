@@ -44,7 +44,7 @@ public class HttpServerTest {
                 .header("Accept", "application/json") //
                 .queryParam("id", id) //
                 .responseAs(Thing.class) //
-                .whenStatusCodeMatches("200") //
+                .whenStatusCodeMatches("2XX") //
                 .whenContentTypeMatches("application/json") //
                 .responseAs(Problem.class) //
                 .whenStatusCodeMatches("default") //
