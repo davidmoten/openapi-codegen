@@ -173,7 +173,7 @@ public final class Http {
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
             Headers headers = new Headers(requestHeaders);
-            if (method.equals("PATCH")) {
+            if (method.equals(HttpMethod.PATCH)) {
                 // PATCH not supported by HttpURLConnection so use a workaround
                 headers.put("X-HTTP-Method-Override", "PATCH");
                 con.setRequestMethod("POST");
