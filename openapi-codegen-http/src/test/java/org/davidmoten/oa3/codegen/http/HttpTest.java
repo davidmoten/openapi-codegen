@@ -62,7 +62,7 @@ public class HttpTest {
                 .add()) {
             HttpResponse r = Http.call( //
                     "GET", //
-                    server.baseUrl() + "map", //
+                    server.baseUrl() + "app", //
                     "/msi", //
                     new ObjectMapper(), //
                     Headers.create().put("Accept", "application/json"), //
