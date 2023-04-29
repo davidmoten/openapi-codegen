@@ -60,7 +60,8 @@ public class HttpTest {
                 .body(THING_JSON) //
                 .statusCode(205) //
                 .add()) {
-            HttpResponse r = Http.method("GET") //
+            HttpResponse r = Http //
+                    .method("GET") //
                     .basePath(server.baseUrl() + "app") //
                     .pathTemplate("/msi") //
                     .header("Accept", "application/json") //
