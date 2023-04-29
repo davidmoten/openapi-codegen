@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -45,36 +46,25 @@ public final class Http {
             this.method = method;
         }
 
-        public Builder basePath(String basePath) {
+        public BuilderWithBasePath basePath(String basePath) {
             this.basePath = basePath;
-            return this;
-        }
-
-        public Builder path(String path) {
-            this.path = path;
-            return this;
-        }
-
-        public Builder objectMapper(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-            return this;
+            return new BuilderWithBasePath(this);
         }
 
         public Builder header(String key, String value) {
+            if ("CONTENT-TYPE".equals(key.toUpperCase(Locale.ENGLISH))) {
+                throw new IllegalArgumentException("set content type in the builder only after setting the body");
+            }
             headers.put(key, value);
             return this;
         }
 
-        public Builder contentType(String value) {
-            return header("Content-Type", value);
-        }
-
-        public Builder contentTypeApplicationJson() {
-            return contentType("application/json");
-        }
-
         public Builder acceptApplicationJson() {
             return header("Accept", "application/json");
+        }
+
+        public Builder acceptAny() {
+            return header("Accept", "*/*");
         }
 
         public Builder param(String name, Optional<Object> value, ParameterType type, Optional<String> contentType) {
@@ -102,13 +92,18 @@ public final class Http {
             return this;
         }
 
-        public Builder bodyParam(Object value) {
+        public BuilderWithBody body(Object value) {
             values.add(ParameterValue.body(value));
-            return this;
+            return new BuilderWithBody(this);
         }
 
-        public ResponseDescriptorBuilder responseAs(Class<?> cls) {
-            return new ResponseDescriptorBuilder(this, cls);
+        public BuilderWithReponseDescriptor responseAs(Class<?> cls) {
+            return new BuilderWithReponseDescriptor(this, cls);
+        }
+
+        public Builder objectMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
+            return this;
         }
 
         public HttpResponse call() {
@@ -117,30 +112,73 @@ public final class Http {
 
     }
 
-    public static final class ResponseDescriptorBuilder {
+    public static final class BuilderWithBasePath {
+
+        private final Builder b;
+
+        BuilderWithBasePath(Builder b) {
+            this.b = b;
+        }
+
+        public Builder path(String path) {
+            b.path = path;
+            return b;
+        }
+    }
+
+    public static final class BuilderWithBody {
+
+        private final Builder b;
+
+        BuilderWithBody(Builder b) {
+            this.b = b;
+        }
+
+        public Builder contentType(String value) {
+            b.headers.put("Content-Type", value);
+            return b;
+        }
+
+        public Builder contentTypeApplicationJson() {
+            return contentType("application/json");
+        }
+
+    }
+
+    public static final class BuilderWithReponseDescriptor {
 
         private final Builder b;
         private String statusCode;
         private Class<?> cls;
 
-        ResponseDescriptorBuilder(Builder b, Class<?> cls) {
+        BuilderWithReponseDescriptor(Builder b, Class<?> cls) {
             this.b = b;
             this.cls = cls;
         }
 
-        public ResponseDescriptorBuilder whenStatusCodeMatches(String statusCode) {
+        public BuilderWithStatusCodeMatch whenStatusCodeMatches(String statusCode) {
             this.statusCode = statusCode;
-            return this;
+            return new BuilderWithStatusCodeMatch(this);
         }
 
-        public ResponseDescriptorBuilder whenStatusCodeDefault() {
+        public BuilderWithStatusCodeMatch whenStatusCodeDefault() {
             this.statusCode = "default";
-            return this;
+            return new BuilderWithStatusCodeMatch(this);
+        }
+
+    }
+
+    public static final class BuilderWithStatusCodeMatch {
+
+        private final BuilderWithReponseDescriptor brd;
+
+        public BuilderWithStatusCodeMatch(BuilderWithReponseDescriptor brd) {
+            this.brd = brd;
         }
 
         public Builder whenContentTypeMatches(String contentType) {
-            b.responseDescriptors.add(new ResponseDescriptor(statusCode, contentType, cls));
-            return b;
+            brd.b.responseDescriptors.add(new ResponseDescriptor(brd.statusCode, contentType, brd.cls));
+            return brd.b;
         }
 
     }

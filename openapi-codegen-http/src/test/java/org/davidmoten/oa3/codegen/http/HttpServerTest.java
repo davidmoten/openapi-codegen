@@ -67,8 +67,8 @@ public class HttpServerTest {
                 .basePath("http://localhost:" + serverPort) //
                 .path("/thing") //
                 .acceptApplicationJson() //
+                .body(new Thing("dave", 20)) //
                 .contentTypeApplicationJson()//
-                .bodyParam(new Thing("dave", 20)) //
                 .responseAs(Thing.class) //
                 .whenStatusCodeMatches("2XX") //
                 .whenContentTypeMatches("application/json") //
