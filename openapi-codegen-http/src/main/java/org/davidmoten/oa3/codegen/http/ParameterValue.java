@@ -15,6 +15,14 @@ public final class ParameterValue {
         this.type = type;
         this.contentType = contentType;
     }
+    
+    public static ParameterValue query(String name, Object value) {
+        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.QUERY, Optional.empty());
+    }
+    
+    public static ParameterValue path(String name, Object value) {
+        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.PATH, Optional.empty());
+    }
 
     public String name() {
         return name;

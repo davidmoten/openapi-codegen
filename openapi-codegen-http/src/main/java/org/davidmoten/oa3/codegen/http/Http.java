@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.davidmoten.guavamini.Preconditions;
+import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Http {
 
@@ -56,15 +57,9 @@ public final class Http {
             List<ParameterValue> parameters, //
             // (statusCode x contentType) -> class
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls) {
-        Preconditions.checkArgument(pathTemplate.startsWith("/"));
-        // substitute path parameters
-        String path = stripFinalSlash(basePath) + insertParameters(pathTemplate, parameters);
-        // build query string
-        String queryString = parameters.stream().filter(p -> p.type() == ParameterType.QUERY) //
-                .map(p -> urlEncode(p.name() + "=" + p.value().map(x -> valueToString(x)).orElse(""))) //
-                .collect(Collectors.joining("&"));
-        String url = path + "?" + queryString;
-        Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY).findFirst();
+        String url = buildUrl(basePath, pathTemplate, parameters);
+        Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
+                .findFirst();
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
             Headers headers = new Headers(requestHeaders);
@@ -107,6 +102,20 @@ public final class Http {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @VisibleForTesting
+    static String buildUrl(String basePath, String pathTemplate, List<ParameterValue> parameters) {
+        Preconditions.checkArgument(pathTemplate.startsWith("/"));
+        // substitute path parameters
+        String path = stripFinalSlash(basePath) + insertParameters(pathTemplate, parameters);
+        // build query string
+        String queryString = parameters //
+                .stream() //
+                .filter(p -> p.type() == ParameterType.QUERY) //
+                .map(p -> urlEncode(p.name()) + "=" + p.value().map(x -> valueToString(x)).orElse("")) //
+                .collect(Collectors.joining("&"));
+        return path + "?" + queryString;
     }
 
     private static Object readResponse(ObjectMapper mapper, Optional<Class<?>> responseType, InputStream in)
