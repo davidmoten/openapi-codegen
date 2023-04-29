@@ -3,8 +3,8 @@ package org.davidmoten.oa3.codegen.generator;
 import java.util.List;
 import java.util.Locale;
 
-import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Preconditions;

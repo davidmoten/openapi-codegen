@@ -7,7 +7,7 @@
         <artifactId>openapi-codegen-parent</artifactId>
         <version>0.1-alpha-3-SNAPSHOT</version>
     </parent>
-    <artifactId>openapi-codegen-generator</artifactId>
+    <artifactId>openapi-codegen-util</artifactId>
     <name>${project.artifactId}</name>
     <description />
     <packaging>jar</packaging>
@@ -15,67 +15,17 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-runtime</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-util</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-http</artifactId>
-            <version>${project.parent.version}</version>
+            <artifactId>guava-mini</artifactId>
+            <version>0.1.6</version>
         </dependency>
 
         <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-spring-runtime</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>word-wrap</artifactId>
-            <version>0.1.12</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.swagger.parser.v3</groupId>
-            <artifactId>swagger-parser</artifactId>
-            <version>2.1.13</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.commonmark</groupId>
-            <artifactId>commonmark</artifactId>
-            <version>0.21.0</version>
-        </dependency>
-
-       <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>junit-extras</artifactId>
@@ -123,7 +73,7 @@
                     <effort>Max</effort>
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>
-                    <excludeFilterFile>src/main/spotbugs/filter.xml</excludeFilterFile>
+                    <excludeFilterFile>${project.basedir}/src/main/spotbugs/filter.xml</excludeFilterFile>
                 </configuration>
                 <executions>
                     <execution>
@@ -148,4 +98,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

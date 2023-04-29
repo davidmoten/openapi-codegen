@@ -1,6 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 @FunctionalInterface
 interface Visitor {

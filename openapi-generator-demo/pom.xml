@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.github.davidmoten</groupId>
         <artifactId>openapi-codegen-parent</artifactId>
-        <version>0.1-alpha-2-SNAPSHOT</version>
+        <version>0.1-alpha-3-SNAPSHOT</version>
     </parent>
     <artifactId>openapi-generator-demo</artifactId>
     <name>${project.artifactId}</name>

@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
@@ -338,7 +338,7 @@ final class Names {
     RequestBody lookupRequestBody(String ref) {
         return api.getComponents().getRequestBodies().get(lastComponent(ref));
     }
-    
+
     boolean generatorIsSpring3() {
         return definition.generator().orElse("").equals("spring3");
     }

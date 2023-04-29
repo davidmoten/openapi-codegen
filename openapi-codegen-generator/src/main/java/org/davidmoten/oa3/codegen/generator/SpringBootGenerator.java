@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor.Result;
-import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.util.ImmutableList;
 import org.springframework.core.io.Resource;
 
 import io.swagger.v3.oas.models.Operation;

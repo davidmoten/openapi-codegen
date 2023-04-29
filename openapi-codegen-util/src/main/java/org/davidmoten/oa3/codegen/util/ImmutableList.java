@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator.internal;
+package org.davidmoten.oa3.codegen.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +8,8 @@ import java.util.List;
 public final class ImmutableList<T> implements Iterable<T> {
 
     private final List<T> list;
+
+    private static final ImmutableList<Object> EMPTY = of();
 
     public ImmutableList() {
         this(new ArrayList<>());
@@ -27,6 +29,11 @@ public final class ImmutableList<T> implements Iterable<T> {
     public static <T> ImmutableList<T> of(T... values) {
         List<T> list = Arrays.asList(values);
         return new ImmutableList<>(list);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ImmutableList<T> empty() {
+        return (ImmutableList<T>) EMPTY;
     }
 
     @Override

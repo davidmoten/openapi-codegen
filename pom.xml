@@ -87,6 +87,7 @@
 
 
     <modules>
+        <module>openapi-codegen-util</module>
         <module>openapi-codegen-runtime</module>
         <module>openapi-codegen-generator</module>
         <module>openapi-codegen-spring-runtime</module>
