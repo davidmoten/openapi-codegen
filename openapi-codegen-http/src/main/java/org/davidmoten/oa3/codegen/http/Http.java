@@ -35,7 +35,7 @@ public final class Http {
 
         private final String method;
         private String basePath;
-        private String pathTemplate;
+        private String path;
         private ObjectMapper objectMapper = new ObjectMapper();
         private final Headers headers = Headers.create();
         private final List<ParameterValue> values = new ArrayList<>();
@@ -50,8 +50,8 @@ public final class Http {
             return this;
         }
 
-        public Builder pathTemplate(String pathTemplate) {
-            this.pathTemplate = pathTemplate;
+        public Builder path(String path) {
+            this.path = path;
             return this;
         }
 
@@ -100,7 +100,7 @@ public final class Http {
         }
 
         public HttpResponse call() {
-            return Http.call(method, basePath, pathTemplate, objectMapper, headers, values, responseDescriptors);
+            return Http.call(method, basePath, path, objectMapper, headers, values, responseDescriptors);
         }
 
     }

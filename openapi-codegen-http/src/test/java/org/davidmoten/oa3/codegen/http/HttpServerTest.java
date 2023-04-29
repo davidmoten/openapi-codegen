@@ -21,7 +21,7 @@ public class HttpServerTest {
         HttpResponse r = Http //
                 .method("GET") //
                 .basePath("http://localhost:" + serverPort) //
-                .pathTemplate("/thing") //
+                .path("/thing") //
                 .header("Accept", "application/json") //
                 .queryParam("id", "abc1") //
                 .responseAs(Thing.class) //

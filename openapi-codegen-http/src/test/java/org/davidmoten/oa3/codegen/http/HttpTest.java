@@ -69,7 +69,7 @@ public class HttpTest {
             HttpResponse r = Http //
                     .method("GET") //
                     .basePath(server.baseUrl() + "app") //
-                    .pathTemplate("/msi") //
+                    .path("/msi") //
                     .header("Accept", "application/json") //
                     .queryParam("id", "abc1") //
                     .responseAs(Thing.class) //
