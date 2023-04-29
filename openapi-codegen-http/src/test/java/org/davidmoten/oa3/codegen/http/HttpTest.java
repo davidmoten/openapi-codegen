@@ -19,6 +19,8 @@ import com.github.davidmoten.http.test.server.Server;
 
 public class HttpTest {
 
+    private static final String THING_JSON = "{\"name\":\"fred\",\"age\":23}";
+
     @Test
     public void testBuildUrlWithQueryParameters() {
         String url = Http.buildUrl("/map", "/msi/hello", Arrays.asList(ParameterValue.query("thing", 1),
@@ -43,16 +45,21 @@ public class HttpTest {
         ObjectMapper m = new ObjectMapper();
         Thing a = new Thing("fred", 23);
         String json = m.writeValueAsString(a);
-        assertEquals("{\"name\":\"fred\",\"age\":23}", json);
+        assertEquals(THING_JSON, json);
         Thing b = m.readValue(json, Thing.class);
+        assertEquals("fred", b.name);
+        assertEquals(23, b.age);
     }
 
     @Test
     public void testReadThingFromServer() throws MalformedURLException {
         try (Server server = Server //
                 .start() //
-                .response().header("Content-Type", "application/json").body("{\"name\":\"fred\",\"age\":23}")
-                .statusCode(200).add()) {
+                .response() //
+                .header("Content-Type", "application/json") //
+                .body(THING_JSON) //
+                .statusCode(200) //
+                .add()) {
             // hit the url a couple of times and do your asserts
             HttpResponse r = Http.call("GET", server.baseUrl() + "map", "/msi", new ObjectMapper(), Headers.create(),
                     Collections.emptyList(), //
