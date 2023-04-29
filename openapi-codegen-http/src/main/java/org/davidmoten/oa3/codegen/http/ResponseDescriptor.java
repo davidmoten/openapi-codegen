@@ -27,12 +27,20 @@ public final class ResponseDescriptor {
 
     public int specificity() {
         if (statusCode.equals("default")) {
-            return 3;
-        } else if (statusCode.contains("X") || mediaType.contains("*")) {
-            return 2;
+            return Integer.MAX_VALUE;
         } else {
-            return 1;
+            return 10000 * count(statusCode, 'X') + 1000 * count(mediaType, '*') + (1000 - mediaType.length());
         }
+    }
+
+    private static int count(String s, char ch) {
+        int count = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ch) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public boolean matches(int statusCode, String mediaType) {
