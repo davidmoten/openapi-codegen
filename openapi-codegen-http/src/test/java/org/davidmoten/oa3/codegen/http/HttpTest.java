@@ -65,7 +65,7 @@ public class HttpTest {
                     server.baseUrl() + "map", //
                     "/msi", //
                     new ObjectMapper(), //
-                    Headers.create(), //
+                    Headers.create().put("Accept", "application/json"), //
                     Collections.emptyList(), //
                     Arrays.asList(new ResponseDescriptor("2XX", "application/json", Thing.class)));
             assertEquals(205, r.statusCode());
