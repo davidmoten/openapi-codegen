@@ -23,7 +23,15 @@ public final class ParameterValue {
     public static ParameterValue path(String name, Object value) {
         return new ParameterValue(name, Optional.ofNullable(value), ParameterType.PATH, Optional.empty());
     }
+    
+    public static ParameterValue cookie(String name, Object value) {
+        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.COOKIE, Optional.empty());
+    }
 
+    public static ParameterValue header(String name, Object value) {
+        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.HEADER, Optional.empty());
+    }
+    
     public String name() {
         return name;
     }
