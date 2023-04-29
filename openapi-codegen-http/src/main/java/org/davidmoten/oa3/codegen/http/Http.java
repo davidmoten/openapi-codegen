@@ -60,13 +60,21 @@ public final class Http {
             return this;
         }
 
-        public Builder acceptApplicationJson() {
-            return header("Accept", "application/json");
-        }
-
         public Builder header(String key, String value) {
             headers.put(key, value);
             return this;
+        }
+
+        public Builder contentType(String value) {
+            return header("Content-Type", value);
+        }
+
+        public Builder contentTypeApplicationJson() {
+            return contentType("application/json");
+        }
+
+        public Builder acceptApplicationJson() {
+            return header("Accept", "application/json");
         }
 
         public Builder param(String name, Optional<Object> value, ParameterType type, Optional<String> contentType) {
@@ -184,7 +192,7 @@ public final class Http {
             headers.forEach((key, list) -> {
                 con.setRequestProperty(key, list.stream().collect(Collectors.joining(",")));
             });
-
+            con.setDoInput(true);
             if (requestBody.isPresent()) {
                 con.setDoOutput(true);
                 Optional<Object> body = requestBody.get().value();
@@ -194,7 +202,6 @@ public final class Http {
                     }
                 }
             }
-            con.setDoInput(true);
             int statusCode = con.getResponseCode();
             Map<String, List<String>> responseHeaders = con.getHeaderFields();
             String responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"))

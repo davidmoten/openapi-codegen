@@ -19,7 +19,7 @@ public class HttpServerTest {
 
     @Test
     void testGetThing() {
-        HttpResponse r = getResponse("a");
+        HttpResponse r = getResponseGet("a");
         assertEquals(200, r.statusCode());
         assertTrue(r.data().isPresent());
         Thing a = (Thing) r.data().get();
@@ -29,20 +29,46 @@ public class HttpServerTest {
 
     @Test
     void testGetProblem() {
-        HttpResponse r = getResponse("b");
+        HttpResponse r = getResponseGet("b");
         assertEquals(HttpStatus.BAD_REQUEST.value(), r.statusCode());
         assertTrue(r.data().isPresent());
         Problem a = (Problem) r.data().get();
         assertEquals(HttpStatus.BAD_REQUEST.value(), a.statusCode);
     }
 
-    private HttpResponse getResponse(String id) {
+    @Test
+    void testPostWithRequestBody() {
+        HttpResponse r = getResponsePostWithRequestBody();
+        assertEquals(200, r.statusCode());
+        assertTrue(r.data().isPresent());
+        Thing a = (Thing) r.data().get();
+        assertEquals("dave", a.name);
+    }
+
+    private HttpResponse getResponseGet(String id) {
         return Http //
-                .method(HttpMethod.GET)
+                .method(HttpMethod.GET) //
                 .basePath("http://localhost:" + serverPort) //
                 .path("/thing") //
-                .acceptApplicationJson() //s
+                .acceptApplicationJson() //
                 .queryParam("id", id) //
+                .responseAs(Problem.class) //
+                .whenStatusCodeDefault() //
+                .whenContentTypeMatches("application/json") //
+                .responseAs(Thing.class) //
+                .whenStatusCodeMatches("2XX") //
+                .whenContentTypeMatches("application/json") //
+                .call();
+    }
+
+    private HttpResponse getResponsePostWithRequestBody() {
+        return Http //
+                .method(HttpMethod.POST) //
+                .basePath("http://localhost:" + serverPort) //
+                .path("/thing") //
+                .acceptApplicationJson() //
+                .contentTypeApplicationJson()//
+                .bodyParam(new Thing("dave", 20)) //
                 .responseAs(Thing.class) //
                 .whenStatusCodeMatches("2XX") //
                 .whenContentTypeMatches("application/json") //

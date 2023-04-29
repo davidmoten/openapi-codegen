@@ -2,6 +2,7 @@ package org.davidmoten.oa3.codegen.http;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,5 +19,16 @@ public class ApplicationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Problem("bad id", HttpStatus.BAD_REQUEST.value()));
         }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/thing", produces = { "application/json" })
+    public ResponseEntity<?> thingPost(@RequestBody(required = true) Thing thing) {
+        if (thing.age == 20) {
+            return ResponseEntity.ok().body(thing);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Problem("bad age", HttpStatus.BAD_REQUEST.value()));
+        }
+
     }
 }
