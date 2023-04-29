@@ -24,9 +24,9 @@ public class HttpServerTest {
                 .pathTemplate("/thing") //
                 .header("Accept", "application/json") //
                 .queryParam("id", "abc1") //
-                .statusCode("200") //
-                .contentType("application/json") //
-                .cls(Thing.class) //
+                .responseAs(Thing.class) //
+                .whenStatusCodeMatches("200") //
+                .whenContentTypeMatches("application/json") //
                 .call();
         assertEquals(200, r.statusCode());
         assertTrue(r.data().isPresent());

@@ -52,7 +52,7 @@ public class HttpTest {
     public void testReadThingFromServer200() throws MalformedURLException {
         readThingFromServer(200);
     }
-    
+
     @Test
     public void testReadThingFromServer400() throws MalformedURLException {
         readThingFromServer(400);
@@ -72,9 +72,9 @@ public class HttpTest {
                     .pathTemplate("/msi") //
                     .header("Accept", "application/json") //
                     .queryParam("id", "abc1") //
-                    .statusCode(statusCode + "") //
-                    .contentType("application/json") //
-                    .cls(Thing.class) //
+                    .responseAs(Thing.class) //
+                    .whenStatusCodeMatches(statusCode + "") //
+                    .whenContentTypeMatches("application/json") //
                     .call();
             assertEquals(statusCode, r.statusCode());
             assertTrue(r.data().isPresent());

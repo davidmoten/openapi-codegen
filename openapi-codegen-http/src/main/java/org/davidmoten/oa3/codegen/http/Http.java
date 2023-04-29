@@ -89,16 +89,16 @@ public final class Http {
             values.add(ParameterValue.cookie(name, value));
             return this;
         }
-        
+
         public Builder bodyParam(Object value) {
             values.add(ParameterValue.body(value));
             return this;
         }
 
-        public ResponseDescriptorBuilder statusCode(String statusCode) {
-            return new ResponseDescriptorBuilder(this, statusCode);
+        public ResponseDescriptorBuilder responseAs(Class<?> cls) {
+            return new ResponseDescriptorBuilder(this, cls);
         }
-        
+
         public HttpResponse call() {
             return Http.call(method, basePath, pathTemplate, objectMapper, headers, values, responseDescriptors);
         }
@@ -109,22 +109,23 @@ public final class Http {
 
         private final Builder b;
         private String statusCode;
-        private String contentType;
+        private Class<?> cls;
 
-        ResponseDescriptorBuilder(Builder b, String statusCode) {
+        ResponseDescriptorBuilder(Builder b, Class<?> cls) {
             this.b = b;
-            this.statusCode = statusCode;
+            this.cls = cls;
         }
-        
-        public ResponseDescriptorBuilder contentType(String contentType) {
-            this.contentType = contentType;
+
+        public ResponseDescriptorBuilder whenStatusCodeMatches(String statusCode) {
+            this.statusCode = statusCode;
             return this;
         }
-        
-        public Builder cls(Class<?> cls) {
+
+        public Builder whenContentTypeMatches(String contentType) {
             b.responseDescriptors.add(new ResponseDescriptor(statusCode, contentType, cls));
             return b;
         }
+
     }
 
     public static HttpResponse call(//
@@ -147,7 +148,7 @@ public final class Http {
             return matches.stream().findFirst().map(d -> d.cls());
         });
     }
-    
+
     private static HttpResponse call(//
             String method, //
             String basePath, //
