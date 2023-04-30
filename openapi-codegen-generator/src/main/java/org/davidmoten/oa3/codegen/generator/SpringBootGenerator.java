@@ -123,8 +123,9 @@ public class SpringBootGenerator {
                     if (schemaCls.get(schema) != null) {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
-                                Optional.ofNullable((Object) schema.getDefault()), org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), false),
-                                fullClassName, false, true, constraints(schema), ParamType.BODY, false,
+                                Optional.ofNullable((Object) schema.getDefault()),
+                                org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), false), fullClassName,
+                                false, true, constraints(schema), ParamType.BODY, false,
                                 Optional.ofNullable(schema.getDescription())));
                     } else {
                         throw new RuntimeException("unexpected");
@@ -160,7 +161,9 @@ public class SpringBootGenerator {
                                 } else {
                                     return defaultReturnClassFullName;
                                 }
-                            }).findFirst().orElse(defaultReturnClassFullName));
+                            }) //
+                            .findFirst() //
+                            .orElse(defaultReturnClassFullName));
                 }
                 statusCode = Optional.of(response.get().statusCode);
                 produces = new ArrayList<>(content.keySet());
