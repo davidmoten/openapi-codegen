@@ -41,7 +41,7 @@ public class Generator {
         // generate model classes for schema definitions
         writeSchemaClasses(definition, names);
 
-        CodeWriter.writeGlobalsClass(names);
+        SchemasCodeWriter.writeGlobalsClass(names);
 
     }
 
@@ -58,7 +58,7 @@ public class Generator {
             String schemaName = result.name;
             if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
                     && !definition.excludeSchemas().contains(schemaName)) {
-                CodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
+                SchemasCodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
             }
         }
     }

@@ -50,9 +50,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import jakarta.annotation.Generated;
 
-final class CodeWriter {
+final class SchemasCodeWriter {
 
-    private CodeWriter() {
+    private SchemasCodeWriter() {
         // prevent instantiation
     }
 
@@ -79,21 +79,8 @@ final class CodeWriter {
         }
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
-        CodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
+        SchemasCodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
         WriterUtil.writeContent(names, out, names.schemaNameToFullClassName(cls.category, schemaName), imports);
-//        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-//        if (DEBUG) {
-//            System.out.println("////////////////////////////////////////////////");
-//            System.out.println(content);
-//        }
-//        out.close();
-//        File file = names.schemaNameToJavaFile(cls.category, schemaName);
-//        file.getParentFile().mkdirs();
-//        try {
-//            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-//        } catch (IOException e) {
-//            throw new UncheckedIOException(e);
-//        }
     }
 
     static void writeGlobalsClass(Names names) {
@@ -122,17 +109,6 @@ final class CodeWriter {
         indent.left();
         out.format("%s}\n", indent);
         WriterUtil.writeContent(names, out, fullClassName, imports);
-//        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-////        System.out.println("////////////////////////////////////////////////");
-////        System.out.println(content);
-//        out.close();
-//        File file = names.fullClassNameToJavaFile(fullClassName);
-//        file.getParentFile().mkdirs();
-//        try {
-//            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-//        } catch (IOException e) {
-//            throw new UncheckedIOException(e);
-//        }
     }
 
     private static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
