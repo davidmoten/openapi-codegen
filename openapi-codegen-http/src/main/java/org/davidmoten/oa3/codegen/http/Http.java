@@ -192,16 +192,20 @@ public final class Http {
             List<ParameterValue> parameters, //
             // (statusCode, contentType, class)
             List<ResponseDescriptor> descriptors) {
-        return call(method, basePath, pathTemplate, mapper, requestHeaders, parameters, (statusCode, contentType) -> {
-            List<ResponseDescriptor> matches = new ArrayList<>();
-            for (ResponseDescriptor d : descriptors) {
-                if (d.matches(statusCode, contentType)) {
-                    matches.add(d);
-                }
+        return call(method, basePath, pathTemplate, mapper, requestHeaders, parameters,
+                (statusCode, contentType) -> match(descriptors, statusCode, contentType));
+    }
+
+    private static Optional<Class<?>> match(List<ResponseDescriptor> descriptors, Integer statusCode,
+            String contentType) {
+        List<ResponseDescriptor> matches = new ArrayList<>();
+        for (ResponseDescriptor d : descriptors) {
+            if (d.matches(statusCode, contentType)) {
+                matches.add(d);
             }
-            Collections.sort(matches, ResponseDescriptor.specificity());
-            return matches.stream().findFirst().map(d -> d.cls());
-        });
+        }
+        Collections.sort(matches, ResponseDescriptor.specificity());
+        return matches.stream().findFirst().map(d -> d.cls());
     }
 
     private static HttpResponse call(//
