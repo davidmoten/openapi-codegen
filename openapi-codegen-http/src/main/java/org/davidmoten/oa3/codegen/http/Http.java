@@ -199,7 +199,7 @@ public final class Http {
                     matches.add(d);
                 }
             }
-            Collections.sort(matches, (a, b) -> Integer.compare(a.specificity(), b.specificity()));
+            Collections.sort(matches, ResponseDescriptor.specificity());
             return matches.stream().findFirst().map(d -> d.cls());
         });
     }

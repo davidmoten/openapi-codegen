@@ -1,5 +1,6 @@
 package org.davidmoten.oa3.codegen.http;
 
+import java.util.Comparator;
 import java.util.regex.Pattern;
 
 public final class ResponseDescriptor {
@@ -25,13 +26,8 @@ public final class ResponseDescriptor {
         return cls;
     }
 
-    public int specificity() {
-        // the desired match is the one with the lowest specificity
-        if (statusCode.equals("default")) {
-            return Integer.MAX_VALUE;
-        } else {
-            return 10000 * count(statusCode, 'X') + 1000 * count(mediaType, '*') + (1000 - mediaType.length());
-        }
+    private static int countX(String s) {
+        return count(s, 'X');
     }
 
     private static int count(String s, char ch) {
@@ -48,5 +44,23 @@ public final class ResponseDescriptor {
         return (this.statusCode.equals("default")
                 || Pattern.matches(this.statusCode.replace("X", "\\d"), statusCode + ""))
                 && Pattern.matches(this.mediaType.replace("*", ".*"), mediaType);
+    }
+
+    public static Comparator<ResponseDescriptor> specificity() {
+        return (a, b) -> {
+            if (!a.statusCode().equals(b.statusCode())) {
+                if (a.statusCode.equals("default")) {
+                    return 1;
+                } else if (b.statusCode().equals("default")) {
+                    return -1;
+                }
+                if (countX(a.statusCode) != countX(b.statusCode)) {
+                    return Integer.compare(countX(a.statusCode), countX(b.statusCode));
+                }
+            }
+            // otherwise check mediaType length, longer is more specific (so b is compared
+            // to a rather than a to b)
+            return Integer.compare(b.mediaType.length(), a.mediaType.length());
+        };
     }
 }
