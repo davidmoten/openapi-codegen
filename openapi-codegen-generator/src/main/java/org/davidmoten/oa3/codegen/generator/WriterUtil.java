@@ -6,6 +6,9 @@ import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -13,6 +16,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
+import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 
 class WriterUtil {
 
@@ -39,12 +43,23 @@ class WriterUtil {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     public static String markdownToHtml(String description) {
         Parser parser = Parser.builder().build();
         Node document = parser.parse(description);
         HtmlRenderer renderer = HtmlRenderer.builder().build();
         return renderer.render(document);
+    }
+
+    static void writeApiJavadoc(PrintWriter out, Names names, Indent indent) {
+        String text = Stream.of( //
+                Optional.ofNullable(names.api().getInfo().getTitle()), //
+                Optional.ofNullable(names.api().getInfo().getSummary()), //
+                Optional.ofNullable(names.api().getInfo().getDescription())) //
+                .filter(Optional::isPresent) //
+                .map(Optional::get) //
+                .collect(Collectors.joining("\n\n"));
+        Javadoc.printJavadoc(out, indent, WriterUtil.markdownToHtml(text), true);
     }
 
 }

@@ -1,15 +1,13 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import static org.davidmoten.oa3.codegen.generator.WriterUtil.IMPORTS_HERE;
 import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
 import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -58,11 +56,7 @@ final class CodeWriter {
         // prevent instantiation
     }
 
-    private static final String IMPORTS_HERE = "IMPORTS_HERE";
-
     private static final String version = readVersion();
-
-    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
 
     private static String readVersion() {
         Properties p = new Properties();
@@ -86,7 +80,7 @@ final class CodeWriter {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
         CodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
-        WriterUtil.writeContent(names, out, names.schemaNameToJavaFile(cls.category, schemaName).getAbsolutePath(), imports);
+        WriterUtil.writeContent(names, out, names.schemaNameToFullClassName(cls.category, schemaName), imports);
 //        String content = out.text().replace(IMPORTS_HERE, imports.toString());
 //        if (DEBUG) {
 //            System.out.println("////////////////////////////////////////////////");

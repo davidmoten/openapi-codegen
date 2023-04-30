@@ -3,18 +3,13 @@ package org.davidmoten.oa3.codegen.generator;
 import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
 
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
-import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 
 public class ClientCodeWriter {
@@ -32,31 +27,17 @@ public class ClientCodeWriter {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(fullClassName));
         out.format("\n%s", WriterUtil.IMPORTS_HERE);
-        String text = Stream.of( //
-                Optional.ofNullable(names.api().getInfo().getTitle()), //
-                Optional.ofNullable(names.api().getInfo().getSummary()), //
-                Optional.ofNullable(names.api().getInfo().getDescription())) //
-                .filter(Optional::isPresent) //
-                .map(Optional::get) //
-                .collect(Collectors.joining("\n\n"));
-        Javadoc.printJavadoc(out, indent, WriterUtil.markdownToHtml(text), true);
+        WriterUtil.writeApiJavadoc(out, names, indent);
         out.format("\npublic class %s {\n", Names.simpleClassName(fullClassName));
         indent.right();
-        writeServiceMethods(out, imports, methods, indent, false, names);
+        writeServiceMethods(out, imports, methods, indent);
         indent.left();
         out.println("\n}\n");
     }
 
-    private static void writeServiceMethods(PrintWriter out, Imports imports, List<Method> methods,
-            Indent indent, boolean isController, Names names) {
+    private static void writeServiceMethods(PrintWriter out, Imports imports, List<Method> methods, Indent indent) {
         methods.forEach(m -> {
-            Map<String, String> parameterDescriptions = m.parameters //
-                    .stream() //
-                    .collect(Collectors.toMap(x -> x.identifier,
-                            x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
-            Javadoc.printJavadoc(out, indent, m.description.map(x -> WriterUtil.markdownToHtml(x)),
-                    Collections.emptyList(), Optional.empty(), m.primaryStatusCode.map(x -> "status code " + x),
-                    parameterDescriptions, true);
+            SpringBootCodeWriter.writeMethodJavadoc(out, indent, m);
             indent.right().right();
             String params = m.parameters //
                     .stream() //
@@ -70,9 +51,9 @@ public class ClientCodeWriter {
             } else {
                 importedReturnType = imports.add(m.returnFullClassName.get());
             }
-            out.format("\n%sdefault %s %s(%s) throws %s {\n", indent, importedReturnType, m.methodName, params,
+            out.format("\n%spublic %s %s(%s) throws %s {\n", indent, importedReturnType, m.methodName, params,
                     imports.add(ServiceException.class));
-            out.format("%sthrow notImplemented();\n", indent.right());
+            out.format("%sthrow new %s();\n", indent.right(), imports.add(UnsupportedOperationException.class));
             closeParen(out, indent);
         });
     }

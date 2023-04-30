@@ -294,7 +294,7 @@ public class Generator {
             cls.description = Optional.ofNullable(schema.getDescription());
             if (stack.isEmpty()) {
                 // should be top-level class
-                cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
+                cls.fullClassName = names.schemaNameToFullClassName(cls.category, last.name);
                 cls.name = Optional.of(last.name);
                 cls.schema = Optional.of(schema);
                 cls.classType = classType(schema);
@@ -313,7 +313,7 @@ public class Generator {
                             previous.get().classType == ClassType.ARRAY_WRAPPER));
 
                 } else {
-                    cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
+                    cls.fullClassName = names.schemaNameToFullClassName(cls.category, last.name);
                 }
                 cls.classType = ClassType.ARRAY_WRAPPER;
                 stack.push(cls);
@@ -339,7 +339,7 @@ public class Generator {
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                 } else {
                     fieldName = Optional.empty();
-                    String candidate = names.schemaNameToClassName(cls.category, last.name);
+                    String candidate = names.schemaNameToFullClassName(cls.category, last.name);
                     cls.fullClassName = candidate;
                 }
                 if (Util.isEnum(schema)) {

@@ -3,12 +3,12 @@ package org.davidmoten.oa3.codegen.generator;
 import static org.davidmoten.oa3.codegen.generator.WriterUtil.IMPORTS_HERE;
 import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
 
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Constraints;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Method;
@@ -129,14 +129,7 @@ class SpringBootCodeWriter {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
         out.format("\n%s", IMPORTS_HERE);
-        String text = Stream.of( //
-                Optional.ofNullable(names.api().getInfo().getTitle()), //
-                Optional.ofNullable(names.api().getInfo().getSummary()), //
-                Optional.ofNullable(names.api().getInfo().getDescription())) //
-                .filter(Optional::isPresent) //
-                .map(Optional::get) //
-                .collect(Collectors.joining("\n\n"));
-        Javadoc.printJavadoc(out, indent, WriterUtil.markdownToHtml(text), true);
+        WriterUtil.writeApiJavadoc(out, names, indent);
         out.format("\npublic interface %s extends %s {\n", Names.simpleClassName(names.serviceInterfaceFullClassName()),
                 imports.add(ErrorHandler.class));
         indent.right();
@@ -169,13 +162,7 @@ class SpringBootCodeWriter {
     private static void writeServiceMethods(ByteArrayPrintWriter out, Imports imports, List<Method> methods,
             Indent indent, boolean isController, Names names) {
         methods.forEach(m -> {
-            Map<String, String> parameterDescriptions = m.parameters //
-                    .stream() //
-                    .collect(Collectors.toMap(x -> x.identifier,
-                            x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
-            Javadoc.printJavadoc(out, indent, m.description.map(x -> WriterUtil.markdownToHtml(x)),
-                    Collections.emptyList(), Optional.empty(), m.primaryStatusCode.map(x -> "status code " + x),
-                    parameterDescriptions, true);
+            writeMethodJavadoc(out, indent, m);
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
@@ -265,6 +252,16 @@ class SpringBootCodeWriter {
                 closeParen(out, indent);
             }
         });
+    }
+
+    static void writeMethodJavadoc(PrintWriter out, Indent indent, Method m) {
+        Map<String, String> parameterDescriptions = m.parameters //
+                .stream() //
+                .collect(Collectors.toMap(x -> x.identifier,
+                        x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
+        Javadoc.printJavadoc(out, indent, m.description.map(x -> WriterUtil.markdownToHtml(x)),
+                Collections.emptyList(), Optional.empty(), m.primaryStatusCode.map(x -> "status code " + x),
+                parameterDescriptions, true);
     }
 
     private static Class<?> annotation(ParamType t) {

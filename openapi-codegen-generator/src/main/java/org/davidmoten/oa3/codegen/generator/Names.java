@@ -78,17 +78,13 @@ final class Names {
         return api;
     }
 
-    String schemaNameToClassName(SchemaCategory category, String schemaName) {
+    String schemaNameToFullClassName(SchemaCategory category, String schemaName) {
         return definition.packages().basePackage() + "." + category.getPackageFragment() + "."
                 + schemaNameToSimpleClassName(schemaName);
     }
 
     String schemaNameToSimpleClassName(String schemaName) {
         return upperFirst(toIdentifier(schemaName));
-    }
-
-    File schemaNameToJavaFile(SchemaCategory category, String schemaName) {
-        return fullClassNameToJavaFile(schemaNameToClassName(category, schemaName));
     }
 
     File fullClassNameToJavaFile(String fullClassName) {
@@ -118,7 +114,7 @@ final class Names {
                 throw new RuntimeException("unexpected ref: " + ref);
             }
             String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
-            fullClassName = schemaNameToClassName(category, schemaName);
+            fullClassName = schemaNameToFullClassName(category, schemaName);
         }
         return fullClassName;
     }
