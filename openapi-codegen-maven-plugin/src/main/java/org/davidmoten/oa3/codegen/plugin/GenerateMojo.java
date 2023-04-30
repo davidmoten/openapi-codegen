@@ -1,6 +1,6 @@
 package org.davidmoten.oa3.codegen.plugin;
 
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
+import static org.davidmoten.oa3.codegen.util.Util.orElse;
 
 import java.io.File;
 import java.io.IOException;

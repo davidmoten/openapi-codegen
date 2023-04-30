@@ -171,7 +171,7 @@ class SpringBootCodeWriter {
         out.format("\n%spublic %s(@%s(required = false) %s service) {\n", indent, simpleClassName,
                 imports.add(Autowired.class), imports.add(names.serviceInterfaceFullClassName()));
         out.format("%sthis.service = %s.orElse(service, new %s() {});\n", indent.right(),
-                imports.add(org.davidmoten.oa3.codegen.runtime.internal.Util.class),
+                imports.add(org.davidmoten.oa3.codegen.util.Util.class),
                 imports.add(names.serviceInterfaceFullClassName()));
         closeParen(out, indent);
         writeServiceMethods(out, imports, methods, indent, true, names);

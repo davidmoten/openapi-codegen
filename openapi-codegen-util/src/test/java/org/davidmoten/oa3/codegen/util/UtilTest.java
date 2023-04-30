@@ -1,10 +1,9 @@
-package org.davidmoten.oa3.runtime;
+package org.davidmoten.oa3.codegen.util;
 
 import static org.junit.Assert.assertEquals;
 
 import java.nio.charset.StandardCharsets;
 
-import org.davidmoten.oa3.codegen.runtime.internal.Util;
 import org.junit.Test;
 
 public class UtilTest {

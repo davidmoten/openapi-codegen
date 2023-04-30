@@ -1,5 +1,8 @@
-package org.davidmoten.oa3.codegen.runtime.internal;
+package org.davidmoten.oa3.codegen.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 
 import com.github.davidmoten.guavamini.Preconditions;
@@ -32,6 +35,16 @@ public final class Util {
             i += 2;
         }
         return cls.getSimpleName() + "[" + s + "]";
+    }
+    
+    public static byte[] read(InputStream in) throws IOException {
+        byte[] buffer = new byte[8192];
+        int n = 0;
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        while ((n = in.read(buffer)) != -1) {
+            bytes.write(buffer, 0, n);
+        }
+        return bytes.toByteArray();
     }
 
 }

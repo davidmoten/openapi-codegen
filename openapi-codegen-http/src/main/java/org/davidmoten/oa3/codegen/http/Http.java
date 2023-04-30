@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,9 +19,10 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.util.Util;
+
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
@@ -37,10 +37,10 @@ public final class Http {
         private final HttpMethod method;
         private String basePath;
         private String path;
-        private ObjectMapper objectMapper = new ObjectMapper();
         private final Headers headers = Headers.create();
         private final List<ParameterValue> values = new ArrayList<>();
         private final List<ResponseDescriptor> responseDescriptors = new ArrayList<>();
+        private Serializer serializer;
 
         Builder(HttpMethod method) {
             this.method = method;
@@ -93,21 +93,15 @@ public final class Http {
         }
 
         public BuilderWithBody body(Object value) {
-            values.add(ParameterValue.body(value));
-            return new BuilderWithBody(this);
+            return new BuilderWithBody(this, value);
         }
 
         public BuilderWithReponseDescriptor responseAs(Class<?> cls) {
             return new BuilderWithReponseDescriptor(this, cls);
         }
 
-        public Builder objectMapper(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-            return this;
-        }
-
         public HttpResponse call() {
-            return Http.call(method, basePath, path, objectMapper, headers, values, responseDescriptors);
+            return Http.call(method, basePath, path, serializer, headers, values, responseDescriptors);
         }
 
     }
@@ -120,8 +114,22 @@ public final class Http {
             this.b = b;
         }
 
-        public Builder path(String path) {
+        public BuilderWithPath path(String path) {
             b.path = path;
+            return new BuilderWithPath(b);
+        }
+    }
+
+    public static final class BuilderWithPath {
+
+        private final Builder b;
+
+        BuilderWithPath(Builder b) {
+            this.b = b;
+        }
+
+        public Builder serializer(Serializer serializer) {
+            b.serializer = serializer;
             return b;
         }
     }
@@ -129,13 +137,15 @@ public final class Http {
     public static final class BuilderWithBody {
 
         private final Builder b;
+        private final Object body;
 
-        BuilderWithBody(Builder b) {
+        BuilderWithBody(Builder b, Object body) {
             this.b = b;
+            this.body = body;
         }
 
         public Builder contentType(String value) {
-            b.headers.put("Content-Type", value);
+            b.values.add(ParameterValue.body(body, value));
             return b;
         }
 
@@ -187,12 +197,12 @@ public final class Http {
             HttpMethod method, //
             String basePath, //
             String pathTemplate, //
-            ObjectMapper mapper, //
+            Serializer serializer, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode, contentType, class)
             List<ResponseDescriptor> descriptors) {
-        return call(method, basePath, pathTemplate, mapper, requestHeaders, parameters,
+        return call(method, basePath, pathTemplate, serializer, requestHeaders, parameters,
                 (statusCode, contentType) -> match(descriptors, statusCode, contentType));
     }
 
@@ -212,7 +222,7 @@ public final class Http {
             HttpMethod method, //
             String basePath, //
             String pathTemplate, //
-            ObjectMapper mapper, //
+            Serializer serializer, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode x contentType) -> class
@@ -230,7 +240,9 @@ public final class Http {
             } else {
                 con.setRequestMethod(method.name());
             }
-
+            // add request body content type (should just be one)
+            parameters.stream().filter(p -> p.contentType().isPresent())
+                    .forEach(p -> headers.put("Content-Type", p.contentType().get()));
             headers.forEach((key, list) -> {
                 con.setRequestProperty(key, list.stream().collect(Collectors.joining(",")));
             });
@@ -240,7 +252,7 @@ public final class Http {
                 Optional<Object> body = requestBody.get().value();
                 if (body.isPresent()) {
                     try (OutputStream out = con.getOutputStream()) {
-                        out.write(mapper.writeValueAsBytes(body.get()));
+                        serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
                     }
                 }
             }
@@ -249,12 +261,12 @@ public final class Http {
             String responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"))
                     .orElse("application/octet-stream");
             Object data;
-            Optional<Class<?>> responseType = responseCls.apply(statusCode, responseContentType);
+            Optional<Class<?>> responseClass = responseCls.apply(statusCode, responseContentType);
             try (InputStream in = con.getInputStream()) {
-                data = readResponse(mapper, responseType, in);
+                data = readResponse(serializer, responseClass, responseContentType, in);
             } catch (IOException e) {
                 try (InputStream err = con.getErrorStream()) {
-                    data = readResponse(mapper, responseType, err);
+                    data = readResponse(serializer, responseClass, responseContentType, err);
                 }
             }
             return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
@@ -277,23 +289,13 @@ public final class Http {
         return path + "?" + queryString;
     }
 
-    private static Object readResponse(ObjectMapper mapper, Optional<Class<?>> responseType, InputStream in)
-            throws IOException, StreamReadException, DatabindException {
+    private static Object readResponse(Serializer serializer, Optional<Class<?>> responseType,
+            String responseContentType, InputStream in) throws IOException, StreamReadException, DatabindException {
         if (responseType.isPresent()) {
-            return mapper.readValue(in, responseType.get());
+            return serializer.deserialize(responseType.get(), responseContentType, in);
         } else {
-            return new String(read(in), StandardCharsets.UTF_8);
+            return new String(Util.read(in), StandardCharsets.UTF_8);
         }
-    }
-
-    private static byte[] read(InputStream in) throws IOException {
-        byte[] buffer = new byte[8192];
-        int n = 0;
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        while ((n = in.read(buffer)) != -1) {
-            bytes.write(buffer, 0, n);
-        }
-        return bytes.toByteArray();
     }
 
     private static String valueToString(Object value) {

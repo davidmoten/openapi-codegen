@@ -1,6 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
+import static org.davidmoten.oa3.codegen.util.Util.orElse;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

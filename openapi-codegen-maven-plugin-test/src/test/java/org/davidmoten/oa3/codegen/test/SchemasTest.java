@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
-import org.davidmoten.oa3.codegen.runtime.internal.Util;
 import org.davidmoten.oa3.codegen.test.schema.ArrayInProperty;
 import org.davidmoten.oa3.codegen.test.schema.ArrayInProperty.Counts;
 import org.davidmoten.oa3.codegen.test.schema.ArrayOfComplexType;
@@ -81,6 +80,7 @@ import org.davidmoten.oa3.codegen.test.schema.Status;
 import org.davidmoten.oa3.codegen.test.schema.Table;
 import org.davidmoten.oa3.codegen.test.schema.Table.TableItem;
 import org.davidmoten.oa3.codegen.test.schema.Vehicle;
+import org.davidmoten.oa3.codegen.util.Util;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

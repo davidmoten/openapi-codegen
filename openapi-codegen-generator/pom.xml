@@ -36,12 +36,6 @@
         
         <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-util</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
             <artifactId>openapi-codegen-http</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

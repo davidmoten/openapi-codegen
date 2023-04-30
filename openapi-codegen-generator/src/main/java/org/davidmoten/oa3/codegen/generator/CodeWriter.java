@@ -31,7 +31,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
-import org.davidmoten.oa3.codegen.runtime.internal.Util;
+import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

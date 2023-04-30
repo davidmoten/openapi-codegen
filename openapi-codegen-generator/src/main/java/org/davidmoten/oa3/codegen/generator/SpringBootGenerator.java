@@ -1,7 +1,5 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,7 +122,7 @@ public class SpringBootGenerator {
                     if (schemaCls.get(schema) != null) {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
-                                Optional.ofNullable((Object) schema.getDefault()), orElse(b.getRequired(), false),
+                                Optional.ofNullable((Object) schema.getDefault()), org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), false),
                                 fullClassName, false, true, constraints(schema), ParamType.BODY, false,
                                 Optional.ofNullable(schema.getDescription())));
                     } else {

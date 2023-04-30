@@ -10,10 +10,14 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @SpringBootTest(classes = { Application.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 public class HttpServerTest {
 
+    private static final Serializer serializer = new DefaultSerializer(new ObjectMapper());
+    
     @LocalServerPort
     int serverPort;
 
@@ -50,6 +54,7 @@ public class HttpServerTest {
                 .method(HttpMethod.GET) //
                 .basePath("http://localhost:" + serverPort) //
                 .path("/thing") //
+                .serializer(serializer) //
                 .acceptApplicationJson() //
                 .queryParam("id", id) //
                 .responseAs(Problem.class) //
@@ -66,6 +71,7 @@ public class HttpServerTest {
                 .method(HttpMethod.POST) //
                 .basePath("http://localhost:" + serverPort) //
                 .path("/thing") //
+                .serializer(serializer) //
                 .acceptApplicationJson() //
                 .body(new Thing("dave", 20)) //
                 .contentTypeApplicationJson()//

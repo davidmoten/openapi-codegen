@@ -18,6 +18,8 @@ public class HttpTest {
 
     private static final String THING_JSON = "{\"name\":\"fred\",\"age\":23}";
 
+    private static final Serializer serializer = new DefaultSerializer(new ObjectMapper());
+
     @Test
     public void testBuildUrlWithQueryParameters() {
         String url = Http.buildUrl("/map", "/msi/hello", Arrays.asList(ParameterValue.query("thing", 1),
@@ -70,6 +72,7 @@ public class HttpTest {
                     .method(HttpMethod.GET) //
                     .basePath(server.baseUrl() + "app") //
                     .path("/msi") //
+                    .serializer(serializer) //
                     .header("Accept", "application/json") //
                     .queryParam("id", "abc1") //
                     .responseAs(Thing.class) //
