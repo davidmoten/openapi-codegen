@@ -322,6 +322,10 @@ final class Names {
         return definition.packages().basePackage() + ".Application";
     }
 
+    String clientFullClassName() {
+        return definition.packages().basePackage() + ".client.Service";
+    }
+
     String jacksonConfigurationFullClassName() {
         return definition.packages().basePackage() + ".service.JacksonConfiguration";
     }
@@ -342,5 +346,4 @@ final class Names {
     boolean generatorIsSpring3() {
         return definition.generator().orElse("").equals("spring3");
     }
-
 }

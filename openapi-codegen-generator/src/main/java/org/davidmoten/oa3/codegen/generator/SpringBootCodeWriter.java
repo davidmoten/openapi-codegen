@@ -1,10 +1,8 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import static org.davidmoten.oa3.codegen.generator.WriterUtil.IMPORTS_HERE;
+import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +10,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Constraints;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Param;
@@ -49,9 +44,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 class SpringBootCodeWriter {
 
-    private static final String IMPORTS_HERE = "IMPORTS_HERE";
-    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
-
     static void writeServiceClasses(Names names, List<Method> methods) {
         writeApplicationClass(names);
         writeJacksonConfigurationClass(names);
@@ -64,7 +56,7 @@ class SpringBootCodeWriter {
         String fullClassName = names.applicationFullClassName();
         Imports imports = new Imports(fullClassName);
         writeApplicationClass(out, imports, fullClassName);
-        writeContent(names, out, fullClassName, imports);
+        WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeApplicationClass(ByteArrayPrintWriter out, Imports imports, String fullClassName) {
@@ -83,17 +75,12 @@ class SpringBootCodeWriter {
         out.println("\n}\n");
     }
 
-    private static void closeParen(ByteArrayPrintWriter out, Indent indent) {
-        indent.left();
-        out.format("%s}\n", indent);
-    }
-
     private static void writeJacksonConfigurationClass(Names names) {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         String fullClassName = names.jacksonConfigurationFullClassName();
         Imports imports = new Imports(fullClassName);
         writeJacksonConfigurationClass(out, imports, names, fullClassName);
-        writeContent(names, out, fullClassName, imports);
+        WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeJacksonConfigurationClass(ByteArrayPrintWriter out, Imports imports, Names names,
@@ -126,7 +113,7 @@ class SpringBootCodeWriter {
         String fullClassName = names.serviceControllerFullClassName();
         Imports imports = new Imports(fullClassName);
         writeServiceControllerClass(out, imports, names, methods, fullClassName);
-        writeContent(names, out, fullClassName, imports);
+        WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeServiceInterfaceClass(Names names, List<Method> methods) {
@@ -134,7 +121,7 @@ class SpringBootCodeWriter {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Imports imports = new Imports(fullClassName);
         writeServiceInterfaceClass(out, imports, names, methods);
-        writeContent(names, out, fullClassName, imports);
+        WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeServiceInterfaceClass(ByteArrayPrintWriter out, Imports imports, Names names,
@@ -149,7 +136,7 @@ class SpringBootCodeWriter {
                 .filter(Optional::isPresent) //
                 .map(Optional::get) //
                 .collect(Collectors.joining("\n\n"));
-        Javadoc.printJavadoc(out, indent, markdownToHtml(text), true);
+        Javadoc.printJavadoc(out, indent, WriterUtil.markdownToHtml(text), true);
         out.format("\npublic interface %s extends %s {\n", Names.simpleClassName(names.serviceInterfaceFullClassName()),
                 imports.add(ErrorHandler.class));
         indent.right();
@@ -186,8 +173,9 @@ class SpringBootCodeWriter {
                     .stream() //
                     .collect(Collectors.toMap(x -> x.identifier,
                             x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
-            Javadoc.printJavadoc(out, indent, m.description.map(x -> markdownToHtml(x)), Collections.emptyList(),
-                    Optional.empty(), m.primaryStatusCode.map(x -> "status code " + x), parameterDescriptions, true);
+            Javadoc.printJavadoc(out, indent, m.description.map(x -> WriterUtil.markdownToHtml(x)),
+                    Collections.emptyList(), Optional.empty(), m.primaryStatusCode.map(x -> "status code " + x),
+                    parameterDescriptions, true);
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
@@ -279,13 +267,6 @@ class SpringBootCodeWriter {
         });
     }
 
-    private static String markdownToHtml(String description) {
-        Parser parser = Parser.builder().build();
-        Node document = parser.parse(description);
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
-        return renderer.render(document);
-    }
-
     private static Class<?> annotation(ParamType t) {
         if (t == ParamType.BODY) {
             return RequestBody.class;
@@ -355,23 +336,7 @@ class SpringBootCodeWriter {
         });
     }
 
-    private static void writeContent(Names names, ByteArrayPrintWriter out, String fullClassName, Imports imports) {
-        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-        if (DEBUG) {
-            System.out.println("////////////////////////////////////////////////");
-            System.out.println(content);
-        }
-        out.close();
-        File file = names.fullClassNameToJavaFile(fullClassName);
-        file.getParentFile().mkdirs();
-        try {
-            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private static String toImportedType(Param p, Imports imports) {
+    static String toImportedType(Param p, Imports imports) {
         if (p.isArray) {
             if (p.required) {
                 return String.format("%s<%s>", imports.add(List.class), imports.add(p.fullClassName));

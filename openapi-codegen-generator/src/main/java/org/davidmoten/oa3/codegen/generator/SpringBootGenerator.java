@@ -63,6 +63,7 @@ public class SpringBootGenerator {
         });
 
         SpringBootCodeWriter.writeServiceClasses(names, methods);
+        ClientCodeWriter.writeClientClass(names, methods);
     }
 
     private void gatherMethods(String pathName, PathItem pathItem, List<Method> methods) {

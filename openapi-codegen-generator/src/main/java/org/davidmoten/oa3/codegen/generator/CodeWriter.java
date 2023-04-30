@@ -1,5 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
 import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 
 import java.io.File;
@@ -85,19 +86,20 @@ final class CodeWriter {
         ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
         Indent indent = new Indent();
         CodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
-        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-        if (DEBUG) {
-            System.out.println("////////////////////////////////////////////////");
-            System.out.println(content);
-        }
-        out.close();
-        File file = names.schemaNameToJavaFile(cls.category, schemaName);
-        file.getParentFile().mkdirs();
-        try {
-            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        WriterUtil.writeContent(names, out, names.schemaNameToJavaFile(cls.category, schemaName).getAbsolutePath(), imports);
+//        String content = out.text().replace(IMPORTS_HERE, imports.toString());
+//        if (DEBUG) {
+//            System.out.println("////////////////////////////////////////////////");
+//            System.out.println(content);
+//        }
+//        out.close();
+//        File file = names.schemaNameToJavaFile(cls.category, schemaName);
+//        file.getParentFile().mkdirs();
+//        try {
+//            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+//        } catch (IOException e) {
+//            throw new UncheckedIOException(e);
+//        }
     }
 
     static void writeGlobalsClass(Names names) {
@@ -125,17 +127,18 @@ final class CodeWriter {
         out.format("%s}\n", indent);
         indent.left();
         out.format("%s}\n", indent);
-        String content = out.text().replace(IMPORTS_HERE, imports.toString());
-//        System.out.println("////////////////////////////////////////////////");
-//        System.out.println(content);
-        out.close();
-        File file = names.fullClassNameToJavaFile(fullClassName);
-        file.getParentFile().mkdirs();
-        try {
-            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        WriterUtil.writeContent(names, out, fullClassName, imports);
+//        String content = out.text().replace(IMPORTS_HERE, imports.toString());
+////        System.out.println("////////////////////////////////////////////////");
+////        System.out.println(content);
+//        out.close();
+//        File file = names.fullClassNameToJavaFile(fullClassName);
+//        file.getParentFile().mkdirs();
+//        try {
+//            Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));
+//        } catch (IOException e) {
+//            throw new UncheckedIOException(e);
+//        }
     }
 
     private static void writeClass(PrintWriter out, Imports imports, Indent indent, Cls cls,
@@ -617,10 +620,6 @@ final class CodeWriter {
             out.print(text);
             out.format("%s}\n", indent);
         }
-    }
-
-    private static PrintWriter closeParen(PrintWriter out, Indent indent) {
-        return out.format("%s}\n", indent.left());
     }
 
     private static void assignField(PrintWriter out, Indent indent, Cls cls, Field x) {
