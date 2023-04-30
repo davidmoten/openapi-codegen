@@ -97,8 +97,13 @@
                             <generatorName>spring</generatorName>
                             <apiPackage>demo.api</apiPackage>
                             <modelPackage>demo.model</modelPackage>
+                            <invokerPackage>demo.client</invokerPackage>
                             <configOptions>
                                 <delegatePattern>true</delegatePattern>
+                                <dateLibrary>java8</dateLibrary>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <library>spring-boot</library>
+                                <withXml>false</withXml>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -111,6 +116,25 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build.helper.version}</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
