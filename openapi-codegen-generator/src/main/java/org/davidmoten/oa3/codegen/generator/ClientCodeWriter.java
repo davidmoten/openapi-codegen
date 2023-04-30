@@ -41,6 +41,7 @@ public class ClientCodeWriter {
         // add constructor
         out.format("\n%spublic %s(%s serializer, %s basePath) {\n", indent, Names.simpleClassName(fullClassName),
                 imports.add(Serializer.class), imports.add(String.class));
+        indent.right();
         out.format("%sthis.serializer = serializer;\n", indent);
         out.format("%sthis.basePath = basePath;\n", indent);
         closeParen(out, indent);
@@ -68,7 +69,8 @@ public class ClientCodeWriter {
             }
             out.format("\n%spublic %s %s(%s) throws %s {\n", indent, importedReturnType, m.methodName, params,
                     imports.add(ServiceException.class));
-            out.format("%sthrow new %s();\n", indent.right(), imports.add(UnsupportedOperationException.class));
+            indent.right();
+            out.format("%sthrow new %s();\n", indent, imports.add(UnsupportedOperationException.class));
             closeParen(out, indent);
             out.format("\n%spublic %s %sWithInfo(%s) throws %s {\n", indent, imports.add(HttpResponse.class),
                     m.methodName, params, imports.add(ServiceException.class));
