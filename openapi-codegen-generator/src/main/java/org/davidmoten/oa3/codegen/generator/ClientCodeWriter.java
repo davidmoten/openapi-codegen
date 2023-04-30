@@ -34,6 +34,14 @@ public class ClientCodeWriter {
         WriterUtil.writeApiJavadoc(out, names, indent);
         out.format("\npublic class %s {\n", Names.simpleClassName(fullClassName));
         indent.right();
+        writeClientClassFieldsAndConstructor(out, imports, fullClassName, indent);
+        writeClientClassMethods(out, imports, methods, indent);
+        indent.left();
+        out.println("\n}\n");
+    }
+
+    private static void writeClientClassFieldsAndConstructor(PrintWriter out, Imports imports, String fullClassName,
+            Indent indent) {
         // add fields
         out.format("\n%sprivate final %s serializer;\n", indent, imports.add(Serializer.class));
         out.format("%sprivate final %s basePath;\n", indent, imports.add(String.class));
@@ -45,10 +53,6 @@ public class ClientCodeWriter {
         out.format("%sthis.serializer = serializer;\n", indent);
         out.format("%sthis.basePath = basePath;\n", indent);
         closeParen(out, indent);
-
-        writeClientClassMethods(out, imports, methods, indent);
-        indent.left();
-        out.println("\n}\n");
     }
 
     private static void writeClientClassMethods(PrintWriter out, Imports imports, List<Method> methods, Indent indent) {
