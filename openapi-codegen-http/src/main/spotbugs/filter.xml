@@ -3,6 +3,7 @@
 <FindBugsFilter>
   <Bug pattern="EI_EXPOSE_REP"/>
   <Bug pattern="EI_EXPOSE_REP2"/>
+  <Bug pattern="SE_BAD_FIELD"/>
   <And>
     <Class name="org.davidmoten.oa3.codegen.runtime.Config$Builder"/>
     <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>

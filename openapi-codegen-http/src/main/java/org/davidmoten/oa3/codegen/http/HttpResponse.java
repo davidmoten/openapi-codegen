@@ -23,15 +23,16 @@ public final class HttpResponse {
     public Map<String, List<String>> headers() {
         return headers;
     }
-
+    
     public Optional<?> data() {
         return data;
     }
 
-    public Optional<?> data(String expectedStatusCode, String expectedContentType) {
+    @SuppressWarnings("unchecked")
+    public <T> T data(String expectedStatusCode, String expectedContentType) {
         if (ResponseDescriptor.matches(expectedStatusCode, statusCode, expectedContentType,
                 headers.get("Content-Type").stream().findFirst().orElse(""))) {
-            return data;
+            return (T) data.orElse(null);
         } else {
             throw new NotPrimaryResponseException(this);
         }

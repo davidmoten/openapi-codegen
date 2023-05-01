@@ -1,8 +1,7 @@
 package org.davidmoten.oa3.codegen.http;
 
+@SuppressWarnings("serial")
 public final class NotPrimaryResponseException extends RuntimeException {
-    
-    private static final long serialVersionUID = -4609453679904943321L;
     
     private final HttpResponse response;
 

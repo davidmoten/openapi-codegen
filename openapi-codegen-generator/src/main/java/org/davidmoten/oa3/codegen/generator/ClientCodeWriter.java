@@ -70,12 +70,15 @@ public class ClientCodeWriter {
             } else {
                 importedReturnType = imports.add(m.returnFullClassName.get());
             }
-            out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
-            indent.right();
-            out.format("%s// primary status code:  %s\n", indent, m.primaryStatusCode.orElse(-1));
-            out.format("%s// primary media type:   %s\n", indent, m.primaryMediaType.orElse(""));
-            out.format("%sthrow new %s();\n", indent, imports.add(UnsupportedOperationException.class));
-            closeParen(out, indent);
+            if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
+                out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
+                indent.right();
+                String paramIdentifiers = m.parameters.stream().map(p -> p.identifier)
+                        .collect(Collectors.joining(", "));
+                out.format("%sreturn %sFullResponse(%s).data(\"%s\", \"%s\");\n", indent, m.methodName,
+                        paramIdentifiers, m.primaryStatusCode.get(), m.primaryMediaType.get());
+                closeParen(out, indent);
+            }
             out.format("\n%spublic %s %sFullResponse(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
                     params);
             indent.right();

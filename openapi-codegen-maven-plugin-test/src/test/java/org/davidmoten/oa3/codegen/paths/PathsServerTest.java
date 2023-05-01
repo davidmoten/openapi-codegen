@@ -137,19 +137,25 @@ public class PathsServerTest {
     }
 
     @Test
-    public void testClientResponseMultiTypeWithAcceptHeaderJson() {
+    public void testClientFullResponseMultiTypeWithAcceptHeaderJson() {
         HttpResponse r = client.responseMultiTypeGetFullResponse("application/json", "jason");
         assertEquals(200, r.statusCode());
-        assertEquals("jason" , ((Response1) r.data().get()).thing());
+        assertEquals("jason", ((Response1) r.data().get()).thing());
+    }
+
+    @Test
+    public void testClientPrimaryResponseMultiTypeWithAcceptHeaderJson() {
+        Response1 r = client.responseMultiTypeGet("application/json", "jason");
+        assertEquals("jason", r.thing());
     }
 
     @Test
     public void testClientResponseMultiTypeWithAcceptHeaderOctetStream() {
         HttpResponse r = client.responseMultiTypeGetFullResponse("application/octet-stream", "jason");
         assertEquals(200, r.statusCode());
-        assertEquals("hello there" , new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
+        assertEquals("hello there", new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
     }
-    
+
     public static void main(String[] args) {
         start();
     }
