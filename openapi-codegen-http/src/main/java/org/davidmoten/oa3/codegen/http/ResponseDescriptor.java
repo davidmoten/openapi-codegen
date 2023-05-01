@@ -41,9 +41,13 @@ public final class ResponseDescriptor {
     }
 
     public boolean matches(int statusCode, String mediaType) {
-        return (this.statusCode.equals("default")
-                || Pattern.matches(this.statusCode.replace("X", "\\d"), statusCode + ""))
-                && Pattern.matches(this.mediaType.replace("*", ".*"), mediaType);
+        return matches(this.statusCode, statusCode, this.mediaType, mediaType);
+    }
+
+    public static boolean matches(String statusCodePattern, int statusCode, String mediaTypePattern, String mediaType) {
+        return (statusCodePattern.equals("default")
+                || Pattern.matches(statusCodePattern.replace("X", "\\d"), statusCode + ""))
+                && Pattern.matches(mediaTypePattern.replace("*", ".*"), mediaType);
     }
 
     public static Comparator<ResponseDescriptor> specificity() {

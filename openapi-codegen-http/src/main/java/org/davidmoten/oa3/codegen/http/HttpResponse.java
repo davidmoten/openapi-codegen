@@ -27,7 +27,16 @@ public final class HttpResponse {
     public Optional<?> data() {
         return data;
     }
-    
+
+    public Optional<?> data(String expectedStatusCode, String expectedContentType) {
+        if (ResponseDescriptor.matches(expectedStatusCode, statusCode, expectedContentType,
+                headers.get("Content-Type").stream().findFirst().orElse(""))) {
+            return data;
+        } else {
+            throw new NotPrimaryResponseException(this);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
@@ -40,7 +49,5 @@ public final class HttpResponse {
         b.append("]");
         return b.toString();
     }
-    
-    
 
 }
