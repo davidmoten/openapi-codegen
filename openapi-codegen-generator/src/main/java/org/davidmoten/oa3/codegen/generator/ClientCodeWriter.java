@@ -85,6 +85,21 @@ public class ClientCodeWriter {
             out.format("%s.basePath(this.basePath)\n", indent);
             out.format("%s.path(\"%s\")\n", indent, m.path);
             out.format("%s.serializer(this.serializer)\n", indent);
+            out.format("%s.acceptApplicationJson()\n", indent);
+            m.parameters.forEach(p -> {
+                if (p.type == ParamType.QUERY) {
+                    out.format("%s.queryParam(\"%s\", %s)\n", indent, p.name, p.identifier);
+                } else if (p.type == ParamType.PATH) {
+                    out.format("%s.pathParam(\"%s\", %s)\n", indent, p.name, p.identifier);
+                } else if (p.type == ParamType.BODY) {
+                    out.format("%s.body( %s)\n", indent, p.identifier);
+                    out.format("%s.contentTypeApplicationJson()\n", indent);
+                } else if (p.type == ParamType.COOKIE) {
+                    out.format("%s.cookie(\"%s\", %s)\n", indent, p.name, p.identifier);
+                } else if (p.type == ParamType.HEADER) {
+                    out.format("%s.header(\"%s\", %s)\n", indent, p.name, p.identifier);
+                }
+            });
             out.format("%s.call();\n", indent);
             indent.left().left();
             closeParen(out, indent);

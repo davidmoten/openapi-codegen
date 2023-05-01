@@ -72,8 +72,18 @@ public final class Http {
             return this;
         }
 
+        public Builder queryParam(String name, Optional<?> value) {
+            values.add(ParameterValue.query(name, value));
+            return this;
+        }
+        
         public Builder queryParam(String name, Object value) {
             values.add(ParameterValue.query(name, value));
+            return this;
+        }
+        
+        public Builder pathParam(String name, Optional<?> value) {
+            values.add(ParameterValue.path(name, value));
             return this;
         }
 
@@ -249,7 +259,7 @@ public final class Http {
             con.setDoInput(true);
             if (requestBody.isPresent()) {
                 con.setDoOutput(true);
-                Optional<Object> body = requestBody.get().value();
+                Optional<?> body = requestBody.get().value();
                 if (body.isPresent()) {
                     try (OutputStream out = con.getOutputStream()) {
                         serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
@@ -284,6 +294,7 @@ public final class Http {
         String queryString = parameters //
                 .stream() //
                 .filter(p -> p.type() == ParameterType.QUERY) //
+                .filter(p -> p.value().isPresent()) //
                 .map(p -> urlEncode(p.name()) + "=" + p.value().map(x -> valueToString(x)).orElse("")) //
                 .collect(Collectors.joining("&"));
         return path + "?" + queryString;
