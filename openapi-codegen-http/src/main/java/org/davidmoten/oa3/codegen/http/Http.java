@@ -233,11 +233,13 @@ public final class Http {
             // (statusCode x contentType) -> class
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls) {
         String url = buildUrl(basePath, pathTemplate, parameters);
+        System.out.println("Http.url=" + url);
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
             Headers headers = new Headers(requestHeaders);
+            System.out.println("Http.headers=" + headers);
             if (method.equals(HttpMethod.PATCH)) {
                 // PATCH not supported by HttpURLConnection so use a workaround
                 headers.put("X-HTTP-Method-Override", HttpMethod.PATCH.name());

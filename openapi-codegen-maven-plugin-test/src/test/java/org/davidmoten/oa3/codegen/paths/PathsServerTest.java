@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.davidmoten.oa3.codegen.http.DefaultSerializer;
@@ -31,6 +32,9 @@ public class PathsServerTest {
 
     private static ConfigurableApplicationContext context;
     private static ObjectMapper m;
+
+    private static final Service client = new Service(new DefaultSerializer(Globals.config().mapper()),
+            "http://localhost:8080");
 
     @BeforeAll
     public static void start() {
@@ -124,12 +128,19 @@ public class PathsServerTest {
     }
 
     @Test
-    public void testClient() throws ServiceException {
-        Service service = new Service(new DefaultSerializer(Globals.config().mapper()), "http://localhost:8080");
-        HttpResponse r = service.itemGetFullResponse();
+    public void testClientNoArgs() throws ServiceException {
+        HttpResponse r = client.itemGetFullResponse();
+        assertEquals(200, r.statusCode());
         assertTrue(r.data().isPresent());
-        System.out.println(r);
         Response2 a = (Response2) r.data().get();
+        assertEquals("abcToken", a.token());
+    }
+
+    @Test
+    public void testClientResponseMultiTypeWithAcceptHeaderOctetStream() {
+        HttpResponse r = client.responseMultiTypeGetFullResponse("application/json", "jason");
+        assertEquals(200, r.statusCode());
+        assertEquals("jason" , ((Response1) r.data().get()).thing());
     }
 
     public static void main(String[] args) {
