@@ -15,7 +15,7 @@ import pet.store.schema.PetId;
 import pet.store.service.Service;
 
 @Component
-public class ServiceImpl implements Service {
+public class PetStoreService implements Service {
 
     @Override
     public PetsGet200Response petsGet(Optional<List<String>> tags, int limit) throws ServiceException {

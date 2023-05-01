@@ -8,14 +8,17 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 public class SpringBootGeneratorTest {
-    
+
     @Test
     public void test() throws MalformedURLException {
-        String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml").toURI().toURL().toExternalForm();
+        String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml").toURI().toURL()
+                .toExternalForm();
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
                 Collections.emptySet(), Collections.emptySet(), false, true, Optional.empty());
-        new SpringBootGenerator(d).generate();
+        ClientServerGenerator generator = new ClientServerGenerator(d);
+        generator.generateServer();
+        generator.generateClient();
     }
 
 }

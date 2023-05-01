@@ -29,13 +29,13 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 
-public class SpringBootGenerator {
+public class ClientServerGenerator {
 
     private final Names names;
     private final Map<String, Cls> refCls;
     private final Map<Schema<?>, Cls> schemaCls;
 
-    public SpringBootGenerator(Definition definition) {
+    public ClientServerGenerator(Definition definition) {
         this.names = new Names(definition);
         // make a ref map
         Map<String, Cls> refCls = new HashMap<String, Cls>();
@@ -55,18 +55,26 @@ public class SpringBootGenerator {
         this.schemaCls = schemaCls;
     }
 
-    public void generate() {
+    public void generateServer() {
+        List<Method> methods = collectMethods();
+        SpringBootServerCodeWriter.writeServiceClasses(names, methods);
+    }
+    
+    public void generateClient() {
+        List<Method> methods = collectMethods();
+        ClientCodeWriter.writeClientClass(names, methods);
+    }
+
+    private List<Method> collectMethods() {
         // want a method per path, operation combo
         List<Method> methods = new ArrayList<>();
         // TODO handle path $ref
         names.api().getPaths().forEach((pathName, pathItem) -> {
             gatherMethods(pathName, pathItem, methods);
         });
-
-        SpringBootCodeWriter.writeServiceClasses(names, methods);
-        ClientCodeWriter.writeClientClass(names, methods);
+        return methods;
     }
-
+    
     private void gatherMethods(String pathName, PathItem pathItem, List<Method> methods) {
         // TODO pathItem.get$ref();
         pathItem.readOperationsMap() //

@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.generator.SpringBootGenerator.Method;
+import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
@@ -56,11 +56,11 @@ public class ClientCodeWriter {
 
     private static void writeClientClassMethods(PrintWriter out, Imports imports, List<Method> methods, Indent indent) {
         methods.forEach(m -> {
-            SpringBootCodeWriter.writeMethodJavadoc(out, indent, m);
+            SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m);
             indent.right().right();
             String params = m.parameters //
                     .stream() //
-                    .map(p -> String.format("\n%s%s %s", indent, SpringBootCodeWriter.toImportedType(p, imports),
+                    .map(p -> String.format("\n%s%s %s", indent, SpringBootServerCodeWriter.toImportedType(p, imports),
                             p.identifier)) //
                     .collect(Collectors.joining(", "));
             indent.left().left();
