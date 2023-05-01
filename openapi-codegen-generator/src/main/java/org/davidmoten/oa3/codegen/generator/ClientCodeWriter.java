@@ -72,6 +72,8 @@ public class ClientCodeWriter {
             }
             out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
             indent.right();
+            out.format("%s// primary status code:  %s\n", indent, m.primaryStatusCode.orElse(-1));
+            out.format("%s// primary media type:   %s\n", indent, m.primaryMediaType.orElse(""));
             out.format("%sthrow new %s();\n", indent, imports.add(UnsupportedOperationException.class));
             closeParen(out, indent);
             out.format("\n%spublic %s %sFullResponse(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
