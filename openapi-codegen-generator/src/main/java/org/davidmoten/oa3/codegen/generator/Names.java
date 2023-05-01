@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -337,6 +338,10 @@ final class Names {
 
     RequestBody lookupRequestBody(String ref) {
         return api.getComponents().getRequestBodies().get(lastComponent(ref));
+    }
+
+    ApiResponse lookupResponse(String ref) {
+        return api.getComponents().getResponses().get(lastComponent(ref));
     }
 
     boolean generatorIsSpring3() {

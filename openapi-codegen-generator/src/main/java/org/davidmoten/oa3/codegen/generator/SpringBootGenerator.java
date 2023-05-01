@@ -139,7 +139,8 @@ public class SpringBootGenerator {
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
         Optional<Integer> primaryStatusCode = response.map(x -> x.statusCode);
         if (response.isPresent()) {
-            Content content = response.get().response.getContent();
+
+            Content content = resolveResponseRefs(response.get().response).getContent();
             if (content != null) {
                 MediaType mediaType = content.get("application/json");
                 if (mediaType == null) {
@@ -171,9 +172,26 @@ public class SpringBootGenerator {
                 System.out.println("TODO handle response ref");
             }
         }
+
+        List<ResponseDescriptor> responseDescriptors = responseDescriptors(operation);
+
         Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces,
-                Optional.ofNullable(operation.getDescription()), primaryStatusCode);
+                Optional.ofNullable(operation.getDescription()), primaryStatusCode, responseDescriptors);
         methods.add(m);
+    }
+
+    private List<ResponseDescriptor> responseDescriptors(Operation operation) {
+        List<ResponseDescriptor> list = new ArrayList<>();
+        operation.getResponses().forEach((statusCode, response) -> {
+            response = resolveResponseRefs(response);
+            if (response.getContent() != null) {
+                response.getContent().forEach((contentType, mediaType) -> {
+                    String fullClassName = resolveRefsFullClassName(mediaType.getSchema());
+                    list.add(new ResponseDescriptor(statusCode, contentType, fullClassName));
+                });
+            }
+        });
+        return list;
     }
 
     private RequestBody resolveRefs(RequestBody b) {
@@ -225,6 +243,13 @@ public class SpringBootGenerator {
         return p;
     }
 
+    private ApiResponse resolveResponseRefs(ApiResponse r) {
+        while (r.get$ref() != null) {
+            r = names.lookupResponse(r.get$ref());
+        }
+        return r;
+    }
+
     private String resolveRefsFullClassName(Schema<?> schema) {
         return schemaCls.get(resolveRefs(schema)).fullClassName;
     }
@@ -248,10 +273,12 @@ public class SpringBootGenerator {
         final List<String> produces;
         final Optional<String> description;
         final Optional<Integer> primaryStatusCode;
+        final List<ResponseDescriptor> responseDescriptors;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
                 Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
-                List<String> produces, Optional<String> description, Optional<Integer> primaryStatusCode) {
+                List<String> produces, Optional<String> description, Optional<Integer> primaryStatusCode,
+                List<ResponseDescriptor> responseDescriptors) {
             this.methodName = methodName;
             this.statusCode = statusCode;
             this.parameters = parameters;
@@ -262,6 +289,7 @@ public class SpringBootGenerator {
             this.produces = produces;
             this.description = description;
             this.primaryStatusCode = primaryStatusCode;
+            this.responseDescriptors = responseDescriptors;
         }
 
         @Override
@@ -270,6 +298,31 @@ public class SpringBootGenerator {
                     + returnFullClassName.orElse("") + ", parameters="
                     + parameters.stream().map(Object::toString).map(x -> "\n    " + x).collect(Collectors.joining())
                     + "]";
+        }
+
+    }
+
+    static final class ResponseDescriptor {
+        private final String statusCode; // can be a pattern like `2*`
+        private final String mediaType;
+        private final String fullClassName;
+
+        ResponseDescriptor(String statusCode, String mediaType, String fullClassName) {
+            this.statusCode = statusCode;
+            this.mediaType = mediaType;
+            this.fullClassName = fullClassName;
+        }
+
+        String statusCode() {
+            return statusCode;
+        }
+
+        String mediaType() {
+            return mediaType;
+        }
+
+        String fullClassName() {
+            return fullClassName;
         }
 
     }

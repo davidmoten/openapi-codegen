@@ -28,4 +28,19 @@ public final class HttpResponse {
         return data;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("HttpResponse [statusCode=");
+        b.append(statusCode);
+        b.append(", headers=");
+        b.append(headers);
+        b.append(", data=");
+        b.append(data);
+        b.append("]");
+        return b.toString();
+    }
+    
+    
+
 }

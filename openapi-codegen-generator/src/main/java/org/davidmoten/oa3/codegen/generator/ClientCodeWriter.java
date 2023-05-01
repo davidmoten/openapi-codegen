@@ -14,7 +14,6 @@ import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.http.Serializer;
-import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 
 public class ClientCodeWriter {
 
@@ -71,13 +70,12 @@ public class ClientCodeWriter {
             } else {
                 importedReturnType = imports.add(m.returnFullClassName.get());
             }
-            out.format("\n%spublic %s %s(%s) throws %s {\n", indent, importedReturnType, m.methodName, params,
-                    imports.add(ServiceException.class));
+            out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
             indent.right();
             out.format("%sthrow new %s();\n", indent, imports.add(UnsupportedOperationException.class));
             closeParen(out, indent);
-            out.format("\n%spublic %s %sGenericReturn(%s) throws %s {\n", indent, imports.add(HttpResponse.class),
-                    m.methodName, params, imports.add(ServiceException.class));
+            out.format("\n%spublic %s %sFullResponse(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
+                    params);
             indent.right();
             out.format("%sreturn %s\n", indent, imports.add(Http.class));
             indent.right().right();
@@ -99,6 +97,11 @@ public class ClientCodeWriter {
                 } else if (p.type == ParamType.HEADER) {
                     out.format("%s.header(\"%s\", %s)\n", indent, p.name, p.identifier);
                 }
+            });
+            m.responseDescriptors.forEach(r -> {
+                out.format("%s.responseAs(%s.class)\n", indent, imports.add(r.fullClassName()));
+                out.format("%s.whenStatusCodeMatches(\"%s\")\n", indent, r.statusCode());
+                out.format("%s.whenContentTypeMatches(\"%s\")\n", indent, r.mediaType());
             });
             out.format("%s.call();\n", indent);
             indent.left().left();

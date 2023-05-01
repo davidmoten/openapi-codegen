@@ -5,9 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
+import org.davidmoten.oa3.codegen.http.DefaultSerializer;
+import org.davidmoten.oa3.codegen.http.HttpResponse;
+import org.davidmoten.oa3.codegen.paths.client.Service;
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
+import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -117,6 +121,15 @@ public class PathsServerTest {
     @Test
     public void testText() {
         assertEquals("example text", Http.readString("http://localhost:8080/text", HttpMethod.GET, "text/plain"));
+    }
+
+    @Test
+    public void testClient() throws ServiceException {
+        Service service = new Service(new DefaultSerializer(Globals.config().mapper()), "http://localhost:8080");
+        HttpResponse r = service.itemGetFullResponse();
+        assertTrue(r.data().isPresent());
+        System.out.println(r);
+        Response2 a = (Response2) r.data().get();
     }
 
     public static void main(String[] args) {
