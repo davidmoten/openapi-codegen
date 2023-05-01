@@ -27,7 +27,7 @@ public final class HttpResponse {
     public Optional<?> data() {
         return data;
     }
-
+    
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();

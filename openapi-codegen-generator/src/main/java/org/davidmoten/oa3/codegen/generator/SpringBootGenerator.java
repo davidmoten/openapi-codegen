@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor.Result;
+import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 import org.springframework.core.io.Resource;
@@ -138,13 +139,15 @@ public class SpringBootGenerator {
         }
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
         Optional<Integer> primaryStatusCode = response.map(x -> x.statusCode);
+        Mutable<String> primaryMimeType = Mutable.create(null);
         if (response.isPresent()) {
-
             Content content = resolveResponseRefs(response.get().response).getContent();
             if (content != null) {
-                MediaType mediaType = content.get("application/json");
+                primaryMimeType.value = "application/json";
+                MediaType mediaType = content.get(primaryMimeType.value);
                 if (mediaType == null) {
-                    mediaType = content.get("application/xml");
+                    primaryMimeType.value = "application/xml";
+                    mediaType = content.get(primaryMimeType.value);
                 }
                 if (mediaType != null) {
                     returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
@@ -152,19 +155,31 @@ public class SpringBootGenerator {
                     // loop through all mime-types and pick first non-default to infer return class
                     // name
                     final String defaultReturnClassFullName = Resource.class.getCanonicalName();
-                    returnFullClassName = Optional.of(content. //
+                    returnFullClassName = content. //
                             keySet() //
                             .stream() //
                             .filter(x -> !"default".equals(x)) //
                             .map(x -> {
+                                primaryMimeType.value = x;
                                 if (x.startsWith("text/")) {
                                     return String.class.getCanonicalName();
                                 } else {
                                     return defaultReturnClassFullName;
                                 }
                             }) //
-                            .findFirst() //
-                            .orElse(defaultReturnClassFullName));
+                            .findFirst();
+                    if (!returnFullClassName.isPresent()) {
+                        primaryMimeType.value = "default";
+                        MediaType a = content.get(primaryMimeType.value);
+                        if (a == null) {
+                            returnFullClassName = Optional.empty();
+                        } else {
+                            returnFullClassName = Optional.of(resolveRefsFullClassName(a.getSchema()));
+                        }
+                    }
+                    if (!returnFullClassName.isPresent()) {
+                        primaryMimeType.value = null;
+                    }
                 }
                 statusCode = Optional.of(response.get().statusCode);
                 produces = new ArrayList<>(content.keySet());
@@ -176,7 +191,9 @@ public class SpringBootGenerator {
         List<ResponseDescriptor> responseDescriptors = responseDescriptors(operation);
 
         Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces,
-                Optional.ofNullable(operation.getDescription()), primaryStatusCode, responseDescriptors);
+                Optional.ofNullable(operation.getDescription()), primaryStatusCode,
+                Optional.ofNullable(primaryMimeType.value), responseDescriptors);
+        System.out.println(m.primaryStatusCode.orElse(-1) + ", " + m.primaryMediaType.orElse(""));
         methods.add(m);
     }
 
@@ -234,6 +251,7 @@ public class SpringBootGenerator {
         StatusCodeApiResponse(int statusCode, ApiResponse response) {
             this.statusCode = statusCode;
             this.response = response;
+
         }
     }
 
@@ -278,12 +296,13 @@ public class SpringBootGenerator {
         final List<String> produces;
         final Optional<String> description;
         final Optional<Integer> primaryStatusCode;
+        final Optional<String> primaryMediaType;
         final List<ResponseDescriptor> responseDescriptors;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
                 Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
                 List<String> produces, Optional<String> description, Optional<Integer> primaryStatusCode,
-                List<ResponseDescriptor> responseDescriptors) {
+                Optional<String> primaryMediaType, List<ResponseDescriptor> responseDescriptors) {
             this.methodName = methodName;
             this.statusCode = statusCode;
             this.parameters = parameters;
@@ -294,6 +313,7 @@ public class SpringBootGenerator {
             this.produces = produces;
             this.description = description;
             this.primaryStatusCode = primaryStatusCode;
+            this.primaryMediaType = primaryMediaType;
             this.responseDescriptors = responseDescriptors;
         }
 
