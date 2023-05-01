@@ -186,7 +186,12 @@ public class SpringBootGenerator {
             response = resolveResponseRefs(response);
             if (response.getContent() != null) {
                 response.getContent().forEach((contentType, mediaType) -> {
-                    String fullClassName = resolveRefsFullClassName(mediaType.getSchema());
+                    final String fullClassName;
+                    if (mediaType.getSchema() == null) {
+                        fullClassName = byte[].class.getCanonicalName();
+                    } else {
+                        fullClassName = resolveRefsFullClassName(mediaType.getSchema());
+                    }
                     list.add(new ResponseDescriptor(statusCode, contentType, fullClassName));
                 });
             }
