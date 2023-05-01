@@ -56,7 +56,6 @@ public class ClientCodeWriter {
 
     private static void writeClientClassMethods(PrintWriter out, Imports imports, List<Method> methods, Indent indent) {
         methods.forEach(m -> {
-            SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m);
             indent.right().right();
             String params = m.parameters //
                     .stream() //
@@ -71,6 +70,7 @@ public class ClientCodeWriter {
                 importedReturnType = imports.add(m.returnFullClassName.get());
             }
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
+                SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m);
                 out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
                 indent.right();
                 final String paramIdentifiers;
@@ -88,6 +88,7 @@ public class ClientCodeWriter {
                 indent.left().left();
                 closeParen(out, indent);
             }
+            SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m);
             out.format("\n%spublic %s %sFullResponse(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
                     params);
             indent.right();

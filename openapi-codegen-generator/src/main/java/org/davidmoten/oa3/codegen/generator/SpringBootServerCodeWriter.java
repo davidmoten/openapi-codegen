@@ -259,9 +259,10 @@ class SpringBootServerCodeWriter {
                 .stream() //
                 .collect(Collectors.toMap(x -> x.identifier,
                         x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
-        Javadoc.printJavadoc(out, indent, m.description.map(x -> WriterUtil.markdownToHtml(x)),
-                Collections.emptyList(), Optional.empty(), m.primaryStatusCode.map(x -> "status code " + x),
-                parameterDescriptions, true);
+        Optional<String> html = Optional.of(m.description.map(x -> WriterUtil.markdownToHtml(x))
+                .orElse("<p>Returns response from call to path <i>%s</i>.</p>"));
+        Javadoc.printJavadoc(out, indent, html, Collections.emptyList(), Optional.empty(),
+                m.primaryStatusCode.map(x -> "status code " + x), parameterDescriptions, true);
     }
 
     private static Class<?> annotation(ParamType t) {
