@@ -1,5 +1,6 @@
 package org.davidmoten.oa3.codegen.http;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -247,11 +248,14 @@ public final class Http {
             } else {
                 con.setRequestMethod(method.name());
             }
+            parameters.stream() //
+                    .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
+                    .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
             // add request body content type (should just be one)
             parameters.stream().filter(p -> p.contentType().isPresent())
                     .forEach(p -> headers.put("Content-Type", p.contentType().get()));
             headers.forEach((key, list) -> {
-                con.setRequestProperty(key, list.stream().collect(Collectors.joining(",")));
+                con.setRequestProperty(key, list.stream().collect(Collectors.joining(", ")));
             });
             con.setDoInput(true);
             if (requestBody.isPresent()) {
@@ -269,10 +273,10 @@ public final class Http {
                     .orElse("application/octet-stream");
             Object data;
             Optional<Class<?>> responseClass = responseCls.apply(statusCode, responseContentType);
-            try (InputStream in = con.getInputStream()) {
+            try (InputStream in = log(con.getInputStream())) {
                 data = readResponse(serializer, responseClass, responseContentType, in);
             } catch (IOException e) {
-                try (InputStream err = con.getErrorStream()) {
+                try (InputStream err = log(con.getErrorStream())) {
                     data = readResponse(serializer, responseClass, responseContentType, err);
                 }
             }
@@ -280,6 +284,23 @@ public final class Http {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static InputStream log(InputStream inputStream) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        return new InputStream() {
+
+            @Override
+            public int read() throws IOException {
+                int v = inputStream.read();
+                if (v == -1) {
+                    System.out.println("Http.inputStream=\n" + new String(bytes.toByteArray(), StandardCharsets.UTF_8));
+                }
+                bytes.write(v);
+                return v;
+            }
+
+        };
     }
 
     @VisibleForTesting

@@ -11,21 +11,27 @@ public final class Headers extends HashMap<String, List<String>> {
     public Headers() {
         super();
     }
-    
+
     public Headers(Headers requestHeaders) {
         super(requestHeaders);
     }
-    
+
     public Headers put(String key, String value) {
+        if (key.equalsIgnoreCase("Content-Type") && get(key) != null) {
+            // replace
+            get(key).clear();
+        }
         List<String> list = get(key);
         if (list == null) {
             list = new ArrayList<>();
             put(key, list);
         }
-        list.add(value);
+        if (!list.contains(value)) {
+            list.add(value);
+        }
         return this;
     }
-    
+
     public static Headers create() {
         return new Headers();
     }
