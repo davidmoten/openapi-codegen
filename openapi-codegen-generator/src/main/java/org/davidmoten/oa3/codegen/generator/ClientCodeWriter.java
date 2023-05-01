@@ -73,10 +73,19 @@ public class ClientCodeWriter {
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
                 out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
                 indent.right();
-                String paramIdentifiers = m.parameters.stream().map(p -> p.identifier)
-                        .collect(Collectors.joining(", "));
-                out.format("%sreturn %sFullResponse(%s).data(\"%s\", \"%s\");\n", indent, m.methodName,
-                        paramIdentifiers, m.primaryStatusCode.get(), m.primaryMediaType.get());
+                final String paramIdentifiers;
+                if (m.parameters.size() <= 3) {
+                    paramIdentifiers = m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", "));
+                } else {
+                    indent.right().right().right();
+                    paramIdentifiers = m.parameters.stream().map(p -> String.format("\n%s%s", indent, p.identifier))
+                            .collect(Collectors.joining(","));
+                    indent.left().left().left();
+                }
+                out.format("%sreturn %sFullResponse(%s)\n", indent, m.methodName, paramIdentifiers);
+                indent.right().right();
+                out.format("%s.data(\"%s\", \"%s\");\n", indent, m.primaryStatusCode.get(), m.primaryMediaType.get());
+                indent.left().left();
                 closeParen(out, indent);
             }
             out.format("\n%spublic %s %sFullResponse(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
