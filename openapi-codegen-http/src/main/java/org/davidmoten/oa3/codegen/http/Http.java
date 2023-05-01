@@ -53,7 +53,7 @@ public final class Http {
 
         public Builder header(String key, String value) {
             if ("CONTENT-TYPE".equals(key.toUpperCase(Locale.ENGLISH))) {
-                throw new IllegalArgumentException("set content type in the builder only after setting the body");
+                throw new IllegalArgumentException("set content type in the builder just after setting the body");
             }
             headers.put(key, value);
             return this;
@@ -76,12 +76,12 @@ public final class Http {
             values.add(ParameterValue.query(name, value));
             return this;
         }
-        
+
         public Builder queryParam(String name, Object value) {
             values.add(ParameterValue.query(name, value));
             return this;
         }
-        
+
         public Builder pathParam(String name, Optional<?> value) {
             values.add(ParameterValue.path(name, value));
             return this;
@@ -92,12 +92,7 @@ public final class Http {
             return this;
         }
 
-        public Builder headerParam(String name, Object value) {
-            values.add(ParameterValue.header(name, value));
-            return this;
-        }
-
-        public Builder cookieParam(String name, Object value) {
+        public Builder cookie(String name, Object value) {
             values.add(ParameterValue.cookie(name, value));
             return this;
         }

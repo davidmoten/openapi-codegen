@@ -76,7 +76,7 @@ public class ClientCodeWriter {
             indent.right();
             out.format("%sthrow new %s();\n", indent, imports.add(UnsupportedOperationException.class));
             closeParen(out, indent);
-            out.format("\n%spublic %s %sWithInfo(%s) throws %s {\n", indent, imports.add(HttpResponse.class),
+            out.format("\n%spublic %s %sGenericReturn(%s) throws %s {\n", indent, imports.add(HttpResponse.class),
                     m.methodName, params, imports.add(ServiceException.class));
             indent.right();
             out.format("%sreturn %s\n", indent, imports.add(Http.class));
@@ -92,7 +92,7 @@ public class ClientCodeWriter {
                 } else if (p.type == ParamType.PATH) {
                     out.format("%s.pathParam(\"%s\", %s)\n", indent, p.name, p.identifier);
                 } else if (p.type == ParamType.BODY) {
-                    out.format("%s.body( %s)\n", indent, p.identifier);
+                    out.format("%s.body(%s)\n", indent, p.identifier);
                     out.format("%s.contentTypeApplicationJson()\n", indent);
                 } else if (p.type == ParamType.COOKIE) {
                     out.format("%s.cookie(\"%s\", %s)\n", indent, p.name, p.identifier);
