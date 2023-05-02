@@ -183,6 +183,7 @@ components:
           $ref: '#/components/schemas/Id'
         isbn:
           $ref: '#/components/schemas/ISBN'
+      required: [title, author, publishedYear, publisherId, authorId, isbn]
         
   responses:
 
