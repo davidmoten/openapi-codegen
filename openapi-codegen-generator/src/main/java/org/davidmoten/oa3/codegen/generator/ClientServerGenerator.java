@@ -148,7 +148,7 @@ public class ClientServerGenerator {
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
         Optional<Integer> primaryStatusCode = response.map(x -> x.statusCode);
         Mutable<String> primaryMimeType = Mutable.create(null);
-        if (response.isPresent()) {
+        if (response.isPresent() && response.get().response != null) {
             Content content = resolveResponseRefs(response.get().response).getContent();
             if (content != null) {
                 primaryMimeType.value = "application/json";
@@ -275,7 +275,11 @@ public class ClientServerGenerator {
 
     private ApiResponse resolveResponseRefs(ApiResponse r) {
         while (r.get$ref() != null) {
-            r = names.lookupResponse(r.get$ref());
+            String ref = r.get$ref();
+            r = names.lookupResponse(ref);
+            if (r == null) {
+                throw new RuntimeException("could not find response " + ref);
+            }
         }
         return r;
     }

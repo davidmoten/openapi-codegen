@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+    
+  version: '1.0-alpha'
+
+  title: Library Demo
+
+  ## Note that description fields may use Common Markdown 
+  ## (supported by OpenApi 3)
+ 
+  description: | 
+    Library
+    
+paths:
+
+  /user:
+
+    post:
+      description: Creates a new user
+      requestBody:
+        description: Defines a new user
+        required: true
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':   
+          description: created
+        default:
+          $ref: '#/components/responses/Error'
+          
+  /user/{id}:
+  
+    get:
+      description: Creates a new user
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          minLength: 1
+      responses:
+        '200':
+          description: user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:    
+          $ref: '#/components/responses/Error'
+      
+components:
+
+  schemas:
+
+    User: 
+      type: object
+      properties:
+        firstName: 
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: string
+        email: 
+          type: string
+          minLength: 3
+        mobile:
+          type: string
+          pattern: '[\+][0-9]+'
+      required: [firstName, lastName, email]
+      
+  responses:
+    Error:
+      description: an error occurred, just the HTTP status code returned
+      
+      
+  
