@@ -477,7 +477,7 @@ final class SchemasCodeWriter {
         }
         if (x.pattern.isPresent()) {
             out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.pattern.get(),
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, escapePattern(x.pattern.get()),
                     x.fieldName(cls));
         }
         if (x.min.isPresent()) {
@@ -500,6 +500,10 @@ final class SchemasCodeWriter {
                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.maxItems.get(), x.fieldName(cls));
         }
+    }
+
+    private static String escapePattern(String pattern) {
+        return pattern.replace("\\", "\\\\");
     }
 
     private static void writeEqualsMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
