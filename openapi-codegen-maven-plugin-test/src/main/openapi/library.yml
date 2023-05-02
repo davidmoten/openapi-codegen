@@ -91,6 +91,26 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  /item/{itemId}:
+  
+    parameters:
+    - in: path
+      name: itemId
+      required: true
+      schema:
+        $ref: '#/components/schemas/ItemId'
+    get:
+      description: Gets item details
+      responses:
+        '200':
+          description: item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        default:
+          $ref: '#/components/responses/Error'
+
 components:
 
   schemas:
@@ -103,7 +123,7 @@ components:
           minLength: 1
         lastName:
           type: string
-          minLength: string
+          minLength: 1
         email:
           type: string
           minLength: 3
@@ -149,6 +169,10 @@ components:
     ISBN:
       type: string
       pattern: '[0-9]{13}'
+    
+    ISSN:
+      type: string
+      pattern: '[0-9]{8}'
       
     Year:
       type: integer
@@ -170,6 +194,12 @@ components:
       type: string
       minLength: 1
       maxLength: 255
+      enum: [Chinese, Danish, Dutch, English, Esperanto, Finnish, French, German, Greek, Hungarian, Italian, Latin, Portuguese, Spanish, Swedish, Tagalog, Other]
+      
+    ItemId:
+      type: string
+      minLength: 1
+      maxLength: 255
       
     Book:
       type: object
@@ -188,11 +218,13 @@ components:
           $ref: '#/components/schemas/Id'
         isbn:
           $ref: '#/components/schemas/ISBN'
+        itemId: 
+          $ref: '#/components/schemas/ItemId'
         language:
           $ref: '#/components/schemas/Language'
-      required: [title, author, publishedYear, publisherId, authorId, isbn, language]
+      required: [title, author, publishedYear, publisherId, authorId, isbn, language, itemId]
         
-    Magazine:
+    Serial:
       type: object
       properties:
         title:
@@ -205,11 +237,36 @@ components:
         publisherId:
           $ref: '#/components/schemas/Id'
         issn:
-          $ref: '#/components/schemas/ISBN'
+          $ref: '#/components/schemas/ISSN'
+        itemId:
+          $ref: '#/components/schemas/ItemId'
         language:
           $ref: '#/components/schemas/Language'
-      required: [title, publishedDate, publisherId, authorId, issn, language]        
+      required: [title, publishedDate, publisherId, authorId, issn, itemId, language]        
   
+    Item:
+      oneOf:
+      - $ref: '#/components/schemas/Serial'
+      - $ref: '#/components/schemas/Book'
+      
+    Loan:
+      type: object
+      properties:
+        userId: 
+          $ref: '#/components/schemas/UserId'
+        itemId:
+          $ref: '#/components/schemas/ItemId'
+        startDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        dateReturned:
+          type: string
+          format: date
+      required: [userId, itemId, startDate, dueDate]        
+
   responses:
 
     Error:
