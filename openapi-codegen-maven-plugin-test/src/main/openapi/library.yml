@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
 
-  version: 1.0-alpha
+  version: 1.0
 
   title: Library Demo
 
@@ -38,8 +38,7 @@ paths:
         name: continuationToken
         required: false
         schema:
-          type: string
-          minLength: 1          
+          $ref: '#/components/schemas/ContinuationToken'       
       responses:
         '200':
           description: list of users with token to use for next page
@@ -120,6 +119,11 @@ components:
       type: string
       minLength: 1
       maxLength: 255
+      
+    ContinuationToken:
+      type: string
+      minLength: 1
+      maxLength: 1600      
             
     UserWithId:
       type: object
@@ -137,8 +141,7 @@ components:
           items:
             $ref: '#/components/schemas/User'
         continuationToken:
-          type: string
-          minLength: 1
+          $ref: '#/components/schemas/ContinuationToken'
       required: [users]
         
   responses:
