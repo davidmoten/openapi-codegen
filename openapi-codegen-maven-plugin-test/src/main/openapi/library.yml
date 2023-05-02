@@ -126,13 +126,10 @@ components:
       maxLength: 1600      
             
     UserWithId:
-      type: object
-      properties:
-        id: 
-          $ref: '#/components/schemas/UserId'        
-        details: 
-          $ref: '#/components/schemas/User'
-          
+      allOf:
+      - $ref: '#/components/schemas/User'
+      - $ref: '#/components/schemas/UserId'
+      
     UsersPage:
       type: object
       properties:
