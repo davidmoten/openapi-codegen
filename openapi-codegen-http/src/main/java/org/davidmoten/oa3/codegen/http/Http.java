@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -268,7 +267,7 @@ public final class Http {
                 }
             }
             int statusCode = con.getResponseCode();
-            Map<String, List<String>> responseHeaders = con.getHeaderFields();
+            Headers responseHeaders = Headers.create(con.getHeaderFields());
             String responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"))
                     .orElse("application/octet-stream");
             Object data;

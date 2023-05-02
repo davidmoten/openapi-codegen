@@ -154,6 +154,7 @@ public class PathsServerTest {
         HttpResponse r = client.responseMultiTypeGetFullResponse("application/octet-stream", "jason");
         assertEquals(200, r.statusCode());
         assertEquals("hello there", new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
+        assertTrue(r.headers().contains("content-type", "application/octet-stream"));
     }
 
     public static void main(String[] args) {

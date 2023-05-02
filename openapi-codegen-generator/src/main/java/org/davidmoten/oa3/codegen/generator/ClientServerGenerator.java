@@ -201,7 +201,6 @@ public class ClientServerGenerator {
         Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces,
                 Optional.ofNullable(operation.getDescription()), primaryStatusCode,
                 Optional.ofNullable(primaryMimeType.value), responseDescriptors);
-        System.out.println(m.primaryStatusCode.orElse(-1) + ", " + m.primaryMediaType.orElse(""));
         methods.add(m);
     }
 
