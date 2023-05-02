@@ -4,6 +4,7 @@ import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
@@ -72,7 +73,8 @@ public class ClientCodeWriter {
                 importedReturnType = imports.add(m.returnFullClassName.get());
             }
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
-                SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m);
+                SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m,
+                        m.primaryStatusCode.map(x -> "primary response with status code " + x));
                 out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
                 indent.right();
                 final String paramIdentifiers;
@@ -92,7 +94,8 @@ public class ClientCodeWriter {
                 indent.left().left();
                 closeParen(out, indent);
             }
-            SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m);
+            SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m,
+                    Optional.of("full response with status code, body and headers"));
             out.format("\n%spublic %s %s%s(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
                     FULL_RESPONSE_SUFFIX, params);
             indent.right();

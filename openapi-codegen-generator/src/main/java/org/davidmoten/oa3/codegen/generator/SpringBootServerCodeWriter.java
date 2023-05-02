@@ -162,7 +162,7 @@ class SpringBootServerCodeWriter {
     private static void writeServiceMethods(ByteArrayPrintWriter out, Imports imports, List<Method> methods,
             Indent indent, boolean isController, Names names) {
         methods.forEach(m -> {
-            writeMethodJavadoc(out, indent, m);
+            writeMethodJavadoc(out, indent, m, m.primaryStatusCode.map(x -> "primary response status code " + x));
             indent.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
@@ -254,7 +254,7 @@ class SpringBootServerCodeWriter {
         });
     }
 
-    static void writeMethodJavadoc(PrintWriter out, Indent indent, Method m) {
+    static void writeMethodJavadoc(PrintWriter out, Indent indent, Method m, Optional<String> returns) {
         Map<String, String> parameterDescriptions = m.parameters //
                 .stream() //
                 .collect(Collectors.toMap(x -> x.identifier,
@@ -262,7 +262,7 @@ class SpringBootServerCodeWriter {
         Optional<String> html = Optional.of(m.description.map(x -> WriterUtil.markdownToHtml(x))
                 .orElse("<p>Returns response from call to path <i>%s</i>.</p>"));
         Javadoc.printJavadoc(out, indent, html, Collections.emptyList(), Optional.empty(),
-                m.primaryStatusCode.map(x -> "status code " + x), parameterDescriptions, true);
+                returns, parameterDescriptions, true);
     }
 
     private static Class<?> annotation(ParamType t) {
