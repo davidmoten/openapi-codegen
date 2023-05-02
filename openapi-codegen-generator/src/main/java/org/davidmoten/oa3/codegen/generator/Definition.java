@@ -46,15 +46,15 @@ public final class Definition {
     public String externalRefClassName(String ref) {
         return externalRefClassNames.apply(ref);
     }
-    
+
     public Set<String> includeSchemas() {
         return includeSchemas;
     }
-    
+
     public Set<String> excludeSchemas() {
         return excludeSchemas;
     }
-    
+
     public boolean mapIntegerToBigInteger() {
         return mapIntegerToBigInteger;
     }

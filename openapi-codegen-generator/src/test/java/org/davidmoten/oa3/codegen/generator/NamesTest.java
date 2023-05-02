@@ -9,7 +9,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 public class NamesTest {
-    
+
     @Test
     public void testEnumMapResolvesPotentialCollisions() {
         List<String> list = Arrays.asList("a b", "a  b", "a   b");
@@ -18,7 +18,7 @@ public class NamesTest {
         assertEquals("A_B_1", map.get("a  b"));
         assertEquals("A_B_2", map.get("a   b"));
     }
-    
+
     @Test
     public void testEnumMapResolvesRepeated() {
         List<String> list = Arrays.asList("a", "a", "b");

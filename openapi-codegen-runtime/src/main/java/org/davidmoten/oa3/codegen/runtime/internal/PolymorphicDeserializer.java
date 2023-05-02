@@ -92,7 +92,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                 "json did not match any of the possible classes: " + classes + ", json=\n" + json);
     }
 
-    private static <T> T deserializeAllOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls) 
+    private static <T> T deserializeAllOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls)
             throws JsonMappingException, JsonProcessingException {
         ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         List<Object> list = new ArrayList<>();

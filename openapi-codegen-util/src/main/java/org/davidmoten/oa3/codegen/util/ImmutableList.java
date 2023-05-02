@@ -22,7 +22,7 @@ public final class ImmutableList<T> implements Iterable<T> {
     public ImmutableList<T> add(T value) {
         List<T> list2 = new ArrayList<>(list);
         list2.add(value);
-        return new ImmutableList<T>(list2);
+        return new ImmutableList<>(list2);
     }
 
     @SafeVarargs

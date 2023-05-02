@@ -73,7 +73,7 @@ public final class Util {
     public static boolean isMap(Schema<?> schema) {
         return schema instanceof MapSchema;
     }
-    
+
     public static Class<?> toClass(String type, String format, boolean mapIntegerToBigInteger) {
         Preconditions.checkNotNull(type);
         if ("string".equals(type)) {
@@ -116,7 +116,7 @@ public final class Util {
             throw new RuntimeException("unexpected type and format: " + type + ", " + format);
         }
     }
-    
+
     public static String toPrimitive(String canonicalClassName) {
         if (canonicalClassName.equals(Integer.class.getCanonicalName())) {
             return "int";
@@ -156,5 +156,5 @@ public final class Util {
             return c;
         }
     }
-    
+
 }

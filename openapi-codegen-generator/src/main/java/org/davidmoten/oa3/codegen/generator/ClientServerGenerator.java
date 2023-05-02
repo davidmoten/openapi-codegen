@@ -38,8 +38,8 @@ public class ClientServerGenerator {
     public ClientServerGenerator(Definition definition) {
         this.names = new Names(definition);
         // make a ref map
-        Map<String, Cls> refCls = new HashMap<String, Cls>();
-        Map<Schema<?>, Cls> schemaCls = new HashMap<Schema<?>, Cls>();
+        Map<String, Cls> refCls = new HashMap<>();
+        Map<Schema<?>, Cls> schemaCls = new HashMap<>();
         MyVisitor v = new MyVisitor(names);
         Apis.visitSchemas(names.api(), v);
         for (Result result : v.results()) {
@@ -59,7 +59,7 @@ public class ClientServerGenerator {
         List<Method> methods = collectMethods();
         SpringBootServerCodeWriter.writeServiceClasses(names, methods);
     }
-    
+
     public void generateClient() {
         List<Method> methods = collectMethods();
         ClientCodeWriter.writeClientClass(names, methods);
@@ -74,7 +74,7 @@ public class ClientServerGenerator {
         });
         return methods;
     }
-    
+
     private void gatherMethods(String pathName, PathItem pathItem, List<Method> methods) {
         // TODO pathItem.get$ref();
         pathItem.readOperationsMap() //

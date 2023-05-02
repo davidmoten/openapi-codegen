@@ -36,7 +36,7 @@ public final class Util {
         }
         return cls.getSimpleName() + "[" + s + "]";
     }
-    
+
     public static byte[] read(InputStream in) throws IOException {
         byte[] buffer = new byte[8192];
         int n = 0;

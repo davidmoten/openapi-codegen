@@ -26,10 +26,10 @@ public class JacksonBugWorkaroundTest {
 
     @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     public static final class Thing {
-        
+
         @JsonProperty("a")
         private final double ax;
-        
+
         @JsonProperty("b")
         private final double bx;
 
@@ -48,15 +48,15 @@ public class JacksonBugWorkaroundTest {
         public Thing(double a, double b) {
             this((Number) a, (Number) b);
         }
-        
+
         public double a() {
             return ax;
         }
-        
+
         public double b() {
             return bx;
         }
-       
+
     }
 
 }

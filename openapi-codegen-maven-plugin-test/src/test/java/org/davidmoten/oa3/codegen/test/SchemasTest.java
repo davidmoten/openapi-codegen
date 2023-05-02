@@ -323,7 +323,7 @@ public class SchemasTest {
         String json = "{\"label\":\"hello\",\"num\":123}";
         ObjectNoOptionalFields a = m.readValue(json, ObjectNoOptionalFields.class);
         assertEquals("hello", a.label());
-        assertEquals(123, (int) a.num());
+        assertEquals(123, a.num());
         // test constructor
         assertEquals(json, m.writeValueAsString(new ObjectNoOptionalFields("hello", 123)));
         assertEquals(1, ObjectNoOptionalFields.class.getConstructors().length);

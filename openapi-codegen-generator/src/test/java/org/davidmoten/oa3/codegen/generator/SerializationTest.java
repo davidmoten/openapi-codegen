@@ -161,7 +161,7 @@ public class SerializationTest {
 
         /**
          * Instance be of type Circle or Rectangle
-         * 
+         *
          * @return instance
          */
         public Object value() {

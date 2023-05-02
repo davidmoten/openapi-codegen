@@ -68,7 +68,7 @@ public class PathsTest {
     public void testResponseRef() throws ServiceException {
         Response2 response = service.responseRefGet();
     }
-    
+
     @Test
     public void testResponseRef2() throws ServiceException {
         Response4 response = service.responseRef2Get();
@@ -115,7 +115,7 @@ public class PathsTest {
     public void testGetOctetStream() throws ServiceException {
         Resource response = service.bytesGet();
     }
-    
+
     @Test
     public void testGetText() throws ServiceException {
         String response = service.textGet();

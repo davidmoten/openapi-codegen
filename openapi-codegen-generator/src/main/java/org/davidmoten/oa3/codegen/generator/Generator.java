@@ -87,7 +87,7 @@ public class Generator {
         Discriminator discriminator = null;
         String enumFullType;
         private int num = 0;
-        private Set<String> fieldNames = new HashSet<String>();
+        private Set<String> fieldNames = new HashSet<>();
         boolean topLevel = false;
         boolean hasProperties = false;
         PolymorphicType polymorphicType;

@@ -26,7 +26,7 @@ public final class HttpResponse {
     public Optional<?> data() {
         return data;
     }
-    
+
     public HttpResponse assertStatusCodeMatches(String expectedStatusCode) {
         if (!ResponseDescriptor.matchesStatusCode(expectedStatusCode, statusCode)) {
             throw new NotPrimaryResponseException(this);

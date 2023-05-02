@@ -17,10 +17,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.io.FileUtils;
+import org.davidmoten.oa3.codegen.generator.ClientServerGenerator;
 import org.davidmoten.oa3.codegen.generator.Definition;
 import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Packages;
-import org.davidmoten.oa3.codegen.generator.ClientServerGenerator;
 
 import com.github.davidmoten.guavamini.Sets;
 
@@ -59,7 +59,7 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "generateService", defaultValue = "true")
     private boolean generateService;
-    
+
     @Parameter(name = "generateClient", defaultValue = "true")
     private boolean generateClient;
 

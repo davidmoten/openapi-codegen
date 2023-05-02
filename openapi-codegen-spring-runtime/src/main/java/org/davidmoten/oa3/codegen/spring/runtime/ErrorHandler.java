@@ -19,13 +19,13 @@ public interface ErrorHandler {
     default <T> T response(ResponseEntity<?> response) throws ServiceException {
         throw new ServiceException(response);
     }
-    
+
     default Object errorResponseBody(int statusCode, Throwable e) {
         return new DefaultError(statusCode, e);
     }
-    
+
     default ServiceException notImplemented() {
         return new ServiceException(501, "Not implemented");
     }
-    
+
 }

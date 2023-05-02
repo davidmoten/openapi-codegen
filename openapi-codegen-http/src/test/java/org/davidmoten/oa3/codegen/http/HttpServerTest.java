@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class HttpServerTest {
 
     private static final Serializer serializer = new DefaultSerializer(new ObjectMapper());
-    
+
     @LocalServerPort
     int serverPort;
 
