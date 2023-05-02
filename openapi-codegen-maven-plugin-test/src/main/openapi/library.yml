@@ -212,8 +212,6 @@ components:
           $ref: '#/components/schemas/Abstract'
         publishedYear:
           $ref: '#/components/schemas/Year'
-        publisherId:
-          $ref: '#/components/schemas/Id'
         authorId:
           $ref: '#/components/schemas/Id'
         isbn:
@@ -222,8 +220,23 @@ components:
           $ref: '#/components/schemas/ItemId'
         language:
           $ref: '#/components/schemas/Language'
-      required: [title, author, publishedYear, publisherId, authorId, isbn, language, itemId]
-        
+      required: [title, author, publishedYear, authorId, isbn, language, itemId]
+       
+    Audiobook:
+      type: object
+      properties: 
+        book: 
+          $ref: '#/components/schemas/Book'
+        voices: 
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonName'
+        lengthMinutes:
+          type: number
+          format: double
+          minimum: 0
+      required: [book, voices]
+      
     Serial:
       type: object
       properties:
@@ -248,6 +261,7 @@ components:
       oneOf:
       - $ref: '#/components/schemas/Serial'
       - $ref: '#/components/schemas/Book'
+      - $ref: '#/components/schemas/Audiobook'
       
     Loan:
       type: object
