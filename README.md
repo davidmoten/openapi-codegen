@@ -19,6 +19,7 @@ Features
 * Maven plugin
 * Simple server-side and client-side implementation for primary and general response handling
 * Partial use of schema generated classes possible with generated server and client of *openapi-generator-plugin*
+* Constructor validation of schema objects means fail-fast which helps with diagnosis
 
 **Status**: in development, alpha release on Maven Central
 
