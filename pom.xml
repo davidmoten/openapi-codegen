@@ -35,6 +35,7 @@
         <compiler.plugin.version>3.11.0</compiler.plugin.version>
         <slf4j.version>1.7.36</slf4j.version>
 
+        <guava.mini.version>0.1.6</guava.mini.version>
         <jackson.version>2.15.0</jackson.version>
         <spring.boot.version>2.7.11</spring.boot.version>
         <junit.version>5.9.3</junit.version>
