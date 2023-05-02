@@ -231,6 +231,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PersonName'
+          minItems: 1
         lengthMinutes:
           type: number
           format: double
