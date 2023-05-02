@@ -125,21 +125,6 @@ public class ClientCodeWriter {
             out.format("%s.call();\n", indent);
             indent.left().left();
             closeParen(out, indent);
-//            return Http //
-//                    .method(HttpMethod.POST) //
-//                    .basePath("http://localhost:" + serverPort) //
-//                    .path("/thing") //
-//                    .serializer(serializer) //
-//                    .acceptApplicationJson() //
-//                    .body(new Thing("dave", 20)) //
-//                    .contentTypeApplicationJson()//
-//                    .responseAs(Thing.class) //
-//                    .whenStatusCodeMatches("2XX") //
-//                    .whenContentTypeMatches("application/json") //
-//                    .responseAs(Problem.class) //
-//                    .whenStatusCodeDefault() //
-//                    .whenContentTypeMatches("application/json") //
-//                    .call();
         });
     }
 
