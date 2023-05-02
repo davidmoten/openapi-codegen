@@ -166,6 +166,11 @@ components:
       minLength: 1
       maxLength: 16000
       
+    Language:
+      type: string
+      minLength: 1
+      maxLength: 255
+      
     Book:
       type: object
       properties:
@@ -183,8 +188,28 @@ components:
           $ref: '#/components/schemas/Id'
         isbn:
           $ref: '#/components/schemas/ISBN'
-      required: [title, author, publishedYear, publisherId, authorId, isbn]
+        language:
+          $ref: '#/components/schemas/Language'
+      required: [title, author, publishedYear, publisherId, authorId, isbn, language]
         
+    Magazine:
+      type: object
+      properties:
+        title:
+          type: string
+        abstract:
+          $ref: '#/components/schemas/Abstract'
+        publishedDate:
+          type: string
+          format: date
+        publisherId:
+          $ref: '#/components/schemas/Id'
+        issn:
+          $ref: '#/components/schemas/ISBN'
+        language:
+          $ref: '#/components/schemas/Language'
+      required: [title, publishedDate, publisherId, authorId, issn, language]        
+  
   responses:
 
     Error:
