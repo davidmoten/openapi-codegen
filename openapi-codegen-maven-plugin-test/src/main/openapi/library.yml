@@ -24,6 +24,24 @@ paths:
           description: created
         default:
           $ref: '#/components/responses/Error'
+          
+    get:
+      description: List users
+      parameters:
+      - in: query
+        name: continuationToken
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          
+      responses:
+        '200':
+          description: list of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersPage'
 
   /user/{id}:
 
@@ -43,7 +61,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserWithId'
         default:
           $ref: '#/components/responses/Error'
 
@@ -92,8 +110,34 @@ components:
       - firstName
       - lastName
       - email
-
+      
+    UserId:
+      type: string
+      minLength: 1
+      maxLength: 255
+            
+    UserWithId:
+      type: object
+      properties:
+        id: 
+          $ref: '#/components/schemas/UserId'        
+        details: 
+          $ref: '#/components/schemas/User'
+          
+    UsersPage:
+      type: object
+      properties:
+        users: 
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        continuationToken:
+          type: string
+          minLength: 1
+      required: [users]
+        
   responses:
 
     Error:
       description: an error occurred, just the HTTP status code returned
+      
