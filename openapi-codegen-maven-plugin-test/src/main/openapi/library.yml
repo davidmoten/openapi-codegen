@@ -1,18 +1,13 @@
 openapi: 3.0.0
 info:
-    
-  version: '1.0-alpha'
+
+  version: 1.0-alpha
 
   title: Library Demo
 
-  ## Note that description fields may use Common Markdown 
-  ## (supported by OpenApi 3)
- 
-  description: | 
-    Library
-    
-paths:
+  description: Library
 
+paths:
   /user:
 
     post:
@@ -21,26 +16,27 @@ paths:
         description: Defines a new user
         required: true
         content:
-          application/json: 
+          application/json:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        '201':   
+        '201':
           description: created
         default:
           $ref: '#/components/responses/Error'
-          
+
   /user/{id}:
-  
+
+    parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
     get:
-      description: Creates a new user
-      parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-          minLength: 1
+      description: Gets user details
       responses:
         '200':
           description: user details
@@ -48,33 +44,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        default:    
+        default:
           $ref: '#/components/responses/Error'
-      
+
+    put:
+      description: Updates a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '204':
+          description: updated
+        default:
+          $ref: '#/components/responses/Error'
+
+    delete:
+      description: Deletes a user (logically)
+      responses:
+        '204':
+          description: deleted
+        default:
+          $ref: '#/components/responses/Error'
+
 components:
 
   schemas:
 
-    User: 
+    User:
       type: object
       properties:
-        firstName: 
+        firstName:
           type: string
           minLength: 1
         lastName:
           type: string
           minLength: string
-        email: 
+        email:
           type: string
           minLength: 3
         mobile:
           type: string
           pattern: '[\+][0-9]+'
-      required: [firstName, lastName, email]
-      
+      required:
+      - firstName
+      - lastName
+      - email
+
   responses:
+
     Error:
       description: an error occurred, just the HTTP status code returned
-      
-      
-  
