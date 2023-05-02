@@ -54,6 +54,8 @@ public class ClientCodeWriter {
         closeParen(out, indent);
     }
 
+    private static final String FULL_RESPONSE_SUFFIX = "FullResponse";
+
     private static void writeClientClassMethods(PrintWriter out, Imports imports, List<Method> methods, Indent indent) {
         methods.forEach(m -> {
             indent.right().right();
@@ -82,15 +84,17 @@ public class ClientCodeWriter {
                             .collect(Collectors.joining(","));
                     indent.left().left().left();
                 }
-                out.format("%sreturn %sFullResponse(%s)\n", indent, m.methodName, paramIdentifiers);
+                out.format("%sreturn %s%s(%s)\n", indent, m.methodName, FULL_RESPONSE_SUFFIX, paramIdentifiers);
                 indent.right().right();
-                out.format("%s.data(\"%s\", \"%s\");\n", indent, m.primaryStatusCode.get(), m.primaryMediaType.get());
+                out.format("%s.assertStatusCodeMatches(\"%s\")\n", indent, m.primaryStatusCode.get());
+                out.format("%s.assertContentTypeMatches(\"%s\")\n", indent, m.primaryMediaType.get());
+                out.format("%s.dataUnwrapped();\n", indent);
                 indent.left().left();
                 closeParen(out, indent);
             }
             SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m);
-            out.format("\n%spublic %s %sFullResponse(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
-                    params);
+            out.format("\n%spublic %s %s%s(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
+                    FULL_RESPONSE_SUFFIX, params);
             indent.right();
             out.format("%sreturn %s\n", indent, imports.add(Http.class));
             indent.right().right();

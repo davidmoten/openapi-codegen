@@ -27,15 +27,25 @@ public final class HttpResponse {
     public Optional<?> data() {
         return data;
     }
-
-    @SuppressWarnings("unchecked")
-    public <T> T data(String expectedStatusCode, String expectedContentType) {
-        if (ResponseDescriptor.matches(expectedStatusCode, statusCode, expectedContentType,
-                headers.get("Content-Type").stream().findFirst().orElse(""))) {
-            return (T) data.orElse(null);
-        } else {
-            throw new NotPrimaryResponseException(this);
+    
+    public HttpResponse assertStatusCodeMatches(String expectedStatusCode) {
+        if (!ResponseDescriptor.matchesStatusCode(expectedStatusCode, statusCode)) {
+            throw new NotPrimaryResponseException(this);            
         }
+        return this;
+    }
+    
+    public HttpResponse assertContentTypeMatches(String expectedContentType) {
+        String contentType = headers.get("Content-Type").stream().findFirst().orElse("");
+        if (!ResponseDescriptor.matchesMediaType(expectedContentType, contentType)) {
+            throw new NotPrimaryResponseException(this);            
+        }
+        return this;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T> T dataUnwrapped() {
+        return (T) data.orElse(null);
     }
 
     @Override
