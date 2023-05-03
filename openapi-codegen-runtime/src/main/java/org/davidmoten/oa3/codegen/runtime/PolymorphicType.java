@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.runtime.internal;
+package org.davidmoten.oa3.codegen.runtime;
 
 public enum PolymorphicType {
 

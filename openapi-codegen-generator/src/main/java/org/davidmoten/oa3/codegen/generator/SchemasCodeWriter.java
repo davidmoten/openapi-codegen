@@ -28,8 +28,8 @@ import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.runtime.Config;
-import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicDeserializer;
-import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
+import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
+import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
@@ -308,7 +308,7 @@ final class SchemasCodeWriter {
                             } else {
                                 out.format("%s// ???\n", indent);
                             }
-                            validateMore(out2, imports, indent, cls, x, false);
+                            validateMore(out2, imports, indent, cls, x);
                         }));
                 cls.fields.stream().forEach(x -> {
                     assignField(out, indent, cls, x);
@@ -405,7 +405,7 @@ final class SchemasCodeWriter {
                                 imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                                 x.fieldName(cls));
                     }
-                    validateMore(out2, imports, indent, cls, x, false);
+                    validateMore(out2, imports, indent, cls, x);
                 }));
 
         // assign
@@ -434,7 +434,7 @@ final class SchemasCodeWriter {
                             out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
                                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
                                     x.fieldName(cls), x.fieldName(cls));
-                            validateMore(out2, imports, indent, cls, x, !x.required);
+                            validateMore(out2, imports, indent, cls, x);
                         }
                     }));
 
@@ -462,9 +462,8 @@ final class SchemasCodeWriter {
         }
     }
 
-    private static void validateMore(PrintWriter out, Imports imports, Indent indent, Cls cls, Field x,
-            boolean useGet) {
-        String raw = x.fieldName(cls) + (useGet ? ".get()" : "");
+    private static void validateMore(PrintWriter out, Imports imports, Indent indent, Cls cls, Field x) {
+        String raw = x.fieldName(cls);
         if (x.minLength.isPresent()) {
             out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.minLength.get(),

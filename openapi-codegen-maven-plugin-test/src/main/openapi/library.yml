@@ -140,6 +140,13 @@ components:
       minLength: 1
       maxLength: 255
       
+    UserIdWrapped:
+      type: object
+      properties:
+        userId:
+          $ref: '#/components/schemas/UserId'
+      required: [userId] 
+        
     ContinuationToken:
       type: string
       minLength: 1
@@ -148,7 +155,8 @@ components:
     UserWithId:
       allOf:
       - $ref: '#/components/schemas/User'
-      - $ref: '#/components/schemas/UserId'
+      ## must wrap UserId with an object to be a member of allOf
+      - $ref: '#/components/schemas/UserIdWrapped'
       
     UsersPage:
       type: object

@@ -130,7 +130,7 @@ public final class PreconditionsBase {
     }
 
     public String checkMatchesPattern(String s, String pattern, String name) {
-        if (!Pattern.matches(pattern, s)) {
+        if (s != null && !Pattern.matches(pattern, s)) {
             throw factory.apply(name + " must match this regex pattern: " + pattern);
         }
         return s;

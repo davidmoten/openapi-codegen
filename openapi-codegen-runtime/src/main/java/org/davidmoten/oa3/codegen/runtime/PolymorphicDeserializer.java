@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.runtime.internal;
+package org.davidmoten.oa3.codegen.runtime;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -6,8 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.davidmoten.oa3.codegen.runtime.Config;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
