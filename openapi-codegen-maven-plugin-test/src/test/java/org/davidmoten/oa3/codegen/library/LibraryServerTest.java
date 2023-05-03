@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.library;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.http.DefaultSerializer;
@@ -19,15 +21,12 @@ public class LibraryServerTest {
     int serverPort;
 
     @Test
-    public void test() {
+    public void testClientServerAllOf() {
         Service client = new Service(new DefaultSerializer(Globals.config().mapper()),
                 "http://localhost:" + serverPort);
         UsersPage page = client.userGet(Optional.empty(), Optional.empty());
-        System.out.println(page);
-        while (page.continuationToken().isPresent()) {
-            page = client.userGet(Optional.empty(), Optional.of(page.continuationToken().get().value()));
-            System.out.println(page);
-        }
+        assertEquals(20, page.users().value().size());
+        assertEquals("User19", page.users().value().get(18).user().firstName());
     }
 
 }

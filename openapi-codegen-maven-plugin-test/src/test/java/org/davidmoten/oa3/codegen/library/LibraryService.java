@@ -20,17 +20,13 @@ public class LibraryService implements Service {
 
     @Override
     public UsersPage userGet(Optional<String> search, Optional<String> continuationToken) throws ServiceException {
-        try {
-            Users users = new Users(IntStream.range(1, 20)
-                    .mapToObj(i -> new UserWithId(
-                            new User("User" + i, "Gomez", "user" + i + ".gomez@gmail.com", Optional.empty()),
-                            new UserIdWrapped(new UserId(i + ""))))
-                    .collect(Collectors.toList()));
-            return new UsersPage(users, Optional.empty());
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw e;
-        }
+        Users users = new Users(IntStream.range(1, 21).mapToObj(i -> createUser(i)).collect(Collectors.toList()));
+        return new UsersPage(users, Optional.empty());
+    }
+
+    private UserWithId createUser(int i) {
+        return new UserWithId(new User("User" + i, "Gomez", "user" + i + ".gomez@gmail.com", Optional.empty()),
+                new UserIdWrapped(new UserId(i + "")));
     }
 
     @Override
