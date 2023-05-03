@@ -1,6 +1,6 @@
 package org.davidmoten.oa3.codegen.plugin;
 
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
+import static org.davidmoten.oa3.codegen.util.Util.orElse;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,10 +17,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.io.FileUtils;
+import org.davidmoten.oa3.codegen.generator.ClientServerGenerator;
 import org.davidmoten.oa3.codegen.generator.Definition;
 import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Packages;
-import org.davidmoten.oa3.codegen.generator.SpringBootGenerator;
 
 import com.github.davidmoten.guavamini.Sets;
 
@@ -54,11 +54,14 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "failOnParseErrors", defaultValue = "true")
     private boolean failOnParseErrors;
 
-    @Parameter(name = "generator", defaultValue="spring2")
+    @Parameter(name = "generator", defaultValue = "spring2")
     private String generator;
 
     @Parameter(name = "generateService", defaultValue = "true")
     private boolean generateService;
+
+    @Parameter(name = "generateClient", defaultValue = "true")
+    private boolean generateClient;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -87,8 +90,14 @@ public final class GenerateMojo extends AbstractMojo {
                         Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
                         failOnParseErrors, Optional.ofNullable(generator));
                 new Generator(d).generate();
-                if (generateService) {
-                    new SpringBootGenerator(d).generate();
+                if (generateService || generateClient) {
+                    ClientServerGenerator g = new ClientServerGenerator(d);
+                    if (generateService) {
+                        g.generateServer();
+                    }
+                    if (generateClient) {
+                        g.generateClient();
+                    }
                 }
             }
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());

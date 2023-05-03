@@ -9,6 +9,6 @@ public final class Mutable<T> {
     }
 
     public static <T> Mutable<T> create(T value) {
-        return new Mutable<T>(value);
+        return new Mutable<>(value);
     }
 }

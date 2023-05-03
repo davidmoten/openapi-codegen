@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.generator;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,8 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
-import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicDeserializer;
-import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
+import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
+import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -135,9 +134,10 @@ public class SerializationTest {
 
     @Test
     public void testPolymorphicDeserializationThrows() throws JsonMappingException, JsonProcessingException {
-        assertThrows(JsonMappingException.class, () ->{
-        String json = "{\"radiusKm\":3.4}";
-        m.readerFor(OneOf.class).readValue(json);});
+        assertThrows(JsonMappingException.class, () -> {
+            String json = "{\"radiusKm\":3.4}";
+            m.readerFor(OneOf.class).readValue(json);
+        });
     }
 
     @JsonDeserialize(using = OneOf.Deserializer.class)
@@ -161,7 +161,7 @@ public class SerializationTest {
 
         /**
          * Instance be of type Circle or Rectangle
-         * 
+         *
          * @return instance
          */
         public Object value() {

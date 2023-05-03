@@ -21,5 +21,5 @@ class Annotation {
     public String getTerm() {
         return "";
     }
-    
+
 }

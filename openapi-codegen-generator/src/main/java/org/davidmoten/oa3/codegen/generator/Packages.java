@@ -7,9 +7,9 @@ public final class Packages {
     public Packages(String basePackage) {
         this.basePackage = basePackage;
     }
-    
+
     public String basePackage() {
         return basePackage;
     }
-    
+
 }

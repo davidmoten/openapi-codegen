@@ -1,6 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.runtime.internal.Util.orElse;
+import static org.davidmoten.oa3.codegen.util.Util.orElse;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,11 +14,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.LinkedStack;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
-import org.davidmoten.oa3.codegen.runtime.internal.PolymorphicType;
+import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
+import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Sets;
 
@@ -41,7 +41,7 @@ public class Generator {
         // generate model classes for schema definitions
         writeSchemaClasses(definition, names);
 
-        CodeWriter.writeGlobalsClass(names);
+        SchemasCodeWriter.writeGlobalsClass(names);
 
     }
 
@@ -58,7 +58,7 @@ public class Generator {
             String schemaName = result.name;
             if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
                     && !definition.excludeSchemas().contains(schemaName)) {
-                CodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
+                SchemasCodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
             }
         }
     }
@@ -87,7 +87,7 @@ public class Generator {
         Discriminator discriminator = null;
         String enumFullType;
         private int num = 0;
-        private Set<String> fieldNames = new HashSet<String>();
+        private Set<String> fieldNames = new HashSet<>();
         boolean topLevel = false;
         boolean hasProperties = false;
         PolymorphicType polymorphicType;
@@ -294,7 +294,7 @@ public class Generator {
             cls.description = Optional.ofNullable(schema.getDescription());
             if (stack.isEmpty()) {
                 // should be top-level class
-                cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
+                cls.fullClassName = names.schemaNameToFullClassName(cls.category, last.name);
                 cls.name = Optional.of(last.name);
                 cls.schema = Optional.of(schema);
                 cls.classType = classType(schema);
@@ -313,7 +313,7 @@ public class Generator {
                             previous.get().classType == ClassType.ARRAY_WRAPPER));
 
                 } else {
-                    cls.fullClassName = names.schemaNameToClassName(cls.category, last.name);
+                    cls.fullClassName = names.schemaNameToFullClassName(cls.category, last.name);
                 }
                 cls.classType = ClassType.ARRAY_WRAPPER;
                 stack.push(cls);
@@ -339,7 +339,7 @@ public class Generator {
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                 } else {
                     fieldName = Optional.empty();
-                    String candidate = names.schemaNameToClassName(cls.category, last.name);
+                    String candidate = names.schemaNameToFullClassName(cls.category, last.name);
                     cls.fullClassName = candidate;
                 }
                 if (Util.isEnum(schema)) {
@@ -388,7 +388,10 @@ public class Generator {
                     final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
                     String fieldName = current.nextFieldName(fieldNameCandidate);
                     boolean required = fieldIsRequired(schemaPath);
-                    current.addField(fullClassName, last.name, fieldName, required, isArray);
+                    // TODO pick up other constraints
+                    current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
+                            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                            false, false, Encoding.DEFAULT);
                 } else {
                     throw new RuntimeException("unexpected");
                 }

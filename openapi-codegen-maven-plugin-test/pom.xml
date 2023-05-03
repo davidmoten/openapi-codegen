@@ -27,11 +27,18 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>openapi-codegen-client-runtime</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>5.3.27</version>
         </dependency>
 
+        <!-- required for Java 17 -->
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
@@ -39,11 +46,19 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -164,6 +179,23 @@
                                 <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
                                     <include>marqueta.yml</include>
+                                </includes>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>library</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <failOnParseErrors>false</failOnParseErrors>
+                            <generator>spring</generator>
+                            <basePackage>org.davidmoten.oa3.codegen.library</basePackage>
+                            <sources>
+                                <directory>${project.basedir}/src/main/openapi</directory>
+                                <includes>
+                                    <include>library.yml</include>
                                 </includes>
                             </sources>
                         </configuration>

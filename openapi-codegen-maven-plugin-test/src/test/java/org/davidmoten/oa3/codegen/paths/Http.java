@@ -38,7 +38,7 @@ public final class Http {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     public static String readString(String url, HttpMethod method, String acceptHeader) {
         try {
             URL u = new URL(url);

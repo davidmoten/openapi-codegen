@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.github.davidmoten</groupId>
         <artifactId>openapi-codegen-parent</artifactId>
-        <version>0.1-alpha-2-SNAPSHOT</version>
+        <version>0.1-alpha-3-SNAPSHOT</version>
     </parent>
     <artifactId>openapi-generator-demo</artifactId>
     <name>${project.artifactId}</name>
@@ -12,7 +12,6 @@
     <properties>
         <springfox.version>3.0.0</springfox.version>
         <swagger.annotations.version>1.6.3</swagger.annotations.version>
-        <openapi.codegen.version>0.1-alpha-1</openapi.codegen.version>
     </properties>
 
     <dependencies>
@@ -95,11 +94,16 @@
                         </goals>
                         <configuration>
                             <inputSpec>${project.basedir}/../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml</inputSpec>
-                            <generatorName>spring</generatorName>
+                            <generatorName>java</generatorName>
                             <apiPackage>demo.api</apiPackage>
                             <modelPackage>demo.model</modelPackage>
+                            <invokerPackage>demo.client</invokerPackage>
                             <configOptions>
                                 <delegatePattern>true</delegatePattern>
+                                <dateLibrary>java8</dateLibrary>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <library>native</library>
+                                <withXml>false</withXml>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -112,6 +116,25 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build.helper.version}</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

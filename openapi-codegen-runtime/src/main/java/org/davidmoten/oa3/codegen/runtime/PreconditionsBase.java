@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 public final class PreconditionsBase {
-    
+
     private final Function<? super String, ? extends RuntimeException> factory;
 
     public PreconditionsBase(Function<? super String, ? extends RuntimeException> factory) {
@@ -130,7 +130,7 @@ public final class PreconditionsBase {
     }
 
     public String checkMatchesPattern(String s, String pattern, String name) {
-        if (!Pattern.matches(pattern, s)) {
+        if (s != null && !Pattern.matches(pattern, s)) {
             throw factory.apply(name + " must match this regex pattern: " + pattern);
         }
         return s;

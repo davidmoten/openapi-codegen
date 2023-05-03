@@ -3,11 +3,16 @@ package org.davidmoten.oa3.codegen.paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import org.davidmoten.oa3.codegen.http.DefaultSerializer;
+import org.davidmoten.oa3.codegen.http.HttpResponse;
+import org.davidmoten.oa3.codegen.paths.client.Service;
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
+import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -27,6 +32,9 @@ public class PathsServerTest {
 
     private static ConfigurableApplicationContext context;
     private static ObjectMapper m;
+
+    private static final Service client = new Service(new DefaultSerializer(Globals.config().mapper()),
+            "http://localhost:8080");
 
     @BeforeAll
     public static void start() {
@@ -117,6 +125,36 @@ public class PathsServerTest {
     @Test
     public void testText() {
         assertEquals("example text", Http.readString("http://localhost:8080/text", HttpMethod.GET, "text/plain"));
+    }
+
+    @Test
+    public void testClientNoArgs() throws ServiceException {
+        HttpResponse r = client.itemGetFullResponse();
+        assertEquals(200, r.statusCode());
+        assertTrue(r.data().isPresent());
+        Response2 a = (Response2) r.data().get();
+        assertEquals("abcToken", a.token());
+    }
+
+    @Test
+    public void testClientFullResponseMultiTypeWithAcceptHeaderJson() {
+        HttpResponse r = client.responseMultiTypeGetFullResponse("application/json", "jason");
+        assertEquals(200, r.statusCode());
+        assertEquals("jason", ((Response1) r.data().get()).thing());
+    }
+
+    @Test
+    public void testClientPrimaryResponseMultiTypeWithAcceptHeaderJson() {
+        Response1 r = client.responseMultiTypeGet("application/json", "jason");
+        assertEquals("jason", r.thing());
+    }
+
+    @Test
+    public void testClientResponseMultiTypeWithAcceptHeaderOctetStream() {
+        HttpResponse r = client.responseMultiTypeGetFullResponse("application/octet-stream", "jason");
+        assertEquals(200, r.statusCode());
+        assertEquals("hello there", new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
+        assertTrue(r.headers().contains("content-type", "application/octet-stream"));
     }
 
     public static void main(String[] args) {

@@ -4,8 +4,7 @@
   <And>
     <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
     <Or>
-        <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
-        <Class name="org.davidmoten.oa3.codegen.generator.SpringBootCodeWriter"/>
+        <Class name="org.davidmoten.oa3.codegen.generator.WriterUtil"/>
     </Or>
     <Bug code="RV"/>
   </And>

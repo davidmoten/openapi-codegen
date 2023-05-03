@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.generator.internal.ImmutableList;
+import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -78,17 +79,13 @@ final class Names {
         return api;
     }
 
-    String schemaNameToClassName(SchemaCategory category, String schemaName) {
+    String schemaNameToFullClassName(SchemaCategory category, String schemaName) {
         return definition.packages().basePackage() + "." + category.getPackageFragment() + "."
                 + schemaNameToSimpleClassName(schemaName);
     }
 
     String schemaNameToSimpleClassName(String schemaName) {
         return upperFirst(toIdentifier(schemaName));
-    }
-
-    File schemaNameToJavaFile(SchemaCategory category, String schemaName) {
-        return fullClassNameToJavaFile(schemaNameToClassName(category, schemaName));
     }
 
     File fullClassNameToJavaFile(String fullClassName) {
@@ -118,7 +115,7 @@ final class Names {
                 throw new RuntimeException("unexpected ref: " + ref);
             }
             String schemaName = ref.substring(ref.lastIndexOf("/") + 1);
-            fullClassName = schemaNameToClassName(category, schemaName);
+            fullClassName = schemaNameToFullClassName(category, schemaName);
         }
         return fullClassName;
     }
@@ -322,6 +319,10 @@ final class Names {
         return definition.packages().basePackage() + ".Application";
     }
 
+    String clientFullClassName() {
+        return definition.packages().basePackage() + ".client.Service";
+    }
+
     String jacksonConfigurationFullClassName() {
         return definition.packages().basePackage() + ".service.JacksonConfiguration";
     }
@@ -338,9 +339,12 @@ final class Names {
     RequestBody lookupRequestBody(String ref) {
         return api.getComponents().getRequestBodies().get(lastComponent(ref));
     }
-    
+
+    ApiResponse lookupResponse(String ref) {
+        return api.getComponents().getResponses().get(lastComponent(ref));
+    }
+
     boolean generatorIsSpring3() {
         return definition.generator().orElse("").equals("spring3");
     }
-
 }

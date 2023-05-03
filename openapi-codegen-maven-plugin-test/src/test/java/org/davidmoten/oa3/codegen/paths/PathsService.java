@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 import org.davidmoten.oa3.codegen.paths.path.QueryObjectGetIdParameterId;
 import org.davidmoten.oa3.codegen.paths.schema.Point;
@@ -34,8 +35,7 @@ public class PathsService implements Service {
 
     @Override
     public Response2 responseRefGet() throws ServiceException {
-        return response(
-                ResponseEntity.status(500).body(new Response1("beehive")));
+        return response(ResponseEntity.status(500).body(new Response1("beehive")));
     }
 
     @Override
@@ -51,15 +51,18 @@ public class PathsService implements Service {
 
     @Override
     public Response1 responseMultiTypeGet(String accept, String username) throws ServiceException {
-        if (MediaType.valueOf(accept).isCompatibleWith(MediaType.APPLICATION_JSON)) {
-            return new Response1(username);
-        } else if (MediaType.valueOf(accept).isCompatibleWith(MediaType.APPLICATION_OCTET_STREAM)) {
+        List<String> accepts = Arrays.asList(accept.split(", "));
+        if (accepts.stream()
+                .anyMatch(x -> MediaType.valueOf(x).isCompatibleWith(MediaType.APPLICATION_OCTET_STREAM))) {
             byte[] bytes = "hello there".getBytes(StandardCharsets.UTF_8);
             InputStream in = new ByteArrayInputStream(bytes);
             InputStreamResource res = new InputStreamResource(in);
             HttpHeaders headers = new HttpHeaders();
+            headers.put(HttpHeaders.CONTENT_TYPE, Arrays.asList(MediaType.APPLICATION_OCTET_STREAM_VALUE));
             headers.put(HttpHeaders.CONTENT_LENGTH, Arrays.asList(bytes.length + ""));
             return response(new ResponseEntity<>(res, headers, HttpStatus.OK));
+        } else if (accepts.stream().anyMatch(x -> MediaType.valueOf(x).isCompatibleWith(MediaType.APPLICATION_JSON))) {
+            return new Response1(username);
         } else {
             throw new ServiceException(HttpStatus.BAD_REQUEST.value(), "unsupported Accept header: " + accept);
         }

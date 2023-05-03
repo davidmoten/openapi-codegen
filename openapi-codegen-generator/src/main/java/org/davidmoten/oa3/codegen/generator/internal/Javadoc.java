@@ -75,7 +75,7 @@ public class Javadoc {
     }
 
     private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {
-        s = s.replace("{@", "zxxz");
+        s = s.trim().replace("{@", "zxxz");
         if (!isHtml) {
             s = wrap(s);
         }
