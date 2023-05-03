@@ -20,6 +20,8 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
@@ -27,6 +29,8 @@ import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Http {
+
+    private static Logger log = LoggerFactory.getLogger(Http.class);
 
     public static Builder method(HttpMethod method) {
         return new Builder(method);
@@ -233,13 +237,13 @@ public final class Http {
             // (statusCode x contentType) -> class
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls) {
         String url = buildUrl(basePath, pathTemplate, parameters);
-        System.out.println("Http.url=" + url);
+        log.debug("Http.url={}", url);
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
         try {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
             Headers headers = new Headers(requestHeaders);
-            System.out.println("Http.headers=" + headers);
+            log.debug("Http.headers={}", headers);
             if (method.equals(HttpMethod.PATCH)) {
                 // PATCH not supported by HttpURLConnection so use a workaround
                 headers.put("X-HTTP-Method-Override", HttpMethod.PATCH.name());
@@ -286,6 +290,9 @@ public final class Http {
     }
 
     private static InputStream log(InputStream inputStream) {
+        if (!log.isDebugEnabled()) {
+            return inputStream;
+        }
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         return new InputStream() {
 
@@ -293,7 +300,7 @@ public final class Http {
             public int read() throws IOException {
                 int v = inputStream.read();
                 if (v == -1) {
-                    System.out.println("Http.inputStream=\n" + new String(bytes.toByteArray(), StandardCharsets.UTF_8));
+                    log.debug("Http.inputStream=\n{}", new String(bytes.toByteArray(), StandardCharsets.UTF_8));
                 }
                 bytes.write(v);
                 return v;

@@ -41,7 +41,6 @@ public class DefaultSerializer implements Serializer {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(Class<T> cls, String contentType, InputStream in) {
-        System.out.println("deserializing " + contentType + " to " + cls.getSimpleName());
         try {
             if (MediaType.isJson(contentType)) {
                 return m.readValue(in, cls);
