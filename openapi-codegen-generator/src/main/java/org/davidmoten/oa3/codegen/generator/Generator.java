@@ -388,7 +388,10 @@ public class Generator {
                     final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
                     String fieldName = current.nextFieldName(fieldNameCandidate);
                     boolean required = fieldIsRequired(schemaPath);
-                    current.addField(fullClassName, last.name, fieldName, required, isArray);
+                    // TODO pick up other constraints
+                    current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
+                            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                            false, false, Encoding.DEFAULT);
                 } else {
                     throw new RuntimeException("unexpected");
                 }

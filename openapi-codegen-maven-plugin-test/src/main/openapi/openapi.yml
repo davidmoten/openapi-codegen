@@ -1363,6 +1363,16 @@ components:
         format: int32
       minItems: 2
       maxItems: 4          
+
+    MinMaxItemsObjectRef:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinMaxInteger'
+          minItems: 2
+          maxItems: 4     
       
     ForeignLanguageEnum:
       type: string

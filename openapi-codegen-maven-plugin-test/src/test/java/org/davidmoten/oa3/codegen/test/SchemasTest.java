@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.test.schema.ArrayInProperty;
@@ -46,6 +48,7 @@ import org.davidmoten.oa3.codegen.test.schema.MetBroadcastArea;
 import org.davidmoten.oa3.codegen.test.schema.MinMaxDouble;
 import org.davidmoten.oa3.codegen.test.schema.MinMaxInteger;
 import org.davidmoten.oa3.codegen.test.schema.MinMaxItems;
+import org.davidmoten.oa3.codegen.test.schema.MinMaxItemsObjectRef;
 import org.davidmoten.oa3.codegen.test.schema.MinMaxLength;
 import org.davidmoten.oa3.codegen.test.schema.Msi;
 import org.davidmoten.oa3.codegen.test.schema.MsiId;
@@ -465,6 +468,25 @@ public class SchemasTest {
     @Test
     public void testMinMaxLengthTooBigOptionalPublicConstructor() throws JsonMappingException, JsonProcessingException {
         assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("abc", Optional.of("defgh")));
+    }
+
+    @Test
+    public void testMinMaxObjectRefMinItemsIsOk() throws JsonMappingException, JsonProcessingException {
+        MinMaxItemsObjectRef.List list = new MinMaxItemsObjectRef.List(
+                Arrays.asList(new MinMaxInteger(2), new MinMaxInteger(2)));
+        new MinMaxItemsObjectRef(Optional.of(list));
+    }
+
+    @Test
+    public void testMinMaxObjectRefMinItemsIsBad() throws JsonMappingException, JsonProcessingException {
+        assertThrows(IllegalArgumentException.class,
+                () -> new MinMaxItemsObjectRef.List(Arrays.asList(new MinMaxInteger(2))));
+    }
+
+    @Test
+    public void testMinMaxObjectRefMaxItemsIsBad() throws JsonMappingException, JsonProcessingException {
+        assertThrows(IllegalArgumentException.class, () -> new MinMaxItemsObjectRef.List(
+                IntStream.rangeClosed(1, 5).mapToObj(i -> new MinMaxInteger(2)).collect(Collectors.toList())));
     }
 
     @Test
