@@ -2,6 +2,10 @@ package org.davidmoten.oa3.codegen.http;
 
 import com.github.davidmoten.guavamini.Preconditions;
 
+/**
+ * The components of an HTTP request not including the request body
+ *
+ */
 public final class RequestBase {
 
     private final HttpMethod method;
