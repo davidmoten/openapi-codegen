@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.client.runtime.ClientBuilder;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
-import org.davidmoten.oa3.codegen.http.DefaultSerializer;
 import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
@@ -50,7 +50,7 @@ public class ClientCodeWriter {
         out.format("%sprivate final %s basePath;\n", indent, imports.add(String.class));
 
         // add constructor
-        out.format("\n%spublic %s(%s serializer, %s interceptor, %s basePath) {\n", indent,
+        out.format("\n%sprivate %s(%s serializer, %s interceptor, %s basePath) {\n", indent,
                 Names.simpleClassName(fullClassName), imports.add(Serializer.class), imports.add(Interceptor.class),
                 imports.add(String.class));
         indent.right();
@@ -59,17 +59,13 @@ public class ClientCodeWriter {
         out.format("%sthis.basePath = basePath;\n", indent);
         closeParen(out, indent);
 
-        out.format("\n%spublic %s(%s interceptor, %s basePath) {\n", indent, Names.simpleClassName(fullClassName),
-                imports.add(Interceptor.class), imports.add(String.class));
+        out.format("\n%spublic static %s<%s> basePath(%s basePath) {\n", indent, imports.add(ClientBuilder.class),
+                Names.simpleClassName(fullClassName), imports.add(String.class));
         indent.right();
-        out.format("%sthis(new %s(%s.config().mapper()), interceptor, basePath);\n", indent,
-                imports.add(DefaultSerializer.class), imports.add(names.globalsFullClassName()));
-        closeParen(out, indent);
-
-        out.format("\n%spublic %s(%s basePath) {\n", indent, Names.simpleClassName(fullClassName),
-                imports.add(String.class));
-        indent.right();
-        out.format("%sthis(x -> x, basePath);\n", indent, names.globalsFullClassName());
+        out.format(
+                "%sreturn new %s<>(b -> new %s(b.serializer(), b.interceptor(), b.basePath()), %s.config(), basePath);\n",
+                indent, imports.add(ClientBuilder.class), Names.simpleClassName(fullClassName),
+                imports.add(names.globalsFullClassName()));
         closeParen(out, indent);
     }
 

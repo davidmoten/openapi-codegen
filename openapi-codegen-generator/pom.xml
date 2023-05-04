@@ -33,7 +33,13 @@
             <artifactId>openapi-codegen-runtime</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        
+
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>openapi-codegen-client-runtime</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>openapi-codegen-http</artifactId>
@@ -64,12 +70,12 @@
             <version>0.21.0</version>
         </dependency>
 
-       <dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>junit-extras</artifactId>

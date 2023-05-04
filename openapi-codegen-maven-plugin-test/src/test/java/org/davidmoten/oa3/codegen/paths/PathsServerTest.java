@@ -36,7 +36,7 @@ public class PathsServerTest {
     }
 
     private Service client() {
-        return new Service(basePath());
+        return Service.basePath(basePath()).build();
     }
 
     @Test

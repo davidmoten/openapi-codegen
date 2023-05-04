@@ -22,7 +22,10 @@ public class LibraryServerTest {
 
     @Test
     public void testClientServerAllOf() {
-        Service client = new Service(new Authenticator(), "http://localhost:" + serverPort);
+        Service client = Service //
+                .basePath("http://localhost:" + serverPort) //
+                .interceptor(new Authenticator()) //
+                .build();
         UsersPage page = client.userGet(Optional.empty(), Optional.empty());
         assertEquals(20, page.users().value().size());
         assertEquals("User19", page.users().value().get(18).user().firstName());
