@@ -22,7 +22,7 @@ public class LibraryServerTest {
 
     @Test
     public void testClientServerAllOf() {
-        Service client = new Service(new DefaultSerializer(Globals.config().mapper()),
+        Service client = new Service(new DefaultSerializer(Globals.config().mapper()), x -> x,
                 "http://localhost:" + serverPort);
         UsersPage page = client.userGet(Optional.empty(), Optional.empty());
         assertEquals(20, page.users().value().size());

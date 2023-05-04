@@ -37,7 +37,7 @@ public class PathsServerTest {
     }
 
     private Service client() {
-        return new Service(new DefaultSerializer(Globals.config().mapper()), basePath());
+        return new Service(new DefaultSerializer(Globals.config().mapper()), x -> x, basePath());
     }
 
     @Test

@@ -7,6 +7,8 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -45,6 +47,7 @@ public final class Http {
         private final List<ParameterValue> values = new ArrayList<>();
         private final List<ResponseDescriptor> responseDescriptors = new ArrayList<>();
         private Serializer serializer;
+        private Interceptor interceptor = x -> x;
 
         Builder(HttpMethod method) {
             this.method = method;
@@ -60,6 +63,11 @@ public final class Http {
                 throw new IllegalArgumentException("set content type in the builder just after setting the body");
             }
             headers.put(key, value);
+            return this;
+        }
+
+        public Builder interceptor(Interceptor interceptor) {
+            this.interceptor = interceptor;
             return this;
         }
 
@@ -110,7 +118,7 @@ public final class Http {
         }
 
         public HttpResponse call() {
-            return Http.call(method, basePath, path, serializer, headers, values, responseDescriptors);
+            return Http.call(method, basePath, path, serializer, interceptor, headers, values, responseDescriptors);
         }
 
     }
@@ -207,11 +215,12 @@ public final class Http {
             String basePath, //
             String pathTemplate, //
             Serializer serializer, //
+            Interceptor interceptor, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode, contentType, class)
             List<ResponseDescriptor> descriptors) {
-        return call(method, basePath, pathTemplate, serializer, requestHeaders, parameters,
+        return call(method, basePath, pathTemplate, serializer, interceptor, requestHeaders, parameters,
                 (statusCode, contentType) -> match(descriptors, statusCode, contentType));
     }
 
@@ -232,61 +241,73 @@ public final class Http {
             String basePath, //
             String pathTemplate, //
             Serializer serializer, //
+            Interceptor interceptor, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode x contentType) -> class
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls) {
         String url = buildUrl(basePath, pathTemplate, parameters);
-        log.debug("Http.url={}", url);
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
         try {
-            HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
             Headers headers = new Headers(requestHeaders);
-            log.debug("Http.headers={}", headers);
+            final HttpMethod requestMethod;
             if (method.equals(HttpMethod.PATCH)) {
-                // PATCH not supported by HttpURLConnection so use a workaround
                 headers.put("X-HTTP-Method-Override", HttpMethod.PATCH.name());
-                con.setRequestMethod(HttpMethod.POST.name());
+                requestMethod = HttpMethod.POST;
             } else {
-                con.setRequestMethod(method.name());
+                requestMethod = method;
             }
-            parameters.stream() //
-                    .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
-                    .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
-            // add request body content type (should just be one)
-            parameters.stream().filter(p -> p.contentType().isPresent())
-                    .forEach(p -> headers.put("Content-Type", p.contentType().get()));
-            headers.forEach((key, list) -> {
-                con.setRequestProperty(key, list.stream().collect(Collectors.joining(", ")));
-            });
-            con.setDoInput(true);
-            if (requestBody.isPresent()) {
-                con.setDoOutput(true);
-                Optional<?> body = requestBody.get().value();
-                if (body.isPresent()) {
-                    try (OutputStream out = con.getOutputStream()) {
-                        serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
-                    }
-                }
-            }
-            int statusCode = con.getResponseCode();
-            Headers responseHeaders = Headers.create(con.getHeaderFields());
-            String responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"))
-                    .orElse("application/octet-stream");
-            Object data;
-            Optional<Class<?>> responseClass = responseCls.apply(statusCode, responseContentType);
-            try (InputStream in = log(con.getInputStream())) {
-                data = readResponse(serializer, responseClass, responseContentType, in);
-            } catch (IOException e) {
-                try (InputStream err = log(con.getErrorStream())) {
-                    data = readResponse(serializer, responseClass, responseContentType, err);
-                }
-            }
-            return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
+            // modify request metadata (like insert auth related headers)
+            RequestBase r = interceptor.intercept(new RequestBase(requestMethod, url, headers));
+            log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
+            return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(),
+                    r.method());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static HttpResponse connectAndProcess(Serializer serializer, List<ParameterValue> parameters,
+            BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, String url,
+            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method)
+            throws IOException, MalformedURLException, ProtocolException, StreamReadException, DatabindException {
+        log.debug("Http.headers={}", headers);
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setRequestMethod(method.name());
+        parameters.stream() //
+                .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
+                .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
+        // add request body content type (should just be one)
+        parameters.stream().filter(p -> p.contentType().isPresent())
+                .forEach(p -> headers.put("Content-Type", p.contentType().get()));
+        headers.forEach((key, list) -> {
+            con.setRequestProperty(key, list.stream().collect(Collectors.joining(", ")));
+        });
+        con.setDoInput(true);
+        if (requestBody.isPresent()) {
+            con.setDoOutput(true);
+            Optional<?> body = requestBody.get().value();
+            if (body.isPresent()) {
+                try (OutputStream out = con.getOutputStream()) {
+                    serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
+                }
+            }
+        }
+        int statusCode = con.getResponseCode();
+        Headers responseHeaders = Headers.create(con.getHeaderFields());
+        String responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"))
+                .orElse("application/octet-stream");
+        Object data;
+        Optional<Class<?>> responseClass = responseCls.apply(statusCode, responseContentType);
+        try (InputStream in = log(con.getInputStream())) {
+            data = readResponse(serializer, responseClass, responseContentType, in);
+        } catch (IOException e) {
+            try (InputStream err = log(con.getErrorStream())) {
+                data = readResponse(serializer, responseClass, responseContentType, err);
+            }
+        }
+        return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
     }
 
     private static InputStream log(InputStream inputStream) {

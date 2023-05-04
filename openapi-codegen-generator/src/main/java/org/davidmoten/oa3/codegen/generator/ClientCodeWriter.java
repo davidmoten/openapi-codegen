@@ -14,6 +14,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
+import org.davidmoten.oa3.codegen.http.Interceptor;
 import org.davidmoten.oa3.codegen.http.Serializer;
 
 public class ClientCodeWriter {
@@ -44,13 +45,16 @@ public class ClientCodeWriter {
             Indent indent) {
         // add fields
         out.format("\n%sprivate final %s serializer;\n", indent, imports.add(Serializer.class));
+        out.format("%sprivate final %s interceptor;\n", indent, imports.add(Interceptor.class));
         out.format("%sprivate final %s basePath;\n", indent, imports.add(String.class));
 
         // add constructor
-        out.format("\n%spublic %s(%s serializer, %s basePath) {\n", indent, Names.simpleClassName(fullClassName),
-                imports.add(Serializer.class), imports.add(String.class));
+        out.format("\n%spublic %s(%s serializer, %s interceptor, %s basePath) {\n", indent,
+                Names.simpleClassName(fullClassName), imports.add(Serializer.class), imports.add(Interceptor.class),
+                imports.add(String.class));
         indent.right();
         out.format("%sthis.serializer = serializer;\n", indent);
+        out.format("%sthis.interceptor = interceptor;\n", indent);
         out.format("%sthis.basePath = basePath;\n", indent);
         closeParen(out, indent);
     }
@@ -105,6 +109,7 @@ public class ClientCodeWriter {
             out.format("%s.basePath(this.basePath)\n", indent);
             out.format("%s.path(\"%s\")\n", indent, m.path);
             out.format("%s.serializer(this.serializer)\n", indent);
+            out.format("%s.interceptor(this.interceptor)\n", indent);
             out.format("%s.acceptApplicationJson()\n", indent);
             m.parameters.forEach(p -> {
                 if (p.type == ParamType.QUERY) {
