@@ -11,6 +11,7 @@ import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
+import org.davidmoten.oa3.codegen.http.DefaultSerializer;
 import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
@@ -35,14 +36,14 @@ public class ClientCodeWriter {
         WriterUtil.writeApiJavadoc(out, names, indent);
         out.format("\npublic class %s {\n", Names.simpleClassName(fullClassName));
         indent.right();
-        writeClientClassFieldsAndConstructor(out, imports, fullClassName, indent);
+        writeClientClassFieldsAndConstructor(out, imports, fullClassName, indent, names);
         writeClientClassMethods(out, imports, methods, indent);
         indent.left();
         out.println("\n}\n");
     }
 
     private static void writeClientClassFieldsAndConstructor(PrintWriter out, Imports imports, String fullClassName,
-            Indent indent) {
+            Indent indent, Names names) {
         // add fields
         out.format("\n%sprivate final %s serializer;\n", indent, imports.add(Serializer.class));
         out.format("%sprivate final %s interceptor;\n", indent, imports.add(Interceptor.class));
@@ -56,6 +57,19 @@ public class ClientCodeWriter {
         out.format("%sthis.serializer = serializer;\n", indent);
         out.format("%sthis.interceptor = interceptor;\n", indent);
         out.format("%sthis.basePath = basePath;\n", indent);
+        closeParen(out, indent);
+
+        out.format("\n%spublic %s(%s interceptor, %s basePath) {\n", indent, Names.simpleClassName(fullClassName),
+                imports.add(Interceptor.class), imports.add(String.class));
+        indent.right();
+        out.format("%sthis(new %s(%s.config().mapper()), interceptor, basePath);\n", indent,
+                imports.add(DefaultSerializer.class), imports.add(names.globalsFullClassName()));
+        closeParen(out, indent);
+
+        out.format("\n%spublic %s(%s basePath) {\n", indent, Names.simpleClassName(fullClassName),
+                imports.add(String.class));
+        indent.right();
+        out.format("%sthis(x -> x, basePath);\n", indent, names.globalsFullClassName());
         closeParen(out, indent);
     }
 

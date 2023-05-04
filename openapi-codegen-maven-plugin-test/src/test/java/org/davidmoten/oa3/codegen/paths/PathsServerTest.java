@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.davidmoten.oa3.codegen.http.DefaultSerializer;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.paths.client.Service;
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
@@ -37,7 +36,7 @@ public class PathsServerTest {
     }
 
     private Service client() {
-        return new Service(new DefaultSerializer(Globals.config().mapper()), x -> x, basePath());
+        return new Service(basePath());
     }
 
     @Test
