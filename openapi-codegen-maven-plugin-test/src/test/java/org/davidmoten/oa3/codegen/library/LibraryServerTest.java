@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.http.BearerAuthenticator;
-import org.davidmoten.oa3.codegen.library.client.Service;
+import org.davidmoten.oa3.codegen.library.client.Client;
 import org.davidmoten.oa3.codegen.library.schema.UsersPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -22,7 +22,7 @@ public class LibraryServerTest {
 
     @Test
     public void testClientServerAllOf() {
-        Service client = Service //
+        Client client = Client //
                 .basePath("http://localhost:" + serverPort) //
                 .interceptor(new Authenticator()) //
                 .build();

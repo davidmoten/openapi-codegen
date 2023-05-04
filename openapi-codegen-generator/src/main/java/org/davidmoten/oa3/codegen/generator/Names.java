@@ -320,7 +320,7 @@ final class Names {
     }
 
     String clientFullClassName() {
-        return definition.packages().basePackage() + ".client.Service";
+        return definition.packages().basePackage() + ".client.Client";
     }
 
     String jacksonConfigurationFullClassName() {

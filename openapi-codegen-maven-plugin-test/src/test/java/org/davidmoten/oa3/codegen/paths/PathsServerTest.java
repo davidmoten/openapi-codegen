@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.davidmoten.oa3.codegen.http.HttpResponse;
-import org.davidmoten.oa3.codegen.paths.client.Service;
+import org.davidmoten.oa3.codegen.paths.client.Client;
 import org.davidmoten.oa3.codegen.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
@@ -35,8 +35,8 @@ public class PathsServerTest {
         return "http://localhost:" + serverPort;
     }
 
-    private Service client() {
-        return Service.basePath(basePath()).build();
+    private Client client() {
+        return Client.basePath(basePath()).build();
     }
 
     @Test
