@@ -8,5 +8,5 @@ public interface Serializer {
     void serialize(Object o, String contentType, OutputStream out);
 
     <T> T deserialize(Class<T> cls, String contentType, InputStream in);
-
+    
 }

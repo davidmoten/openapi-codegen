@@ -38,6 +38,7 @@
         <guava.mini.version>0.1.6</guava.mini.version>
         <jackson.version>2.15.0</jackson.version>
         <spring.boot.version>2.7.11</spring.boot.version>
+        <spring.version>5.3.27</spring.version>
         <junit.version>5.9.3</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
         <jacoco.version>0.8.10</jacoco.version>
