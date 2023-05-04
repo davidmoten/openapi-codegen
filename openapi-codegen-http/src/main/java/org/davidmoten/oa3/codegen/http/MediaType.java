@@ -18,16 +18,16 @@ public final class MediaType {
         return lc(mediaType).endsWith("/json") || lc(mediaType).endsWith("+json");
     }
 
-    private static String lc(String s) {
-        return s.toLowerCase(Locale.ENGLISH);
-    }
-
     public static boolean isText(String mediaType) {
         return lc(mediaType).startsWith("text/");
     }
 
     public static boolean isOctetStream(String mediaType) {
         return BINARY_MEDIA_TYPES.contains(lc(mediaType));
+    }
+    
+    private static String lc(String s) {
+        return s.toLowerCase(Locale.ENGLISH);
     }
 
 }
