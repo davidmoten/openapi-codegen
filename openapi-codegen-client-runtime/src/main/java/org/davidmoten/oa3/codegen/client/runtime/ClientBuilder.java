@@ -26,6 +26,14 @@ public final class ClientBuilder<T> {
         return this;
     }
 
+    /**
+     * Enables modification of all http requests (url, method, headers, not the
+     * body). Particularly useful for defining authentication (which normally
+     * involves just the addition of an Authorization header).
+     * 
+     * @param interceptor modifies http requests
+     * @return this
+     */
     public ClientBuilder<T> interceptor(Interceptor interceptor) {
         this.interceptor = interceptor;
         return this;
