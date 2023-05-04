@@ -18,7 +18,7 @@ public final class ClientBuilder<T> {
         this.creator = creator;
         this.serializer = new DefaultSerializer(config.mapper());
         this.interceptor = x -> x;
-        this.basePath = basePath;
+        this.basePath = trimAndRemoveFinalSlash(basePath);
     }
 
     public ClientBuilder<T> serializer(Serializer serializer) {
@@ -53,6 +53,15 @@ public final class ClientBuilder<T> {
 
     public T build() {
         return creator.apply(this);
+    }
+
+    private static String trimAndRemoveFinalSlash(String s) {
+        s = s.trim();
+        if (s.endsWith("/")) {
+            return s.substring(0, s.length() - 1);
+        } else {
+            return s;
+        }
     }
 
 }
