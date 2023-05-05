@@ -137,7 +137,7 @@ paths:
                 $ref: '#/components/schemas/Response2' 
         default:    
           $ref: '#/components/responses/Error'   
-
+  
   /responseRef:
     get:
       responses:
@@ -265,8 +265,42 @@ paths:
       responses:
         '200':    
           description: ok response            
+
+  /paramRef:
+    parameters:
+     - $ref: '#/components/parameters/Id1'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/Timestamp'
+      responses:
+        '203':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'                   
              
 components:
+
+  parameters:
+    Id1:
+      in: query
+      name: id
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    
+    Timestamp:
+      in: query
+      name: first
+      required: true
+      schema:
+        type: string
+        format: date-time        
+
   responses:
     BadRequest:
       description: Bad request

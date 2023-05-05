@@ -120,6 +120,11 @@ public class PathsTest {
     public void testGetText() throws ServiceException {
         String response = service.textGet();
     }
+    
+    @Test
+    public void testParameterRefs() throws ServiceException {
+        Response2 response = service.paramRefGet("abc", OffsetDateTime.now());
+    }
 
     private static void hasParameterAnnotation(Class<?> c, Class<? extends Annotation> annotation, String methodName,
             int argNo, Class<?>... args) {
