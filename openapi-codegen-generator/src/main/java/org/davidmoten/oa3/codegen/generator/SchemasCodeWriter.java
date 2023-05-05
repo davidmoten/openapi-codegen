@@ -148,15 +148,6 @@ final class SchemasCodeWriter {
 
     private static void writeEnumCreator(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         if (cls.classType == ClassType.ENUM) {
-//            @JsonCreator
-//            public static SubjectIndicator fromValue(String value) {
-//              for (SubjectIndicator b : SubjectIndicator.values()) {
-//                if (b.value.equals(value)) {
-//                  return b;
-//                }
-//              }
-//              throw new IllegalArgumentException("Unexpected value '" + value + "'");
-//            }
             String simpleClassName = Names.simpleClassName(cls.fullClassName);
             out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
             out.format("%spublic static %s fromValue(%s value) {\n", indent, simpleClassName,
@@ -506,18 +497,6 @@ final class SchemasCodeWriter {
     }
 
     private static void writeEqualsMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
-//      @Override
-//      public boolean equals(Object o) {
-//        if (this == o) {
-//          return true;
-//        }
-//        if (o == null || getClass() != o.getClass()) {
-//          return false;
-//        }
-//        Point point = (Point) o;
-//        return Objects.equals(this.lat, point.lat) &&
-//            Objects.equals(this.lon, point.lon);
-//      }
         addOverrideAnnotation(out, imports, indent);
         out.format("%spublic boolean equals(Object o) {\n", indent);
         indent.right();
@@ -539,11 +518,6 @@ final class SchemasCodeWriter {
     }
 
     private static void writeHashCodeMethod(PrintWriter out, Imports imports, Indent indent, Cls cls) {
-//      @Override
-//      public int hashCode() {
-//        return Objects.hash(lat, lon);
-//      }
-
         addOverrideAnnotation(out, imports, indent);
         out.format("%spublic int hashCode() {\n", indent);
         final String s;
