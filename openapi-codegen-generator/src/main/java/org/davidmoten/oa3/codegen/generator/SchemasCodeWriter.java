@@ -219,7 +219,8 @@ final class SchemasCodeWriter {
 
     private static void addConstructorBindingAnnotation(PrintWriter out, Imports imports, Indent indent, Names names) {
         if (names.generatorIsSpring3()) {
-            out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
+            out.format("%s@%s\n", indent, imports
+                    .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
         } else {
             out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
         }
@@ -361,8 +362,11 @@ final class SchemasCodeWriter {
         // with JsonCreator for use by Jackson.
         // TODO javadoc
         indent.right().right();
+        // collect constructor parameters
         final String parametersNullable;
         if (cls.unwrapSingleField()) {
+            // don't annotate parameters with JsonProperty because we will annotate field
+            // with JsonValue
             parametersNullable = cls.fields.stream()
                     .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
@@ -410,9 +414,11 @@ final class SchemasCodeWriter {
         closeParen(out, indent);
         if (hasOptional || !interfaces.isEmpty() || hasBinary) {
             indent.right().right();
-            String parametersOptional = cls.fields.stream().filter(
-                    x -> !interfaces.stream().map(y -> y.discriminator.propertyName).anyMatch(y -> x.name.equals(y)))
-                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName(cls)))
+            String parametersOptional = cls.fields //
+                    .stream() //
+                    // ignore discriminators that should be constants
+                    .filter(x -> !isDiscriminator(interfaces, x)) //
+                    .map(x -> String.format("\n%s%s %s", indent, x.resolvedType(imports), x.fieldName(cls))) //
                     .collect(Collectors.joining(","));
             indent.left().left();
             out.println();
@@ -422,10 +428,7 @@ final class SchemasCodeWriter {
             // validate
             ifValidate(cls, out, indent, imports, names, //
                     out2 -> cls.fields.stream().forEach(x -> {
-                        Optional<Discriminator> disc = interfaces.stream()
-                                .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator)
-                                .findFirst();
-                        if (!disc.isPresent() && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
+                        if (!isDiscriminator(interfaces, x) && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
                             out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
                                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
                                     x.fieldName(cls), x.fieldName(cls));
@@ -435,8 +438,7 @@ final class SchemasCodeWriter {
 
             // assign
             cls.fields.stream().forEach(x -> {
-                Optional<Discriminator> disc = interfaces.stream()
-                        .filter(y -> x.name.equals(y.discriminator.propertyName)).map(y -> y.discriminator).findFirst();
+                Optional<Discriminator> disc = discriminator(interfaces, x);
                 if (disc.isPresent()) {
                     out.format("%sthis.%s = \"%s\";\n", indent, x.fieldName(cls),
                             disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
@@ -457,6 +459,15 @@ final class SchemasCodeWriter {
         }
     }
 
+    private static boolean isDiscriminator(Set<Cls> interfaces, Field x) {
+        return discriminator(interfaces, x).isPresent();
+    }
+
+    private static Optional<Discriminator> discriminator(Set<Cls> interfaces, Field x) {
+        return interfaces.stream().filter(y -> x.name.equals(y.discriminator.propertyName)) //
+                .map(y -> y.discriminator).findFirst();
+    }
+
     private static void validateMore(PrintWriter out, Imports imports, Indent indent, Cls cls, Field x) {
         String raw = x.fieldName(cls);
         if (x.minLength.isPresent()) {
@@ -471,8 +482,8 @@ final class SchemasCodeWriter {
         }
         if (x.pattern.isPresent()) {
             out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, escapePattern(x.pattern.get()),
-                    x.fieldName(cls));
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
+                    escapePattern(x.pattern.get()), x.fieldName(cls));
         }
         if (x.min.isPresent()) {
             out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
