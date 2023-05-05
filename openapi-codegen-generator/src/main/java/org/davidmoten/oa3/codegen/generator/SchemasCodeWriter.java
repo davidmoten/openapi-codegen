@@ -298,9 +298,7 @@ final class SchemasCodeWriter {
                 ifValidate(cls, out, indent, imports, names, //
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
-                                out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                        imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
-                                        x.fieldName(cls), x.fieldName(cls));
+                                checkNotNull(imports, indent, cls, out2, x);
                             } else {
                                 out.format("%s// ???\n", indent);
                             }
@@ -400,9 +398,7 @@ final class SchemasCodeWriter {
         ifValidate(cls, out, indent, imports, names, //
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                        out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
-                                x.fieldName(cls));
+                        checkNotNull(imports, indent, cls, out2, x);
                     }
                     validateMore(out2, imports, indent, cls, x);
                 }));
@@ -429,9 +425,7 @@ final class SchemasCodeWriter {
             ifValidate(cls, out, indent, imports, names, //
                     out2 -> cls.fields.stream().forEach(x -> {
                         if (!isDiscriminator(interfaces, x) && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
-                            out2.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
-                                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
-                                    x.fieldName(cls), x.fieldName(cls));
+                            checkNotNull(imports, indent, cls, out2, x);
                             validateMore(out2, imports, indent, cls, x);
                         }
                     }));
@@ -440,23 +434,38 @@ final class SchemasCodeWriter {
             cls.fields.stream().forEach(x -> {
                 Optional<Discriminator> disc = discriminator(interfaces, x);
                 if (disc.isPresent()) {
+                    // write constant value for discriminator
                     out.format("%sthis.%s = \"%s\";\n", indent, x.fieldName(cls),
                             disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
                 } else if (!x.isPrimitive() && !x.isByteArray()) {
                     if (x.required) {
                         assignField(out, indent, cls, x);
                     } else {
-                        out.format("%sthis.%s = %s.orElse(null);\n", indent, x.fieldName(cls), x.fieldName(cls));
+                        assignOptionalField(out, indent, cls, x);
                     }
                 } else if (x.isOctets()) {
-                    out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName(cls), imports.add(Util.class),
-                            x.fieldName(cls));
+                    assignEncodedOctets(out, imports, indent, cls, x);
                 } else {
                     assignField(out, indent, cls, x);
                 }
             });
             closeParen(out, indent);
         }
+    }
+
+    private static PrintWriter checkNotNull(Imports imports, Indent indent, Cls cls, PrintWriter out, Field x) {
+        return out.format("%s%s.checkNotNull(%s, \"%s\");\n", indent,
+                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
+                x.fieldName(cls));
+    }
+
+    private static void assignEncodedOctets(PrintWriter out, Imports imports, Indent indent, Cls cls, Field x) {
+        out.format("%sthis.%s = %s.encodeOctets(%s);\n", indent, x.fieldName(cls), imports.add(Util.class),
+                x.fieldName(cls));
+    }
+
+    private static void assignOptionalField(PrintWriter out, Indent indent, Cls cls, Field x) {
+        out.format("%sthis.%s = %s.orElse(null);\n", indent, x.fieldName(cls), x.fieldName(cls));
     }
 
     private static boolean isDiscriminator(Set<Cls> interfaces, Field x) {
