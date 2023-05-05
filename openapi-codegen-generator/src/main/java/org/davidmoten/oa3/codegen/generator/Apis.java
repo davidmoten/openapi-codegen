@@ -35,6 +35,7 @@ class Apis {
                 api.getComponents().getParameters().forEach((name, parameter) -> visitSchemas(SchemaCategory.PARAMETER,
                         ImmutableList.of(name), parameter, visitor, api));
             if (api.getComponents().getPathItems() != null)
+                // Note that this is an OpenAPI 3.1 feature
                 api.getComponents().getPathItems().forEach((name, pathItem) -> visitSchemas(SchemaCategory.PATH_ITEM,
                         ImmutableList.of(name), pathItem, visitor, api));
             if (api.getComponents().getRequestBodies() != null)

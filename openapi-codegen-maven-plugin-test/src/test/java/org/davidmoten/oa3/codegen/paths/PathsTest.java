@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.paths;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,6 +45,12 @@ public class PathsTest {
     public void testRequestBodyNotRequired() throws ServiceException {
         RequestBody2 r = new RequestBody2("fred");
         Response2 response = service.requestBodyNotRequiredPost(Optional.of(r));
+    }
+
+    @Test
+    public void testRequestBodyRef() throws ServiceException {
+        RequestBody1 r = new RequestBody1("fred");
+        Response1 response = service.requestBodyRefPost(r);
     }
 
     @Test
@@ -120,7 +125,7 @@ public class PathsTest {
     public void testGetText() throws ServiceException {
         String response = service.textGet();
     }
-    
+
     @Test
     public void testParameterRefs() throws ServiceException {
         Response2 response = service.paramRefGet("abc", OffsetDateTime.now());
