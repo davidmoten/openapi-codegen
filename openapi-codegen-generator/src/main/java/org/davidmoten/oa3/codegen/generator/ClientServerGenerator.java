@@ -150,6 +150,7 @@ public class ClientServerGenerator {
         Mutable<String> primaryMimeType = Mutable.create(null);
         if (response.isPresent() && response.get().response != null) {
             Content content = resolveResponseRefs(response.get().response).getContent();
+            // if content is null then their is no response body
             if (content != null) {
                 primaryMimeType.value = "application/json";
                 MediaType mediaType = content.get(primaryMimeType.value);
@@ -191,9 +192,7 @@ public class ClientServerGenerator {
                 }
                 statusCode = Optional.of(response.get().statusCode);
                 produces = new ArrayList<>(content.keySet());
-            } else {
-                System.out.println("TODO handle response ref");
-            }
+            } 
         }
 
         List<ResponseDescriptor> responseDescriptors = responseDescriptors(operation);
