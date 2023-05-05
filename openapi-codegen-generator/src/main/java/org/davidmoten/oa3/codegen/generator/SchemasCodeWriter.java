@@ -120,8 +120,7 @@ final class SchemasCodeWriter {
         writeClassDeclaration(out, imports, indent, cls, fullClassNameInterfaces);
         indent.right();
         writeEnumMembers(out, indent, cls);
-        if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
-                || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
+        if (isPolymorphic(cls)) {
             writePolymorphicClassContent(out, imports, indent, cls, names, fullClassNameInterfaces);
         } else {
             writeFields(out, imports, indent, cls);
@@ -136,6 +135,11 @@ final class SchemasCodeWriter {
             writeToStringMethod(out, imports, indent, cls);
         }
         closeParen(out, indent);
+    }
+
+    private static boolean isPolymorphic(Cls cls) {
+        return cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
+                || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF;
     }
 
     private static void addOverrideAnnotation(PrintWriter out, Imports imports, Indent indent) {
