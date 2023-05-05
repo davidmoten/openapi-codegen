@@ -249,7 +249,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <basePackage>org.davidmoten.oa3.codegen.maps.generated</basePackage>
+                                    <basePackage>org.davidmoten.oa3.codegen.maps</basePackage>
                                     <failOnParseErrors>false</failOnParseErrors>
                                     <sources>
                                         <directory>${project.basedir}/../../googlemaps-openapi-specification/specification</directory>

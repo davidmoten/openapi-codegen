@@ -68,7 +68,6 @@ public class ClientServerGenerator {
     private List<Method> collectMethods() {
         // want a method per path, operation combo
         List<Method> methods = new ArrayList<>();
-        // TODO handle path $ref
         names.api().getPaths().forEach((pathName, pathItem) -> {
             gatherMethods(pathName, pathItem, methods);
         });
@@ -76,7 +75,7 @@ public class ClientServerGenerator {
     }
 
     private void gatherMethods(String pathName, PathItem pathItem, List<Method> methods) {
-        // TODO pathItem.get$ref();
+        pathItem = Apis.resolveRefs(names.api(), pathItem);
         pathItem.readOperationsMap() //
                 .forEach((method, operation) -> gatherMethods(pathName, method, operation, methods));
     }
@@ -92,6 +91,7 @@ public class ClientServerGenerator {
         if (operation.getParameters() != null) {
             operation.getParameters() //
                     .forEach(p -> {
+                        // TODO handle refs to components/headers
                         p = resolveParameterRefs(p);
                         boolean isArray = false;
                         Schema<?> s = p.getSchema();
@@ -192,7 +192,7 @@ public class ClientServerGenerator {
                 }
                 statusCode = Optional.of(response.get().statusCode);
                 produces = new ArrayList<>(content.keySet());
-            } 
+            }
         }
 
         List<ResponseDescriptor> responseDescriptors = responseDescriptors(operation);

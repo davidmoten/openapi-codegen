@@ -393,7 +393,7 @@ public class Generator {
                             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
                             false, false, Encoding.DEFAULT);
                 } else {
-                    throw new RuntimeException("unexpected");
+                    throw new RuntimeException("unexpected schema: " + schema);
                 }
             }
         }
