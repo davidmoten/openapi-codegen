@@ -27,23 +27,23 @@ class Apis {
 
     static void visitSchemas(OpenAPI api, Visitor visitor) {
         if (api.getPaths() != null) {
-            api.getPaths().forEach(
-                    (name, pathItem) -> visitSchemas(SchemaCategory.PATH, ImmutableList.of(name), pathItem, visitor));
+            api.getPaths().forEach((name, pathItem) -> visitSchemas(SchemaCategory.PATH, ImmutableList.of(name),
+                    pathItem, visitor, api));
         }
         if (api.getComponents() != null) {
             if (api.getComponents().getParameters() != null)
                 api.getComponents().getParameters().forEach((name, parameter) -> visitSchemas(SchemaCategory.PARAMETER,
-                        ImmutableList.of(name), parameter, visitor));
+                        ImmutableList.of(name), parameter, visitor, api));
             if (api.getComponents().getPathItems() != null)
                 api.getComponents().getPathItems().forEach((name, pathItem) -> visitSchemas(SchemaCategory.PATH_ITEM,
-                        ImmutableList.of(name), pathItem, visitor));
+                        ImmutableList.of(name), pathItem, visitor, api));
             if (api.getComponents().getRequestBodies() != null)
                 api.getComponents().getRequestBodies()
                         .forEach((name, requestBody) -> visitSchemas(SchemaCategory.REQUEST_BODY,
-                                ImmutableList.of(name), requestBody, visitor));
+                                ImmutableList.of(name), requestBody, visitor, api));
             if (api.getComponents().getResponses() != null)
                 api.getComponents().getResponses().forEach((name, response) -> visitSchemas(SchemaCategory.RESPONSE,
-                        ImmutableList.of(name), response, visitor));
+                        ImmutableList.of(name), response, visitor, api));
             if (api.getComponents().getSchemas() != null)
                 api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
         }
@@ -63,45 +63,70 @@ class Apis {
         }
     }
 
-    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, PathItem pathItem, Visitor visitor) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, PathItem pathItem,
+            Visitor visitor, OpenAPI api) {
+        pathItem = resolveRefs(api, pathItem);
         if (pathItem.readOperationsMap() != null) {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
                 visitSchemas(category, names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))),
-                        operation, visitor);
+                        operation, visitor, api);
             });
         }
         if (pathItem.getParameters() != null) {
-            pathItem.getParameters().forEach(p -> visitSchemas(category, names.add(p.getName()), p, visitor));
+            pathItem.getParameters().forEach(p -> visitSchemas(category, names.add(p.getName()), p, visitor, api));
         }
     }
 
+    private static PathItem resolveRefs(OpenAPI api, PathItem item) {
+        while (item.get$ref() != null) {
+            item = api.getComponents().getPathItems().get(Names.lastComponent(item.get$ref()));
+        }
+        return item;
+    }
+
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Operation operation,
-            Visitor visitor) {
+            Visitor visitor, OpenAPI api) {
         if (operation == null) {
             return;
         }
         if (operation.getParameters() != null) {
-            operation.getParameters().forEach(p -> visitSchemas(category, list.add(p.getName()), p, visitor));
+            operation.getParameters().forEach(p -> visitSchemas(category, list.add(p.getName()), p, visitor, api));
         }
-        visitSchemas(category, list, operation.getRequestBody(), visitor);
+        visitSchemas(category, list, operation.getRequestBody(), visitor, api);
         if (operation.getResponses() != null) {
             operation.getResponses().forEach((statusCode, response) -> {
-                visitSchemas(category, list.add(statusCode), response, visitor);
+                visitSchemas(category, list.add(statusCode), response, visitor, api);
             });
         }
     }
 
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, ApiResponse response,
-            Visitor visitor) {
+            Visitor visitor, OpenAPI api) {
+        response = resolveRefs(api, response);
         visitSchemas(category, category == SchemaCategory.RESPONSE ? list : list.add("Response"), response.getContent(),
                 visitor);
     }
 
+    private static ApiResponse resolveRefs(OpenAPI api, ApiResponse response) {
+        while (response.get$ref() != null) {
+            response = api.getComponents().getResponses().get(Names.lastComponent(response.get$ref()));
+        }
+        return response;
+    }
+
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, RequestBody requestBody,
-            Visitor visitor) {
+            Visitor visitor, OpenAPI api) {
         if (requestBody != null) {
+            requestBody = resolveRefs(api, requestBody);
             visitSchemas(category, list.add("Request"), requestBody.getContent(), visitor);
         }
+    }
+
+    private static RequestBody resolveRefs(OpenAPI api, RequestBody requestBody) {
+        while (requestBody.get$ref() != null) {
+            requestBody = api.getComponents().getRequestBodies().get(Names.lastComponent(requestBody.get$ref()));
+        }
+        return requestBody;
     }
 
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Content content,
@@ -123,13 +148,21 @@ class Apis {
     }
 
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Parameter parameter,
-            Visitor visitor) {
+            Visitor visitor, OpenAPI api) {
         if (parameter != null) {
+            parameter = resolveRefs(api, parameter);
             if (parameter.getSchema() != null && !Util.isPrimitive(parameter.getSchema())) {
                 visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getSchema(), visitor);
             }
             visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getContent(), visitor);
         }
+    }
+
+    private static Parameter resolveRefs(OpenAPI api, Parameter parameter) {
+        while (parameter.get$ref() != null) {
+            parameter = api.getComponents().getParameters().get(Names.lastComponent(parameter.get$ref()));
+        }
+        return parameter;
     }
 
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Schema<?> schema,

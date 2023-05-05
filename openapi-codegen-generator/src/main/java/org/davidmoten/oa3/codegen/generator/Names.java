@@ -331,7 +331,7 @@ final class Names {
         return api.getComponents().getParameters().get(lastComponent(name));
     }
 
-    private static String lastComponent(String ref) {
+    public static String lastComponent(String ref) {
         int i = ref.lastIndexOf('/');
         return ref.substring(i + 1);
     }
