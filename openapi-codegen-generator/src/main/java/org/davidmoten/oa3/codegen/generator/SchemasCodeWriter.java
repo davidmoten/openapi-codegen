@@ -386,8 +386,7 @@ final class SchemasCodeWriter {
     private static void writeConstructor(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
         // this code will write one public constructor or one private and one public.
-        // The private one is to be annotated
-        // with JsonCreator for use by Jackson.
+        // The private one is to be annotated with JsonCreator for use by Jackson.
         // TODO javadoc
         indent.right().right();
         // collect constructor parameters
