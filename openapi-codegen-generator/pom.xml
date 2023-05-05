@@ -50,6 +50,12 @@
             <groupId>com.github.davidmoten</groupId>
             <artifactId>openapi-codegen-spring-runtime</artifactId>
             <version>${project.parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
