@@ -23,7 +23,7 @@ public final class GeneratorTest {
     
     @Test
     public void testGenerateLibraryApi() throws IOException {
-        generate("s3.yml");
+        generate("library.yml");
     }
 
     private static void generate(String name) throws MalformedURLException {
