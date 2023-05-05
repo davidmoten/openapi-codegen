@@ -12,6 +12,7 @@ import com.github.davidmoten.guavamini.Preconditions;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -45,9 +46,29 @@ class Apis {
             if (api.getComponents().getResponses() != null)
                 api.getComponents().getResponses().forEach((name, response) -> visitSchemas(SchemaCategory.RESPONSE,
                         ImmutableList.of(name), response, visitor, api));
+            if (api.getComponents().getHeaders() != null) {
+                api.getComponents().getHeaders().forEach((key, header) -> visitSchemas(SchemaCategory.HEADER,
+                        ImmutableList.of(key), header, visitor, api));
+            }
             if (api.getComponents().getSchemas() != null)
                 api.getComponents().getSchemas().forEach((key, value) -> visitSchemas(key, value, visitor));
         }
+    }
+
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, Header header, Visitor visitor,
+            OpenAPI api) {
+        if (header != null) {
+            header = resolveRefs(api, header);
+            visitSchemas(category, names, header.getSchema(), visitor);
+        }
+    }
+
+    private static Header resolveRefs(OpenAPI api, Header header) {
+        // Note that components.pathItems only exists with OpenApi 3.1
+        while (header.get$ref() != null) {
+            header = api.getComponents().getHeaders().get(Names.lastComponent(header.get$ref()));
+        }
+        return header;
     }
 
     private static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {

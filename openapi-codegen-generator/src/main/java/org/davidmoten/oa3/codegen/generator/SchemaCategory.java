@@ -7,7 +7,8 @@ enum SchemaCategory {
     PATH_ITEM("pathitem", "#/components/pathItems/"), //
     RESPONSE("response", "#/components/responses/"), //
     REQUEST_BODY("requestbody", "#/components/requestBodies/"), //
-    PARAMETER("parameter", "#/components/parameters/");
+    PARAMETER("parameter", "#/components/parameters/"), //
+    HEADER("header", "#/components/headers");
 
     private final String packageFragment;
     private final String refPrefix;
