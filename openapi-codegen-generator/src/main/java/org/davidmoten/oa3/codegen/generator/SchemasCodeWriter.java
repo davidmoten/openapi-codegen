@@ -173,13 +173,45 @@ final class SchemasCodeWriter {
 
     private static void writeClassDeclaration(PrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
+        String modifier = classModifier(cls);
+        Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
+        String implementsClause = implementsClause(imports, interfaces);
+        if (cls.description.isPresent()) {
+            Javadoc.printJavadoc(out, indent, cls.description.get(), true);
+        }
+        if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+            writeJsonTypeInfoAnnotation(out, imports, indent, cls);
+        } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
+            writePolymorphicDeserializerAnnotation(out, imports, indent, cls);
+        } else {
+            out.println();
+        }
+        if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+            writeJsonIncludeAnnotation(out, imports, indent);
+            writeAutoDetectAnnotation(out, imports, indent);
+        }
+        if (cls.topLevel) {
+            addGeneratedAnnotation(out, imports, indent);
+        }
+        out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(),
+                implementsClause);
+    }
+
+    private static void writeJsonIncludeAnnotation(PrintWriter out, Imports imports, Indent indent) {
+        out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
+    }
+
+    private static String classModifier(Cls cls) {
         final String modifier;
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ENUM) {
             modifier = "";
         } else {
             modifier = cls.topLevel ? "final " : "static final ";
         }
-        Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
+        return modifier;
+    }
+
+    private static String implementsClause(Imports imports, Set<Cls> interfaces) {
         final String implemented;
         if (interfaces == null || interfaces.isEmpty()) {
             implemented = "";
@@ -187,34 +219,21 @@ final class SchemasCodeWriter {
             implemented = " implements "
                     + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
         }
-        if (cls.description.isPresent()) {
-            Javadoc.printJavadoc(out, indent, cls.description.get(), true);
-        }
-        if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",
-                    indent, imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName,
-                    imports.add(As.class));
-            indent.right().right();
-            String types = cls.fields.stream()
-                    .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),
-                            imports.add(x.fullClassName),
-                            cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName)))
-                    .collect(Collectors.joining(", "));
-            indent.left().left();
-            out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
-        } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
-            writePolymorphicDeserializerAnnotation(out, imports, indent, cls);
-        } else {
-            out.println();
-        }
-        if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
-            writeAutoDetectAnnotation(out, imports, indent);
-        }
-        if (cls.topLevel) {
-            addGeneratedAnnotation(out, imports, indent);
-        }
-        out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(), implemented);
+        return implemented;
+    }
+
+    private static void writeJsonTypeInfoAnnotation(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+        out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",
+                indent, imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName,
+                imports.add(As.class));
+        indent.right().right();
+        String types = cls.fields.stream()
+                .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),
+                        imports.add(x.fullClassName),
+                        cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName)))
+                .collect(Collectors.joining(", "));
+        indent.left().left();
+        out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
     }
 
     private static void addConstructorBindingAnnotation(PrintWriter out, Imports imports, Indent indent, Names names) {
@@ -254,34 +273,18 @@ final class SchemasCodeWriter {
         } else {
             if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
                 out.println();
-                out.format("%s@%s\n", indent, imports.add(JsonValue.class));
+                writeJsonValueAnnotation(out, imports, indent);
                 out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
 
                 // add constructor for each member of the oneOf (fieldTypes)
                 // as there are multiple constructors we cannot add ConstructorBinding
-                // annotations
-                // so polymorphic stuff can't be used to bind to rest method parameters
-                out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
-                out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
-                out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
-                        imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
-                out.format("%s}\n", indent.left());
-                cls.fields.forEach(f -> {
-                    String className = toPrimitive(f.fullClassName);
-                    out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
-                    indent.right();
-                    if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
-                        out.format("%sthis.value = value;\n", indent);
-                    } else {
-                        out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
-                                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
-                    }
-                    out.format("%s}\n", indent.left());
-                });
-
-                out.format("\n%spublic Object value() {\n", indent);
-                out.format("%sreturn value;\n", indent.right());
-                out.format("%s}\n", indent.left());
+                // annotations so polymorphic stuff can't be used to bind to rest method
+                // parameters
+                writeOneOfAnyOfNonDiscriminatedObjectConstructor(out, imports, indent, cls);
+                cls.fields.forEach(
+                        f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, imports, indent, cls, f));
+                out.println();
+                writeGetter(out, indent, imports.add(Object.class), "value", "value");
             } else {
                 // allof
                 writeFields(out, imports, indent, cls);
@@ -326,6 +329,29 @@ final class SchemasCodeWriter {
         }
     }
 
+    private static void writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(PrintWriter out, Imports imports,
+            Indent indent, Cls cls, Field f) {
+        String className = toPrimitive(f.fullClassName);
+        out.format("\n%spublic %s(%s value) {\n", indent, cls.simpleName(), imports.add(className));
+        indent.right();
+        if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
+            out.format("%sthis.value = value;\n", indent);
+        } else {
+            out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent,
+                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
+        }
+        out.format("%s}\n", indent.left());
+    }
+
+    private static void writeOneOfAnyOfNonDiscriminatedObjectConstructor(PrintWriter out, Imports imports,
+            Indent indent, Cls cls) {
+        out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
+        out.format("%sprivate %s(%s value) {\n", indent, cls.simpleName(), imports.add(Object.class));
+        out.format("%sthis.value = %s.checkNotNull(value, \"value\");\n", indent.right(),
+                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
+        out.format("%s}\n", indent.left());
+    }
+
     private static void writeFields(PrintWriter out, Imports imports, Indent indent, Cls cls) {
         if (!cls.fields.isEmpty()) {
             out.println();
@@ -339,7 +365,7 @@ final class SchemasCodeWriter {
             if (cls.classType == ClassType.ALL_OF) {
                 out.format("%s@%s\n", indent, imports.add(JsonUnwrapped.class));
             } else if (cls.unwrapSingleField()) {
-                out.format("%s@%s\n", indent, imports.add(JsonValue.class));
+                writeJsonValueAnnotation(out, imports, indent);
             } else {
                 out.format("%s@%s(\"%s\")\n", indent, imports.add(JsonProperty.class), f.name);
             }
@@ -351,6 +377,10 @@ final class SchemasCodeWriter {
             }
             out.format("%sprivate final %s %s;\n", indent, fieldType, cls.fieldName(f));
         });
+    }
+
+    private static void writeJsonValueAnnotation(PrintWriter out, Imports imports, Indent indent) {
+        out.format("%s@%s\n", indent, imports.add(JsonValue.class));
     }
 
     private static void writeConstructor(PrintWriter out, Imports imports, Indent indent, Cls cls,
@@ -606,17 +636,35 @@ final class SchemasCodeWriter {
             } else {
                 out.println();
             }
-            out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName(cls));
-            indent.right();
+//            out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName(cls));
+//            indent.right();
+//            if (!f.isOctets() && !f.required) {
+//                out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName(cls));
+//            } else if (f.isOctets()) {
+//                out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName(cls));
+//            } else {
+//                out.format("%sreturn %s;\n", indent, f.fieldName(cls));
+//            }
+//            closeParen(out, indent);
+
+            final String value;
             if (!f.isOctets() && !f.required) {
-                out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName(cls));
+                value = String.format("%s.ofNullable(%s)", imports.add(Optional.class), f.fieldName(cls));
             } else if (f.isOctets()) {
-                out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName(cls));
+                value = String.format("%s.decodeOctets(%s)", imports.add(Util.class), f.fieldName(cls));
             } else {
-                out.format("%sreturn %s;\n", indent, f.fieldName(cls));
+                value = f.fieldName(cls);
             }
-            closeParen(out, indent);
+            writeGetter(out, indent, f.resolvedType(imports), f.fieldName(cls), value);
         });
+    }
+
+    private static void writeGetter(PrintWriter out, Indent indent, String returnImportedType, String fieldName,
+            String value) {
+        out.format("%spublic %s %s() {\n", indent, returnImportedType, fieldName);
+        indent.right();
+        out.format("%sreturn %s;\n", indent, value);
+        closeParen(out, indent);
     }
 
     private static void writeMemberClasses(PrintWriter out, Imports imports, Indent indent, Cls cls,
