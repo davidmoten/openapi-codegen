@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +46,12 @@ public class BuilderWriter {
                 nextBuilderName = builderName;
             }
             if (previousWasRequired) {
-                out.format("\n%spublic static %s builder() {\n", indent, builderName);
-                indent.right();
-                out.format("%sreturn new %s();\n", indent, builderName);
-                indent.left();
-                out.format("%s}\n", indent);
-                
+                if (!passBuilderIntoConstructor) {
+                    out.format("\n%spublic static %s builder() {\n", indent, builderName);
+                    indent.right();
+                    out.format("%sreturn new %s();\n", indent, builderName);
+                    closeParen(out, indent);
+                }
                 out.format("\n%spublic static final class %s {\n", indent, builderName);
                 indent.right();
                 if (passBuilderIntoConstructor) {
@@ -57,8 +59,7 @@ public class BuilderWriter {
                     out.format("\n%s%s(Builder b) {\n", indent, builderName);
                     indent.right();
                     out.format("%sthis.b = b;\n", indent);
-                    indent.left();
-                    out.format("%s}\n", indent);
+                    closeParen(out, indent);
                 } else {
                     boolean first = true;
                     for (Field fld : list) {
@@ -91,8 +92,7 @@ public class BuilderWriter {
             } else {
                 out.format("%sreturn this;\n", indent, nextBuilderName);
             }
-            indent.left();
-            out.format("%s}\n", indent);
+            closeParen(out, indent);
 
             if (!f.required) {
                 out.format("\n%spublic %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName,
@@ -100,22 +100,25 @@ public class BuilderWriter {
                 indent.right();
                 out.format("%sthis.b.%s = %s;\n", indent, f.fieldName, f.fieldName);
                 out.format("%sreturn this;\n", indent);
-                indent.left();
-                out.format("%s}\n", indent);
+                closeParen(out, indent);
 
             }
-            if (f == last) {
-                out.format("\n%spublic %s build() {\n", indent, importedBuiltType);
-                indent.right();
-                String params = fields.stream().map(x -> x.fieldName).collect(Collectors.joining(", "));
-                out.format("%sreturn new %s(%s);\n", indent, importedBuiltType, params);
-                indent.left();
-                out.format("%s}\n", indent);
+            if (f == last && !f.required) {
+                writeBuildMethod(out, indent, fields, importedBuiltType);
             }
-
             if (f.required || f == last) {
-                indent.left();
-                out.format("%s}\n", indent);
+                closeParen(out, indent);
+            }
+            if (f == last && f.required) {
+                out.format("\n%spublic static final class %s {\n", indent, nextBuilderName);
+                indent.right();
+                out.format("\n%sprivate final Builder b;\n", indent);
+                out.format("\n%s%s(%s b) {\n", indent, nextBuilderName, "Builder");
+                indent.right();
+                out.format("%sthis.b = b;\n", indent);
+                closeParen(out, indent);
+                writeBuildMethod(out, indent, fields, importedBuiltType);
+                closeParen(out, indent);
             }
             passBuilderIntoConstructor = f.required;
             builderName = nextBuilderName;
@@ -123,6 +126,15 @@ public class BuilderWriter {
             out.flush();
         }
 
+    }
+
+    private static void writeBuildMethod(PrintWriter out, Indent indent, List<Field> fields, String importedBuiltType) {
+        out.format("\n%spublic %s build() {\n", indent, importedBuiltType);
+        indent.right();
+        String params = fields.stream().map(x -> "this.b." + x.fieldName).collect(Collectors.joining(", "));
+        out.format("%sreturn new %s(%s);\n", indent, importedBuiltType, params);
+        indent.left();
+        out.format("%s}\n", indent);
     }
 
     private static String enhancedImportedType(Field f, Optional<String> importedOptionalType) {
