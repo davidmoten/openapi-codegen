@@ -13,8 +13,10 @@ public class BuilderWriterTest {
     @Test
     public void test() {
         List<Field> fields = new ArrayList<>();
-        fields.add(new Field("name", "String", true));
+        fields.add(new Field("firstName", "String", true));
+        fields.add(new Field("lastName", "String", true));
         fields.add(new Field("mobile", "String", false));
+        fields.add(new Field("age", "Integer", false));
         try (PrintWriter writer = new PrintWriter(System.out)) {
             BuilderWriter.write(writer, new Indent(), fields, "Thing");
         }

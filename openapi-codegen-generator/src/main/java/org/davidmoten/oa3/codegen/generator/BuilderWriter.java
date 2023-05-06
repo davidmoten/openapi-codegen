@@ -25,20 +25,18 @@ public class BuilderWriter {
         List<Field> list = new ArrayList<>(fields);
         // sort so required are first
         list.sort((a, b) -> Boolean.compare(b.required, a.required));
-        List<Field> required = list.stream().filter(x -> x.required).collect(Collectors.toList());
-        List<Field> optional = list.stream().filter(x -> !x.required).collect(Collectors.toList());
 
         String builderName = "Builder";
         boolean passBuilderIntoConstructor = false;
-        boolean previousWasOptional = false;
+        boolean previousWasRequired = true;
         for (Field f : list) {
             final String nextBuilderName;
             if (f.required) {
-                nextBuilderName = "BuilderWith"+ Names.upperFirst(f.fieldName);
+                nextBuilderName = "BuilderWith" + Names.upperFirst(f.fieldName);
             } else {
                 nextBuilderName = builderName;
             }
-            if (!previousWasOptional) {
+            if (previousWasRequired) {
                 out.format("\n%spublic static final class %s {\n", indent, builderName);
                 indent.right();
                 if (passBuilderIntoConstructor) {
@@ -48,14 +46,37 @@ public class BuilderWriter {
                     indent.left();
                     out.format("%s}\n", indent);
                 } else {
-                    out.format("\n%s%s(Builder b) {\n", indent, builderName);
+                    boolean first = true;
+                    for (Field fld : list) {
+                        if (first) {
+                            out.println();
+                            first = false;
+                        }
+                        out.format("%sprivate %s %s;\n", indent, fld.importedType, fld.fieldName);
+                    }
+                    out.format("\n%s%s() {\n", indent, builderName);
                     out.format("%s}\n", indent);
                 }
+            }
+            out.format("\n%spublic %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName, f.importedType,
+                    f.fieldName);
+            indent.right();
+            out.format("%sthis.b.%s = %s;\n", indent, f.fieldName, f.fieldName);
+            if (f.required) {
+                out.format("%sreturn new %s(this.b);\n", indent, nextBuilderName);
+            } else {
+                out.format("%sreturn this;\n", indent, nextBuilderName);
+            }
+            indent.left();
+            out.format("%s}\n", indent);
+
+            if (previousWasRequired) {
                 indent.left();
                 out.format("%s}\n", indent);
             }
             passBuilderIntoConstructor = f.required;
-            builderName = nextBuilderName ;
+            builderName = nextBuilderName;
+            previousWasRequired = f.required;
         }
 
     }
