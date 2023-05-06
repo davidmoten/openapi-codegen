@@ -32,6 +32,12 @@ public class BuilderWriter {
         boolean passBuilderIntoConstructor = false;
         boolean previousWasOptional = false;
         for (Field f : list) {
+            final String nextBuilderName;
+            if (f.required) {
+                nextBuilderName = "BuilderWith"+ Names.upperFirst(f.fieldName);
+            } else {
+                nextBuilderName = builderName;
+            }
             if (!previousWasOptional) {
                 out.format("\n%spublic static final class %s {\n", indent, builderName);
                 indent.right();
@@ -49,7 +55,7 @@ public class BuilderWriter {
                 out.format("%s}\n", indent);
             }
             passBuilderIntoConstructor = f.required;
-            builderName = "BuilderWith"+ Names.upperFirst(f.fieldName);
+            builderName = nextBuilderName ;
         }
 
     }
