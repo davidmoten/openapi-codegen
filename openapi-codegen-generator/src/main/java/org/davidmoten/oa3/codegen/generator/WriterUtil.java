@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
+import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
@@ -28,7 +28,7 @@ class WriterUtil {
         out.format("%s}\n", indent);
     }
 
-    static void writeContent(Names names, ByteArrayPrintWriter out, String fullClassName, Imports imports) {
+    static void writeContent(Names names, CodePrintWriter out, String fullClassName, Imports imports) {
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
         if (DEBUG) {
             System.out.println("////////////////////////////////////////////////");

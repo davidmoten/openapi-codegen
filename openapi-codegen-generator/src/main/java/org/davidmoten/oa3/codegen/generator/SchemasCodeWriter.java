@@ -22,7 +22,7 @@ import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
 import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
-import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
+import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
@@ -77,14 +77,14 @@ final class SchemasCodeWriter {
             // is used in generated code
             return;
         }
-        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create();
         Indent indent = new Indent();
         SchemasCodeWriter.writeClass(out, imports, indent, cls, fullClassNameInterfaces, names);
         WriterUtil.writeContent(names, out, names.schemaNameToFullClassName(cls.category, schemaName), imports);
     }
 
     static void writeGlobalsClass(Names names) {
-        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create();
         Indent indent = new Indent();
         String fullClassName = names.globalsFullClassName();
         Imports imports = new Imports(fullClassName);
@@ -606,7 +606,7 @@ final class SchemasCodeWriter {
 
     private static void ifValidate(Cls cls, PrintWriter out, Indent indent, Imports imports, Names names,
             Consumer<PrintWriter> r) {
-        ByteArrayPrintWriter b = ByteArrayPrintWriter.create();
+        CodePrintWriter b = CodePrintWriter.create();
         indent.right();
         r.accept(b);
         indent.left();

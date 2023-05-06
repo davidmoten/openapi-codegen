@@ -2,12 +2,14 @@ package org.davidmoten.oa3.codegen.generator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.generator.BuilderWriter.Field;
+import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +22,8 @@ public class BuilderWriterTest {
         fields.add(new Field("lastName", "String", true));
         fields.add(new Field("mobile", "String", false));
         fields.add(new Field("age", "Integer", false));
-        try (PrintWriter writer = new PrintWriter(new File("target/Mixed.java"))) {
-            BuilderWriter.write(writer, new Indent().right(), fields, "Thing", Optional.of("Optional"));
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Mixed.java"))) {
+            BuilderWriter.write(writer, fields, "Thing", Optional.of("Optional"));
         }
     }
 
@@ -32,8 +34,8 @@ public class BuilderWriterTest {
         fields.add(new Field("lastName", "String", false));
         fields.add(new Field("mobile", "String", false));
         fields.add(new Field("age", "Integer", false));
-        try (PrintWriter writer = new PrintWriter(new File("target/Optionals.java"))) {
-            BuilderWriter.write(writer, new Indent().right(), fields, "Thing", Optional.of("Optional"));
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Optionals.java"))) {
+            BuilderWriter.write(writer, fields, "Thing", Optional.of("Optional"));
         }
     }
 
@@ -44,8 +46,8 @@ public class BuilderWriterTest {
         fields.add(new Field("lastName", "String", true));
         fields.add(new Field("mobile", "String", true));
         fields.add(new Field("age", "Integer", true));
-        try (PrintWriter writer = new PrintWriter(new File("target/Required.java"))) {
-            BuilderWriter.write(writer, new Indent().right(), fields, "Thing", Optional.of("Optional"));
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Required.java"))) {
+            BuilderWriter.write(writer, fields, "Thing", Optional.of("Optional"));
         }
     }
 

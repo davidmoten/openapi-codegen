@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.client.runtime.ClientBuilder;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
-import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
+import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.http.Http;
@@ -21,7 +21,7 @@ import org.davidmoten.oa3.codegen.http.Serializer;
 public class ClientCodeWriter {
 
     public static void writeClientClass(Names names, List<Method> methods) {
-        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create();
         String fullClassName = names.clientFullClassName();
         Imports imports = new Imports(fullClassName);
         writeClientClass(out, names, imports, fullClassName, methods);

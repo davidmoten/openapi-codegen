@@ -1,14 +1,11 @@
 package org.davidmoten.oa3.codegen.generator;
 
-import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
-
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.generator.internal.Indent;
+import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 
 import com.github.davidmoten.guavamini.Preconditions;
 
@@ -27,7 +24,7 @@ public class BuilderWriter {
 
     }
 
-    public static void write(PrintWriter out, Indent indent, List<Field> fields, String importedBuiltType,
+    public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType,
             Optional<String> importedOptionalType) {
         Preconditions.checkArgument(!fields.isEmpty());
         List<Field> list = new ArrayList<>(fields);
@@ -47,19 +44,23 @@ public class BuilderWriter {
             }
             if (previousWasRequired) {
                 if (!passBuilderIntoConstructor) {
-                    out.format("\n%spublic static %s builder() {\n", indent, builderName);
-                    indent.right();
-                    out.format("%sreturn new %s();\n", indent, builderName);
-                    closeParen(out, indent);
+                    out.newLine();
+                    out.line("public static %s builder() {", builderName);
+                    out.right();
+                    out.line("return new %s();", builderName);
+                    out.closeParen();
                 }
-                out.format("\n%spublic static final class %s {\n", indent, builderName);
-                indent.right();
+                out.newLine();
+                out.line("public static final class %s {", builderName);
+                out.right();
                 if (passBuilderIntoConstructor) {
-                    out.format("\n%sprivate final Builder b;\n", indent);
-                    out.format("\n%s%s(Builder b) {\n", indent, builderName);
-                    indent.right();
-                    out.format("%sthis.b = b;\n", indent);
-                    closeParen(out, indent);
+                    out.newLine();
+                    out.line("private final Builder b;");
+                    out.newLine();
+                    out.line("%s(Builder b) {", builderName);
+                    out.right();
+                    out.line("this.b = b;");
+                    out.closeParen();
                 } else {
                     boolean first = true;
                     for (Field fld : list) {
@@ -68,57 +69,61 @@ public class BuilderWriter {
                             first = false;
                         }
                         if (fld.required) {
-                            out.format("%sprivate %s %s;\n", indent, fld.importedType, fld.fieldName);
+                            out.line("private %s %s;", fld.importedType, fld.fieldName);
                         } else {
-                            out.format("%sprivate %s %s = %s.empty();\n", indent,
-                                    enhancedImportedType(fld, importedOptionalType), fld.fieldName,
-                                    importedOptionalType.get());
+                            out.line("private %s %s = %s.empty();", enhancedImportedType(fld, importedOptionalType),
+                                    fld.fieldName, importedOptionalType.get());
                         }
                     }
-                    out.format("\n%s%s() {\n", indent, builderName);
-                    out.format("%s}\n", indent);
+                    out.newLine();
+                    out.line("%s() {", builderName);
+                    out.right();
+                    out.closeParen();
                 }
             }
-            out.format("\n%spublic %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName, f.importedType,
-                    f.fieldName);
-            indent.right();
+            out.newLine();
+            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, f.importedType, f.fieldName);
+            out.right();
             if (f.required) {
-                out.format("%sthis.b.%s = %s;\n", indent, f.fieldName, f.fieldName);
+                out.line("this.b.%s = %s;", f.fieldName, f.fieldName);
             } else {
-                out.format("%sthis.b.%s = %s.of(%s);\n", indent, f.fieldName, importedOptionalType.get(), f.fieldName);
+                out.line("this.b.%s = %s.of(%s);", f.fieldName, importedOptionalType.get(), f.fieldName);
             }
             if (f.required) {
-                out.format("%sreturn new %s(this.b);\n", indent, nextBuilderName);
+                out.line("return new %s(this.b);", nextBuilderName);
             } else {
-                out.format("%sreturn this;\n", indent, nextBuilderName);
+                out.line("%sreturn this;", nextBuilderName);
             }
-            closeParen(out, indent);
+            out.closeParen();
 
             if (!f.required) {
-                out.format("\n%spublic %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName,
+                out.newLine();
+                out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName,
                         enhancedImportedType(f, importedOptionalType), f.fieldName);
-                indent.right();
-                out.format("%sthis.b.%s = %s;\n", indent, f.fieldName, f.fieldName);
-                out.format("%sreturn this;\n", indent);
-                closeParen(out, indent);
-
+                out.right();
+                out.line("this.b.%s = %s;", f.fieldName, f.fieldName);
+                out.line("return this;");
+                out.closeParen();
             }
             if (f == last && !f.required) {
-                writeBuildMethod(out, indent, fields, importedBuiltType);
+                writeBuildMethod(out, fields, importedBuiltType);
             }
             if (f.required || f == last) {
-                closeParen(out, indent);
+                out.closeParen();
             }
             if (f == last && f.required) {
-                out.format("\n%spublic static final class %s {\n", indent, nextBuilderName);
-                indent.right();
-                out.format("\n%sprivate final Builder b;\n", indent);
-                out.format("\n%s%s(%s b) {\n", indent, nextBuilderName, "Builder");
-                indent.right();
-                out.format("%sthis.b = b;\n", indent);
-                closeParen(out, indent);
-                writeBuildMethod(out, indent, fields, importedBuiltType);
-                closeParen(out, indent);
+                out.newLine();
+                out.line("public static final class %s {", nextBuilderName);
+                out.right();
+                out.newLine();
+                out.line("private final Builder b;");
+                out.newLine();
+                out.line("%s(%s b) {", nextBuilderName, "Builder");
+                out.right();
+                out.line("this.b = b;");
+                out.closeParen();
+                writeBuildMethod(out, fields, importedBuiltType);
+                out.closeParen();
             }
             passBuilderIntoConstructor = f.required;
             builderName = nextBuilderName;
@@ -128,13 +133,13 @@ public class BuilderWriter {
 
     }
 
-    private static void writeBuildMethod(PrintWriter out, Indent indent, List<Field> fields, String importedBuiltType) {
-        out.format("\n%spublic %s build() {\n", indent, importedBuiltType);
-        indent.right();
+    private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
+        out.newLine();
+        out.line("public %s build() {", importedBuiltType);
+        out.right();
         String params = fields.stream().map(x -> "this.b." + x.fieldName).collect(Collectors.joining(", "));
-        out.format("%sreturn new %s(%s);\n", indent, importedBuiltType, params);
-        indent.left();
-        out.format("%s}\n", indent);
+        out.line("return new %s(%s);", importedBuiltType, params);
+        out.closeParen();
     }
 
     private static String enhancedImportedType(Field f, Optional<String> importedOptionalType) {

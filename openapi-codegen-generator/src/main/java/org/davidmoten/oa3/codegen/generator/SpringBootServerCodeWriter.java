@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Constraints;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Param;
-import org.davidmoten.oa3.codegen.generator.internal.ByteArrayPrintWriter;
+import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
@@ -52,14 +52,14 @@ class SpringBootServerCodeWriter {
     }
 
     private static void writeApplicationClass(Names names) {
-        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create();
         String fullClassName = names.applicationFullClassName();
         Imports imports = new Imports(fullClassName);
         writeApplicationClass(out, imports, fullClassName);
         WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
-    private static void writeApplicationClass(ByteArrayPrintWriter out, Imports imports, String fullClassName) {
+    private static void writeApplicationClass(CodePrintWriter out, Imports imports, String fullClassName) {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(fullClassName));
         out.format("\n%s", IMPORTS_HERE);
@@ -76,14 +76,14 @@ class SpringBootServerCodeWriter {
     }
 
     private static void writeJacksonConfigurationClass(Names names) {
-        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create();
         String fullClassName = names.jacksonConfigurationFullClassName();
         Imports imports = new Imports(fullClassName);
         writeJacksonConfigurationClass(out, imports, names, fullClassName);
         WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
-    private static void writeJacksonConfigurationClass(ByteArrayPrintWriter out, Imports imports, Names names,
+    private static void writeJacksonConfigurationClass(CodePrintWriter out, Imports imports, Names names,
             String fullClassName) {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(fullClassName));
@@ -109,7 +109,7 @@ class SpringBootServerCodeWriter {
     }
 
     private static void writeServiceControllerClass(Names names, List<Method> methods) {
-        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create();
         String fullClassName = names.serviceControllerFullClassName();
         Imports imports = new Imports(fullClassName);
         writeServiceControllerClass(out, imports, names, methods, fullClassName);
@@ -118,13 +118,13 @@ class SpringBootServerCodeWriter {
 
     private static void writeServiceInterfaceClass(Names names, List<Method> methods) {
         String fullClassName = names.serviceInterfaceFullClassName();
-        ByteArrayPrintWriter out = ByteArrayPrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create();
         Imports imports = new Imports(fullClassName);
         writeServiceInterfaceClass(out, imports, names, methods);
         WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
-    private static void writeServiceInterfaceClass(ByteArrayPrintWriter out, Imports imports, Names names,
+    private static void writeServiceInterfaceClass(CodePrintWriter out, Imports imports, Names names,
             List<Method> methods) {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
@@ -138,7 +138,7 @@ class SpringBootServerCodeWriter {
         out.println("\n}\n");
     }
 
-    private static void writeServiceControllerClass(ByteArrayPrintWriter out, Imports imports, Names names,
+    private static void writeServiceControllerClass(CodePrintWriter out, Imports imports, Names names,
             List<Method> methods, String fullClassName) {
         Indent indent = new Indent();
         out.format("package %s;\n", Names.pkg(fullClassName));
@@ -159,7 +159,7 @@ class SpringBootServerCodeWriter {
         out.println("\n}\n");
     }
 
-    private static void writeServiceMethods(ByteArrayPrintWriter out, Imports imports, List<Method> methods,
+    private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods,
             Indent indent, boolean isController, Names names) {
         methods.forEach(m -> {
             writeMethodJavadoc(out, indent, m, m.primaryStatusCode.map(x -> "primary response status code " + x));
@@ -281,7 +281,7 @@ class SpringBootServerCodeWriter {
         }
     }
 
-    private static void addValidationChecks(ByteArrayPrintWriter out, Imports imports, Indent indent, Method m,
+    private static void addValidationChecks(CodePrintWriter out, Imports imports, Indent indent, Method m,
             Names names) {
         m.parameters.forEach(p -> {
             Constraints x = p.constraints;
