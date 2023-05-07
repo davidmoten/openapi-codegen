@@ -14,13 +14,13 @@ public class BuilderWriter {
 
     public static final class Field {
         private final String fieldName;
-        private final String importedType;
+        private final String fullClassName;
         private final boolean required;
         private final boolean isArray;
 
-        public Field(String fieldName, String importedType, boolean required, boolean isArray) {
+        public Field(String fieldName, String fullClassName, boolean required, boolean isArray) {
             this.fieldName = fieldName;
-            this.importedType = importedType;
+            this.fullClassName = fullClassName;
             this.required = required;
             this.isArray = isArray;
         }
@@ -72,10 +72,10 @@ public class BuilderWriter {
                         }
                         if (fld.required) {
                             if (fld.isArray) {
-                                out.line("private %s<%s> %s;", imports.add(List.class), fld.importedType,
+                                out.line("private %s<%s> %s;", imports.add(List.class), imports.add(fld.fullClassName),
                                         fld.fieldName);
                             } else {
-                                out.line("private %s %s;", fld.importedType, fld.fieldName);
+                                out.line("private %s %s;", imports.add(fld.fullClassName), fld.fieldName);
                             }
                         } else {
                             out.line("private %s %s = %s.empty();", enhancedImportedType(fld, imports), fld.fieldName,
@@ -153,16 +153,16 @@ public class BuilderWriter {
     private static String enhancedImportedType(Field f, Imports imports) {
         if (f.isArray) {
             if (f.required) {
-                return String.format("%s<%s>", imports.add(List.class), f.importedType);
+                return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
             } else {
                 return String.format("%s<%s<%s>>", imports.add(Optional.class), imports.add(List.class),
-                        f.importedType);
+                        imports.add(f.fullClassName));
             }
         }
         if (f.required) {
-            return f.importedType;
+            return imports.add(f.fullClassName);
         } else {
-            return String.format("%s<%s>", imports.add(Optional.class), f.importedType);
+            return String.format("%s<%s>", imports.add(Optional.class), imports.add(f.fullClassName));
         }
     }
 }
