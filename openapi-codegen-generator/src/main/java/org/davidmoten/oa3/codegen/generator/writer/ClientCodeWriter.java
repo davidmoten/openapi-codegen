@@ -20,11 +20,10 @@ import org.davidmoten.oa3.codegen.http.Serializer;
 public class ClientCodeWriter {
 
     public static void writeClientClass(Names names, List<Method> methods) {
-        CodePrintWriter out = CodePrintWriter.create();
         String fullClassName = names.clientFullClassName();
-        Imports imports = new Imports(fullClassName);
-        writeClientClass(out, names, imports, fullClassName, methods);
-        WriterUtil.writeContent(names, out, fullClassName, imports);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        writeClientClass(out, names, out.imports(), fullClassName, methods);
+        WriterUtil.writeContent(names, out, fullClassName, out.imports());
     }
 
     private static void writeClientClass(CodePrintWriter out, Names names, Imports imports, String fullClassName,
@@ -44,23 +43,23 @@ public class ClientCodeWriter {
             Names names) {
         // add fields
         out.println();
-        out.line("private final %s serializer;", imports.add(Serializer.class));
-        out.line("private final %s interceptor;", imports.add(Interceptor.class));
-        out.line("private final %s basePath;", imports.add(String.class));
+        out.line("private final %s serializer;", Serializer.class);
+        out.line("private final %s interceptor;", Interceptor.class);
+        out.line("private final %s basePath;", String.class);
 
         // add constructor
         out.line("private %s(%s serializer, %s interceptor, %s basePath) {", Names.simpleClassName(fullClassName),
-                imports.add(Serializer.class), imports.add(Interceptor.class), imports.add(String.class));
+                Serializer.class, Interceptor.class, String.class);
         out.line("this.serializer = serializer;");
         out.line("this.interceptor = interceptor;");
         out.line("this.basePath = basePath;");
         out.closeParen();
 
         out.println();
-        out.line("public static %s<%s> basePath(%s basePath) {", imports.add(ClientBuilder.class),
-                Names.simpleClassName(fullClassName), imports.add(String.class));
+        out.line("public static %s<%s> basePath(%s basePath) {", ClientBuilder.class,
+                Names.simpleClassName(fullClassName), String.class);
         out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptor(), b.basePath()), %s.config(), basePath);",
-                imports.add(ClientBuilder.class), Names.simpleClassName(fullClassName),
+                ClientBuilder.class, Names.simpleClassName(fullClassName),
                 imports.add(names.globalsFullClassName()));
         out.closeParen();
     }
@@ -106,11 +105,11 @@ public class ClientCodeWriter {
             }
             SpringBootServerCodeWriter.writeMethodJavadoc(out, m,
                     Optional.of("full response with status code, body and headers"));
-            out.line("public %s %s%s(%s) {", imports.add(HttpResponse.class), m.methodName, FULL_RESPONSE_SUFFIX,
+            out.line("public %s %s%s(%s) {", HttpResponse.class, m.methodName, FULL_RESPONSE_SUFFIX,
                     params);
-            out.line("return %s", imports.add(Http.class));
+            out.line("return %s", Http.class);
             out.right().right();
-            out.line(".method(%s.%s)", imports.add(HttpMethod.class), m.httpMethod.name());
+            out.line(".method(%s.%s)", HttpMethod.class, m.httpMethod.name());
             out.line(".basePath(this.basePath)");
             out.line(".path(\"%s\")", m.path);
             out.line(".serializer(this.serializer)");

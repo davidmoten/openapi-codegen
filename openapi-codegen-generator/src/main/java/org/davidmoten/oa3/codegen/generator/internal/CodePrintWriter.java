@@ -11,6 +11,7 @@ public final class CodePrintWriter extends PrintWriter {
 
     private ByteArrayOutputStream bytes;
     private final Indent indent;
+    private Imports imports = new Imports(CodePrintWriter.class.getCanonicalName());
 
     public CodePrintWriter(OutputStream out) {
         super(new OutputStreamWriter(out, StandardCharsets.UTF_8));
@@ -38,7 +39,11 @@ public final class CodePrintWriter extends PrintWriter {
         Object[] args2 = new Object[args.length + 2];
         args2[0] = indent;
         for (int i = 0; i < args.length; i++) {
-            args2[i + 1] = args[i];
+            Object v = args[i];
+            if (v instanceof Class) {
+                v = imports.add((Class<?>) v);
+            }
+            args2[i + 1] = v;
         }
         format("%s" + format + "\n", args2);
         if (format.endsWith("{")) {
@@ -75,6 +80,20 @@ public final class CodePrintWriter extends PrintWriter {
     public void closeParen() {
         indent.left();
         format("%s}\n", indent);
+    }
+
+    public static CodePrintWriter create(String fullClassName) {
+        CodePrintWriter w = create();
+        w.imports = new Imports(fullClassName);
+        return w;
+    }
+    
+    public Imports imports() {
+        return imports;
+    }
+    
+    public String imported(String fullClassName) {
+        return imports.add(fullClassName);
     }
 
 }

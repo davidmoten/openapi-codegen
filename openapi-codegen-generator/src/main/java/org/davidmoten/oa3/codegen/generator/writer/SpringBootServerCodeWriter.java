@@ -121,7 +121,7 @@ public final class SpringBootServerCodeWriter {
 
     private static void writeServiceInterfaceClass(Names names, List<Method> methods) {
         String fullClassName = names.serviceInterfaceFullClassName();
-        CodePrintWriter out = CodePrintWriter.create();
+        CodePrintWriter out = CodePrintWriter.create(fullClassName);
         Imports imports = new Imports(fullClassName);
         writeServiceInterfaceClass(out, imports, names, methods);
         WriterUtil.writeContent(names, out, fullClassName, imports);
