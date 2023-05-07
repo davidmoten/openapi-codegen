@@ -95,7 +95,7 @@ public final class SchemasCodeWriter {
         out.format("package %s;\n", Names.pkg(fullClassName));
         out.format("\n%s", IMPORTS_HERE);
         out.println();
-        addGeneratedAnnotation(out, imports, indent);
+        addGeneratedAnnotation(out, imports);
         out.format("public final class %s {\n", Names.simpleClassName(fullClassName));
         indent.right();
         out.format("\n%sprivate static volatile %s config = %s.builder().build();\n", indent, imports.add(Config.class),
@@ -132,7 +132,7 @@ public final class SchemasCodeWriter {
             writeBuilder(out, imports, cls, fullClassNameInterfaces);
             writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
         }
-        writeEnumCreator(out, imports, indent, cls);
+        writeEnumCreator(out, imports, cls);
         writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces, names);
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeEqualsMethod(out, imports, indent, cls);
@@ -147,32 +147,33 @@ public final class SchemasCodeWriter {
                 || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF;
     }
 
-    private static void addOverrideAnnotation(CodePrintWriter out, Imports imports, Indent indent) {
-        out.format("\n%s@%s\n", indent, imports.add(Override.class));
+    private static void addOverrideAnnotation(CodePrintWriter out, Imports imports) {
+        out.newLine();
+        out.line("@%s", imports.add(Override.class));
     }
 
-    private static void addGeneratedAnnotation(CodePrintWriter out, Imports imports, Indent indent) {
-        out.format("%s@%s(value = \"%s\")\n", indent, imports.add(Generated.class), version);
+    private static void addGeneratedAnnotation(CodePrintWriter out, Imports imports) {
+        out.line("@%s(value = \"%s\")", imports.add(Generated.class), version);
     }
 
-    private static void writeEnumCreator(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
+    private static void writeEnumCreator(CodePrintWriter out, Imports imports, Cls cls) {
         if (cls.classType == ClassType.ENUM) {
             String simpleClassName = Names.simpleClassName(cls.fullClassName);
-            out.format("\n%s@%s\n", indent, imports.add(JsonCreator.class));
-            out.format("%spublic static %s fromValue(%s value) {\n", indent, simpleClassName,
-                    imports.add(Object.class));
-            indent.right();
-            out.format("%sfor (%s x: %s.values()) {\n", indent, simpleClassName, simpleClassName);
-            indent.right();
+            out.newLine();
+            out.line("@%s", imports.add(JsonCreator.class));
+            out.line("public static %s fromValue(%s value) {", simpleClassName, imports.add(Object.class));
+            out.right();
+            out.line("for (%s x: %s.values()) {", simpleClassName, simpleClassName);
+            out.right();
             // be careful because x.value can be primitive
-            out.format("%sif (value.equals(x.value)) {\n", indent);
-            indent.right();
-            out.format("%sreturn x;\n", indent);
-            closeParen(out, indent);
-            closeParen(out, indent);
-            out.format("%sthrow new %s(\"unexpected enum value: '\" + value + \"'\");\n", indent,
+            out.line("if (value.equals(x.value)) {");
+            out.right();
+            out.line("return x;");
+            out.closeParen();
+            out.closeParen();
+            out.line("throw new %s(\"unexpected enum value: '\" + value + \"'\");",
                     imports.add(IllegalArgumentException.class));
-            closeParen(out, indent);
+            out.closeParen();
         }
     }
 
@@ -196,7 +197,7 @@ public final class SchemasCodeWriter {
             writeAutoDetectAnnotation(out, imports, indent);
         }
         if (cls.topLevel) {
-            addGeneratedAnnotation(out, imports, indent);
+            addGeneratedAnnotation(out, imports);
         }
         out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(),
                 implementsClause);
@@ -580,7 +581,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeEqualsMethod(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
-        addOverrideAnnotation(out, imports, indent);
+        addOverrideAnnotation(out, imports);
         out.format("%spublic boolean equals(Object o) {\n", indent);
         indent.right();
         out.format("%sif (this == o) {\n", indent);
@@ -601,7 +602,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeHashCodeMethod(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
-        addOverrideAnnotation(out, imports, indent);
+        addOverrideAnnotation(out, imports);
         out.format("%spublic int hashCode() {\n", indent);
         final String s;
         if (cls.fields.size() <= 3) {
@@ -617,7 +618,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeToStringMethod(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
-        addOverrideAnnotation(out, imports, indent);
+        addOverrideAnnotation(out, imports);
         out.format("%spublic String toString() {\n", indent);
         final String s;
         if (cls.fields.size() > 3) {
@@ -661,7 +662,7 @@ public final class SchemasCodeWriter {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
             if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
-                addOverrideAnnotation(out, imports, indent);
+                addOverrideAnnotation(out, imports);
             } else {
                 out.println();
             }
