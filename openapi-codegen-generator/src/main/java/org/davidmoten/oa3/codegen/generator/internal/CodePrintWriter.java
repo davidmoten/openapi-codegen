@@ -41,6 +41,9 @@ public final class CodePrintWriter extends PrintWriter {
             args2[i + 1] = args[i];
         }
         format("%s" + format + "\n", args2);
+        if (format.endsWith("{")) {
+            right();
+        }
     }
 
     public CodePrintWriter left() {

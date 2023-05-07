@@ -49,7 +49,6 @@ public class BuilderWriter {
                 if (!passBuilderIntoConstructor) {
                     out.newLine();
                     out.line("public static %s builder() {", builderName);
-                    out.right();
                     out.line("return new %s();", builderName);
                     out.closeParen();
                 }
@@ -61,7 +60,6 @@ public class BuilderWriter {
                     out.line("private final Builder b;");
                     out.newLine();
                     out.line("%s(Builder b) {", builderName);
-                    out.right();
                     out.line("this.b = b;");
                     out.closeParen();
                     inFirstBuilder = false;
@@ -86,14 +84,12 @@ public class BuilderWriter {
                     }
                     out.newLine();
                     out.line("%s() {", builderName);
-                    out.right();
                     out.closeParen();
                 }
             }
             String builderField = inFirstBuilder ? "" : ".b";
             out.newLine();
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, imports), f.fieldName);
-            out.right();
             if (f.required) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else {
@@ -111,7 +107,6 @@ public class BuilderWriter {
                 out.newLine();
                 out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, imports),
                         f.fieldName);
-                out.right();
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
                 out.line("return this;");
                 out.closeParen();
@@ -126,12 +121,10 @@ public class BuilderWriter {
                 out.newLine();
                 out.line("// second");
                 out.line("public static final class %s {", nextBuilderName);
-                out.right();
                 out.newLine();
                 out.line("private final Builder b;");
                 out.newLine();
                 out.line("%s(%s b) {", nextBuilderName, "Builder");
-                out.right();
                 out.line("this.b = b;");
                 out.closeParen();
                 writeBuildMethod(out, fields, importedBuiltType, ".b");
@@ -142,14 +135,12 @@ public class BuilderWriter {
             previousWasRequired = f.required;
             out.flush();
         }
-
     }
 
     private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType,
             String builderField) {
         out.newLine();
         out.line("public %s build() {", importedBuiltType);
-        out.right();
         String params = fields.stream().map(x -> String.format("this%s.%s", builderField, x.fieldName))
                 .collect(Collectors.joining(", "));
         out.line("return new %s(%s);", importedBuiltType, params);

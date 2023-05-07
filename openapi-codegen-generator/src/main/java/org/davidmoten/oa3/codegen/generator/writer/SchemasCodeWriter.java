@@ -94,18 +94,15 @@ public final class SchemasCodeWriter {
         out.line("%s", IMPORTS_HERE);
         addGeneratedAnnotation(out, imports);
         out.line("public final class %s {", Names.simpleClassName(fullClassName));
-        out.right();
         out.println();
         out.line("private static volatile %s config = %s.builder().build();", imports.add(Config.class),
                 imports.add(Config.class));
         out.println();
         out.line("public static void setConfig(%s configuration) {", imports.add(Config.class));
-        out.right();
         out.line("config = configuration;");
         out.closeParen();
         out.println();
         out.line("public static %s config() {", imports.add(Config.class));
-        out.right();
         out.line("return config;");
         out.closeParen();
         out.closeParen();
@@ -120,7 +117,6 @@ public final class SchemasCodeWriter {
             out.line("%s", IMPORTS_HERE);
         }
         writeClassDeclaration(out, imports, cls, fullClassNameInterfaces);
-        out.right();
         writeEnumMembers(out, cls);
         if (isPolymorphic(cls)) {
             writePolymorphicClassContent(out, imports, cls, names, fullClassNameInterfaces);
@@ -160,12 +156,9 @@ public final class SchemasCodeWriter {
             out.println();
             out.line("@%s", imports.add(JsonCreator.class));
             out.line("public static %s fromValue(%s value) {", simpleClassName, imports.add(Object.class));
-            out.right();
             out.line("for (%s x: %s.values()) {", simpleClassName, simpleClassName);
-            out.right();
             // be careful because x.value can be primitive
             out.line("if (value.equals(x.value)) {");
-            out.right();
             out.line("return x;");
             out.closeParen();
             out.closeParen();
@@ -268,8 +261,8 @@ public final class SchemasCodeWriter {
         }
     }
 
-    private static void writePolymorphicClassContent(CodePrintWriter out, Imports imports, Cls cls,
-            Names names, Map<String, Set<Cls>> fullClassNameInterfaces) {
+    private static void writePolymorphicClassContent(CodePrintWriter out, Imports imports, Cls cls, Names names,
+            Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.println();
             out.line("%s %s();", imports.add(String.class), cls.discriminator.fieldName);
@@ -299,7 +292,6 @@ public final class SchemasCodeWriter {
                 out.left().left();
                 out.println();
                 out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersNullable);
-                out.right();
                 ifValidate(cls, out, imports, names, //
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
@@ -319,10 +311,8 @@ public final class SchemasCodeWriter {
             out.line("@%s(\"serial\")", imports.add(SuppressWarnings.class));
             out.line("public static final class Deserializer extends %s<%s> {",
                     imports.add(PolymorphicDeserializer.class), cls.simpleName());
-            out.right();
             out.println();
             out.line("public Deserializer() {");
-            out.right();
             String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
             out.line("super(%s.config(), %s.%s, %s.class, %s);", imports.add(names.globalsFullClassName()),
@@ -335,7 +325,6 @@ public final class SchemasCodeWriter {
     private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Imports imports, Cls cls) {
         cls.fields.forEach(f -> {
             out.line("public static %s of(%s value) {", cls.simpleName(), imports.add(f.fullClassName));
-            out.right();
             out.line("return new %s(value);", cls.simpleName());
             out.closeParen();
         });
@@ -346,7 +335,6 @@ public final class SchemasCodeWriter {
         String className = toPrimitive(f.fullClassName);
         out.println();
         out.line("public %s(%s value) {", cls.simpleName(), imports.add(className));
-        out.right();
         if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
             out.line("this.value = value;");
         } else {
@@ -361,7 +349,6 @@ public final class SchemasCodeWriter {
         out.println();
         out.line("@%s", imports.add(JsonCreator.class));
         out.line("private %s(%s value) {", cls.simpleName(), imports.add(Object.class));
-        out.right();
         out.line("this.value = %s.checkNotNull(value, \"value\");",
                 imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
         out.closeParen();
@@ -464,7 +451,6 @@ public final class SchemasCodeWriter {
             out.println();
             addConstructorBindingAnnotation(out, imports, names);
             out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersOptional);
-            out.right();
             // validate
             ifValidate(cls, out, imports, names, //
                     out2 -> cls.fields.stream().forEach(x -> {
@@ -581,11 +567,9 @@ public final class SchemasCodeWriter {
         out.line("public boolean equals(Object o) {\n");
         out.right();
         out.line("if (this == o) {");
-        out.right();
         out.line("return true;");
         out.closeParen();
         out.line("if (o == null || getClass() != o.getClass()) {");
-        out.right();
         out.line("return false;");
         out.closeParen();
         out.right();
@@ -602,8 +586,6 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeHashCodeMethod(CodePrintWriter out, Imports imports, Cls cls) {
-        addOverrideAnnotation(out, imports);
-        out.line("public int hashCode() {");
         final String s;
         if (cls.fields.size() <= 3) {
             s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
@@ -613,14 +595,13 @@ public final class SchemasCodeWriter {
                     .collect(Collectors.joining(", "));
             out.left().left().left();
         }
-        out.right();
+        addOverrideAnnotation(out, imports);
+        out.line("public int hashCode() {");
         out.line("return %s.hash(%s);", imports.add(Objects.class), s);
         out.closeParen();
     }
 
     private static void writeToStringMethod(CodePrintWriter out, Imports imports, Cls cls) {
-        addOverrideAnnotation(out, imports);
-        out.line("public String toString() {");
         final String s;
         if (cls.fields.size() > 3) {
             out.right().right().right();
@@ -632,7 +613,8 @@ public final class SchemasCodeWriter {
             s = cls.fields.stream().map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
                     .collect(Collectors.joining(""));
         }
-        out.right();
+        addOverrideAnnotation(out, imports);
+        out.line("public String toString() {");
         out.line("return %s.toString(%s.class%s);", imports.add(Util.class), cls.simpleName(), s);
         out.closeParen();
     }
@@ -650,6 +632,7 @@ public final class SchemasCodeWriter {
         } else {
             out.line("if (%s.config().validateInConstructor().test(%s.class)) {",
                     imports.add(names.globalsFullClassName()), cls.simpleName());
+            out.left();
             out.print(text);
             out.line("}");
         }
@@ -680,10 +663,8 @@ public final class SchemasCodeWriter {
         });
     }
 
-    private static void writeGetter(CodePrintWriter out, String returnImportedType, String fieldName,
-            String value) {
+    private static void writeGetter(CodePrintWriter out, String returnImportedType, String fieldName, String value) {
         out.line("public %s %s() {", returnImportedType, fieldName);
-        out.right();
         out.line("return %s;", value);
         out.closeParen();
     }
