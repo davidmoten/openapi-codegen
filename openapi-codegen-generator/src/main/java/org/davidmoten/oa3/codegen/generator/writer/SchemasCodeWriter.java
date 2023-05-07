@@ -289,6 +289,7 @@ public final class SchemasCodeWriter {
                 writeOneOfAnyOfNonDiscriminatedObjectConstructor(out, imports, indent, cls);
                 cls.fields.forEach(
                         f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, imports, indent, cls, f));
+                writeNonDiscriminatedBuilder(out, imports, indent, cls);
                 out.println();
                 writeGetter(out, indent, imports.add(Object.class), "value", "value");
             } else {
@@ -333,6 +334,15 @@ public final class SchemasCodeWriter {
             closeParen(out, indent);
             closeParen(out, indent);
         }
+    }
+
+    private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
+        cls.fields.forEach(f -> {
+            out.format("\n%spublic static %s of(%s value) {\n", indent, cls.simpleName(), imports.add(f.fullClassName));
+            indent.right();
+            out.format("%sreturn new %s(value);\n", indent, cls.simpleName());
+            closeParen(out, indent);
+        });
     }
 
     private static void writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(CodePrintWriter out, Imports imports,
