@@ -2,7 +2,6 @@ package org.davidmoten.oa3.codegen.generator.writer;
 
 import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.closeParen;
 
-import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,50 +30,48 @@ public class ClientCodeWriter {
         WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
-    private static void writeClientClass(PrintWriter out, Names names, Imports imports, String fullClassName,
+    private static void writeClientClass(CodePrintWriter out, Names names, Imports imports, String fullClassName,
             List<Method> methods) {
-        Indent indent = new Indent();
-        out.format("package %s;\n", Names.pkg(fullClassName));
-        out.format("\n%s", WriterUtil.IMPORTS_HERE);
-        WriterUtil.writeApiJavadoc(out, names, indent);
-        out.format("\npublic class %s {\n", Names.simpleClassName(fullClassName));
-        indent.right();
-        writeClientClassFieldsAndConstructor(out, imports, fullClassName, indent, names);
-        writeClientClassMethods(out, imports, methods, indent);
-        indent.left();
-        out.println("\n}\n");
+        out.line("package %s;", Names.pkg(fullClassName));
+        out.println();
+        out.line("%s", WriterUtil.IMPORTS_HERE);
+        WriterUtil.writeApiJavadoc(out, names, out.indent());
+        out.println();
+        out.line("public class %s {", Names.simpleClassName(fullClassName));
+        writeClientClassFieldsAndConstructor(out, imports, fullClassName, names);
+        writeClientClassMethods(out, imports, methods, out.indent());
+        out.closeParen();
     }
 
-    private static void writeClientClassFieldsAndConstructor(PrintWriter out, Imports imports, String fullClassName,
-            Indent indent, Names names) {
+    private static void writeClientClassFieldsAndConstructor(CodePrintWriter out, Imports imports, String fullClassName,
+            Names names) {
         // add fields
-        out.format("\n%sprivate final %s serializer;\n", indent, imports.add(Serializer.class));
-        out.format("%sprivate final %s interceptor;\n", indent, imports.add(Interceptor.class));
-        out.format("%sprivate final %s basePath;\n", indent, imports.add(String.class));
+        out.println();
+        out.line("private final %s serializer;", imports.add(Serializer.class));
+        out.line("private final %s interceptor;", imports.add(Interceptor.class));
+        out.line("private final %s basePath;", imports.add(String.class));
 
         // add constructor
-        out.format("\n%sprivate %s(%s serializer, %s interceptor, %s basePath) {\n", indent,
-                Names.simpleClassName(fullClassName), imports.add(Serializer.class), imports.add(Interceptor.class),
-                imports.add(String.class));
-        indent.right();
-        out.format("%sthis.serializer = serializer;\n", indent);
-        out.format("%sthis.interceptor = interceptor;\n", indent);
-        out.format("%sthis.basePath = basePath;\n", indent);
-        closeParen(out, indent);
+        out.line("private %s(%s serializer, %s interceptor, %s basePath) {", Names.simpleClassName(fullClassName),
+                imports.add(Serializer.class), imports.add(Interceptor.class), imports.add(String.class));
+        out.line("this.serializer = serializer;");
+        out.line("this.interceptor = interceptor;");
+        out.line("this.basePath = basePath;");
+        out.closeParen();
 
-        out.format("\n%spublic static %s<%s> basePath(%s basePath) {\n", indent, imports.add(ClientBuilder.class),
+        out.println();
+        out.line("public static %s<%s> basePath(%s basePath) {", imports.add(ClientBuilder.class),
                 Names.simpleClassName(fullClassName), imports.add(String.class));
-        indent.right();
-        out.format(
-                "%sreturn new %s<>(b -> new %s(b.serializer(), b.interceptor(), b.basePath()), %s.config(), basePath);\n",
-                indent, imports.add(ClientBuilder.class), Names.simpleClassName(fullClassName),
+        out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptor(), b.basePath()), %s.config(), basePath);",
+                imports.add(ClientBuilder.class), Names.simpleClassName(fullClassName),
                 imports.add(names.globalsFullClassName()));
-        closeParen(out, indent);
+        out.closeParen();
     }
 
     private static final String FULL_RESPONSE_SUFFIX = "FullResponse";
 
-    private static void writeClientClassMethods(PrintWriter out, Imports imports, List<Method> methods, Indent indent) {
+    private static void writeClientClassMethods(CodePrintWriter out, Imports imports, List<Method> methods,
+            Indent indent) {
         methods.forEach(m -> {
             indent.right().right();
             String params = m.parameters //
