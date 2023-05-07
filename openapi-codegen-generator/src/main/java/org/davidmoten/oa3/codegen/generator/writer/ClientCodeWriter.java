@@ -1,7 +1,5 @@
 package org.davidmoten.oa3.codegen.generator.writer;
 
-import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.closeParen;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,7 +10,6 @@ import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
-import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
@@ -39,7 +36,7 @@ public class ClientCodeWriter {
         out.println();
         out.line("public class %s {", Names.simpleClassName(fullClassName));
         writeClientClassFieldsAndConstructor(out, imports, fullClassName, names);
-        writeClientClassMethods(out, imports, methods, out.indent());
+        writeClientClassMethods(out, imports, methods);
         out.closeParen();
     }
 
@@ -70,16 +67,16 @@ public class ClientCodeWriter {
 
     private static final String FULL_RESPONSE_SUFFIX = "FullResponse";
 
-    private static void writeClientClassMethods(CodePrintWriter out, Imports imports, List<Method> methods,
-            Indent indent) {
+    private static void writeClientClassMethods(CodePrintWriter out, Imports imports, List<Method> methods
+            ) {
         methods.forEach(m -> {
-            indent.right().right();
+            out.right().right();
             String params = m.parameters //
                     .stream() //
-                    .map(p -> String.format("\n%s%s %s", indent, SpringBootServerCodeWriter.toImportedType(p, imports),
+                    .map(p -> String.format("\n%s%s %s", out.indent(), SpringBootServerCodeWriter.toImportedType(p, imports),
                             p.identifier)) //
                     .collect(Collectors.joining(", "));
-            indent.left().left();
+            out.left().left();
             final String importedReturnType;
             if (!m.returnFullClassName.isPresent()) {
                 importedReturnType = "void";
@@ -87,62 +84,60 @@ public class ClientCodeWriter {
                 importedReturnType = imports.add(m.returnFullClassName.get());
             }
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
-                SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m,
+                SpringBootServerCodeWriter.writeMethodJavadoc(out, out.indent(), m,
                         m.primaryStatusCode.map(x -> "primary response with status code " + x));
-                out.format("\n%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
-                indent.right();
+                out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 final String paramIdentifiers;
                 if (m.parameters.size() <= 3) {
                     paramIdentifiers = m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", "));
                 } else {
-                    indent.right().right().right();
-                    paramIdentifiers = m.parameters.stream().map(p -> String.format("\n%s%s", indent, p.identifier))
+                    out.right().right().right();
+                    paramIdentifiers = m.parameters.stream().map(p -> String.format("\n%s%s", out.indent(), p.identifier))
                             .collect(Collectors.joining(","));
-                    indent.left().left().left();
+                    out.left().left().left();
                 }
-                out.format("%sreturn %s%s(%s)\n", indent, m.methodName, FULL_RESPONSE_SUFFIX, paramIdentifiers);
-                indent.right().right();
-                out.format("%s.assertStatusCodeMatches(\"%s\")\n", indent, m.primaryStatusCode.get());
-                out.format("%s.assertContentTypeMatches(\"%s\")\n", indent, m.primaryMediaType.get());
-                out.format("%s.dataUnwrapped();\n", indent);
-                indent.left().left();
-                closeParen(out, indent);
+                out.line("return %s%s(%s)", m.methodName, FULL_RESPONSE_SUFFIX, paramIdentifiers);
+                out.right().right();
+                out.line(".assertStatusCodeMatches(\"%s\")", m.primaryStatusCode.get());
+                out.line(".assertContentTypeMatches(\"%s\")", m.primaryMediaType.get());
+                out.line(".dataUnwrapped();");
+                out.left().left();
+                out.closeParen();
             }
-            SpringBootServerCodeWriter.writeMethodJavadoc(out, indent, m,
+            SpringBootServerCodeWriter.writeMethodJavadoc(out, out.indent(), m,
                     Optional.of("full response with status code, body and headers"));
-            out.format("\n%spublic %s %s%s(%s) {\n", indent, imports.add(HttpResponse.class), m.methodName,
+            out.line("public %s %s%s(%s) {", imports.add(HttpResponse.class), m.methodName,
                     FULL_RESPONSE_SUFFIX, params);
-            indent.right();
-            out.format("%sreturn %s\n", indent, imports.add(Http.class));
-            indent.right().right();
-            out.format("%s.method(%s.%s)\n", indent, imports.add(HttpMethod.class), m.httpMethod.name());
-            out.format("%s.basePath(this.basePath)\n", indent);
-            out.format("%s.path(\"%s\")\n", indent, m.path);
-            out.format("%s.serializer(this.serializer)\n", indent);
-            out.format("%s.interceptor(this.interceptor)\n", indent);
-            out.format("%s.acceptApplicationJson()\n", indent);
+            out.line("return %s", imports.add(Http.class));
+            out.right().right();
+            out.line(".method(%s.%s)", imports.add(HttpMethod.class), m.httpMethod.name());
+            out.line(".basePath(this.basePath)");
+            out.line(".path(\"%s\")", m.path);
+            out.line(".serializer(this.serializer)");
+            out.line(".interceptor(this.interceptor)");
+            out.line(".acceptApplicationJson()");
             m.parameters.forEach(p -> {
                 if (p.type == ParamType.QUERY) {
-                    out.format("%s.queryParam(\"%s\", %s)\n", indent, p.name, p.identifier);
+                    out.line(".queryParam(\"%s\", %s)", p.name, p.identifier);
                 } else if (p.type == ParamType.PATH) {
-                    out.format("%s.pathParam(\"%s\", %s)\n", indent, p.name, p.identifier);
+                    out.line(".pathParam(\"%s\", %s)", p.name, p.identifier);
                 } else if (p.type == ParamType.BODY) {
-                    out.format("%s.body(%s)\n", indent, p.identifier);
-                    out.format("%s.contentTypeApplicationJson()\n", indent);
+                    out.line(".body(%s)", p.identifier);
+                    out.line(".contentTypeApplicationJson()");
                 } else if (p.type == ParamType.COOKIE) {
-                    out.format("%s.cookie(\"%s\", %s)\n", indent, p.name, p.identifier);
+                    out.line(".cookie(\"%s\", %s)", p.name, p.identifier);
                 } else if (p.type == ParamType.HEADER) {
-                    out.format("%s.header(\"%s\", %s)\n", indent, p.name, p.identifier);
+                    out.line(".header(\"%s\", %s)", p.name, p.identifier);
                 }
             });
             m.responseDescriptors.forEach(r -> {
-                out.format("%s.responseAs(%s.class)\n", indent, imports.add(r.fullClassName()));
-                out.format("%s.whenStatusCodeMatches(\"%s\")\n", indent, r.statusCode());
-                out.format("%s.whenContentTypeMatches(\"%s\")\n", indent, r.mediaType());
+                out.line(".responseAs(%s.class)", imports.add(r.fullClassName()));
+                out.line(".whenStatusCodeMatches(\"%s\")", r.statusCode());
+                out.line(".whenContentTypeMatches(\"%s\")", r.mediaType());
             });
-            out.format("%s.call();\n", indent);
-            indent.left().left();
-            closeParen(out, indent);
+            out.line(".call();");
+            out.left().left();
+            out.closeParen();
         });
     }
 
