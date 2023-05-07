@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.internal;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,22 +13,19 @@ import java.util.stream.Stream;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
-import org.davidmoten.oa3.codegen.generator.internal.Imports;
-import org.davidmoten.oa3.codegen.generator.internal.Indent;
-import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
+import org.davidmoten.oa3.codegen.generator.Names;
 
-class WriterUtil {
+public final class WriterUtil {
 
     static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
-    static final String IMPORTS_HERE = "IMPORTS_HERE";
+    public static final String IMPORTS_HERE = "IMPORTS_HERE";
 
     public static void closeParen(PrintWriter out, Indent indent) {
         indent.left();
         out.format("%s}\n", indent);
     }
 
-    static void writeContent(Names names, CodePrintWriter out, String fullClassName, Imports imports) {
+    public static void writeContent(Names names, CodePrintWriter out, String fullClassName, Imports imports) {
         String content = out.text().replace(IMPORTS_HERE, imports.toString());
         if (DEBUG) {
             System.out.println("////////////////////////////////////////////////");
@@ -51,7 +48,7 @@ class WriterUtil {
         return renderer.render(document);
     }
 
-    static void writeApiJavadoc(PrintWriter out, Names names, Indent indent) {
+    public static void writeApiJavadoc(PrintWriter out, Names names, Indent indent) {
         String text = Stream.of( //
                 Optional.ofNullable(names.api().getInfo().getTitle()), //
                 Optional.ofNullable(names.api().getInfo().getSummary()), //

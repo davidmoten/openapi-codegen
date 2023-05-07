@@ -15,6 +15,8 @@ import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor;
 import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor.Result;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.generator.writer.ClientCodeWriter;
+import org.davidmoten.oa3.codegen.generator.writer.SpringBootServerCodeWriter;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 import org.springframework.core.io.Resource;
 
@@ -250,7 +252,7 @@ public class ClientServerGenerator {
         return Optional.empty();
     }
 
-    private static final class StatusCodeApiResponse {
+    public static final class StatusCodeApiResponse {
         final int statusCode;
         final ApiResponse response;
 
@@ -295,19 +297,19 @@ public class ClientServerGenerator {
         return s;
     }
 
-    static final class Method {
-        final String methodName;
-        final List<Param> parameters;
-        final Optional<String> returnFullClassName; // arrays always wrapped ?
-        final String path;
-        final HttpMethod httpMethod;
-        final Optional<Integer> statusCode;
-        final List<String> consumes;
-        final List<String> produces;
-        final Optional<String> description;
-        final Optional<Integer> primaryStatusCode;
-        final Optional<String> primaryMediaType;
-        final List<ResponseDescriptor> responseDescriptors;
+    public static final class Method {
+        public final String methodName;
+        public final List<Param> parameters;
+        public final Optional<String> returnFullClassName; // arrays always wrapped ?
+        public final String path;
+        public final HttpMethod httpMethod;
+        public final Optional<Integer> statusCode;
+        public final List<String> consumes;
+        public final List<String> produces;
+        public final Optional<String> description;
+        public final Optional<Integer> primaryStatusCode;
+        public final Optional<String> primaryMediaType;
+        public final List<ResponseDescriptor> responseDescriptors;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
                 Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
@@ -337,43 +339,43 @@ public class ClientServerGenerator {
 
     }
 
-    static final class ResponseDescriptor {
+    public static final class ResponseDescriptor {
         private final String statusCode; // can be a pattern like `2*`
         private final String mediaType;
         private final String fullClassName;
 
-        ResponseDescriptor(String statusCode, String mediaType, String fullClassName) {
+        public ResponseDescriptor(String statusCode, String mediaType, String fullClassName) {
             this.statusCode = statusCode;
             this.mediaType = mediaType;
             this.fullClassName = fullClassName;
         }
 
-        String statusCode() {
+        public String statusCode() {
             return statusCode;
         }
 
-        String mediaType() {
+        public String mediaType() {
             return mediaType;
         }
 
-        String fullClassName() {
+        public String fullClassName() {
             return fullClassName;
         }
 
     }
 
-    static final class Constraints {
-        final Optional<Integer> minLength;
-        final Optional<Integer> maxLength;
-        final Optional<BigDecimal> min;
-        final Optional<BigDecimal> max;
-        final Optional<BigDecimal> minExclusive;
-        final Optional<BigDecimal> maxExclusive;
-        final Optional<Integer> minItems;
-        final Optional<Integer> maxItems;
-        final Optional<String> pattern;
+    public static final class Constraints {
+        public final Optional<Integer> minLength;
+        public final Optional<Integer> maxLength;
+        public final Optional<BigDecimal> min;
+        public final Optional<BigDecimal> max;
+        public final Optional<BigDecimal> minExclusive;
+        public final Optional<BigDecimal> maxExclusive;
+        public final Optional<Integer> minItems;
+        public final Optional<Integer> maxItems;
+        public final Optional<String> pattern;
 
-        Constraints(Optional<Integer> minLength, Optional<Integer> maxLength, Optional<BigDecimal> min,
+        public Constraints(Optional<Integer> minLength, Optional<Integer> maxLength, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, Optional<BigDecimal> minExclusive, Optional<BigDecimal> maxExclusive,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<String> pattern) {
             this.minLength = minLength;
@@ -387,7 +389,7 @@ public class ClientServerGenerator {
             this.pattern = pattern;
         }
 
-        boolean atLeastOnePresent() {
+        public boolean atLeastOnePresent() {
             return minLength.isPresent() || maxLength.isPresent() || min.isPresent() || max.isPresent()
                     || minExclusive.isPresent() || maxExclusive.isPresent() || minItems.isPresent()
                     || maxItems.isPresent() || pattern.isPresent();
@@ -395,20 +397,20 @@ public class ClientServerGenerator {
 
     }
 
-    static final class Param {
-        final String name;
-        final String identifier;
-        final Optional<Object> defaultValue;
-        final boolean required;
-        final String fullClassName;
-        final boolean isArray;
-        final boolean isRequestBody;
-        final Constraints constraints;
-        final ParamType type;
-        final boolean isComplexQueryParameter;
-        final Optional<String> description;
+    public static final class Param {
+        public final String name;
+        public final String identifier;
+        public final Optional<Object> defaultValue;
+        public final boolean required;
+        public final String fullClassName;
+        public final boolean isArray;
+        public final boolean isRequestBody;
+        public final Constraints constraints;
+        public final ParamType type;
+        public final boolean isComplexQueryParameter;
+        public final Optional<String> description;
 
-        Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
+        public Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
                 boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
                 boolean isComplexQueryParameter, Optional<String> description) {
             this.name = name;

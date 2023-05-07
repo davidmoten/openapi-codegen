@@ -1,7 +1,7 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.writer;
 
-import static org.davidmoten.oa3.codegen.generator.WriterUtil.IMPORTS_HERE;
-import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
+import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
+import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.closeParen;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -13,11 +13,14 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Constraints;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Param;
+import org.davidmoten.oa3.codegen.generator.Names;
+import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.spring.runtime.ControllerExceptionHandler;
 import org.davidmoten.oa3.codegen.spring.runtime.ErrorHandler;
@@ -42,9 +45,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-class SpringBootServerCodeWriter {
+public final class SpringBootServerCodeWriter {
 
-    static void writeServiceClasses(Names names, List<Method> methods) {
+    public static void writeServiceClasses(Names names, List<Method> methods) {
         writeApplicationClass(names);
         writeJacksonConfigurationClass(names);
         writeServiceControllerClass(names, methods);

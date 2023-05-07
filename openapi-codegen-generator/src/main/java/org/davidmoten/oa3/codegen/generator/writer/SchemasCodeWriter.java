@@ -1,8 +1,8 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.writer;
 
-import static org.davidmoten.oa3.codegen.generator.WriterUtil.IMPORTS_HERE;
-import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
 import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
+import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
+import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.closeParen;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,16 +17,20 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Generator.ClassType;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
 import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
+import org.davidmoten.oa3.codegen.generator.Names;
+import org.davidmoten.oa3.codegen.generator.SchemaCategory;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
+import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
@@ -50,7 +54,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import jakarta.annotation.Generated;
 
-final class SchemasCodeWriter {
+public final class SchemasCodeWriter {
 
     private SchemasCodeWriter() {
         // prevent instantiation
@@ -68,7 +72,7 @@ final class SchemasCodeWriter {
         }
     }
 
-    static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls,
+    public static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls,
             String schemaName) {
         Imports imports = new Imports(cls.fullClassName);
         if ((cls.category == SchemaCategory.PATH || cls.category == SchemaCategory.RESPONSE) && cls.schema.isPresent()
@@ -83,7 +87,7 @@ final class SchemasCodeWriter {
         WriterUtil.writeContent(names, out, names.schemaNameToFullClassName(cls.category, schemaName), imports);
     }
 
-    static void writeGlobalsClass(Names names) {
+    public static void writeGlobalsClass(Names names) {
         CodePrintWriter out = CodePrintWriter.create();
         Indent indent = new Indent();
         String fullClassName = names.globalsFullClassName();

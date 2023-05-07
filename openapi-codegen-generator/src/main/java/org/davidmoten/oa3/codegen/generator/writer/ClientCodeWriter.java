@@ -1,6 +1,6 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.writer;
 
-import static org.davidmoten.oa3.codegen.generator.WriterUtil.closeParen;
+import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.closeParen;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -9,9 +9,12 @@ import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.client.runtime.ClientBuilder;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
+import org.davidmoten.oa3.codegen.generator.Names;
+import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Indent;
+import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;

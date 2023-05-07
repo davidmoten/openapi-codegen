@@ -27,7 +27,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
-final class Names {
+public final class Names {
 
     // note that hashCode and toString added to this set so that generated getters
     // without a get prefix don't get into trouble
@@ -75,24 +75,24 @@ final class Names {
         }
     }
 
-    OpenAPI api() {
+    public OpenAPI api() {
         return api;
     }
 
-    String schemaNameToFullClassName(SchemaCategory category, String schemaName) {
+    public String schemaNameToFullClassName(SchemaCategory category, String schemaName) {
         return definition.packages().basePackage() + "." + category.getPackageFragment() + "."
                 + schemaNameToSimpleClassName(schemaName);
     }
 
-    String schemaNameToSimpleClassName(String schemaName) {
+    public String schemaNameToSimpleClassName(String schemaName) {
         return upperFirst(toIdentifier(schemaName));
     }
 
-    File fullClassNameToJavaFile(String fullClassName) {
+    public File fullClassNameToJavaFile(String fullClassName) {
         return new File(definition.generatedSourceDirectory(), fullClassName.replace(".", File.separator) + ".java");
     }
 
-    String refToFullClassName(String ref) {
+    public String refToFullClassName(String ref) {
         Preconditions.checkNotNull(ref);
         final String fullClassName;
         if (!ref.startsWith("#")) {
@@ -120,15 +120,15 @@ final class Names {
         return fullClassName;
     }
 
-    static String simpleClassName(String fullClassName) {
+    public static String simpleClassName(String fullClassName) {
         return getLastItemInDotDelimitedString(fullClassName);
     }
 
-    static String pkg(String className) {
+    public static String pkg(String className) {
         return className.substring(0, className.lastIndexOf("."));
     }
 
-    static String toIdentifier(String s) {
+    public static String toIdentifier(String s) {
         StringBuilder b = new StringBuilder();
         char lastCh = ' ';
         for (int i = 0; i < s.length(); i++) {
@@ -154,11 +154,11 @@ final class Names {
         }
     }
 
-    static String propertyNameToClassSimpleName(String propertyName) {
+    public static String propertyNameToClassSimpleName(String propertyName) {
         return upperFirst(toIdentifier(propertyName));
     }
 
-    static String upperFirst(String name) {
+    public static String upperFirst(String name) {
         return name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
     }
 
@@ -175,36 +175,36 @@ final class Names {
         }
     }
 
-    String clientClassName() {
+    public String clientClassName() {
         return definition.packages().basePackage() + "client.Client";
     }
 
-    File clientClassJavaFile() {
+    public File clientClassJavaFile() {
         return new File(definition.generatedSourceDirectory(),
                 clientClassName().replace(".", File.separator) + ".java");
     }
 
-    static String propertyNameToFieldName(String propertyName) {
+    public static String propertyNameToFieldName(String propertyName) {
         return lowerFirst(toIdentifier(propertyName));
     }
 
-    static String schemaNameToFieldName(String schemaName) {
+    public static String schemaNameToFieldName(String schemaName) {
         return lowerFirst(toIdentifier(schemaName));
     }
 
-    static String toFieldName(String name) {
+    public static String toFieldName(String name) {
         return lowerFirst(toIdentifier(name));
     }
 
-    static String simpleClassNameFromSimpleName(String name) {
+    public static String simpleClassNameFromSimpleName(String name) {
         return upperFirst(toIdentifier(name));
     }
 
-    static String enumNameToEnumConstant(String s) {
+    public static String enumNameToEnumConstant(String s) {
         return camelToUpper(toIdentifier(s));
     }
 
-    static String camelToUpper(String s) {
+    public static String camelToUpper(String s) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             if (i > 0 && i < s.length() - 1 && Character.isUpperCase(s.charAt(i))
@@ -249,11 +249,11 @@ final class Names {
         return list;
     }
 
-    String externalRefClassName(String ref) {
+    public String externalRefClassName(String ref) {
         return definition.externalRefClassName(ref);
     }
 
-    String globalsFullClassName() {
+    public String globalsFullClassName() {
         return definition.packages().basePackage() + ".Globals";
     }
 
@@ -276,11 +276,11 @@ final class Names {
         return map;
     }
 
-    boolean mapIntegerToBigInteger() {
+    public boolean mapIntegerToBigInteger() {
         return definition.mapIntegerToBigInteger();
     }
 
-    static String toIdentifier(ImmutableList<String> list) {
+    public static String toIdentifier(ImmutableList<String> list) {
         StringBuilder b = new StringBuilder();
         for (String s : list) {
             b.append(Names.upperFirst(camelifyOnSeparatorCharacters(s)));
@@ -307,27 +307,27 @@ final class Names {
         return b.toString();
     }
 
-    String serviceControllerFullClassName() {
+    public String serviceControllerFullClassName() {
         return definition.packages().basePackage() + ".service.ServiceController";
     }
 
-    String serviceInterfaceFullClassName() {
+    public String serviceInterfaceFullClassName() {
         return definition.packages().basePackage() + ".service.Service";
     }
 
-    String applicationFullClassName() {
+    public String applicationFullClassName() {
         return definition.packages().basePackage() + ".Application";
     }
 
-    String clientFullClassName() {
+    public String clientFullClassName() {
         return definition.packages().basePackage() + ".client.Client";
     }
 
-    String jacksonConfigurationFullClassName() {
+    public String jacksonConfigurationFullClassName() {
         return definition.packages().basePackage() + ".service.JacksonConfiguration";
     }
 
-    Parameter lookupParameter(String name) {
+    public Parameter lookupParameter(String name) {
         return api.getComponents().getParameters().get(lastComponent(name));
     }
 
@@ -336,15 +336,15 @@ final class Names {
         return ref.substring(i + 1);
     }
 
-    RequestBody lookupRequestBody(String ref) {
+    public RequestBody lookupRequestBody(String ref) {
         return api.getComponents().getRequestBodies().get(lastComponent(ref));
     }
 
-    ApiResponse lookupResponse(String ref) {
+    public ApiResponse lookupResponse(String ref) {
         return api.getComponents().getResponses().get(lastComponent(ref));
     }
 
-    boolean generatorIsSpring3() {
+    public boolean generatorIsSpring3() {
         return definition.generator().orElse("").equals("spring3");
     }
 }

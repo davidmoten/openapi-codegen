@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.LinkedStack;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.generator.writer.SchemasCodeWriter;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 
@@ -76,32 +77,33 @@ public class Generator {
         }
     }
 
-    static final class Cls {
-        SchemaCategory category;
-        String fullClassName;
-        Optional<String> description = Optional.empty();
-        ClassType classType;
-        List<Field> fields = new ArrayList<>();
-        List<EnumMember> enumMembers = new ArrayList<>();
-        List<Cls> classes = new ArrayList<>();
-        Discriminator discriminator = null;
-        String enumFullType;
-        private int num = 0;
-        private Set<String> fieldNames = new HashSet<>();
-        boolean topLevel = false;
-        boolean hasProperties = false;
-        PolymorphicType polymorphicType;
-        Optional<Cls> owner = Optional.empty(); // the owning heirarchy, we cannot name our class any one of
-                                                // these classes (disallowed by java)
-        Optional<String> name = Optional.empty();
-        Optional<Schema<?>> schema = Optional.empty();
+    public static final class Cls {
+        public SchemaCategory category;
+        public String fullClassName;
+        public Optional<String> description = Optional.empty();
+        public ClassType classType;
+        public List<Field> fields = new ArrayList<>();
+        public List<EnumMember> enumMembers = new ArrayList<>();
+        public List<Cls> classes = new ArrayList<>();
+        public Discriminator discriminator = null;
+        public String enumFullType;
+        public boolean topLevel = false;
+        public boolean hasProperties = false;
+        public PolymorphicType polymorphicType;
+        public Optional<Cls> owner = Optional.empty(); // the owning heirarchy, we cannot name our class any one of
+        // these classes (disallowed by java)
+        public Optional<String> name = Optional.empty();
+        public Optional<Schema<?>> schema = Optional.empty();
 
-        String nextAnonymousFieldName() {
+        public String nextAnonymousFieldName() {
             num++;
             return "object" + num;
         }
 
-        String nextFieldName(String name) {
+        private int num = 0;
+        private Set<String> fieldNames = new HashSet<>();
+
+        public String nextFieldName(String name) {
             final String next;
             if (name == null) {
                 next = nextAnonymousFieldName();
@@ -126,7 +128,7 @@ public class Generator {
             return next;
         }
 
-        String fieldName(Field f) {
+        public String fieldName(Field f) {
             if (unwrapSingleField()) {
                 return "value";
             } else {
@@ -148,22 +150,22 @@ public class Generator {
                     pattern, min, max, exclusiveMin, exclusiveMax, encoding));
         }
 
-        String pkg() {
+        public String pkg() {
             return Names.pkg(fullClassName);
         }
 
-        String simpleName() {
+        public String simpleName() {
             return Names.simpleClassName(fullClassName);
         }
 
-        boolean unwrapSingleField() {
+        public boolean unwrapSingleField() {
             return !hasProperties
                     && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
                             || topLevel && fields.size() == 1)
                     || classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
         }
 
-        Set<String> ownersAndSiblingsSimpleNames() {
+        public Set<String> ownersAndSiblingsSimpleNames() {
             Cls c = this;
             Set<String> set = new HashSet<>();
             while (c.owner.isPresent()) {
@@ -175,17 +177,17 @@ public class Generator {
         }
     }
 
-    static class EnumMember {
-        String name;
-        Object parameter;
+    public static class EnumMember {
+        public final String name;
+        public final Object parameter;
 
-        EnumMember(String name, Object parameter) {
+        public EnumMember(String name, Object parameter) {
             this.name = name;
             this.parameter = parameter;
         }
     }
 
-    enum ClassType {
+    public enum ClassType {
         CLASS("class"), //
         ENUM("enum"), //
         ONE_OR_ANY_OF_DISCRIMINATED("interface"), //
@@ -199,7 +201,7 @@ public class Generator {
             this.word = word;
         }
 
-        String word() {
+        public String word() {
             return word;
         }
     }
@@ -207,22 +209,22 @@ public class Generator {
     private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "long", "byte", "float", "double",
             "boolean", "short");
 
-    final static class Field {
-        final String fullClassName;
-        final String name;
-        final String fieldName;
-        final boolean required;
-        final Optional<Integer> minLength;
-        final Optional<Integer> maxLength;
-        final Optional<String> pattern;
-        final Optional<BigDecimal> min;
-        final Optional<BigDecimal> max;
-        final boolean isArray; // if a List to be used to represent
-        final Encoding encoding;
-        final boolean exclusiveMin;
-        final boolean exclusiveMax;
-        final Optional<Integer> minItems;
-        final Optional<Integer> maxItems;
+    public final static class Field {
+        public final String fullClassName;
+        public final String name;
+        public final String fieldName;
+        public final boolean required;
+        public final Optional<Integer> minLength;
+        public final Optional<Integer> maxLength;
+        public final Optional<String> pattern;
+        public final Optional<BigDecimal> min;
+        public final Optional<BigDecimal> max;
+        public final boolean isArray; // if a List to be used to represent
+        public final Encoding encoding;
+        public final boolean exclusiveMin;
+        public final boolean exclusiveMax;
+        public final Optional<Integer> minItems;
+        public final Optional<Integer> maxItems;
 
         Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
@@ -245,27 +247,27 @@ public class Generator {
             this.max = max;
         }
 
-        String fieldName(Cls cls) {
+        public String fieldName(Cls cls) {
             return cls.fieldName(this);
         }
 
-        String resolvedType(Imports imports) {
+        public String resolvedType(Imports imports) {
             return Generator.resolvedType(this, imports);
         }
 
-        String resolvedTypeNullable(Imports imports) {
+        public String resolvedTypeNullable(Imports imports) {
             return Generator.resolvedTypeNullable(this, imports);
         }
 
-        boolean isPrimitive() {
+        public boolean isPrimitive() {
             return required && PRIMITIVE_CLASS_NAMES.contains(Util.toPrimitive(fullClassName));
         }
 
-        boolean isOctets() {
+        public boolean isOctets() {
             return encoding == Encoding.OCTET;
         }
 
-        boolean isByteArray() {
+        public boolean isByteArray() {
             return fullClassName.equals("byte[]");
         }
 
@@ -276,12 +278,12 @@ public class Generator {
         }
     }
 
-    static final class MyVisitor implements Visitor {
+    public static final class MyVisitor implements Visitor {
         private final Names names;
         private final LinkedStack<Cls> stack = new LinkedStack<>();
         private final List<Result> results = new ArrayList<>();
 
-        MyVisitor(Names names) {
+        public MyVisitor(Names names) {
             this.names = names;
         }
 
@@ -448,7 +450,7 @@ public class Generator {
         previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
     }
 
-    enum Encoding {
+    public enum Encoding {
         DEFAULT, OCTET;
     }
 
@@ -507,12 +509,12 @@ public class Generator {
         return pt;
     }
 
-    static final class Discriminator {
-        final String propertyName;
-        final String fieldName;
-        final Map<String, String> fullClassNameToPropertyValue;
+    public static final class Discriminator {
+        public final String propertyName;
+        public final String fieldName;
+        public final Map<String, String> fullClassNameToPropertyValue;
 
-        Discriminator(String propertyName, String fieldName, Map<String, String> fullClassNameToPropertyValue) {
+        public Discriminator(String propertyName, String fieldName, Map<String, String> fullClassNameToPropertyValue) {
             this.propertyName = propertyName;
             this.fieldName = fieldName;
             this.fullClassNameToPropertyValue = fullClassNameToPropertyValue;
