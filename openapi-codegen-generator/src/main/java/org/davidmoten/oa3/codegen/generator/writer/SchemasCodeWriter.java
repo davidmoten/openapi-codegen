@@ -135,7 +135,7 @@ public final class SchemasCodeWriter {
         writeEnumCreator(out, imports, cls);
         writeMemberClasses(out, imports, indent, cls, fullClassNameInterfaces, names);
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            writeEqualsMethod(out, imports, indent, cls);
+            writeEqualsMethod(out, imports, cls);
             writeHashCodeMethod(out, imports, indent, cls);
             writeToStringMethod(out, imports, indent, cls);
         }
@@ -296,21 +296,20 @@ public final class SchemasCodeWriter {
 
                 out.right().right();
                 final String parametersNullable;
-                parametersNullable = cls.fields.stream()
-                        .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName(cls)))
-                        .collect(Collectors.joining(","));
+                parametersNullable = cls.fields.stream().map(x -> String.format("\n%s%s %s", out.indent(),
+                        x.resolvedTypeNullable(imports), x.fieldName(cls))).collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
                 out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersNullable);
                 out.right();
-                ifValidate(cls, out, indent, imports, names, //
+                ifValidate(cls, out, imports, names, //
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
                                 checkNotNull(imports, cls, out2, x);
                             } else {
                                 out.line("// ???");
                             }
-                            validateMore(out2, imports, indent, cls, x);
+                            validateMore(out2, imports, cls, x);
                         }));
                 cls.fields.stream().forEach(x -> {
                     assignField(out, indent, cls, x);
@@ -442,12 +441,12 @@ public final class SchemasCodeWriter {
         }
         out.line("%s %s(%s) {\n", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         out.right();
-        ifValidate(cls, out, indent, imports, names, //
+        ifValidate(cls, out, imports, names, //
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                         checkNotNull(imports, cls, out2, x);
                     }
-                    validateMore(out2, imports, indent, cls, x);
+                    validateMore(out2, imports, cls, x);
                 }));
 
         // assign
@@ -469,11 +468,11 @@ public final class SchemasCodeWriter {
             out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersOptional);
             out.right();
             // validate
-            ifValidate(cls, out, indent, imports, names, //
+            ifValidate(cls, out, imports, names, //
                     out2 -> cls.fields.stream().forEach(x -> {
                         if (!isDiscriminator(interfaces, x) && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
                             checkNotNull(imports, cls, out2, x);
-                            validateMore(out2, imports, indent, cls, x);
+                            validateMore(out2, imports, cls, x);
                         }
                     }));
 
@@ -536,7 +535,7 @@ public final class SchemasCodeWriter {
                 .map(y -> y.discriminator).findFirst();
     }
 
-    private static void validateMore(CodePrintWriter out, Imports imports, Indent indent, Cls cls, Field x) {
+    private static void validateMore(CodePrintWriter out, Imports imports, Cls cls, Field x) {
         String raw = x.fieldName(cls);
         if (x.minLength.isPresent()) {
             out.line("%s.checkMinLength(%s, %s, \"%s\");",
@@ -554,22 +553,22 @@ public final class SchemasCodeWriter {
                     escapePattern(x.pattern.get()), x.fieldName(cls));
         }
         if (x.min.isPresent()) {
-            out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
+            out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);",
                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.min.get().toString(),
                     x.fieldName(cls), x.exclusiveMin);
         }
         if (x.max.isPresent()) {
-            out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
+            out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);",
                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.max.get().toString(),
                     x.fieldName(cls), x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
-            out.format("%s%s.checkMinSize(%s, %s, \"%s\");\n", indent,
+            out.line("%s.checkMinSize(%s, %s, \"%s\");",
                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.minItems.get(), x.fieldName(cls));
         }
         if (x.isArray && x.maxItems.isPresent()) {
-            out.format("%s%s.checkMaxSize(%s, %s, \"%s\");\n", indent,
+            out.line("%s.checkMaxSize(%s, %s, \"%s\");",
                     imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
                     x.maxItems.get(), x.fieldName(cls));
         }
@@ -579,25 +578,29 @@ public final class SchemasCodeWriter {
         return pattern.replace("\\", "\\\\");
     }
 
-    private static void writeEqualsMethod(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
+    private static void writeEqualsMethod(CodePrintWriter out, Imports imports, Cls cls) {
         addOverrideAnnotation(out, imports);
-        out.format("%spublic boolean equals(Object o) {\n", indent);
-        indent.right();
-        out.format("%sif (this == o) {\n", indent);
-        out.format("%sreturn true;\n", indent.right());
-        closeParen(out, indent);
-        out.format("%sif (o == null || getClass() != o.getClass()) {\n", indent);
-        out.format("%sreturn false;\n", indent.right());
-        closeParen(out, indent);
-        indent.right();
-        String s = cls.fields.stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", indent,
-                imports.add(Objects.class), x.fieldName(cls), x.fieldName(cls))).collect(Collectors.joining(" && "));
-        indent.left();
+        out.line("public boolean equals(Object o) {\n");
+        out.right();
+        out.line("if (this == o) {");
+        out.right();
+        out.line("return true;");
+        out.closeParen();
+        out.line("if (o == null || getClass() != o.getClass()) {");
+        out.right();
+        out.line("return false;");
+        out.closeParen();
+        out.right();
+        String s = cls.fields
+                .stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", out.indent(),
+                        imports.add(Objects.class), x.fieldName(cls), x.fieldName(cls)))
+                .collect(Collectors.joining(" && "));
+        out.left();
         if (!s.isEmpty()) {
-            out.format("%s%s other = (%s) o;\n", indent, cls.simpleName(), cls.simpleName());
+            out.line("%s other = (%s) o;", cls.simpleName(), cls.simpleName());
         }
-        out.format("%sreturn %s;\n", indent, s.isEmpty() ? "true" : s);
-        closeParen(out, indent);
+        out.line("return %s;", s.isEmpty() ? "true" : s);
+        out.closeParen();
     }
 
     private static void writeHashCodeMethod(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
@@ -634,21 +637,21 @@ public final class SchemasCodeWriter {
         closeParen(out, indent);
     }
 
-    private static void ifValidate(Cls cls, CodePrintWriter out, Indent indent, Imports imports, Names names,
+    private static void ifValidate(Cls cls, CodePrintWriter out, Imports imports, Names names,
             Consumer<CodePrintWriter> r) {
         CodePrintWriter b = CodePrintWriter.create();
-        indent.right();
+        out.right();
         r.accept(b);
-        indent.left();
+        out.left();
         b.close();
         String text = b.text();
         if (text.isEmpty()) {
             return;
         } else {
-            out.format("%sif (%s.config().validateInConstructor().test(%s.class)) {\n", indent,
+            out.line("if (%s.config().validateInConstructor().test(%s.class)) {",
                     imports.add(names.globalsFullClassName()), cls.simpleName());
             out.print(text);
-            out.format("%s}\n", indent);
+            out.line("}");
         }
     }
 
