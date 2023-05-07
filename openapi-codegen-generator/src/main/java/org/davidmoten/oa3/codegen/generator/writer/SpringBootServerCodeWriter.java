@@ -139,7 +139,7 @@ public final class SpringBootServerCodeWriter {
         out.println();
         out.line("public interface %s extends %s {", Names.simpleClassName(names.serviceInterfaceFullClassName()),
                 imports.add(ErrorHandler.class));
-        writeServiceMethods(out, imports, methods, out.indent(), false, names);
+        writeServiceMethods(out, imports, methods, false, names);
         out.closeParen();
     }
 
@@ -161,15 +161,15 @@ public final class SpringBootServerCodeWriter {
                 imports.add(org.davidmoten.oa3.codegen.util.Util.class),
                 imports.add(names.serviceInterfaceFullClassName()));
         out.closeParen();
-        writeServiceMethods(out, imports, methods, out.indent(), true, names);
+        writeServiceMethods(out, imports, methods, true, names);
         out.closeParen();
     }
 
-    private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods, Indent indent,
+    private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods, 
             boolean isController, Names names) {
         methods.forEach(m -> {
-            writeMethodJavadoc(out, indent, m, m.primaryStatusCode.map(x -> "primary response status code " + x));
-            indent.right().right();
+            writeMethodJavadoc(out, out.indent(), m, m.primaryStatusCode.map(x -> "primary response status code " + x));
+            out.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
                     final String annotations;
@@ -178,7 +178,7 @@ public final class SpringBootServerCodeWriter {
                     } else {
                         annotations = "";
                     }
-                    return String.format("\n%s%s%s %s", indent, annotations, toImportedType(p, imports), "requestBody");
+                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, imports), "requestBody");
                 } else {
                     final String annotations;
                     if (isController) {
@@ -195,10 +195,10 @@ public final class SpringBootServerCodeWriter {
                     } else {
                         annotations = "";
                     }
-                    return String.format("\n%s%s%s %s", indent, annotations, toImportedType(p, imports), p.identifier);
+                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, imports), p.identifier);
                 }
             }).collect(Collectors.joining(", "));
-            indent.left().left();
+            out.left().left();
             final String importedReturnType;
             if (isController) {
                 importedReturnType = String.format("%s<?>", imports.add(ResponseEntity.class));
@@ -215,47 +215,46 @@ public final class SpringBootServerCodeWriter {
 //                )
             if (isController) {
 
-                out.format("\n%s@%s(\n", indent, imports.add(RequestMapping.class));
-                indent.right();
+                out.println();
+                out.line("@%s(", imports.add(RequestMapping.class));
+                out.right();
                 String consumes = m.consumes.stream().map(x -> "\"" + x + "\"").collect(Collectors.joining(", "));
                 if (!consumes.isEmpty()) {
-                    consumes = String.format(",\n%sconsumes = {%s}", indent, consumes);
+                    consumes = String.format(",\n%sconsumes = {%s}", out.indent(), consumes);
                 }
                 String produces = m.produces.stream().map(x -> "\"" + x + "\"").collect(Collectors.joining(", "));
                 if (!produces.isEmpty()) {
-                    produces = String.format(",\n%sproduces = {%s}", indent, produces);
+                    produces = String.format(",\n%sproduces = {%s}", out.indent(), produces);
                 }
-                out.format("%smethod = %s.%s,\n", indent, imports.add(RequestMethod.class), m.httpMethod);
-                out.format("%svalue = \"%s\"%s%s)\n", indent, m.path, consumes, produces);
-                indent.left();
-                out.format("%spublic %s %s(%s) {\n", indent, importedReturnType, m.methodName, params);
-                indent.right();
-                out.format("%stry {\n", indent);
-                indent.right();
-                addValidationChecks(out, imports, indent, m, names);
+                out.line("method = %s.%s,", imports.add(RequestMethod.class), m.httpMethod);
+                out.line("value = \"%s\"%s%s)", m.path, consumes, produces);
+                out.left();
+                out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
+                out.line("try {");
+                addValidationChecks(out, imports, out.indent(), m, names);
                 if (m.returnFullClassName.isPresent()) {
-                    out.format("%sreturn %s.status(%s).body(service.%s(%s));\n", indent,
+                    out.line("return %s.status(%s).body(service.%s(%s));", 
                             imports.add(ResponseEntity.class), //
                             m.statusCode.get(), //
                             m.methodName, //
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
                 } else {
-                    out.format("%sservice.%s(%s);\n", indent, m.methodName,
+                    out.line("service.%s(%s);", m.methodName,
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
-                    out.format("%sreturn %s.status(%s).build();\n", indent, imports.add(ResponseEntity.class),
+                    out.line("return %s.status(%s).build();", imports.add(ResponseEntity.class),
                             m.statusCode.orElse(200));
                 }
-                indent.left();
-                out.format("%s} catch (%s e) {\n", indent, imports.add(Throwable.class));
-                indent.right();
-                out.format("%sreturn service.errorResponse(e);\n", indent);
-                closeParen(out, indent);
-                closeParen(out, indent);
+                out.left();
+                out.line("} catch (%s e) {", imports.add(Throwable.class));
+                out.line("return service.errorResponse(e);");
+                out.closeParen();
+                out.closeParen();
             } else {
-                out.format("\n%sdefault %s %s(%s) throws %s {\n", indent, importedReturnType, m.methodName, params,
+                out.println();
+                out.line("default %s %s(%s) throws %s {", importedReturnType, m.methodName, params,
                         imports.add(ServiceException.class));
-                out.format("%sthrow notImplemented();\n", indent.right());
-                closeParen(out, indent);
+                out.line("throw notImplemented();");
+                out.closeParen();
             }
         });
     }
