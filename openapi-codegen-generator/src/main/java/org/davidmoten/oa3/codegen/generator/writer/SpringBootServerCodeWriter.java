@@ -63,19 +63,20 @@ public final class SpringBootServerCodeWriter {
     }
 
     private static void writeApplicationClass(CodePrintWriter out, Imports imports, String fullClassName) {
-        Indent indent = new Indent();
-        out.format("package %s;\n", Names.pkg(fullClassName));
-        out.format("\n%s", IMPORTS_HERE);
-        out.format("\n@%s\n", imports.add(SpringBootApplication.class));
+        out.line("package %s;", Names.pkg(fullClassName));
+        out.println();
+        out.format("%s", IMPORTS_HERE);
+        out.println();
+        out.line("@%s", imports.add(SpringBootApplication.class));
         String simpleClassName = Names.simpleClassName(fullClassName);
-        out.format("public class %s {\n", simpleClassName);
-        indent.right();
-        out.format("\n%spublic static void main(%s[] args) {\n", indent, imports.add(String.class));
-        indent.right();
-        out.format("%s%s.run(%s.class, args);\n", indent, imports.add(SpringApplication.class), simpleClassName);
-        closeParen(out, indent);
-        indent.left();
-        out.println("\n}\n");
+        out.line("public class %s {", simpleClassName);
+        out.println();
+        out.line("public static void main(%s[] args) {", imports.add(String.class));
+        out.line("%s.run(%s.class, args);", imports.add(SpringApplication.class), simpleClassName);
+        out.closeParen();
+        out.left();
+        out.println();
+        out.line("}");
     }
 
     private static void writeJacksonConfigurationClass(Names names) {
@@ -88,27 +89,29 @@ public final class SpringBootServerCodeWriter {
 
     private static void writeJacksonConfigurationClass(CodePrintWriter out, Imports imports, Names names,
             String fullClassName) {
-        Indent indent = new Indent();
-        out.format("package %s;\n", Names.pkg(fullClassName));
-        out.format("\n%s", IMPORTS_HERE);
-        out.format("\n@%s\n", imports.add(Configuration.class));
+        out.line("package %s;", Names.pkg(fullClassName));
+        out.println();
+        out.format("%s", IMPORTS_HERE);
+        out.println();
+        out.line("@%s", imports.add(Configuration.class));
         String simpleClassName = Names.simpleClassName(fullClassName);
-        out.format("public class %s {\n", simpleClassName);
-        indent.right();
-        out.format("\n%sprivate final %s config;\n", indent, imports.add(Config.class));
-        out.format("\n%spublic %s(@%s(required = false) %s config) {\n", indent, simpleClassName,
-                imports.add(Autowired.class), imports.add(Config.class));
-        out.format("%sthis.config = config == null ? %s.config() : config;\n", indent.right(),
-                imports.add(names.globalsFullClassName()));
-        out.format("%s}\n", indent.left());
-        out.format("\n%s@%s\n", indent, imports.add(Bean.class));
-        out.format("%s@%s\n", indent, imports.add(Primary.class));
-        out.format("%spublic %s objectMapper() {\n", indent, imports.add(ObjectMapper.class));
-        indent.right();
-        out.format("%sreturn config.mapper();\n", indent);
-        closeParen(out, indent);
-        indent.left();
-        out.println("\n}\n");
+        out.line("public class %s {", simpleClassName);
+        out.println();
+        out.line("private final %s config;", imports.add(Config.class));
+        out.println();
+        out.line("public %s(@%s(required = false) %s config) {", simpleClassName, imports.add(Autowired.class),
+                imports.add(Config.class));
+        out.line("this.config = config == null ? %s.config() : config;", imports.add(names.globalsFullClassName()));
+        out.closeParen();
+        out.println();
+        out.line("@%s", imports.add(Bean.class));
+        out.line("@%s", imports.add(Primary.class));
+        out.line("public %s objectMapper() {", imports.add(ObjectMapper.class));
+        out.line("return config.mapper();");
+        out.closeParen();
+        out.left();
+        out.println();
+        out.line("}");
     }
 
     private static void writeServiceControllerClass(Names names, List<Method> methods) {
@@ -162,8 +165,8 @@ public final class SpringBootServerCodeWriter {
         out.println("\n}\n");
     }
 
-    private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods,
-            Indent indent, boolean isController, Names names) {
+    private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods, Indent indent,
+            boolean isController, Names names) {
         methods.forEach(m -> {
             writeMethodJavadoc(out, indent, m, m.primaryStatusCode.map(x -> "primary response status code " + x));
             indent.right().right();
@@ -264,8 +267,8 @@ public final class SpringBootServerCodeWriter {
                         x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
         Optional<String> html = Optional.of(m.description.map(x -> WriterUtil.markdownToHtml(x))
                 .orElse("<p>Returns response from call to path <i>%s</i>.</p>"));
-        Javadoc.printJavadoc(out, indent, html, Collections.emptyList(), Optional.empty(),
-                returns, parameterDescriptions, true);
+        Javadoc.printJavadoc(out, indent, html, Collections.emptyList(), Optional.empty(), returns,
+                parameterDescriptions, true);
     }
 
     private static Class<?> annotation(ParamType t) {
