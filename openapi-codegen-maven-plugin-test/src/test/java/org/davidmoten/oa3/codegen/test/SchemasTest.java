@@ -703,15 +703,21 @@ public class SchemasTest {
         }
         {
             Circle circle = new Circle(new Latitude(25.1F), new Longitude(-33.1F), 1);
-            MetBroadcastArea mbca = new MetBroadcastArea(new Geometry(circle));
-            MetBroadcast mbc = new MetBroadcast(mbca, Optional.empty());
-            Broadcast broadcast = new Broadcast(mbc);
+            MetBroadcastArea mbca = MetBroadcastArea.of(Geometry.of(circle));
+            MetBroadcast mbc = MetBroadcast.builder().area(mbca).build();
+            Broadcast broadcast = Broadcast.of(mbc);
             OffsetDateTime createdTime = OffsetDateTime.parse("2023-04-05T12:15:26.025+10:00");
             OffsetDateTime startTime = OffsetDateTime.parse("2023-04-05T14:15:26.025+10:00");
             OffsetDateTime endTime = OffsetDateTime.parse("2023-04-06T12:00:26.025+10:00");
             MsiId msiId = new MsiId("8ds9f8sd98-dsfds8989");
-            Msi msi = new Msi(msiId, broadcast, createdTime, Optional.empty(), startTime, endTime, Optional.empty(),
-                    Status.ACTIVE, Optional.empty(), Optional.empty(), Optional.empty());
+            Msi msi  = Msi.builder() //
+                    .id(msiId) //
+                    .broadcast(broadcast) //
+                    .createdTime(createdTime) //
+                    .startTime(startTime) //
+                    .endTime(endTime)  //
+                    .status(Status.ACTIVE) //
+                    .build();
             assertEquals(m.readTree(json), m.readTree(m.writeValueAsString(msi)));
         }
     }
