@@ -51,5 +51,15 @@ public class BuilderWriterTest {
             BuilderWriter.write(writer, fields, "Thing", createImports());
         }
     }
+    
+    @Test
+    public void testNameValue() throws FileNotFoundException {
+        List<Field> fields = new ArrayList<>();
+        fields.add(new Field("name", String.class.getCanonicalName(), false, false));
+        fields.add(new Field("value", String.class.getCanonicalName(), true, false));
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/NameValue.java"))) {
+            BuilderWriter.write(writer, fields, "Thing", createImports());
+        }
+    }
 
 }

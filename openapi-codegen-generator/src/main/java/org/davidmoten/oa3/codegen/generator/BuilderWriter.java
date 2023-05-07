@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 
-import com.github.davidmoten.guavamini.Preconditions;
-
 public class BuilderWriter {
 
     public static final class Field {
@@ -28,16 +26,19 @@ public class BuilderWriter {
     }
 
     public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType, Imports imports) {
-        Preconditions.checkArgument(!fields.isEmpty());
-        List<Field> list = new ArrayList<>(fields);
+        if (fields.isEmpty()) {
+            return;
+        }
+        List<Field> sortedFields = new ArrayList<>(fields);
         // sort so required are first
-        list.sort((a, b) -> Boolean.compare(b.required, a.required));
+        sortedFields.sort((a, b) -> Boolean.compare(b.required, a.required));
 
         String builderName = "Builder";
         boolean passBuilderIntoConstructor = false;
         boolean previousWasRequired = true;
-        Field last = fields.get(fields.size() - 1);
-        for (Field f : list) {
+        boolean inFirstBuilder = true;
+        Field last = sortedFields.get(sortedFields.size() - 1);
+        for (Field f : sortedFields) {
             final String nextBuilderName;
             if (f.required) {
                 nextBuilderName = "BuilderWith" + Names.upperFirst(f.fieldName);
@@ -63,9 +64,10 @@ public class BuilderWriter {
                     out.right();
                     out.line("this.b = b;");
                     out.closeParen();
+                    inFirstBuilder = false;
                 } else {
                     boolean first = true;
-                    for (Field fld : list) {
+                    for (Field fld : sortedFields) {
                         if (first) {
                             out.println();
                             first = false;
@@ -88,39 +90,41 @@ public class BuilderWriter {
                     out.closeParen();
                 }
             }
+            String builderField = inFirstBuilder ? "" : ".b";
             out.newLine();
-            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, imports),
-                    f.fieldName);
+            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, imports), f.fieldName);
             out.right();
             if (f.required) {
-                out.line("this.b.%s = %s;", f.fieldName, f.fieldName);
+                out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else {
-                out.line("this.b.%s = %s.of(%s);", f.fieldName, imports.add(Optional.class), f.fieldName);
+                out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, imports.add(Optional.class), f.fieldName);
             }
             if (f.required) {
-                out.line("return new %s(this.b);", nextBuilderName);
+                out.line("return new %s(this%s);", nextBuilderName, builderField);
             } else {
-                out.line("%sreturn this;", nextBuilderName);
+                out.line("return this;");
             }
             out.closeParen();
 
             if (!f.required) {
+                out.line("// first");
                 out.newLine();
                 out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, imports),
                         f.fieldName);
                 out.right();
-                out.line("this.b.%s = %s;", f.fieldName, f.fieldName);
+                out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
                 out.line("return this;");
                 out.closeParen();
-            }
-            if (f == last && !f.required) {
-                writeBuildMethod(out, fields, importedBuiltType);
+                if (f == last) {
+                    writeBuildMethod(out, fields, importedBuiltType, builderField);
+                }
             }
             if (f.required || f == last) {
                 out.closeParen();
             }
             if (f == last && f.required) {
                 out.newLine();
+                out.line("// second");
                 out.line("public static final class %s {", nextBuilderName);
                 out.right();
                 out.newLine();
@@ -130,7 +134,7 @@ public class BuilderWriter {
                 out.right();
                 out.line("this.b = b;");
                 out.closeParen();
-                writeBuildMethod(out, fields, importedBuiltType);
+                writeBuildMethod(out, fields, importedBuiltType, ".b");
                 out.closeParen();
             }
             passBuilderIntoConstructor = f.required;
@@ -141,13 +145,23 @@ public class BuilderWriter {
 
     }
 
-    private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
+    private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType,
+            String builderField) {
         out.newLine();
         out.line("public %s build() {", importedBuiltType);
         out.right();
-        String params = fields.stream().map(x -> "this.b." + x.fieldName).collect(Collectors.joining(", "));
+        String params = fields.stream().map(x -> String.format("this%s.%s", builderField, x.fieldName))
+                .collect(Collectors.joining(", "));
         out.line("return new %s(%s);", importedBuiltType, params);
         out.closeParen();
+    }
+
+    private static String baseImportedType(Field f, Imports imports) {
+        if (f.isArray) {
+            return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
+        } else {
+            return imports.add(f.fullClassName);
+        }
     }
 
     private static String enhancedImportedType(Field f, Imports imports) {
