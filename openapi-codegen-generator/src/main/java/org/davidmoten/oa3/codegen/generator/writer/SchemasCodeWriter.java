@@ -129,6 +129,7 @@ public final class SchemasCodeWriter {
         } else {
             writeFields(out, imports, indent, cls);
             writeConstructor(out, imports, indent, cls, fullClassNameInterfaces, names);
+            writeBuilder(out, imports, indent, cls);
             writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
         }
         writeEnumCreator(out, imports, indent, cls);
@@ -484,6 +485,11 @@ public final class SchemasCodeWriter {
             });
             closeParen(out, indent);
         }
+    }
+    
+    private static void writeBuilder(PrintWriter out, Imports imports, Indent indent, Cls cls) {
+        // TODO Auto-generated method stub
+        
     }
 
     private static PrintWriter checkNotNull(Imports imports, Indent indent, Cls cls, PrintWriter out, Field x) {
