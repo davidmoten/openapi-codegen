@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.generator.writer;
 
 import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
-import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.closeParen;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -168,7 +167,7 @@ public final class SpringBootServerCodeWriter {
     private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods, 
             boolean isController, Names names) {
         methods.forEach(m -> {
-            writeMethodJavadoc(out, out.indent(), m, m.primaryStatusCode.map(x -> "primary response status code " + x));
+            writeMethodJavadoc(out,out.indent(), m, m.primaryStatusCode.map(x -> "primary response status code " + x));
             out.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
@@ -231,7 +230,7 @@ public final class SpringBootServerCodeWriter {
                 out.left();
                 out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 out.line("try {");
-                addValidationChecks(out, imports, out.indent(), m, names);
+                addValidationChecks(out, imports, m, names);
                 if (m.returnFullClassName.isPresent()) {
                     out.line("return %s.status(%s).body(service.%s(%s));", 
                             imports.add(ResponseEntity.class), //
@@ -286,55 +285,54 @@ public final class SpringBootServerCodeWriter {
         }
     }
 
-    private static void addValidationChecks(CodePrintWriter out, Imports imports, Indent indent, Method m,
+    private static void addValidationChecks(CodePrintWriter out, Imports imports, Method m,
             Names names) {
         m.parameters.forEach(p -> {
             Constraints x = p.constraints;
             if (x.atLeastOnePresent()) {
-                out.format("%sif (%s.config().validateInControllerMethod().test(\"%s\")) {\n", indent,
+                out.line("if (%s.config().validateInControllerMethod().test(\"%s\")) {", 
                         imports.add(names.globalsFullClassName()), m.methodName);
-                indent.right();
                 if (x.minLength.isPresent()) {
-                    out.format("%s%s.checkMinLength(%s, %s, \"%s\");\n", indent,
+                    out.line("%s.checkMinLength(%s, %s, \"%s\");", 
                             imports.add(RequestPreconditions.class), p.identifier, x.minLength.get(), p.identifier);
                 }
                 if (x.maxLength.isPresent()) {
-                    out.format("%s%s.checkMaxLength(%s, %s, \"%s\");\n", indent,
+                    out.line("%s.checkMaxLength(%s, %s, \"%s\");",
                             imports.add(RequestPreconditions.class), p.identifier, x.maxLength.get(), p.identifier);
                 }
                 if (x.pattern.isPresent()) {
-                    out.format("%s%s.checkMatchesPattern(%s, \"%s\", \"%s\");\n", indent,
+                    out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");",
                             imports.add(RequestPreconditions.class), p.identifier, x.pattern.get(), p.identifier);
                 }
                 if (x.min.isPresent()) {
-                    out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
+                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", 
                             imports.add(RequestPreconditions.class), p.identifier, x.min.get().toString(), p.identifier,
                             false);
                 }
                 if (x.max.isPresent()) {
-                    out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
+                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", 
                             imports.add(RequestPreconditions.class), p.identifier, x.max.get().toString(), p.identifier,
                             false);
                 }
                 if (x.minExclusive.isPresent()) {
-                    out.format("%s%s.checkMinimum(%s, \"%s\", \"%s\", %s);\n", indent,
+                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);",
                             imports.add(RequestPreconditions.class), p.identifier, x.minExclusive.get().toString(),
                             p.identifier, true);
                 }
                 if (x.maxExclusive.isPresent()) {
-                    out.format("%s%s.checkMaximum(%s, \"%s\", \"%s\", %s);\n", indent,
+                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", 
                             imports.add(RequestPreconditions.class), p.identifier, x.maxExclusive.get().toString(),
                             p.identifier, true);
                 }
                 if (p.isArray && x.minItems.isPresent()) {
-                    out.format("%s%s.checkMinSize(%s, %s, \"%s\");\n", indent, imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMinSize(%s, %s, \"%s\");", imports.add(RequestPreconditions.class),
                             p.identifier, x.minItems.get(), p.identifier);
                 }
                 if (p.isArray && x.maxItems.isPresent()) {
-                    out.format("%s%s.checkMaxSize(%s, %s, \"%s\");\n", indent, imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMaxSize(%s, %s, \"%s\");", imports.add(RequestPreconditions.class),
                             p.identifier, x.maxItems.get(), p.identifier);
                 }
-                closeParen(out, indent);
+                out.closeParen();
             }
         });
     }
