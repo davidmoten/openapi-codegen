@@ -32,7 +32,7 @@ public class ClientCodeWriter {
         out.line("package %s;", Names.pkg(fullClassName));
         out.println();
         out.line("%s", WriterUtil.IMPORTS_HERE);
-        WriterUtil.writeApiJavadoc(out, names, out.indent());
+        WriterUtil.writeApiJavadoc(out, names);
         out.println();
         out.line("public class %s {", Names.simpleClassName(fullClassName));
         writeClientClassFieldsAndConstructor(out, imports, fullClassName, names);

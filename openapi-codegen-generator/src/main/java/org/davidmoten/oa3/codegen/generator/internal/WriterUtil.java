@@ -17,7 +17,7 @@ import org.davidmoten.oa3.codegen.generator.Names;
 
 public final class WriterUtil {
 
-    static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
+    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
     public static final String IMPORTS_HERE = "IMPORTS_HERE";
 
     public static void closeParen(PrintWriter out, Indent indent) {
@@ -48,7 +48,7 @@ public final class WriterUtil {
         return renderer.render(document);
     }
 
-    public static void writeApiJavadoc(PrintWriter out, Names names, Indent indent) {
+    public static void writeApiJavadoc(CodePrintWriter out, Names names) {
         String text = Stream.of( //
                 Optional.ofNullable(names.api().getInfo().getTitle()), //
                 Optional.ofNullable(names.api().getInfo().getSummary()), //
@@ -56,7 +56,7 @@ public final class WriterUtil {
                 .filter(Optional::isPresent) //
                 .map(Optional::get) //
                 .collect(Collectors.joining("\n\n"));
-        Javadoc.printJavadoc(out, indent, WriterUtil.markdownToHtml(text), true);
+        Javadoc.printJavadoc(out, out.indent(), WriterUtil.markdownToHtml(text), true);
     }
 
 }

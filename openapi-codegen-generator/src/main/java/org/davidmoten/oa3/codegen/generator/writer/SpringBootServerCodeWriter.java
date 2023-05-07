@@ -134,7 +134,7 @@ public final class SpringBootServerCodeWriter {
         out.line("package %s;", Names.pkg(names.serviceControllerFullClassName()));
         out.println();
         out.line("%s", IMPORTS_HERE);
-        WriterUtil.writeApiJavadoc(out, names, out.indent());
+        WriterUtil.writeApiJavadoc(out, names);
         out.println();
         out.line("public interface %s extends %s {", Names.simpleClassName(names.serviceInterfaceFullClassName()),
                 imports.add(ErrorHandler.class));
