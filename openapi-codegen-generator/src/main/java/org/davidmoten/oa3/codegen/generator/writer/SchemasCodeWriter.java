@@ -655,17 +655,6 @@ public final class SchemasCodeWriter {
             } else {
                 out.println();
             }
-//            out.format("%spublic %s %s() {\n", indent, f.resolvedType(imports), f.fieldName(cls));
-//            indent.right();
-//            if (!f.isOctets() && !f.required) {
-//                out.format("%sreturn %s.ofNullable(%s);\n", indent, imports.add(Optional.class), f.fieldName(cls));
-//            } else if (f.isOctets()) {
-//                out.format("%sreturn %s.decodeOctets(%s);\n", indent, imports.add(Util.class), f.fieldName(cls));
-//            } else {
-//                out.format("%sreturn %s;\n", indent, f.fieldName(cls));
-//            }
-//            closeParen(out, indent);
-
             final String value;
             if (!f.isOctets() && !f.required) {
                 value = String.format("%s.ofNullable(%s)", imports.add(Optional.class), f.fieldName(cls));
