@@ -30,6 +30,10 @@ public final class CodePrintWriter extends PrintWriter {
         return this;
     }
 
+    public void println() {
+        newLine();
+    }
+
     public void line(String format, Object... args) {
         Object[] args2 = new Object[args.length + 2];
         args2[0] = indent;

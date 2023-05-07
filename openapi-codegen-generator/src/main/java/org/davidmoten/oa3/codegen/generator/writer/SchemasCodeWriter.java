@@ -89,41 +89,41 @@ public final class SchemasCodeWriter {
 
     public static void writeGlobalsClass(Names names) {
         CodePrintWriter out = CodePrintWriter.create();
-        Indent indent = new Indent();
         String fullClassName = names.globalsFullClassName();
         Imports imports = new Imports(fullClassName);
-        out.format("package %s;\n", Names.pkg(fullClassName));
-        out.format("\n%s", IMPORTS_HERE);
+        out.line("package %s;", Names.pkg(fullClassName));
         out.println();
+        out.line("%s", IMPORTS_HERE);
         addGeneratedAnnotation(out, imports);
-        out.format("public final class %s {\n", Names.simpleClassName(fullClassName));
-        indent.right();
-        out.format("\n%sprivate static volatile %s config = %s.builder().build();\n", indent, imports.add(Config.class),
+        out.line("public final class %s {", Names.simpleClassName(fullClassName));
+        out.right();
+        out.println();
+        out.line("private static volatile %s config = %s.builder().build();", imports.add(Config.class),
                 imports.add(Config.class));
-        out.format("\n%spublic static void setConfig(%s configuration) {\n", indent, imports.add(Config.class));
-        indent.right();
-        out.format("%sconfig = configuration;\n", indent);
-        indent.left();
-        out.format("%s}\n", indent);
-        out.format("\n%spublic static %s config() {\n", indent, imports.add(Config.class));
-        indent.right();
-        out.format("%sreturn config;\n", indent);
-        indent.left();
-        out.format("%s}\n", indent);
-        indent.left();
-        out.format("%s}\n", indent);
+        out.println();
+        out.line("public static void setConfig(%s configuration) {", imports.add(Config.class));
+        out.right();
+        out.line("config = configuration;");
+        out.closeParen();
+        out.println();
+        out.line("public static %s config() {", imports.add(Config.class));
+        out.right();
+        out.line("return config;");
+        out.closeParen();
+        out.closeParen();
         WriterUtil.writeContent(names, out, fullClassName, imports);
     }
 
     private static void writeClass(CodePrintWriter out, Imports imports, Indent indent, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
         if (cls.topLevel) {
-            out.format("package %s;\n", cls.pkg());
-            out.format("\n%s", IMPORTS_HERE);
+            out.line("package %s;", cls.pkg());
+            out.println();
+            out.line("%s", IMPORTS_HERE);
         }
         writeClassDeclaration(out, imports, indent, cls, fullClassNameInterfaces);
-        indent.right();
-        writeEnumMembers(out, indent, cls);
+        out.right();
+        writeEnumMembers(out, cls);
         if (isPolymorphic(cls)) {
             writePolymorphicClassContent(out, imports, indent, cls, names, fullClassNameInterfaces);
         } else {
@@ -139,7 +139,7 @@ public final class SchemasCodeWriter {
             writeHashCodeMethod(out, imports, indent, cls);
             writeToStringMethod(out, imports, indent, cls);
         }
-        closeParen(out, indent);
+        out.closeParen();
     }
 
     private static boolean isPolymorphic(Cls cls) {
@@ -148,7 +148,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void addOverrideAnnotation(CodePrintWriter out, Imports imports) {
-        out.newLine();
+        out.println();
         out.line("@%s", imports.add(Override.class));
     }
 
@@ -159,7 +159,7 @@ public final class SchemasCodeWriter {
     private static void writeEnumCreator(CodePrintWriter out, Imports imports, Cls cls) {
         if (cls.classType == ClassType.ENUM) {
             String simpleClassName = Names.simpleClassName(cls.fullClassName);
-            out.newLine();
+            out.println();
             out.line("@%s", imports.add(JsonCreator.class));
             out.line("public static %s fromValue(%s value) {", simpleClassName, imports.add(Object.class));
             out.right();
@@ -183,28 +183,27 @@ public final class SchemasCodeWriter {
         Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
         String implementsClause = implementsClause(imports, interfaces);
         if (cls.description.isPresent()) {
-            Javadoc.printJavadoc(out, indent, cls.description.get(), true);
+            Javadoc.printJavadoc(out, out.indent(), cls.description.get(), true);
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeJsonTypeInfoAnnotation(out, imports, indent, cls);
         } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
-            writePolymorphicDeserializerAnnotation(out, imports, indent, cls);
+            writePolymorphicDeserializerAnnotation(out, imports, cls);
         } else {
             out.println();
         }
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            writeJsonIncludeAnnotation(out, imports, indent);
-            writeAutoDetectAnnotation(out, imports, indent);
+            writeJsonIncludeAnnotation(out, imports);
+            writeAutoDetectAnnotation(out, imports);
         }
         if (cls.topLevel) {
             addGeneratedAnnotation(out, imports);
         }
-        out.format("%spublic %s%s %s%s {\n", indent, modifier, cls.classType.word(), cls.simpleName(),
-                implementsClause);
+        out.line("public %s%s %s%s {", modifier, cls.classType.word(), cls.simpleName(), implementsClause);
     }
 
-    private static void writeJsonIncludeAnnotation(CodePrintWriter out, Imports imports, Indent indent) {
-        out.format("%s@%s(%s.NON_NULL)\n", indent, imports.add(JsonInclude.class), imports.add(Include.class));
+    private static void writeJsonIncludeAnnotation(CodePrintWriter out, Imports imports) {
+        out.line("@%s(%s.NON_NULL)", imports.add(JsonInclude.class), imports.add(Include.class));
     }
 
     private static String classModifier(Cls cls) {
@@ -229,10 +228,10 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeJsonTypeInfoAnnotation(CodePrintWriter out, Imports imports, Indent indent, Cls cls) {
-        out.format("\n%s@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)\n",
-                indent, imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName,
+        out.line("@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)",
+                imports.add(JsonTypeInfo.class), imports.add(Id.class), cls.discriminator.propertyName,
                 imports.add(As.class));
-        indent.right().right();
+        out.right().right();
         String types = cls.fields.stream()
                 .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", indent, imports.add(Type.class),
                         imports.add(x.fullClassName),
@@ -242,31 +241,30 @@ public final class SchemasCodeWriter {
         out.format("%s@%s({%s})\n", indent, imports.add(JsonSubTypes.class), types);
     }
 
-    private static void addConstructorBindingAnnotation(CodePrintWriter out, Imports imports, Indent indent,
-            Names names) {
+    private static void addConstructorBindingAnnotation(CodePrintWriter out, Imports imports, Names names) {
         if (names.generatorIsSpring3()) {
-            out.format("%s@%s\n", indent, imports
+            out.line("@%s", imports
                     .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
         } else {
-            out.format("%s@%s\n", indent, imports.add(ConstructorBinding.class));
+            out.line("@%s", imports.add(ConstructorBinding.class));
         }
     }
 
-    private static void writePolymorphicDeserializerAnnotation(CodePrintWriter out, Imports imports, Indent indent,
+    private static void writePolymorphicDeserializerAnnotation(CodePrintWriter out, Imports imports,
             Cls cls) {
-        out.format("\n%s@%s(using = %s.Deserializer.class)\n", indent, imports.add(JsonDeserialize.class),
-                cls.simpleName());
+        out.println();
+        out.line("@%s(using = %s.Deserializer.class)", imports.add(JsonDeserialize.class), cls.simpleName());
     }
 
-    private static void writeAutoDetectAnnotation(CodePrintWriter out, Imports imports, Indent indent) {
-        out.format("%s@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)\n", indent,
-                imports.add(JsonAutoDetect.class), imports.add(Visibility.class), imports.add(Visibility.class));
+    private static void writeAutoDetectAnnotation(CodePrintWriter out, Imports imports) {
+        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)", imports.add(JsonAutoDetect.class),
+                imports.add(Visibility.class), imports.add(Visibility.class));
     }
 
-    private static void writeEnumMembers(CodePrintWriter out, Indent indent, Cls cls) {
+    private static void writeEnumMembers(CodePrintWriter out, Cls cls) {
         String text = cls.enumMembers.stream().map(x -> {
             String delim = x.parameter instanceof String ? "\"" : "";
-            return String.format("%s%s(%s%s%s)", indent, x.name, delim, x.parameter, delim);
+            return String.format("%s%s(%s%s%s)", out.indent(), x.name, delim, x.parameter, delim);
         }).collect(Collectors.joining(",\n"));
         if (!text.isEmpty()) {
             out.println("\n" + text + ";");
@@ -276,12 +274,13 @@ public final class SchemasCodeWriter {
     private static void writePolymorphicClassContent(CodePrintWriter out, Imports imports, Indent indent, Cls cls,
             Names names, Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            out.format("\n%s%s %s();\n", indent, imports.add(String.class), cls.discriminator.fieldName);
+            out.println();
+            out.line("%s %s();", imports.add(String.class), cls.discriminator.fieldName);
         } else {
             if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
                 out.println();
                 writeJsonValueAnnotation(out, imports, indent);
-                out.format("%sprivate final %s %s;\n", indent, imports.add(Object.class), "value");
+                out.line("private final %s %s;", imports.add(Object.class), "value");
 
                 // add constructor for each member of the oneOf (fieldTypes)
                 // as there are multiple constructors we cannot add ConstructorBinding
@@ -297,21 +296,21 @@ public final class SchemasCodeWriter {
                 // allof
                 writeFields(out, imports, indent, cls);
 
-                indent.right().right();
+                out.right().right();
                 final String parametersNullable;
                 parametersNullable = cls.fields.stream()
                         .map(x -> String.format("\n%s%s %s", indent, x.resolvedTypeNullable(imports), x.fieldName(cls)))
                         .collect(Collectors.joining(","));
-                indent.left().left();
+                out.left().left();
                 out.println();
-                out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersNullable);
-                indent.right();
+                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersNullable);
+                out.right();
                 ifValidate(cls, out, indent, imports, names, //
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
                                 checkNotNull(imports, indent, cls, out2, x);
                             } else {
-                                out.format("%s// ???\n", indent);
+                                out.line("// ???");
                             }
                             validateMore(out2, imports, indent, cls, x);
                         }));
@@ -321,19 +320,20 @@ public final class SchemasCodeWriter {
                 closeParen(out, indent);
                 writeGetters(out, imports, indent, cls, fullClassNameInterfaces);
             }
-            out.format("\n%s@%s(\"serial\")\n", indent, imports.add(SuppressWarnings.class));
-            out.format("%spublic static final class Deserializer extends %s<%s> {\n", indent,
+            out.println();
+            out.line("@%s(\"serial\")", imports.add(SuppressWarnings.class));
+            out.line("public static final class Deserializer extends %s<%s> {",
                     imports.add(PolymorphicDeserializer.class), cls.simpleName());
-            indent.right();
-            out.format("\n%spublic Deserializer() {\n", indent);
-            indent.right();
+            out.right();
+            out.println();
+            out.line("public Deserializer() {");
+            out.right();
             String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
-            out.format("%ssuper(%s.config(), %s.%s, %s.class, %s);\n", indent,
-                    imports.add(names.globalsFullClassName()), imports.add(PolymorphicType.class),
-                    cls.polymorphicType.name(), cls.simpleName(), classes);
-            closeParen(out, indent);
-            closeParen(out, indent);
+            out.line("super(%s.config(), %s.%s, %s.class, %s);", imports.add(names.globalsFullClassName()),
+                    imports.add(PolymorphicType.class), cls.polymorphicType.name(), cls.simpleName(), classes);
+            out.closeParen();
+            out.closeParen();
         }
     }
 
@@ -437,7 +437,7 @@ public final class SchemasCodeWriter {
                 ? "private"
                 : "public";
         if (visibility.equals("public")) {
-            addConstructorBindingAnnotation(out, imports, indent, names);
+            addConstructorBindingAnnotation(out, imports, names);
         }
         out.format("%s%s %s(%s) {\n", indent, visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         indent.right();
@@ -464,7 +464,7 @@ public final class SchemasCodeWriter {
                     .collect(Collectors.joining(","));
             indent.left().left();
             out.println();
-            addConstructorBindingAnnotation(out, imports, indent, names);
+            addConstructorBindingAnnotation(out, imports, names);
             out.format("%spublic %s(%s) {\n", indent, Names.simpleClassName(cls.fullClassName), parametersOptional);
             indent.right();
             // validate
