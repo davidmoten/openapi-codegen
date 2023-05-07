@@ -25,8 +25,14 @@ public class LibraryService implements Service {
     }
 
     private UserWithId createUser(int i) {
-        return new UserWithId(new User("User" + i, "Gomez", "user" + i + ".gomez@gmail.com", Optional.empty()),
-                new UserIdWrapped(new UserId(i + "")));
+        return new UserWithId(User.builder() //
+                .firstName("User" + i) //
+                .lastName("Gomez") //
+                .email("user" + i + ".gomez@gmail.com") //
+                .build(), //
+                UserIdWrapped.builder() //
+                        .userId(UserId.builder().value(i + "").build()) //
+                        .build());
     }
 
     @Override

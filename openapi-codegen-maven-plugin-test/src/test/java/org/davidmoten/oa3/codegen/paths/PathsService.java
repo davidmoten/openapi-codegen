@@ -35,7 +35,7 @@ public class PathsService implements Service {
 
     @Override
     public Response2 responseRefGet() throws ServiceException {
-        return response(ResponseEntity.status(500).body(new Response1("beehive")));
+        return response(ResponseEntity.status(500).body(Response1.builder().thing("beehive").build()));
     }
 
     @Override
@@ -52,8 +52,7 @@ public class PathsService implements Service {
     @Override
     public Response1 responseMultiTypeGet(String accept, String username) throws ServiceException {
         List<String> accepts = Arrays.asList(accept.split(", "));
-        if (accepts.stream()
-                .anyMatch(x -> MediaType.valueOf(x).isCompatibleWith(MediaType.APPLICATION_OCTET_STREAM))) {
+        if (accepts.stream().anyMatch(x -> MediaType.valueOf(x).isCompatibleWith(MediaType.APPLICATION_OCTET_STREAM))) {
             byte[] bytes = "hello there".getBytes(StandardCharsets.UTF_8);
             InputStream in = new ByteArrayInputStream(bytes);
             InputStreamResource res = new InputStreamResource(in);
