@@ -132,37 +132,37 @@ public final class SpringBootServerCodeWriter {
 
     private static void writeServiceInterfaceClass(CodePrintWriter out, Imports imports, Names names,
             List<Method> methods) {
-        Indent indent = new Indent();
-        out.format("package %s;\n", Names.pkg(names.serviceControllerFullClassName()));
-        out.format("\n%s", IMPORTS_HERE);
-        WriterUtil.writeApiJavadoc(out, names, indent);
-        out.format("\npublic interface %s extends %s {\n", Names.simpleClassName(names.serviceInterfaceFullClassName()),
+        out.line("package %s;", Names.pkg(names.serviceControllerFullClassName()));
+        out.println();
+        out.line("%s", IMPORTS_HERE);
+        WriterUtil.writeApiJavadoc(out, names, out.indent());
+        out.println();
+        out.line("public interface %s extends %s {", Names.simpleClassName(names.serviceInterfaceFullClassName()),
                 imports.add(ErrorHandler.class));
-        indent.right();
-        writeServiceMethods(out, imports, methods, indent, false, names);
-        indent.left();
-        out.println("\n}\n");
+        writeServiceMethods(out, imports, methods, out.indent(), false, names);
+        out.closeParen();
     }
 
     private static void writeServiceControllerClass(CodePrintWriter out, Imports imports, Names names,
             List<Method> methods, String fullClassName) {
-        Indent indent = new Indent();
-        out.format("package %s;\n", Names.pkg(fullClassName));
-        out.format("\n%s", IMPORTS_HERE);
-        out.format("\n@%s\n", imports.add(RestController.class));
+        out.line("package %s;", Names.pkg(fullClassName));
+        out.println();
+        out.line("%s", IMPORTS_HERE);
+        out.println();
+        out.line("@%s", imports.add(RestController.class));
         String simpleClassName = Names.simpleClassName(fullClassName);
-        out.format("public class %s implements %s {\n", simpleClassName, imports.add(ControllerExceptionHandler.class));
-        indent.right();
-        out.format("\n%sprivate final %s service;\n", indent, imports.add(names.serviceInterfaceFullClassName()));
-        out.format("\n%spublic %s(@%s(required = false) %s service) {\n", indent, simpleClassName,
-                imports.add(Autowired.class), imports.add(names.serviceInterfaceFullClassName()));
-        out.format("%sthis.service = %s.orElse(service, new %s() {});\n", indent.right(),
+        out.line("public class %s implements %s {", simpleClassName, imports.add(ControllerExceptionHandler.class));
+        out.println();
+        out.line("private final %s service;", imports.add(names.serviceInterfaceFullClassName()));
+        out.println();
+        out.line("public %s(@%s(required = false) %s service) {", simpleClassName, imports.add(Autowired.class),
+                imports.add(names.serviceInterfaceFullClassName()));
+        out.line("this.service = %s.orElse(service, new %s() {});",
                 imports.add(org.davidmoten.oa3.codegen.util.Util.class),
                 imports.add(names.serviceInterfaceFullClassName()));
-        closeParen(out, indent);
-        writeServiceMethods(out, imports, methods, indent, true, names);
-        indent.left();
-        out.println("\n}\n");
+        out.closeParen();
+        writeServiceMethods(out, imports, methods, out.indent(), true, names);
+        out.closeParen();
     }
 
     private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods, Indent indent,
