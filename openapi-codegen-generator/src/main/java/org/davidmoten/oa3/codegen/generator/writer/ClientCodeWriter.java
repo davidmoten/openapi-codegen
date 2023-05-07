@@ -67,14 +67,13 @@ public class ClientCodeWriter {
 
     private static final String FULL_RESPONSE_SUFFIX = "FullResponse";
 
-    private static void writeClientClassMethods(CodePrintWriter out, Imports imports, List<Method> methods
-            ) {
+    private static void writeClientClassMethods(CodePrintWriter out, Imports imports, List<Method> methods) {
         methods.forEach(m -> {
             out.right().right();
             String params = m.parameters //
                     .stream() //
-                    .map(p -> String.format("\n%s%s %s", out.indent(), SpringBootServerCodeWriter.toImportedType(p, imports),
-                            p.identifier)) //
+                    .map(p -> String.format("\n%s%s %s", out.indent(),
+                            SpringBootServerCodeWriter.toImportedType(p, imports), p.identifier)) //
                     .collect(Collectors.joining(", "));
             out.left().left();
             final String importedReturnType;
@@ -84,7 +83,7 @@ public class ClientCodeWriter {
                 importedReturnType = imports.add(m.returnFullClassName.get());
             }
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
-                SpringBootServerCodeWriter.writeMethodJavadoc(out, out.indent(), m,
+                SpringBootServerCodeWriter.writeMethodJavadoc(out, m,
                         m.primaryStatusCode.map(x -> "primary response with status code " + x));
                 out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 final String paramIdentifiers;
@@ -92,7 +91,8 @@ public class ClientCodeWriter {
                     paramIdentifiers = m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", "));
                 } else {
                     out.right().right().right();
-                    paramIdentifiers = m.parameters.stream().map(p -> String.format("\n%s%s", out.indent(), p.identifier))
+                    paramIdentifiers = m.parameters.stream()
+                            .map(p -> String.format("\n%s%s", out.indent(), p.identifier))
                             .collect(Collectors.joining(","));
                     out.left().left().left();
                 }
@@ -104,10 +104,10 @@ public class ClientCodeWriter {
                 out.left().left();
                 out.closeParen();
             }
-            SpringBootServerCodeWriter.writeMethodJavadoc(out, out.indent(), m,
+            SpringBootServerCodeWriter.writeMethodJavadoc(out, m,
                     Optional.of("full response with status code, body and headers"));
-            out.line("public %s %s%s(%s) {", imports.add(HttpResponse.class), m.methodName,
-                    FULL_RESPONSE_SUFFIX, params);
+            out.line("public %s %s%s(%s) {", imports.add(HttpResponse.class), m.methodName, FULL_RESPONSE_SUFFIX,
+                    params);
             out.line("return %s", imports.add(Http.class));
             out.right().right();
             out.line(".method(%s.%s)", imports.add(HttpMethod.class), m.httpMethod.name());

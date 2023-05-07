@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.generator.internal;
 
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,66 +10,67 @@ import org.davidmoten.text.utils.WordWrap;
 
 import com.github.davidmoten.guavamini.Preconditions;
 
-public class Javadoc {
+public final class Javadoc {
 
     private static final int MAX_JAVADOC_WIDTH = 80;
 
-    public static void printJavadoc(PrintWriter out, Indent indent, String text, boolean isHtml) {
+    public static void printJavadoc(CodePrintWriter out, Indent indent, String text, boolean isHtml) {
         Preconditions.checkNotNull(text);
-        printJavadoc(out, indent, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
+        printJavadoc(out, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
                 Collections.emptyMap(), isHtml);
     }
 
-    public static void printJavadoc(PrintWriter p, Indent indent, Optional<String> text, List<Annotation> annotations,
+    public static void printJavadoc(CodePrintWriter p, Optional<String> text, List<Annotation> annotations,
             Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml) {
         boolean hasText = text.isPresent() || !annotations.isEmpty() || returns.isPresent();
         boolean addParagraph = false;
         if (hasText) {
-            p.format("\n%s/**\n", indent);
+            p.println();
+            p.line("/**");
             if (preamble.isPresent()) {
-                p.format("%s * %s\n", indent, encodeAndWrapForJavadoc(preamble.get(), indent, false));
+                p.line(" * %s", encodeAndWrapForJavadoc(preamble.get(), p.indent(), false));
                 addParagraph = true;
             }
         }
         if (text.isPresent()) {
             if (addParagraph) {
-                p.format("%s * <p>\n", indent);
+                p.line(" * <p>");
             }
-            p.format("%s * %s\n", indent, encodeAndWrapForJavadoc(text.get(), indent, isHtml));
+            p.line(" * %s", encodeAndWrapForJavadoc(text.get(), p.indent(), isHtml));
         }
         annotations.forEach(a -> {
-            p.format("%s * <p>\n", indent);
-            p.format("%s * <b>%s</b>\n", indent, a.getTerm());
+            p.line(" * <p>");
+            p.line(" * <b>%s</b>", a.getTerm());
             if (a.getString().isPresent()) {
-                p.format("%s * <p>\n", indent);
-                p.format("%s * %s\n", indent, a.getString().get());
+                p.line(" * <p>");
+                p.line(" * %s", a.getString().get());
             }
             if (a.getBool().isPresent()) {
-                p.format("%s * <p>\n", indent);
-                p.format("%s * %s\n", indent, a.getBool().get());
+                p.line(" * <p>");
+                p.line(" * %s", a.getBool().get());
             }
             for (String record : a.getRecords()) {
-                p.format("%s * <p>\n", indent);
-                p.format("%s * %s\n", indent, record);
+                p.line(" * <p>");
+                p.line(" * %s", record);
             }
         });
         if (hasText) {
             boolean first = true;
             for (Entry<String, String> entry : parameterDoc.entrySet()) {
                 if (first) {
-                    p.format("%s * \n", indent);
+                    p.line(" * ");
                     first = false;
                 }
-                p.format("%s * @param %s\n", indent, entry.getKey());
-                p.format("%s *            %s\n", indent, entry.getValue());
+                p.line(" * @param %s", entry.getKey());
+                p.line(" *            %s", entry.getValue());
             }
             if (returns.isPresent()) {
                 if (first) {
-                    p.format("%s * \n", indent);
+                    p.line(" * ");
                 }
-                p.format("%s * @return %s\n", indent, returns.get());
+                p.line(" * @return %s", returns.get());
             }
-            p.format("%s */", indent);
+            p.format("%s */", p.indent());
         }
     }
 
