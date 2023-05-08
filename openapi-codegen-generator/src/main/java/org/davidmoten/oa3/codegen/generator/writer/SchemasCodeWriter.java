@@ -552,8 +552,7 @@ public final class SchemasCodeWriter {
 
     private static void writeEqualsMethod(CodePrintWriter out, Cls cls) {
         addOverrideAnnotation(out);
-        out.line("public boolean equals(Object o) {\n");
-        out.right();
+        out.line("public boolean equals(Object o) {");
         out.line("if (this == o) {");
         out.line("return true;");
         out.closeParen();
