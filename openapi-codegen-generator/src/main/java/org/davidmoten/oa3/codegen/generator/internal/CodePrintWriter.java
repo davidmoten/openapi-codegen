@@ -19,7 +19,7 @@ public final class CodePrintWriter extends PrintWriter {
         this(out, new Imports(fullClassName), new Indent());
     }
     
-    public CodePrintWriter(OutputStream out, Imports imports, Indent indent) {
+    private CodePrintWriter(OutputStream out, Imports imports, Indent indent) {
         super(new OutputStreamWriter(out, StandardCharsets.UTF_8));
         this.indent = indent;
         this.imports = imports;
