@@ -128,7 +128,6 @@ public final class SpringBootServerCodeWriter {
         out.println();
         out.format("%s", IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
-        out.println();
         out.line("public interface %s extends %s {", Names.simpleClassName(out.fullClassName()),
                 ErrorHandler.class);
         writeServiceMethods(out, methods, false, names);
