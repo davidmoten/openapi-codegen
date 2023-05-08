@@ -1,12 +1,13 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.writer;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.davidmoten.oa3.codegen.generator.BuilderWriter.Field;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
+import org.davidmoten.oa3.codegen.generator.writer.BuilderWriter;
+import org.davidmoten.oa3.codegen.generator.writer.BuilderWriter.Field;
 import org.junit.jupiter.api.Test;
 
 public class BuilderWriterTest {

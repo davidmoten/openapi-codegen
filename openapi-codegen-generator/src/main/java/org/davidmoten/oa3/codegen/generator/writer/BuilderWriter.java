@@ -1,10 +1,11 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.generator.writer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 
@@ -54,7 +55,6 @@ public class BuilderWriter {
                 }
                 out.println();
                 out.line("public static final class %s {", builderName);
-                out.right();
                 if (passBuilderIntoConstructor) {
                     out.println();
                     out.line("private final Builder b;");

@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.generator.BuilderWriter;
 import org.davidmoten.oa3.codegen.generator.Generator.ClassType;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;

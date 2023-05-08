@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-public class SpringBootGeneratorTest {
+public class ClientServerGeneratorTest {
 
     @Test
     public void test() throws MalformedURLException {
