@@ -242,7 +242,6 @@ public final class SchemasCodeWriter {
     }
 
     private static void writePolymorphicDeserializerAnnotation(CodePrintWriter out, Cls cls) {
-        out.println();
         out.line("@%s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
     }
 

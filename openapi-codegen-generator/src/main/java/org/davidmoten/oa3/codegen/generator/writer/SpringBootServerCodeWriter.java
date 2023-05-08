@@ -126,7 +126,7 @@ public final class SpringBootServerCodeWriter {
             List<Method> methods) {
         out.line("package %s;", Names.pkg(out.fullClassName()));
         out.println();
-        out.line("%s", IMPORTS_HERE);
+        out.format("%s", IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
         out.println();
         out.line("public interface %s extends %s {", Names.simpleClassName(out.fullClassName()),
@@ -139,7 +139,7 @@ public final class SpringBootServerCodeWriter {
             List<Method> methods) {
         out.line("package %s;", Names.pkg(out.fullClassName()));
         out.println();
-        out.line("%s", IMPORTS_HERE);
+        out.format("%s", IMPORTS_HERE);
         out.println();
         out.line("@%s", RestController.class);
         String simpleClassName = Names.simpleClassName(out.fullClassName());
