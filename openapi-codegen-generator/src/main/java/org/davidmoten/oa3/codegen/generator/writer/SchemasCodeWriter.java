@@ -424,8 +424,7 @@ public final class SchemasCodeWriter {
         if (visibility.equals("public")) {
             addConstructorBindingAnnotation(out, names);
         }
-        out.line("%s %s(%s) {\n", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
-        out.right();
+        out.line("%s %s(%s) {", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         ifValidate(cls, out, names, //
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
