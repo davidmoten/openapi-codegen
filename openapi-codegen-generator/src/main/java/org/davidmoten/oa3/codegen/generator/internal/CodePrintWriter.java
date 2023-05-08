@@ -14,28 +14,30 @@ public final class CodePrintWriter extends PrintWriter {
     private final Imports imports;
 
     public CodePrintWriter(OutputStream out, String fullClassName) {
-        this(out, new Imports(fullClassName));
+        this(out, new Imports(fullClassName), new Indent());
     }
     
-    public CodePrintWriter(OutputStream out, Imports imports) {
+    public CodePrintWriter(OutputStream out, Imports imports, Indent indent) {
         super(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-        this.indent = new Indent();
+        this.indent = indent;
         this.imports = imports;
     }
     
     public static CodePrintWriter create(String fullClassName) {
-        return create(new Imports(fullClassName));
+        return create(new Imports(fullClassName), new Indent());
     }
     
-    public static CodePrintWriter create(Imports imp) {
+    public static CodePrintWriter create(CodePrintWriter w) {
+        return create(w.imports(), w.indent());
+    }
+    
+    private static CodePrintWriter create(Imports imp, Indent indent) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        CodePrintWriter p = new CodePrintWriter(bytes, imp);
+        CodePrintWriter p = new CodePrintWriter(bytes, imp, indent);
         p.setBytes(bytes);
         return p;
-        
     }
-
-
+    
     private void setBytes(ByteArrayOutputStream bytes) {
         this.bytes = bytes;
     }

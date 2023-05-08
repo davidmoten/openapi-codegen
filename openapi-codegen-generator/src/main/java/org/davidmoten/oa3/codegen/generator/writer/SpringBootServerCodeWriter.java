@@ -170,7 +170,7 @@ public final class SpringBootServerCodeWriter {
                     } else {
                         annotations = "";
                     }
-                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
+                    return String.format("%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
                             "requestBody");
                 } else {
                     final String annotations;
@@ -188,7 +188,7 @@ public final class SpringBootServerCodeWriter {
                     } else {
                         annotations = "";
                     }
-                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
+                    return String.format("%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
                             p.identifier);
                 }
             }).collect(Collectors.joining(", "));
@@ -208,8 +208,6 @@ public final class SpringBootServerCodeWriter {
 //                    consumes = { "application/json" }
 //                )
             if (isController) {
-
-                out.println();
                 out.line("@%s(", RequestMapping.class);
                 out.right();
                 String consumes = m.consumes.stream().map(x -> "\"" + x + "\"").collect(Collectors.joining(", "));
@@ -259,8 +257,10 @@ public final class SpringBootServerCodeWriter {
                         x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
         Optional<String> html = Optional.of(m.description.map(x -> WriterUtil.markdownToHtml(x))
                 .orElse("<p>Returns response from call to path <i>%s</i>.</p>"));
-        Javadoc.printJavadoc(out, html, Collections.emptyList(), Optional.empty(), returns,
-                parameterDescriptions, true);
+        if (!Javadoc.printJavadoc(out, html, Collections.emptyList(), Optional.empty(), returns,
+                parameterDescriptions, true)) {
+            out.println();
+        }
     }
 
     private static Class<?> annotation(ParamType t) {

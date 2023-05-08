@@ -14,13 +14,13 @@ public final class Javadoc {
 
     private static final int MAX_JAVADOC_WIDTH = 80;
 
-    public static void printJavadoc(CodePrintWriter out, Indent indent, String text, boolean isHtml) {
+    public static boolean printJavadoc(CodePrintWriter out, Indent indent, String text, boolean isHtml) {
         Preconditions.checkNotNull(text);
-        printJavadoc(out, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
+        return printJavadoc(out, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
                 Collections.emptyMap(), isHtml);
     }
 
-    public static void printJavadoc(CodePrintWriter p, Optional<String> text, List<Annotation> annotations,
+    public static boolean printJavadoc(CodePrintWriter p, Optional<String> text, List<Annotation> annotations,
             Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml) {
         boolean hasText = text.isPresent() || !annotations.isEmpty() || returns.isPresent();
         boolean addParagraph = false;
@@ -70,8 +70,9 @@ public final class Javadoc {
                 }
                 p.line(" * @return %s", returns.get());
             }
-            p.format("%s */", p.indent());
+            p.line(" */");
         }
+        return hasText;
     }
 
     private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {

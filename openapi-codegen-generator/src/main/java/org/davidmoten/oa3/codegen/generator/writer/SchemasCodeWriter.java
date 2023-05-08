@@ -170,8 +170,14 @@ public final class SchemasCodeWriter {
         String modifier = classModifier(cls);
         Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
         String implementsClause = implementsClause(out.imports(), interfaces);
+        final boolean javadocExists;
         if (cls.description.isPresent()) {
-            Javadoc.printJavadoc(out, out.indent(), cls.description.get(), true);
+            javadocExists = Javadoc.printJavadoc(out, out.indent(), cls.description.get(), true);
+        } else {
+            javadocExists = false;
+        }
+        if (!javadocExists) {
+            out.println();
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeJsonTypeInfoAnnotation(out, cls);
@@ -291,13 +297,13 @@ public final class SchemasCodeWriter {
                 out.println();
                 out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersNullable);
                 ifValidate(cls, out, names, //
-                        out2 -> cls.fields.stream().forEach(x -> {
+                        o -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
-                                checkNotNull(cls, out2, x);
+                                checkNotNull(cls, o, x);
                             } else {
-                                out2.line("// ???");
+                                o.line("// ???");
                             }
-                            validateMore(out2, cls, x);
+                            validateMore(o, cls, x);
                         }));
                 cls.fields.stream().forEach(x -> {
                     assignField(out, cls, x);
@@ -606,7 +612,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void ifValidate(Cls cls, CodePrintWriter out, Names names, Consumer<CodePrintWriter> consumer) {
-        CodePrintWriter b = CodePrintWriter.create(out.imports());
+        CodePrintWriter b = CodePrintWriter.create(out);
         out.right();
         consumer.accept(b);
         out.left();

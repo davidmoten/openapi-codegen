@@ -30,7 +30,6 @@ public class ClientCodeWriter {
         out.println();
         out.line("%s", WriterUtil.IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
-        out.println();
         out.line("public class %s {", Names.simpleClassName(fullClassName));
         writeClientClassFieldsAndConstructor(out, fullClassName, names);
         writeClientClassMethods(out, methods);
