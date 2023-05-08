@@ -3,21 +3,16 @@ package org.davidmoten.oa3.codegen.generator.writer;
 import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.generator.BuilderWriter;
-import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Generator.ClassType;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
@@ -52,24 +47,10 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import jakarta.annotation.Generated;
-
 public final class SchemasCodeWriter {
 
     private SchemasCodeWriter() {
         // prevent instantiation
-    }
-
-    private static final String version = readVersion();
-
-    private static String readVersion() {
-        Properties p = new Properties();
-        try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
-            p.load(in);
-            return p.get("groupId") + ":" + p.get("artifactId") + p.get("version");
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     public static void writeSchemaClass(Names names, Map<String, Set<Cls>> fullClassNameInterfaces, Cls cls,
@@ -91,7 +72,7 @@ public final class SchemasCodeWriter {
         out.line("package %s;", Names.pkg(fullClassName));
         out.println();
         out.format("%s", IMPORTS_HERE);
-        addGeneratedAnnotation(out);
+        WriterUtil.addGeneratedAnnotation(out);
         out.line("public final class %s {", Names.simpleClassName(fullClassName));
         out.println();
         out.line("private static volatile %s config = %s.builder().build();", Config.class, Config.class);
@@ -144,10 +125,6 @@ public final class SchemasCodeWriter {
         out.line("@%s", out.add(Override.class));
     }
 
-    private static void addGeneratedAnnotation(CodePrintWriter out) {
-        out.line("@%s(value = \"%s\")", Generated.class, version);
-    }
-
     private static void writeEnumCreator(CodePrintWriter out, Cls cls) {
         if (cls.classType == ClassType.ENUM) {
             String simpleClassName = Names.simpleClassName(cls.fullClassName);
@@ -189,7 +166,7 @@ public final class SchemasCodeWriter {
             writeAutoDetectAnnotation(out);
         }
         if (cls.topLevel) {
-            addGeneratedAnnotation(out);
+            WriterUtil.addGeneratedAnnotation(out);
         }
         out.line("public %s%s %s%s {", modifier, cls.classType.word(), cls.simpleName(), implementsClause);
     }

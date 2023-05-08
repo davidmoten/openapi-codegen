@@ -63,6 +63,7 @@ public final class SpringBootServerCodeWriter {
         out.format("%s", IMPORTS_HERE);
         out.println();
         out.line("@%s", SpringBootApplication.class);
+        WriterUtil.addGeneratedAnnotation(out);
         out.line("public class %s {", out.simpleClassName());
         out.println();
         out.line("public static void main(%s[] args) {", String.class);
@@ -87,6 +88,7 @@ public final class SpringBootServerCodeWriter {
         out.format("%s", IMPORTS_HERE);
         out.println();
         out.line("@%s", Configuration.class);
+        WriterUtil.addGeneratedAnnotation(out);
         out.line("public class %s {", out.simpleClassName());
         out.println();
         out.line("private final %s config;", Config.class);
@@ -126,6 +128,7 @@ public final class SpringBootServerCodeWriter {
         out.println();
         out.format("%s", IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
+        WriterUtil.addGeneratedAnnotation(out);
         out.line("public interface %s extends %s {", out.simpleClassName(),
                 ErrorHandler.class);
         writeServiceMethods(out, methods, false, names);
@@ -139,6 +142,7 @@ public final class SpringBootServerCodeWriter {
         out.format("%s", IMPORTS_HERE);
         out.println();
         out.line("@%s", RestController.class);
+        WriterUtil.addGeneratedAnnotation(out);
         out.line("public class %s implements %s {", out.simpleClassName(), ControllerExceptionHandler.class);
         out.println();
         out.line("private final %s service;", out.add(names.serviceInterfaceFullClassName()));

@@ -2,23 +2,40 @@ package org.davidmoten.oa3.codegen.generator.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Names;
+
+import jakarta.annotation.Generated;
 
 public final class WriterUtil {
 
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
     public static final String IMPORTS_HERE = "IMPORTS_HERE";
+    
+    private static final String version = readVersion();
+
+    private static String readVersion() {
+        Properties p = new Properties();
+        try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
+            p.load(in);
+            return p.get("groupId") + ":" + p.get("artifactId") + p.get("version");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
     public static void closeParen(PrintWriter out, Indent indent) {
         indent.left();
@@ -59,6 +76,10 @@ public final class WriterUtil {
         if (!Javadoc.printJavadoc(out, out.indent(), WriterUtil.markdownToHtml(text), true)) {
            out.println();
         }
+    }
+    
+    public static void addGeneratedAnnotation(CodePrintWriter out) {
+        out.line("@%s(value = \"%s\")", Generated.class, version);
     }
 
 }
