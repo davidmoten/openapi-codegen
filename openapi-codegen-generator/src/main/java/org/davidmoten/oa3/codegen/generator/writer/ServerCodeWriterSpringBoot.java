@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public final class SpringBootServerCodeWriter {
+public final class ServerCodeWriterSpringBoot {
 
     public static void writeServiceClasses(Names names, List<Method> methods) {
         writeApplicationClass(names);

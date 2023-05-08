@@ -16,7 +16,7 @@ import org.davidmoten.oa3.codegen.generator.Generator.MyVisitor.Result;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.generator.writer.ClientCodeWriter;
-import org.davidmoten.oa3.codegen.generator.writer.SpringBootServerCodeWriter;
+import org.davidmoten.oa3.codegen.generator.writer.ServerCodeWriterSpringBoot;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 import org.springframework.core.io.Resource;
 
@@ -59,7 +59,7 @@ public class ClientServerGenerator {
 
     public void generateServer() {
         List<Method> methods = collectMethods();
-        SpringBootServerCodeWriter.writeServiceClasses(names, methods);
+        ServerCodeWriterSpringBoot.writeServiceClasses(names, methods);
     }
 
     public void generateClient() {

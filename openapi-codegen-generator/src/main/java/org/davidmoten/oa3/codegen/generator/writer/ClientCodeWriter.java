@@ -70,7 +70,7 @@ public class ClientCodeWriter {
             String params = m.parameters //
                     .stream() //
                     .map(p -> String.format("\n%s%s %s", out.indent(),
-                            SpringBootServerCodeWriter.toImportedType(p, out.imports()), p.identifier)) //
+                            ServerCodeWriterSpringBoot.toImportedType(p, out.imports()), p.identifier)) //
                     .collect(Collectors.joining(", "));
             out.left().left();
             final String importedReturnType;
@@ -80,7 +80,7 @@ public class ClientCodeWriter {
                 importedReturnType = out.add(m.returnFullClassName.get());
             }
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
-                SpringBootServerCodeWriter.writeMethodJavadoc(out, m,
+                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
                         m.primaryStatusCode.map(x -> "primary response with status code " + x));
                 out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 final String paramIdentifiers;
@@ -101,7 +101,7 @@ public class ClientCodeWriter {
                 out.left().left();
                 out.closeParen();
             }
-            SpringBootServerCodeWriter.writeMethodJavadoc(out, m,
+            ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
                     Optional.of("full response with status code, body and headers"));
             out.line("public %s %s%s(%s) {", HttpResponse.class, m.methodName, FULL_RESPONSE_SUFFIX, params);
             out.line("return %s", Http.class);
