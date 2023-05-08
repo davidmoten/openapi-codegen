@@ -166,7 +166,7 @@ public final class SpringBootServerCodeWriter {
                     } else {
                         annotations = "";
                     }
-                    return String.format("%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
+                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
                             "requestBody");
                 } else {
                     final String annotations;
@@ -184,7 +184,7 @@ public final class SpringBootServerCodeWriter {
                     } else {
                         annotations = "";
                     }
-                    return String.format("%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
+                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
                             p.identifier);
                 }
             }).collect(Collectors.joining(", "));

@@ -141,5 +141,12 @@ public class PathsServerTest {
         assertEquals("hello there", new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
         assertTrue(r.headers().contains("content-type", "application/octet-stream"));
     }
+    
+    @Test
+    public void testDefaultErrorReturned() {
+        HttpResponse r = client().defaultErrorGetFullResponse();
+        org.davidmoten.oa3.codegen.test.paths.schema.Error e = r.dataUnwrapped();
+        assertEquals("not found eh", e.errorMessage().orElse(""));
+    }
 
 }

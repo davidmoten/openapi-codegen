@@ -93,6 +93,18 @@ paths:
                 format: binary
         default:    
           $ref: '#/components/responses/Error'
+
+  /defaultError:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1' 
+        default:    
+          $ref: '#/components/responses/Error'  
                 
   /text:
     get:
