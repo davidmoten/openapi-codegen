@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.paths;
+package org.davidmoten.oa3.codegen.test.paths;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -6,12 +6,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import org.davidmoten.oa3.codegen.paths.path.QueryObjectGetIdParameterId;
-import org.davidmoten.oa3.codegen.paths.schema.Point;
-import org.davidmoten.oa3.codegen.paths.schema.Response1;
-import org.davidmoten.oa3.codegen.paths.schema.Response2;
-import org.davidmoten.oa3.codegen.paths.service.Service;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+import org.davidmoten.oa3.codegen.test.paths.path.QueryObjectGetIdParameterId;
+import org.davidmoten.oa3.codegen.test.paths.schema.Point;
+import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
+import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
+import org.davidmoten.oa3.codegen.test.paths.service.Service;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;

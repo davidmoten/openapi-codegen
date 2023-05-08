@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.library;
+package org.davidmoten.oa3.codegen.test.library;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

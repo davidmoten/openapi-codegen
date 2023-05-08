@@ -1,18 +1,18 @@
-package org.davidmoten.oa3.codegen.library;
+package org.davidmoten.oa3.codegen.test.library;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.davidmoten.oa3.codegen.library.schema.Item;
-import org.davidmoten.oa3.codegen.library.schema.User;
-import org.davidmoten.oa3.codegen.library.schema.UserId;
-import org.davidmoten.oa3.codegen.library.schema.UserIdWrapped;
-import org.davidmoten.oa3.codegen.library.schema.UserWithId;
-import org.davidmoten.oa3.codegen.library.schema.UsersPage;
-import org.davidmoten.oa3.codegen.library.schema.UsersPage.Users;
-import org.davidmoten.oa3.codegen.library.service.Service;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+import org.davidmoten.oa3.codegen.test.library.schema.Item;
+import org.davidmoten.oa3.codegen.test.library.schema.User;
+import org.davidmoten.oa3.codegen.test.library.schema.UserId;
+import org.davidmoten.oa3.codegen.test.library.schema.UserIdWrapped;
+import org.davidmoten.oa3.codegen.test.library.schema.UserWithId;
+import org.davidmoten.oa3.codegen.test.library.schema.UsersPage;
+import org.davidmoten.oa3.codegen.test.library.schema.UsersPage.Users;
+import org.davidmoten.oa3.codegen.test.library.service.Service;
 import org.springframework.stereotype.Component;
 
 @Component

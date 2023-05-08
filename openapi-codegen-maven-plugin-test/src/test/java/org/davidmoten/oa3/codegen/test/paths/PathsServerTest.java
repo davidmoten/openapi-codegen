@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.paths;
+package org.davidmoten.oa3.codegen.test.paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,11 +7,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.davidmoten.oa3.codegen.http.HttpResponse;
-import org.davidmoten.oa3.codegen.paths.client.Client;
-import org.davidmoten.oa3.codegen.paths.schema.Response1;
-import org.davidmoten.oa3.codegen.paths.schema.Response2;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+import org.davidmoten.oa3.codegen.test.paths.client.Client;
+import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
+import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;

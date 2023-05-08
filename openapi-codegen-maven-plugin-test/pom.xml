@@ -110,7 +110,7 @@
                         </goals>
                         <configuration>
                             <generator>spring</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.test</basePackage>
+                            <basePackage>org.davidmoten.oa3.codegen.test.main</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
@@ -126,59 +126,11 @@
                         </goals>
                         <configuration>
                             <generator>spring</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.paths</basePackage>
+                            <basePackage>org.davidmoten.oa3.codegen.test.paths</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
                                     <include>paths.yml</include>
-                                </includes>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cts</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <generator>spring</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.cts</basePackage>
-                            <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
-                                <includes>
-                                    <include>cts.yml</include>
-                                </includes>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>ebay</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <generator>spring</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.ebay</basePackage>
-                            <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
-                                <includes>
-                                    <include>ebay.yml</include>
-                                </includes>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>marqueta</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <generator>spring</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.marqueta</basePackage>
-                            <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
-                                <includes>
-                                    <include>marqueta.yml</include>
                                 </includes>
                             </sources>
                         </configuration>
@@ -191,7 +143,7 @@
                         <configuration>
                             <failOnParseErrors>false</failOnParseErrors>
                             <generator>spring</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.library</basePackage>
+                            <basePackage>org.davidmoten.oa3.codegen.test.library</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
@@ -200,7 +152,6 @@
                             </sources>
                         </configuration>
                     </execution>
-
                 </executions>
             </plugin>
             <plugin>
@@ -235,7 +186,7 @@
 
     <profiles>
         <profile>
-            <id>maps</id>
+            <id>extras</id>
             <build>
                 <plugins>
                     <plugin>
@@ -249,12 +200,60 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <basePackage>org.davidmoten.oa3.codegen.maps</basePackage>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.maps</basePackage>
                                     <failOnParseErrors>false</failOnParseErrors>
                                     <sources>
                                         <directory>${project.basedir}/../../googlemaps-openapi-specification/specification</directory>
                                         <includes>
                                             <include>index.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>cts</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.cts</basePackage>
+                                    <sources>
+                                        <directory>${project.basedir}/src/main/openapi</directory>
+                                        <includes>
+                                            <include>cts.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>ebay</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.ebay</basePackage>
+                                    <sources>
+                                        <directory>${project.basedir}/src/main/openapi</directory>
+                                        <includes>
+                                            <include>ebay.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>marqueta</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.marqueta</basePackage>
+                                    <sources>
+                                        <directory>${project.basedir}/src/main/openapi</directory>
+                                        <includes>
+                                            <include>marqueta.yml</include>
                                         </includes>
                                     </sources>
                                 </configuration>

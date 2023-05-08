@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.paths;
+package org.davidmoten.oa3.codegen.test.paths;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

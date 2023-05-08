@@ -1,12 +1,12 @@
-package org.davidmoten.oa3.codegen.library;
+package org.davidmoten.oa3.codegen.test.library;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.http.BearerAuthenticator;
-import org.davidmoten.oa3.codegen.library.client.Client;
-import org.davidmoten.oa3.codegen.library.schema.UsersPage;
+import org.davidmoten.oa3.codegen.test.library.client.Client;
+import org.davidmoten.oa3.codegen.test.library.schema.UsersPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;

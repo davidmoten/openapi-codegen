@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.paths;
+package org.davidmoten.oa3.codegen.test.paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,14 +10,14 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.davidmoten.oa3.codegen.paths.response.Response4;
-import org.davidmoten.oa3.codegen.paths.schema.RequestBody1;
-import org.davidmoten.oa3.codegen.paths.schema.RequestBody2;
-import org.davidmoten.oa3.codegen.paths.schema.Response1;
-import org.davidmoten.oa3.codegen.paths.schema.Response2;
-import org.davidmoten.oa3.codegen.paths.service.Service;
-import org.davidmoten.oa3.codegen.paths.service.ServiceController;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+import org.davidmoten.oa3.codegen.test.paths.response.Response4;
+import org.davidmoten.oa3.codegen.test.paths.schema.RequestBody1;
+import org.davidmoten.oa3.codegen.test.paths.schema.RequestBody2;
+import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
+import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
+import org.davidmoten.oa3.codegen.test.paths.service.Service;
+import org.davidmoten.oa3.codegen.test.paths.service.ServiceController;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.Resource;
