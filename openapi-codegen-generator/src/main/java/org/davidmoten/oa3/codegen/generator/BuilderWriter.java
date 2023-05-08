@@ -25,7 +25,7 @@ public class BuilderWriter {
 
     }
 
-    public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType, Imports imports) {
+    public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
         if (fields.isEmpty()) {
             return;
         }
@@ -72,14 +72,14 @@ public class BuilderWriter {
                         }
                         if (fld.required) {
                             if (fld.isArray) {
-                                out.line("private %s<%s> %s;", imports.add(List.class), imports.add(fld.fullClassName),
+                                out.line("private %s<%s> %s;", List.class, out.add(fld.fullClassName),
                                         fld.fieldName);
                             } else {
-                                out.line("private %s %s;", imports.add(fld.fullClassName), fld.fieldName);
+                                out.line("private %s %s;", out.add(fld.fullClassName), fld.fieldName);
                             }
                         } else {
-                            out.line("private %s %s = %s.empty();", enhancedImportedType(fld, imports), fld.fieldName,
-                                    imports.add(Optional.class));
+                            out.line("private %s %s = %s.empty();", enhancedImportedType(fld, out.imports()), fld.fieldName,
+                                    Optional.class);
                         }
                     }
                     out.newLine();
@@ -89,11 +89,11 @@ public class BuilderWriter {
             }
             String builderField = inFirstBuilder ? "" : ".b";
             out.newLine();
-            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, imports), f.fieldName);
+            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()), f.fieldName);
             if (f.required) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else {
-                out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, imports.add(Optional.class), f.fieldName);
+                out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
             }
             if (f.required) {
                 out.line("return new %s(this%s);", nextBuilderName, builderField);
@@ -105,7 +105,7 @@ public class BuilderWriter {
             if (!f.required) {
                 out.line("// first");
                 out.newLine();
-                out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, imports),
+                out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, out.imports()),
                         f.fieldName);
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
                 out.line("return this;");

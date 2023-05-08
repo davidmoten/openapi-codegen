@@ -11,12 +11,30 @@ public final class CodePrintWriter extends PrintWriter {
 
     private ByteArrayOutputStream bytes;
     private final Indent indent;
-    private Imports imports = new Imports(CodePrintWriter.class.getCanonicalName());
+    private final Imports imports;
 
-    public CodePrintWriter(OutputStream out) {
+    public CodePrintWriter(OutputStream out, String fullClassName) {
+        this(out, new Imports(fullClassName));
+    }
+    
+    public CodePrintWriter(OutputStream out, Imports imports) {
         super(new OutputStreamWriter(out, StandardCharsets.UTF_8));
         this.indent = new Indent();
+        this.imports = imports;
     }
+    
+    public static CodePrintWriter create(String fullClassName) {
+        return create(new Imports(fullClassName));
+    }
+    
+    public static CodePrintWriter create(Imports imp) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        CodePrintWriter p = new CodePrintWriter(bytes, imp);
+        p.setBytes(bytes);
+        return p;
+        
+    }
+
 
     private void setBytes(ByteArrayOutputStream bytes) {
         this.bytes = bytes;
@@ -61,13 +79,6 @@ public final class CodePrintWriter extends PrintWriter {
         return this;
     }
 
-    public static CodePrintWriter create() {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        CodePrintWriter p = new CodePrintWriter(bytes);
-        p.setBytes(bytes);
-        return p;
-    }
-
     public String text() {
         this.flush();
         try {
@@ -82,18 +93,20 @@ public final class CodePrintWriter extends PrintWriter {
         format("%s}\n", indent);
     }
 
-    public static CodePrintWriter create(String fullClassName) {
-        CodePrintWriter w = create();
-        w.imports = new Imports(fullClassName);
-        return w;
-    }
-    
     public Imports imports() {
         return imports;
     }
     
-    public String imported(String fullClassName) {
+    public String add(String fullClassName) {
         return imports.add(fullClassName);
+    }
+    
+    public String add(Class<?> cls) {
+        return imports.add(cls);
+    }
+
+    public String fullClassName() {
+        return imports.fullClassName();
     }
 
 }

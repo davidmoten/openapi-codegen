@@ -25,14 +25,14 @@ public final class WriterUtil {
         out.format("%s}\n", indent);
     }
 
-    public static void writeContent(Names names, CodePrintWriter out, String fullClassName, Imports imports) {
-        String content = out.text().replace(IMPORTS_HERE, imports.toString());
+    public static void writeContent(Names names, CodePrintWriter out) {
+        String content = out.text().replace(IMPORTS_HERE, out.imports().toString());
         if (DEBUG) {
             System.out.println("////////////////////////////////////////////////");
             System.out.println(content);
         }
         out.close();
-        File file = names.fullClassNameToJavaFile(fullClassName);
+        File file = names.fullClassNameToJavaFile(out.fullClassName());
         file.getParentFile().mkdirs();
         try {
             Files.write(file.toPath(), content.getBytes(StandardCharsets.UTF_8));

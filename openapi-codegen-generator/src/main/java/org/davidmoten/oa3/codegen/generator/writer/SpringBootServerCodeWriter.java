@@ -52,24 +52,22 @@ public final class SpringBootServerCodeWriter {
     }
 
     private static void writeApplicationClass(Names names) {
-        CodePrintWriter out = CodePrintWriter.create();
-        String fullClassName = names.applicationFullClassName();
-        Imports imports = new Imports(fullClassName);
-        writeApplicationClass(out, imports, fullClassName);
-        WriterUtil.writeContent(names, out, fullClassName, imports);
+        CodePrintWriter out = CodePrintWriter.create(names.applicationFullClassName());
+        writeApplicationClass(out);
+        WriterUtil.writeContent(names, out);
     }
 
-    private static void writeApplicationClass(CodePrintWriter out, Imports imports, String fullClassName) {
-        out.line("package %s;", Names.pkg(fullClassName));
+    private static void writeApplicationClass(CodePrintWriter out) {
+        out.line("package %s;", Names.pkg(out.fullClassName()));
         out.println();
         out.format("%s", IMPORTS_HERE);
         out.println();
-        out.line("@%s", imports.add(SpringBootApplication.class));
-        String simpleClassName = Names.simpleClassName(fullClassName);
+        out.line("@%s", SpringBootApplication.class);
+        String simpleClassName = Names.simpleClassName(out.fullClassName());
         out.line("public class %s {", simpleClassName);
         out.println();
-        out.line("public static void main(%s[] args) {", imports.add(String.class));
-        out.line("%s.run(%s.class, args);", imports.add(SpringApplication.class), simpleClassName);
+        out.line("public static void main(%s[] args) {", String.class);
+        out.line("%s.run(%s.class, args);", SpringApplication.class, simpleClassName);
         out.closeParen();
         out.left();
         out.println();
@@ -77,33 +75,32 @@ public final class SpringBootServerCodeWriter {
     }
 
     private static void writeJacksonConfigurationClass(Names names) {
-        CodePrintWriter out = CodePrintWriter.create();
         String fullClassName = names.jacksonConfigurationFullClassName();
-        Imports imports = new Imports(fullClassName);
-        writeJacksonConfigurationClass(out, imports, names, fullClassName);
-        WriterUtil.writeContent(names, out, fullClassName, imports);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        writeJacksonConfigurationClass(out,  names );
+        WriterUtil.writeContent(names, out);
     }
 
-    private static void writeJacksonConfigurationClass(CodePrintWriter out, Imports imports, Names names,
-            String fullClassName) {
-        out.line("package %s;", Names.pkg(fullClassName));
+    private static void writeJacksonConfigurationClass(CodePrintWriter out, Names names
+            ) {
+        out.line("package %s;", Names.pkg(out.fullClassName()));
         out.println();
         out.format("%s", IMPORTS_HERE);
         out.println();
-        out.line("@%s", imports.add(Configuration.class));
-        String simpleClassName = Names.simpleClassName(fullClassName);
+        out.line("@%s", Configuration.class);
+        String simpleClassName = Names.simpleClassName(out.fullClassName());
         out.line("public class %s {", simpleClassName);
         out.println();
-        out.line("private final %s config;", imports.add(Config.class));
+        out.line("private final %s config;", Config.class);
         out.println();
-        out.line("public %s(@%s(required = false) %s config) {", simpleClassName, imports.add(Autowired.class),
-                imports.add(Config.class));
-        out.line("this.config = config == null ? %s.config() : config;", imports.add(names.globalsFullClassName()));
+        out.line("public %s(@%s(required = false) %s config) {", simpleClassName, Autowired.class,
+                Config.class);
+        out.line("this.config = config == null ? %s.config() : config;", out.add(names.globalsFullClassName()));
         out.closeParen();
         out.println();
-        out.line("@%s", imports.add(Bean.class));
-        out.line("@%s", imports.add(Primary.class));
-        out.line("public %s objectMapper() {", imports.add(ObjectMapper.class));
+        out.line("@%s", Bean.class);
+        out.line("@%s", Primary.class);
+        out.line("public %s objectMapper() {", ObjectMapper.class);
         out.line("return config.mapper();");
         out.closeParen();
         out.left();
@@ -112,57 +109,55 @@ public final class SpringBootServerCodeWriter {
     }
 
     private static void writeServiceControllerClass(Names names, List<Method> methods) {
-        CodePrintWriter out = CodePrintWriter.create();
         String fullClassName = names.serviceControllerFullClassName();
-        Imports imports = new Imports(fullClassName);
-        writeServiceControllerClass(out, imports, names, methods, fullClassName);
-        WriterUtil.writeContent(names, out, fullClassName, imports);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        writeServiceControllerClass(out,  names, methods);
+        WriterUtil.writeContent(names, out);
     }
 
     private static void writeServiceInterfaceClass(Names names, List<Method> methods) {
         String fullClassName = names.serviceInterfaceFullClassName();
         CodePrintWriter out = CodePrintWriter.create(fullClassName);
-        Imports imports = new Imports(fullClassName);
-        writeServiceInterfaceClass(out, imports, names, methods);
-        WriterUtil.writeContent(names, out, fullClassName, imports);
+        writeServiceInterfaceClass(out, names, methods);
+        WriterUtil.writeContent(names, out);
     }
 
-    private static void writeServiceInterfaceClass(CodePrintWriter out, Imports imports, Names names,
+    private static void writeServiceInterfaceClass(CodePrintWriter out, Names names,
             List<Method> methods) {
-        out.line("package %s;", Names.pkg(names.serviceControllerFullClassName()));
+        out.line("package %s;", Names.pkg(out.fullClassName()));
         out.println();
         out.line("%s", IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
         out.println();
-        out.line("public interface %s extends %s {", Names.simpleClassName(names.serviceInterfaceFullClassName()),
-                imports.add(ErrorHandler.class));
-        writeServiceMethods(out, imports, methods, false, names);
+        out.line("public interface %s extends %s {", Names.simpleClassName(out.fullClassName()),
+                ErrorHandler.class);
+        writeServiceMethods(out, methods, false, names);
         out.closeParen();
     }
 
-    private static void writeServiceControllerClass(CodePrintWriter out, Imports imports, Names names,
-            List<Method> methods, String fullClassName) {
-        out.line("package %s;", Names.pkg(fullClassName));
+    private static void writeServiceControllerClass(CodePrintWriter out, Names names,
+            List<Method> methods) {
+        out.line("package %s;", Names.pkg(out.fullClassName()));
         out.println();
         out.line("%s", IMPORTS_HERE);
         out.println();
-        out.line("@%s", imports.add(RestController.class));
-        String simpleClassName = Names.simpleClassName(fullClassName);
-        out.line("public class %s implements %s {", simpleClassName, imports.add(ControllerExceptionHandler.class));
+        out.line("@%s", RestController.class);
+        String simpleClassName = Names.simpleClassName(out.fullClassName());
+        out.line("public class %s implements %s {", simpleClassName, ControllerExceptionHandler.class);
         out.println();
-        out.line("private final %s service;", imports.add(names.serviceInterfaceFullClassName()));
+        out.line("private final %s service;", out.add(names.serviceInterfaceFullClassName()));
         out.println();
-        out.line("public %s(@%s(required = false) %s service) {", simpleClassName, imports.add(Autowired.class),
-                imports.add(names.serviceInterfaceFullClassName()));
+        out.line("public %s(@%s(required = false) %s service) {", simpleClassName, Autowired.class,
+                out.add(names.serviceInterfaceFullClassName()));
         out.line("this.service = %s.orElse(service, new %s() {});",
-                imports.add(org.davidmoten.oa3.codegen.util.Util.class),
-                imports.add(names.serviceInterfaceFullClassName()));
+                org.davidmoten.oa3.codegen.util.Util.class,
+                out.add(names.serviceInterfaceFullClassName()));
         out.closeParen();
-        writeServiceMethods(out, imports, methods, true, names);
+        writeServiceMethods(out, methods, true, names);
         out.closeParen();
     }
 
-    private static void writeServiceMethods(CodePrintWriter out, Imports imports, List<Method> methods,
+    private static void writeServiceMethods(CodePrintWriter out,  List<Method> methods,
             boolean isController, Names names) {
         methods.forEach(m -> {
             writeMethodJavadoc(out, m, m.primaryStatusCode.map(x -> "primary response status code " + x));
@@ -171,11 +166,11 @@ public final class SpringBootServerCodeWriter {
                 if (p.isRequestBody) {
                     final String annotations;
                     if (isController) {
-                        annotations = String.format("@%s ", imports.add(RequestBody.class));
+                        annotations = String.format("@%s ", out.add(RequestBody.class));
                     } else {
                         annotations = "";
                     }
-                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, imports),
+                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
                             "requestBody");
                 } else {
                     final String annotations;
@@ -188,23 +183,23 @@ public final class SpringBootServerCodeWriter {
                             required = "";
                             defValue = "";
                         }
-                        annotations = String.format("@%s(name = \"%s\"%s%s) ", imports.add(ann), p.name, defValue,
+                        annotations = String.format("@%s(name = \"%s\"%s%s) ", out.add(ann), p.name, defValue,
                                 required);
                     } else {
                         annotations = "";
                     }
-                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, imports),
+                    return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
                             p.identifier);
                 }
             }).collect(Collectors.joining(", "));
             out.left().left();
             final String importedReturnType;
             if (isController) {
-                importedReturnType = String.format("%s<?>", imports.add(ResponseEntity.class));
+                importedReturnType = String.format("%s<?>", out.add(ResponseEntity.class));
             } else if (!m.returnFullClassName.isPresent()) {
                 importedReturnType = "void";
             } else {
-                importedReturnType = imports.add(m.returnFullClassName.get());
+                importedReturnType = out.add(m.returnFullClassName.get());
             }
 //            @RequestMapping(
 //                    method = RequestMethod.POST,
@@ -215,7 +210,7 @@ public final class SpringBootServerCodeWriter {
             if (isController) {
 
                 out.println();
-                out.line("@%s(", imports.add(RequestMapping.class));
+                out.line("@%s(", RequestMapping.class);
                 out.right();
                 String consumes = m.consumes.stream().map(x -> "\"" + x + "\"").collect(Collectors.joining(", "));
                 if (!consumes.isEmpty()) {
@@ -225,32 +220,32 @@ public final class SpringBootServerCodeWriter {
                 if (!produces.isEmpty()) {
                     produces = String.format(",\n%sproduces = {%s}", out.indent(), produces);
                 }
-                out.line("method = %s.%s,", imports.add(RequestMethod.class), m.httpMethod);
+                out.line("method = %s.%s,", RequestMethod.class, m.httpMethod);
                 out.line("value = \"%s\"%s%s)", m.path, consumes, produces);
                 out.left();
                 out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 out.line("try {");
-                addValidationChecks(out, imports, m, names);
+                addValidationChecks(out, m, names);
                 if (m.returnFullClassName.isPresent()) {
-                    out.line("return %s.status(%s).body(service.%s(%s));", imports.add(ResponseEntity.class), //
+                    out.line("return %s.status(%s).body(service.%s(%s));", ResponseEntity.class, //
                             m.statusCode.get(), //
                             m.methodName, //
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
                 } else {
                     out.line("service.%s(%s);", m.methodName,
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
-                    out.line("return %s.status(%s).build();", imports.add(ResponseEntity.class),
+                    out.line("return %s.status(%s).build();", ResponseEntity.class,
                             m.statusCode.orElse(200));
                 }
                 out.left();
-                out.line("} catch (%s e) {", imports.add(Throwable.class));
+                out.line("} catch (%s e) {", Throwable.class);
                 out.line("return service.errorResponse(e);");
                 out.closeParen();
                 out.closeParen();
             } else {
                 out.println();
                 out.line("default %s %s(%s) throws %s {", importedReturnType, m.methodName, params,
-                        imports.add(ServiceException.class));
+                        ServiceException.class);
                 out.line("throw notImplemented();");
                 out.closeParen();
             }
@@ -284,46 +279,46 @@ public final class SpringBootServerCodeWriter {
         }
     }
 
-    private static void addValidationChecks(CodePrintWriter out, Imports imports, Method m, Names names) {
+    private static void addValidationChecks(CodePrintWriter out, Method m, Names names) {
         m.parameters.forEach(p -> {
             Constraints x = p.constraints;
             if (x.atLeastOnePresent()) {
                 out.line("if (%s.config().validateInControllerMethod().test(\"%s\")) {",
-                        imports.add(names.globalsFullClassName()), m.methodName);
+                        out.add(names.globalsFullClassName()), m.methodName);
                 if (x.minLength.isPresent()) {
-                    out.line("%s.checkMinLength(%s, %s, \"%s\");", imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMinLength(%s, %s, \"%s\");", RequestPreconditions.class,
                             p.identifier, x.minLength.get(), p.identifier);
                 }
                 if (x.maxLength.isPresent()) {
-                    out.line("%s.checkMaxLength(%s, %s, \"%s\");", imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMaxLength(%s, %s, \"%s\");", RequestPreconditions.class,
                             p.identifier, x.maxLength.get(), p.identifier);
                 }
                 if (x.pattern.isPresent()) {
-                    out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class,
                             p.identifier, x.pattern.get(), p.identifier);
                 }
                 if (x.min.isPresent()) {
-                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
                             p.identifier, x.min.get().toString(), p.identifier, false);
                 }
                 if (x.max.isPresent()) {
-                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
                             p.identifier, x.max.get().toString(), p.identifier, false);
                 }
                 if (x.minExclusive.isPresent()) {
-                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
                             p.identifier, x.minExclusive.get().toString(), p.identifier, true);
                 }
                 if (x.maxExclusive.isPresent()) {
-                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", imports.add(RequestPreconditions.class),
+                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
                             p.identifier, x.maxExclusive.get().toString(), p.identifier, true);
                 }
                 if (p.isArray && x.minItems.isPresent()) {
-                    out.line("%s.checkMinSize(%s, %s, \"%s\");", imports.add(RequestPreconditions.class), p.identifier,
+                    out.line("%s.checkMinSize(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
                             x.minItems.get(), p.identifier);
                 }
                 if (p.isArray && x.maxItems.isPresent()) {
-                    out.line("%s.checkMaxSize(%s, %s, \"%s\");", imports.add(RequestPreconditions.class), p.identifier,
+                    out.line("%s.checkMaxSize(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
                             x.maxItems.get(), p.identifier);
                 }
                 out.closeParen();

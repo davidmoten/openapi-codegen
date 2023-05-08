@@ -9,7 +9,6 @@ import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
-import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
@@ -22,25 +21,23 @@ public class ClientCodeWriter {
     public static void writeClientClass(Names names, List<Method> methods) {
         String fullClassName = names.clientFullClassName();
         CodePrintWriter out = CodePrintWriter.create(fullClassName);
-        writeClientClass(out, names, out.imports(), fullClassName, methods);
-        WriterUtil.writeContent(names, out, fullClassName, out.imports());
+        writeClientClass(out, names, fullClassName, methods);
+        WriterUtil.writeContent(names, out);
     }
 
-    private static void writeClientClass(CodePrintWriter out, Names names, Imports imports, String fullClassName,
-            List<Method> methods) {
+    private static void writeClientClass(CodePrintWriter out, Names names, String fullClassName, List<Method> methods) {
         out.line("package %s;", Names.pkg(fullClassName));
         out.println();
         out.line("%s", WriterUtil.IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
         out.println();
         out.line("public class %s {", Names.simpleClassName(fullClassName));
-        writeClientClassFieldsAndConstructor(out, imports, fullClassName, names);
-        writeClientClassMethods(out, imports, methods);
+        writeClientClassFieldsAndConstructor(out, fullClassName, names);
+        writeClientClassMethods(out, methods);
         out.closeParen();
     }
 
-    private static void writeClientClassFieldsAndConstructor(CodePrintWriter out, Imports imports, String fullClassName,
-            Names names) {
+    private static void writeClientClassFieldsAndConstructor(CodePrintWriter out, String fullClassName, Names names) {
         // add fields
         out.println();
         out.line("private final %s serializer;", Serializer.class);
@@ -59,27 +56,26 @@ public class ClientCodeWriter {
         out.line("public static %s<%s> basePath(%s basePath) {", ClientBuilder.class,
                 Names.simpleClassName(fullClassName), String.class);
         out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptor(), b.basePath()), %s.config(), basePath);",
-                ClientBuilder.class, Names.simpleClassName(fullClassName),
-                imports.add(names.globalsFullClassName()));
+                ClientBuilder.class, Names.simpleClassName(fullClassName), out.add(names.globalsFullClassName()));
         out.closeParen();
     }
 
     private static final String FULL_RESPONSE_SUFFIX = "FullResponse";
 
-    private static void writeClientClassMethods(CodePrintWriter out, Imports imports, List<Method> methods) {
+    private static void writeClientClassMethods(CodePrintWriter out, List<Method> methods) {
         methods.forEach(m -> {
             out.right().right();
             String params = m.parameters //
                     .stream() //
                     .map(p -> String.format("\n%s%s %s", out.indent(),
-                            SpringBootServerCodeWriter.toImportedType(p, imports), p.identifier)) //
+                            SpringBootServerCodeWriter.toImportedType(p, out.imports()), p.identifier)) //
                     .collect(Collectors.joining(", "));
             out.left().left();
             final String importedReturnType;
             if (!m.returnFullClassName.isPresent()) {
                 importedReturnType = "void";
             } else {
-                importedReturnType = imports.add(m.returnFullClassName.get());
+                importedReturnType = out.add(m.returnFullClassName.get());
             }
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
                 SpringBootServerCodeWriter.writeMethodJavadoc(out, m,
@@ -105,8 +101,7 @@ public class ClientCodeWriter {
             }
             SpringBootServerCodeWriter.writeMethodJavadoc(out, m,
                     Optional.of("full response with status code, body and headers"));
-            out.line("public %s %s%s(%s) {", HttpResponse.class, m.methodName, FULL_RESPONSE_SUFFIX,
-                    params);
+            out.line("public %s %s%s(%s) {", HttpResponse.class, m.methodName, FULL_RESPONSE_SUFFIX, params);
             out.line("return %s", Http.class);
             out.right().right();
             out.line(".method(%s.%s)", HttpMethod.class, m.httpMethod.name());
@@ -130,7 +125,7 @@ public class ClientCodeWriter {
                 }
             });
             m.responseDescriptors.forEach(r -> {
-                out.line(".responseAs(%s.class)", imports.add(r.fullClassName()));
+                out.line(".responseAs(%s.class)", out.add(r.fullClassName()));
                 out.line(".whenStatusCodeMatches(\"%s\")", r.statusCode());
                 out.line(".whenContentTypeMatches(\"%s\")", r.mediaType());
             });

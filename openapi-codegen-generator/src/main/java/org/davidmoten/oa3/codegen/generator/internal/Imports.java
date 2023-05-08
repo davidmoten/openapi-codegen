@@ -109,5 +109,9 @@ public final class Imports {
             return s.substring(0, i);
         }
     }
+    
+    public String fullClassName() {
+        return fullClassName;
+    }
 
 }

@@ -33,6 +33,7 @@ import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
+import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
@@ -80,8 +81,8 @@ public final class SchemasCodeWriter {
             return;
         }
         CodePrintWriter out = CodePrintWriter.create(cls.fullClassName);
-        SchemasCodeWriter.writeClass(out, out.imports(), cls, fullClassNameInterfaces, names);
-        WriterUtil.writeContent(names, out, cls.fullClassName, out.imports());
+        SchemasCodeWriter.writeClass(out, cls, fullClassNameInterfaces, names);
+        WriterUtil.writeContent(names, out);
     }
 
     public static void writeGlobalsClass(Names names) {
@@ -90,11 +91,10 @@ public final class SchemasCodeWriter {
         out.line("package %s;", Names.pkg(fullClassName));
         out.println();
         out.line("%s", IMPORTS_HERE);
-        addGeneratedAnnotation(out, out.imports());
+        addGeneratedAnnotation(out);
         out.line("public final class %s {", Names.simpleClassName(fullClassName));
         out.println();
-        out.line("private static volatile %s config = %s.builder().build();", Config.class,
-                Config.class);
+        out.line("private static volatile %s config = %s.builder().build();", Config.class, Config.class);
         out.println();
         out.line("public static void setConfig(%s configuration) {", Config.class);
         out.line("config = configuration;");
@@ -104,32 +104,32 @@ public final class SchemasCodeWriter {
         out.line("return config;");
         out.closeParen();
         out.closeParen();
-        WriterUtil.writeContent(names, out, fullClassName, out.imports());
+        WriterUtil.writeContent(names, out);
     }
 
-    private static void writeClass(CodePrintWriter out, Imports imports, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
+    private static void writeClass(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces,
+            Names names) {
         if (cls.topLevel) {
             out.line("package %s;", cls.pkg());
             out.println();
             out.line("%s", IMPORTS_HERE);
         }
-        writeClassDeclaration(out, imports, cls, fullClassNameInterfaces);
+        writeClassDeclaration(out, cls, fullClassNameInterfaces);
         writeEnumMembers(out, cls);
         if (isPolymorphic(cls)) {
-            writePolymorphicClassContent(out, imports, cls, names, fullClassNameInterfaces);
+            writePolymorphicClassContent(out, cls, names, fullClassNameInterfaces);
         } else {
-            writeFields(out, imports, cls);
-            writeConstructor(out, imports, cls, fullClassNameInterfaces, names);
-            writeBuilder(out, imports, cls, fullClassNameInterfaces);
-            writeGetters(out, imports, cls, fullClassNameInterfaces);
+            writeFields(out, cls);
+            writeConstructor(out, cls, fullClassNameInterfaces, names);
+            writeBuilder(out, cls, fullClassNameInterfaces);
+            writeGetters(out, cls, fullClassNameInterfaces);
         }
-        writeEnumCreator(out, imports, cls);
-        writeMemberClasses(out, imports, cls, fullClassNameInterfaces, names);
+        writeEnumCreator(out, cls);
+        writeMemberClasses(out, cls, fullClassNameInterfaces, names);
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            writeEqualsMethod(out, imports, cls);
-            writeHashCodeMethod(out, imports, cls);
-            writeToStringMethod(out, imports, cls);
+            writeEqualsMethod(out, cls);
+            writeHashCodeMethod(out, cls);
+            writeToStringMethod(out, cls);
         }
         out.closeParen();
     }
@@ -139,20 +139,20 @@ public final class SchemasCodeWriter {
                 || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF;
     }
 
-    private static void addOverrideAnnotation(CodePrintWriter out, Imports imports) {
+    private static void addOverrideAnnotation(CodePrintWriter out) {
         out.println();
-        out.line("@%s", imports.add(Override.class));
+        out.line("@%s", out.add(Override.class));
     }
 
-    private static void addGeneratedAnnotation(CodePrintWriter out, Imports imports) {
-        out.line("@%s(value = \"%s\")", imports.add(Generated.class), version);
+    private static void addGeneratedAnnotation(CodePrintWriter out) {
+        out.line("@%s(value = \"%s\")", Generated.class, version);
     }
 
-    private static void writeEnumCreator(CodePrintWriter out, Imports imports, Cls cls) {
+    private static void writeEnumCreator(CodePrintWriter out, Cls cls) {
         if (cls.classType == ClassType.ENUM) {
             String simpleClassName = Names.simpleClassName(cls.fullClassName);
             out.println();
-            out.line("@%s", imports.add(JsonCreator.class));
+            out.line("@%s", JsonCreator.class);
             out.line("public static %s fromValue(%s value) {", simpleClassName, Object.class);
             out.line("for (%s x: %s.values()) {", simpleClassName, simpleClassName);
             // be careful because x.value can be primitive
@@ -160,22 +160,21 @@ public final class SchemasCodeWriter {
             out.line("return x;");
             out.closeParen();
             out.closeParen();
-            out.line("throw new %s(\"unexpected enum value: '\" + value + \"'\");",
-                    IllegalArgumentException.class);
+            out.line("throw new %s(\"unexpected enum value: '\" + value + \"'\");", IllegalArgumentException.class);
             out.closeParen();
         }
     }
 
-    private static void writeClassDeclaration(CodePrintWriter out, Imports imports, Cls cls,
+    private static void writeClassDeclaration(CodePrintWriter out, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         String modifier = classModifier(cls);
         Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
-        String implementsClause = implementsClause(imports, interfaces);
+        String implementsClause = implementsClause(out.imports(), interfaces);
         if (cls.description.isPresent()) {
             Javadoc.printJavadoc(out, out.indent(), cls.description.get(), true);
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
-            writeJsonTypeInfoAnnotation(out, imports, cls);
+            writeJsonTypeInfoAnnotation(out, cls);
         } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicDeserializerAnnotation(out, cls);
         } else {
@@ -186,7 +185,7 @@ public final class SchemasCodeWriter {
             writeAutoDetectAnnotation(out);
         }
         if (cls.topLevel) {
-            addGeneratedAnnotation(out, imports);
+            addGeneratedAnnotation(out);
         }
         out.line("public %s%s %s%s {", modifier, cls.classType.word(), cls.simpleName(), implementsClause);
     }
@@ -216,23 +215,22 @@ public final class SchemasCodeWriter {
         return implemented;
     }
 
-    private static void writeJsonTypeInfoAnnotation(CodePrintWriter out, Imports imports, Cls cls) {
+    private static void writeJsonTypeInfoAnnotation(CodePrintWriter out, Cls cls) {
         out.line("@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)",
-                JsonTypeInfo.class, Id.class, cls.discriminator.propertyName,
-                As.class);
+                JsonTypeInfo.class, Id.class, cls.discriminator.propertyName, As.class);
         out.right().right();
         String types = cls.fields.stream()
-                .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", out.indent(),
-                        imports.add(Type.class), imports.add(x.fullClassName),
+                .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", out.indent(), out.add(Type.class),
+                        out.add(x.fullClassName),
                         cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName)))
                 .collect(Collectors.joining(", "));
         out.left().left();
         out.line("@%s({%s})", JsonSubTypes.class, types);
     }
 
-    private static void addConstructorBindingAnnotation(CodePrintWriter out, Imports imports, Names names) {
+    private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
         if (names.generatorIsSpring3()) {
-            out.line("@%s", imports
+            out.line("@%s", out
                     .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
         } else {
             out.line("@%s", ConstructorBinding.class);
@@ -245,8 +243,8 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeAutoDetectAnnotation(CodePrintWriter out) {
-        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)", JsonAutoDetect.class,
-                Visibility.class, Visibility.class);
+        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)", JsonAutoDetect.class, Visibility.class,
+                Visibility.class);
     }
 
     private static void writeEnumMembers(CodePrintWriter out, Cls cls) {
@@ -259,7 +257,7 @@ public final class SchemasCodeWriter {
         }
     }
 
-    private static void writePolymorphicClassContent(CodePrintWriter out, Imports imports, Cls cls, Names names,
+    private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.println();
@@ -267,92 +265,91 @@ public final class SchemasCodeWriter {
         } else {
             if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
                 out.println();
-                writeJsonValueAnnotation(out, imports);
+                writeJsonValueAnnotation(out);
                 out.line("private final %s %s;", Object.class, "value");
 
                 // add constructor for each member of the oneOf (fieldTypes)
                 // as there are multiple constructors we cannot add ConstructorBinding
                 // annotations so polymorphic stuff can't be used to bind to rest method
                 // parameters
-                writeOneOfAnyOfNonDiscriminatedObjectConstructor(out, imports, cls);
-                cls.fields.forEach(f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, imports, cls, f));
-                writeNonDiscriminatedBuilder(out, imports, cls);
+                writeOneOfAnyOfNonDiscriminatedObjectConstructor(out, cls);
+                cls.fields.forEach(f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, cls, f));
+                writeNonDiscriminatedBuilder(out, cls);
                 out.println();
-                writeGetter(out, imports.add(Object.class), "value", "value");
+                writeGetter(out, out.add(Object.class), "value", "value");
             } else {
                 // allof
-                writeFields(out, imports, cls);
+                writeFields(out, cls);
 
                 out.right().right();
                 final String parametersNullable;
-                parametersNullable = cls.fields.stream().map(x -> String.format("\n%s%s %s", out.indent(),
-                        x.resolvedTypeNullable(imports), x.fieldName(cls))).collect(Collectors.joining(","));
+                parametersNullable = cls.fields
+                        .stream().map(x -> String.format("\n%s%s %s", out.indent(),
+                                x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
+                        .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
                 out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersNullable);
-                ifValidate(cls, out, imports, names, //
+                ifValidate(cls, out, names, //
                         out2 -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
-                                checkNotNull(imports, cls, out2, x);
+                                checkNotNull(cls, out2, x);
                             } else {
-                                out.line("// ???");
+                                out2.line("// ???");
                             }
-                            validateMore(out2, imports, cls, x);
+                            validateMore(out2, cls, x);
                         }));
                 cls.fields.stream().forEach(x -> {
                     assignField(out, cls, x);
                 });
                 out.closeParen();
-                writeGetters(out, imports, cls, fullClassNameInterfaces);
+                writeGetters(out, cls, fullClassNameInterfaces);
             }
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
-            out.line("public static final class Deserializer extends %s<%s> {",
-                    PolymorphicDeserializer.class, cls.simpleName());
+            out.line("public static final class Deserializer extends %s<%s> {", PolymorphicDeserializer.class,
+                    cls.simpleName());
             out.println();
             out.line("public Deserializer() {");
-            String classes = cls.fields.stream().map(x -> imports.add(toPrimitive(x.fullClassName)) + ".class")
+            String classes = cls.fields.stream().map(x -> out.add(toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
-            out.line("super(%s.config(), %s.%s, %s.class, %s);", imports.add(names.globalsFullClassName()),
+            out.line("super(%s.config(), %s.%s, %s.class, %s);", out.add(names.globalsFullClassName()),
                     PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName(), classes);
             out.closeParen();
             out.closeParen();
         }
     }
 
-    private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Imports imports, Cls cls) {
+    private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Cls cls) {
         cls.fields.forEach(f -> {
-            out.line("public static %s of(%s value) {", cls.simpleName(), imports.add(f.fullClassName));
+            out.line("public static %s of(%s value) {", cls.simpleName(), out.add(f.fullClassName));
             out.line("return new %s(value);", cls.simpleName());
             out.closeParen();
         });
     }
 
-    private static void writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(CodePrintWriter out, Imports imports,
-            Cls cls, Field f) {
+    private static void writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(CodePrintWriter out, Cls cls,
+            Field f) {
         String className = toPrimitive(f.fullClassName);
         out.println();
-        out.line("public %s(%s value) {", cls.simpleName(), imports.add(className));
+        out.line("public %s(%s value) {", cls.simpleName(), out.add(className));
         if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
             out.line("this.value = value;");
         } else {
-            out.line("this.value = %s.checkNotNull(value, \"value\");",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
+            out.line("this.value = %s.checkNotNull(value, \"value\");", out.add(Preconditions.class));
         }
         out.closeParen();
     }
 
-    private static void writeOneOfAnyOfNonDiscriminatedObjectConstructor(CodePrintWriter out, Imports imports,
-            Cls cls) {
+    private static void writeOneOfAnyOfNonDiscriminatedObjectConstructor(CodePrintWriter out, Cls cls) {
         out.println();
-        out.line("@%s", imports.add(JsonCreator.class));
-        out.line("private %s(%s value) {", cls.simpleName(), imports.add(Object.class));
-        out.line("this.value = %s.checkNotNull(value, \"value\");",
-                imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class));
+        out.line("@%s", out.add(JsonCreator.class));
+        out.line("private %s(%s value) {", cls.simpleName(), out.add(Object.class));
+        out.line("this.value = %s.checkNotNull(value, \"value\");", out.add(Preconditions.class));
         out.closeParen();
     }
 
-    private static void writeFields(CodePrintWriter out, Imports imports, Cls cls) {
+    private static void writeFields(CodePrintWriter out, Cls cls) {
         if (!cls.fields.isEmpty()) {
             out.println();
         }
@@ -363,28 +360,28 @@ public final class SchemasCodeWriter {
             }
             first.value = false;
             if (cls.classType == ClassType.ALL_OF) {
-                out.line("@%s", imports.add(JsonUnwrapped.class));
+                out.line("@%s", out.add(JsonUnwrapped.class));
             } else if (cls.unwrapSingleField()) {
-                writeJsonValueAnnotation(out, imports);
+                writeJsonValueAnnotation(out);
             } else {
-                out.line("@%s(\"%s\")", imports.add(JsonProperty.class), f.name);
+                out.line("@%s(\"%s\")", out.add(JsonProperty.class), f.name);
             }
             final String fieldType;
             if (f.encoding == Encoding.OCTET) {
-                fieldType = imports.add(String.class);
+                fieldType = out.add(String.class);
             } else {
-                fieldType = f.resolvedTypeNullable(imports);
+                fieldType = f.resolvedTypeNullable(out.imports());
             }
             out.line("private final %s %s;", fieldType, cls.fieldName(f));
         });
     }
 
-    private static void writeJsonValueAnnotation(CodePrintWriter out, Imports imports) {
-        out.line("@%s", imports.add(JsonValue.class));
+    private static void writeJsonValueAnnotation(CodePrintWriter out) {
+        out.line("@%s", out.add(JsonValue.class));
     }
 
-    private static void writeConstructor(CodePrintWriter out, Imports imports, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
+    private static void writeConstructor(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces,
+            Names names) {
         // this code will write one public constructor or one private and one public.
         // The private one is to be annotated with JsonCreator for use by Jackson.
         // TODO javadoc
@@ -394,20 +391,19 @@ public final class SchemasCodeWriter {
         if (cls.unwrapSingleField()) {
             // don't annotate parameters with JsonProperty because we will annotate field
             // with JsonValue
-            parametersNullable = cls.fields.stream().map(
-                    x -> String.format("\n%s%s %s", out.indent(), x.resolvedTypeNullable(imports), x.fieldName(cls)))
-                    .collect(Collectors.joining(","));
+            parametersNullable = cls.fields.stream().map(x -> String.format("\n%s%s %s", out.indent(),
+                    x.resolvedTypeNullable(out.imports()), x.fieldName(cls))).collect(Collectors.joining(","));
         } else {
-            parametersNullable = cls.fields.stream()
-                    .map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), imports.add(JsonProperty.class),
-                            x.name, x.resolvedTypeNullable(imports), x.fieldName(cls)))
+            parametersNullable = cls.fields
+                    .stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class),
+                            x.name, x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
         }
         out.left().left();
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
 
         if (cls.classType != ClassType.ENUM) {
-            out.line("@%s", imports.add(JsonCreator.class));
+            out.line("@%s", out.add(JsonCreator.class));
         } else {
             out.println();
         }
@@ -420,16 +416,16 @@ public final class SchemasCodeWriter {
                 ? "private"
                 : "public";
         if (visibility.equals("public")) {
-            addConstructorBindingAnnotation(out, imports, names);
+            addConstructorBindingAnnotation(out, names);
         }
         out.line("%s %s(%s) {\n", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
         out.right();
-        ifValidate(cls, out, imports, names, //
+        ifValidate(cls, out, names, //
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                        checkNotNull(imports, cls, out2, x);
+                        checkNotNull(cls, out2, x);
                     }
-                    validateMore(out2, imports, cls, x);
+                    validateMore(out2, cls, x);
                 }));
 
         // assign
@@ -443,18 +439,18 @@ public final class SchemasCodeWriter {
                     .stream() //
                     // ignore discriminators that should be constants
                     .filter(x -> !isDiscriminator(interfaces, x)) //
-                    .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(imports), x.fieldName(cls))) //
+                    .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()), x.fieldName(cls))) //
                     .collect(Collectors.joining(","));
             out.left().left();
             out.println();
-            addConstructorBindingAnnotation(out, imports, names);
+            addConstructorBindingAnnotation(out, names);
             out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersOptional);
             // validate
-            ifValidate(cls, out, imports, names, //
+            ifValidate(cls, out, names, //
                     out2 -> cls.fields.stream().forEach(x -> {
                         if (!isDiscriminator(interfaces, x) && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
-                            checkNotNull(imports, cls, out2, x);
-                            validateMore(out2, imports, cls, x);
+                            checkNotNull(cls, out2, x);
+                            validateMore(out2, cls, x);
                         }
                     }));
 
@@ -472,7 +468,7 @@ public final class SchemasCodeWriter {
                         assignOptionalField(out, cls, x);
                     }
                 } else if (x.isOctets()) {
-                    assignEncodedOctets(out, imports, cls, x);
+                    assignEncodedOctets(out, cls, x);
                 } else {
                     assignField(out, cls, x);
                 }
@@ -481,8 +477,7 @@ public final class SchemasCodeWriter {
         }
     }
 
-    private static void writeBuilder(CodePrintWriter out, Imports imports, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces) {
+    private static void writeBuilder(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ENUM) {
             return;
         }
@@ -492,16 +487,16 @@ public final class SchemasCodeWriter {
                 .filter(x -> !isDiscriminator(interfaces, x)) //
                 .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray))
                 .collect(Collectors.toList());
-        BuilderWriter.write(out, fields, cls.simpleName(), imports);
+        BuilderWriter.write(out, fields, cls.simpleName());
     }
 
-    private static void checkNotNull(Imports imports, Cls cls, CodePrintWriter out, Field x) {
-        out.line("%s.checkNotNull(%s, \"%s\");", imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class),
+    private static void checkNotNull(Cls cls, CodePrintWriter out, Field x) {
+        out.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class,
                 x.fieldName(cls), x.fieldName(cls));
     }
 
-    private static void assignEncodedOctets(CodePrintWriter out, Imports imports, Cls cls, Field x) {
-        out.line("this.%s = %s.encodeOctets(%s);", x.fieldName(cls), imports.add(Util.class), x.fieldName(cls));
+    private static void assignEncodedOctets(CodePrintWriter out, Cls cls, Field x) {
+        out.line("this.%s = %s.encodeOctets(%s);", x.fieldName(cls), out.add(Util.class), x.fieldName(cls));
     }
 
     private static void assignOptionalField(CodePrintWriter out, Cls cls, Field x) {
@@ -517,42 +512,35 @@ public final class SchemasCodeWriter {
                 .map(y -> y.discriminator).findFirst();
     }
 
-    private static void validateMore(CodePrintWriter out, Imports imports, Cls cls, Field x) {
+    private static void validateMore(CodePrintWriter out, Cls cls, Field x) {
         String raw = x.fieldName(cls);
         if (x.minLength.isPresent()) {
-            out.line("%s.checkMinLength(%s, %s, \"%s\");",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.minLength.get(),
+            out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(),
                     x.fieldName(cls));
         }
         if (x.maxLength.isPresent()) {
-            out.line("%s.checkMaxLength(%s, %s, \"%s\");",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.maxLength.get(),
+            out.line("%s.checkMaxLength(%s, %s, \"%s\");", Preconditions.class, raw, x.maxLength.get(),
                     x.fieldName(cls));
         }
         if (x.pattern.isPresent()) {
-            out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw,
+            out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
                     escapePattern(x.pattern.get()), x.fieldName(cls));
         }
         if (x.min.isPresent()) {
-            out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.min.get().toString(),
+            out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(),
                     x.fieldName(cls), x.exclusiveMin);
         }
         if (x.max.isPresent()) {
-            out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), raw, x.max.get().toString(),
+            out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.max.get().toString(),
                     x.fieldName(cls), x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
-            out.line("%s.checkMinSize(%s, %s, \"%s\");",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
-                    x.minItems.get(), x.fieldName(cls));
+            out.line("%s.checkMinSize(%s, %s, \"%s\");", Preconditions.class, x.fieldName(cls), x.minItems.get(),
+                    x.fieldName(cls));
         }
         if (x.isArray && x.maxItems.isPresent()) {
-            out.line("%s.checkMaxSize(%s, %s, \"%s\");",
-                    imports.add(org.davidmoten.oa3.codegen.runtime.Preconditions.class), x.fieldName(cls),
-                    x.maxItems.get(), x.fieldName(cls));
+            out.line("%s.checkMaxSize(%s, %s, \"%s\");", Preconditions.class, x.fieldName(cls), x.maxItems.get(),
+                    x.fieldName(cls));
         }
     }
 
@@ -560,8 +548,8 @@ public final class SchemasCodeWriter {
         return pattern.replace("\\", "\\\\");
     }
 
-    private static void writeEqualsMethod(CodePrintWriter out, Imports imports, Cls cls) {
-        addOverrideAnnotation(out, imports);
+    private static void writeEqualsMethod(CodePrintWriter out, Cls cls) {
+        addOverrideAnnotation(out);
         out.line("public boolean equals(Object o) {\n");
         out.right();
         out.line("if (this == o) {");
@@ -573,7 +561,7 @@ public final class SchemasCodeWriter {
         out.right();
         String s = cls.fields
                 .stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", out.indent(),
-                        imports.add(Objects.class), x.fieldName(cls), x.fieldName(cls)))
+                        out.add(Objects.class), x.fieldName(cls), x.fieldName(cls)))
                 .collect(Collectors.joining(" && "));
         out.left();
         if (!s.isEmpty()) {
@@ -583,7 +571,7 @@ public final class SchemasCodeWriter {
         out.closeParen();
     }
 
-    private static void writeHashCodeMethod(CodePrintWriter out, Imports imports, Cls cls) {
+    private static void writeHashCodeMethod(CodePrintWriter out, Cls cls) {
         final String s;
         if (cls.fields.size() <= 3) {
             s = cls.fields.stream().map(x -> x.fieldName(cls)).collect(Collectors.joining(", "));
@@ -593,13 +581,13 @@ public final class SchemasCodeWriter {
                     .collect(Collectors.joining(", "));
             out.left().left().left();
         }
-        addOverrideAnnotation(out, imports);
+        addOverrideAnnotation(out);
         out.line("public int hashCode() {");
-        out.line("return %s.hash(%s);", imports.add(Objects.class), s);
+        out.line("return %s.hash(%s);", out.add(Objects.class), s);
         out.closeParen();
     }
 
-    private static void writeToStringMethod(CodePrintWriter out, Imports imports, Cls cls) {
+    private static void writeToStringMethod(CodePrintWriter out, Cls cls) {
         final String s;
         if (cls.fields.size() > 3) {
             out.right().right().right();
@@ -611,25 +599,24 @@ public final class SchemasCodeWriter {
             s = cls.fields.stream().map(x -> String.format(", \"%s\", %s", x.fieldName(cls), x.fieldName(cls)))
                     .collect(Collectors.joining(""));
         }
-        addOverrideAnnotation(out, imports);
+        addOverrideAnnotation(out);
         out.line("public String toString() {");
-        out.line("return %s.toString(%s.class%s);", imports.add(Util.class), cls.simpleName(), s);
+        out.line("return %s.toString(%s.class%s);", out.add(Util.class), cls.simpleName(), s);
         out.closeParen();
     }
 
-    private static void ifValidate(Cls cls, CodePrintWriter out, Imports imports, Names names,
-            Consumer<CodePrintWriter> r) {
-        CodePrintWriter b = CodePrintWriter.create();
+    private static void ifValidate(Cls cls, CodePrintWriter out, Names names, Consumer<CodePrintWriter> consumer) {
+        CodePrintWriter b = CodePrintWriter.create(out.imports());
         out.right();
-        r.accept(b);
+        consumer.accept(b);
         out.left();
         b.close();
         String text = b.text();
         if (text.isEmpty()) {
             return;
         } else {
-            out.line("if (%s.config().validateInConstructor().test(%s.class)) {",
-                    imports.add(names.globalsFullClassName()), cls.simpleName());
+            out.line("if (%s.config().validateInConstructor().test(%s.class)) {", out.add(names.globalsFullClassName()),
+                    cls.simpleName());
             out.left();
             out.print(text);
             out.line("}");
@@ -640,24 +627,23 @@ public final class SchemasCodeWriter {
         out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
     }
 
-    private static void writeGetters(CodePrintWriter out, Imports imports, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces) {
+    private static void writeGetters(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
             if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
-                addOverrideAnnotation(out, imports);
+                addOverrideAnnotation(out);
             } else {
                 out.println();
             }
             final String value;
             if (!f.isOctets() && !f.required) {
-                value = String.format("%s.ofNullable(%s)", imports.add(Optional.class), f.fieldName(cls));
+                value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
             } else if (f.isOctets()) {
-                value = String.format("%s.decodeOctets(%s)", imports.add(Util.class), f.fieldName(cls));
+                value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
             } else {
                 value = f.fieldName(cls);
             }
-            writeGetter(out, f.resolvedType(imports), f.fieldName(cls), value);
+            writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
         });
     }
 
@@ -667,9 +653,9 @@ public final class SchemasCodeWriter {
         out.closeParen();
     }
 
-    private static void writeMemberClasses(CodePrintWriter out, Imports imports, Cls cls,
-            Map<String, Set<Cls>> fullClassNameInterfaces, Names names) {
-        cls.classes.forEach(c -> writeClass(out, imports, c, fullClassNameInterfaces, names));
+    private static void writeMemberClasses(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces,
+            Names names) {
+        cls.classes.forEach(c -> writeClass(out, c, fullClassNameInterfaces, names));
     }
 
 }
