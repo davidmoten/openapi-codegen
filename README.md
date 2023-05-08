@@ -15,6 +15,8 @@ Features
 * Nesting in openapi definition reflected in nested Java classes
 * Strong typing (primitives are used for mandatory simple types)
 * Java 8 Optional and DateTime types used
+* Generates `equals`, `hashCode`, `toString` methods
+* Generates chained builders (chaining occurs when mandatory fields are present)
 * Plenty of unit tests (good ones, full serialization and deserialization tests)
 * Maven plugin
 * Simple server-side and client-side implementation for primary and general response handling
