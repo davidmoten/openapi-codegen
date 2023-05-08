@@ -632,7 +632,8 @@ public class SchemasTest {
         Dog a = m.readValue(json, Dog.class);
         assertEquals("brown and curly", a.pet().description());
         assertEquals(Breed.CROSS, a.object1().breed().get());
-        Dog b = new Dog(new Pet("brown and curly"), new Dog.Object1(Optional.of(Breed.CROSS)));
+        Dog b = Dog.builder().pet(Pet.builder().description("brown and curly").build())
+                .object1(Dog.Object1.builder().breed(Breed.CROSS).build()).build();
         assertEquals(json, m.writeValueAsString(b));
     }
 
@@ -710,12 +711,12 @@ public class SchemasTest {
             OffsetDateTime startTime = OffsetDateTime.parse("2023-04-05T14:15:26.025+10:00");
             OffsetDateTime endTime = OffsetDateTime.parse("2023-04-06T12:00:26.025+10:00");
             MsiId msiId = new MsiId("8ds9f8sd98-dsfds8989");
-            Msi msi  = Msi.builder() //
+            Msi msi = Msi.builder() //
                     .id(msiId) //
                     .broadcast(broadcast) //
                     .createdTime(createdTime) //
                     .startTime(startTime) //
-                    .endTime(endTime)  //
+                    .endTime(endTime) //
                     .status(Status.ACTIVE) //
                     .build();
             assertEquals(m.readTree(json), m.readTree(m.writeValueAsString(msi)));

@@ -159,7 +159,7 @@ public final class SchemasCodeWriter {
             writeJsonTypeInfoAnnotation(out, cls);
         } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicDeserializerAnnotation(out, cls);
-        } 
+        }
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeJsonIncludeAnnotation(out);
             writeAutoDetectAnnotation(out);
@@ -282,6 +282,9 @@ public final class SchemasCodeWriter {
                     assignField(out, cls, x);
                 });
                 out.closeParen();
+                // write allof builder
+                writeAllOfBuilder(out, cls);
+
                 writeGetters(out, cls, fullClassNameInterfaces);
             }
             out.println();
@@ -297,6 +300,14 @@ public final class SchemasCodeWriter {
             out.closeParen();
             out.closeParen();
         }
+    }
+
+    private static void writeAllOfBuilder(CodePrintWriter out, Cls cls) {
+        List<BuilderWriter.Field> fields = //
+                cls.fields.stream() //
+                        .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray)) //
+                        .collect(Collectors.toList());
+        BuilderWriter.write(out, fields, cls.simpleName());
     }
 
     private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Cls cls) {
@@ -469,8 +480,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void checkNotNull(Cls cls, CodePrintWriter out, Field x) {
-        out.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class,
-                x.fieldName(cls), x.fieldName(cls));
+        out.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, x.fieldName(cls), x.fieldName(cls));
     }
 
     private static void assignEncodedOctets(CodePrintWriter out, Cls cls, Field x) {
