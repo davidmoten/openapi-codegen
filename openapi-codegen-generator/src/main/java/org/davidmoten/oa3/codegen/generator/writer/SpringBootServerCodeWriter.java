@@ -240,7 +240,6 @@ public final class SpringBootServerCodeWriter {
                 out.closeParen();
                 out.closeParen();
             } else {
-                out.println();
                 out.line("default %s %s(%s) throws %s {", importedReturnType, m.methodName, params,
                         ServiceException.class);
                 out.line("throw notImplemented();");
