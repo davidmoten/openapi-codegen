@@ -90,7 +90,7 @@ public final class SchemasCodeWriter {
         CodePrintWriter out = CodePrintWriter.create(fullClassName);
         out.line("package %s;", Names.pkg(fullClassName));
         out.println();
-        out.line("%s", IMPORTS_HERE);
+        out.format("%s", IMPORTS_HERE);
         addGeneratedAnnotation(out);
         out.line("public final class %s {", Names.simpleClassName(fullClassName));
         out.println();
@@ -112,7 +112,7 @@ public final class SchemasCodeWriter {
         if (cls.topLevel) {
             out.line("package %s;", cls.pkg());
             out.println();
-            out.line("%s", IMPORTS_HERE);
+            out.format("%s", IMPORTS_HERE);
         }
         writeClassDeclaration(out, cls, fullClassNameInterfaces);
         writeEnumMembers(out, cls);
