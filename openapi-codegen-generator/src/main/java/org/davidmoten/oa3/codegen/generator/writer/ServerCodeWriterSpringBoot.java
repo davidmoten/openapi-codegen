@@ -77,12 +77,11 @@ public final class ServerCodeWriterSpringBoot {
     private static void writeJacksonConfigurationClass(Names names) {
         String fullClassName = names.jacksonConfigurationFullClassName();
         CodePrintWriter out = CodePrintWriter.create(fullClassName);
-        writeJacksonConfigurationClass(out,  names );
+        writeJacksonConfigurationClass(out, names);
         WriterUtil.writeContent(names, out);
     }
 
-    private static void writeJacksonConfigurationClass(CodePrintWriter out, Names names
-            ) {
+    private static void writeJacksonConfigurationClass(CodePrintWriter out, Names names) {
         out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", IMPORTS_HERE);
@@ -93,8 +92,7 @@ public final class ServerCodeWriterSpringBoot {
         out.println();
         out.line("private final %s config;", Config.class);
         out.println();
-        out.line("public %s(@%s(required = false) %s config) {", out.simpleClassName(), Autowired.class,
-                Config.class);
+        out.line("public %s(@%s(required = false) %s config) {", out.simpleClassName(), Autowired.class, Config.class);
         out.line("this.config = config == null ? %s.config() : config;", out.add(names.globalsFullClassName()));
         out.closeParen();
         out.println();
@@ -111,7 +109,7 @@ public final class ServerCodeWriterSpringBoot {
     private static void writeServiceControllerClass(Names names, List<Method> methods) {
         String fullClassName = names.serviceControllerFullClassName();
         CodePrintWriter out = CodePrintWriter.create(fullClassName);
-        writeServiceControllerClass(out,  names, methods);
+        writeServiceControllerClass(out, names, methods);
         WriterUtil.writeContent(names, out);
     }
 
@@ -122,21 +120,18 @@ public final class ServerCodeWriterSpringBoot {
         WriterUtil.writeContent(names, out);
     }
 
-    private static void writeServiceInterfaceClass(CodePrintWriter out, Names names,
-            List<Method> methods) {
+    private static void writeServiceInterfaceClass(CodePrintWriter out, Names names, List<Method> methods) {
         out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
         WriterUtil.addGeneratedAnnotation(out);
-        out.line("public interface %s extends %s {", out.simpleClassName(),
-                ErrorHandler.class);
+        out.line("public interface %s extends %s {", out.simpleClassName(), ErrorHandler.class);
         writeServiceMethods(out, methods, false, names);
         out.closeParen();
     }
 
-    private static void writeServiceControllerClass(CodePrintWriter out, Names names,
-            List<Method> methods) {
+    private static void writeServiceControllerClass(CodePrintWriter out, Names names, List<Method> methods) {
         out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", IMPORTS_HERE);
@@ -149,16 +144,15 @@ public final class ServerCodeWriterSpringBoot {
         out.println();
         out.line("public %s(@%s(required = false) %s service) {", out.simpleClassName(), Autowired.class,
                 out.add(names.serviceInterfaceFullClassName()));
-        out.line("this.service = %s.orElse(service, new %s() {});",
-                org.davidmoten.oa3.codegen.util.Util.class,
+        out.line("this.service = %s.orElse(service, new %s() {});", org.davidmoten.oa3.codegen.util.Util.class,
                 out.add(names.serviceInterfaceFullClassName()));
         out.closeParen();
         writeServiceMethods(out, methods, true, names);
         out.closeParen();
     }
 
-    private static void writeServiceMethods(CodePrintWriter out,  List<Method> methods,
-            boolean isController, Names names) {
+    private static void writeServiceMethods(CodePrintWriter out, List<Method> methods, boolean isController,
+            Names names) {
         methods.forEach(m -> {
             writeMethodJavadoc(out, m, m.primaryStatusCode.map(x -> "primary response status code " + x));
             out.right().right();
@@ -232,8 +226,7 @@ public final class ServerCodeWriterSpringBoot {
                 } else {
                     out.line("service.%s(%s);", m.methodName,
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
-                    out.line("return %s.status(%s).build();", ResponseEntity.class,
-                            m.statusCode.orElse(200));
+                    out.line("return %s.status(%s).build();", ResponseEntity.class, m.statusCode.orElse(200));
                 }
                 out.left();
                 out.line("} catch (%s e) {", Throwable.class);
@@ -254,9 +247,14 @@ public final class ServerCodeWriterSpringBoot {
                 .stream() //
                 .collect(Collectors.toMap(x -> x.identifier,
                         x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ")));
-        Optional<String> html = Optional.of(m.description.map(x -> WriterUtil.markdownToHtml(x))
-                .orElse("<p>Returns response from call to path <i>%s</i>.</p>"));
-        if (!Javadoc.printJavadoc(out, html, Collections.emptyList(), Optional.empty(), returns,
+
+        String html = m.description.map(x -> WriterUtil.markdownToHtml(x))
+                .orElse("<p>Returns response from call to path <i>%s</i>.</p>");
+        String more = m.responseDescriptors.stream() //
+                .map(rd -> String.format("\n<p>[status=%s, %s] --&gt; {@link %s}</p>", rd.statusCode(), rd.mediaType(),
+                        out.add(rd.fullClassName())))
+                .collect(Collectors.joining());
+        if (!Javadoc.printJavadoc(out, Optional.of(html + more), Collections.emptyList(), Optional.empty(), returns,
                 parameterDescriptions, true)) {
             out.println();
         }
@@ -285,32 +283,32 @@ public final class ServerCodeWriterSpringBoot {
                 out.line("if (%s.config().validateInControllerMethod().test(\"%s\")) {",
                         out.add(names.globalsFullClassName()), m.methodName);
                 if (x.minLength.isPresent()) {
-                    out.line("%s.checkMinLength(%s, %s, \"%s\");", RequestPreconditions.class,
-                            p.identifier, x.minLength.get(), p.identifier);
+                    out.line("%s.checkMinLength(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
+                            x.minLength.get(), p.identifier);
                 }
                 if (x.maxLength.isPresent()) {
-                    out.line("%s.checkMaxLength(%s, %s, \"%s\");", RequestPreconditions.class,
-                            p.identifier, x.maxLength.get(), p.identifier);
+                    out.line("%s.checkMaxLength(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
+                            x.maxLength.get(), p.identifier);
                 }
                 if (x.pattern.isPresent()) {
-                    out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class,
-                            p.identifier, x.pattern.get(), p.identifier);
+                    out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class, p.identifier,
+                            x.pattern.get(), p.identifier);
                 }
                 if (x.min.isPresent()) {
-                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
-                            p.identifier, x.min.get().toString(), p.identifier, false);
+                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            x.min.get().toString(), p.identifier, false);
                 }
                 if (x.max.isPresent()) {
-                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
-                            p.identifier, x.max.get().toString(), p.identifier, false);
+                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            x.max.get().toString(), p.identifier, false);
                 }
                 if (x.minExclusive.isPresent()) {
-                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
-                            p.identifier, x.minExclusive.get().toString(), p.identifier, true);
+                    out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            x.minExclusive.get().toString(), p.identifier, true);
                 }
                 if (x.maxExclusive.isPresent()) {
-                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class,
-                            p.identifier, x.maxExclusive.get().toString(), p.identifier, true);
+                    out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            x.maxExclusive.get().toString(), p.identifier, true);
                 }
                 if (p.isArray && x.minItems.isPresent()) {
                     out.line("%s.checkMinSize(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
