@@ -183,9 +183,7 @@ public final class SchemasCodeWriter {
             writeJsonTypeInfoAnnotation(out, cls);
         } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicDeserializerAnnotation(out, cls);
-        } else {
-            out.println();
-        }
+        } 
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeJsonIncludeAnnotation(out);
             writeAutoDetectAnnotation(out);
