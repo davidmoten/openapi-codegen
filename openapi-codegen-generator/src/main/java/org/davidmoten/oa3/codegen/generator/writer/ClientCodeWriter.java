@@ -26,11 +26,11 @@ public class ClientCodeWriter {
     }
 
     private static void writeClientClass(CodePrintWriter out, Names names, List<Method> methods) {
-        out.line("package %s;", Names.pkg(out.fullClassName()));
+        out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", WriterUtil.IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
-        out.line("public class %s {", Names.simpleClassName(out.fullClassName()));
+        out.line("public class %s {", out.simpleClassName());
         writeClientClassFieldsConstructorAndBuilder(out, names);
         writeClientClassMethods(out, methods);
         out.closeParen();
@@ -45,7 +45,7 @@ public class ClientCodeWriter {
 
         // write constructor
         out.println();
-        out.line("private %s(%s serializer, %s interceptor, %s basePath) {", Names.simpleClassName(out.fullClassName()),
+        out.line("private %s(%s serializer, %s interceptor, %s basePath) {", out.simpleClassName(),
                 Serializer.class, Interceptor.class, String.class);
         out.line("this.serializer = serializer;");
         out.line("this.interceptor = interceptor;");
@@ -55,9 +55,9 @@ public class ClientCodeWriter {
         // write builder
         out.println();
         out.line("public static %s<%s> basePath(%s basePath) {", ClientBuilder.class,
-                Names.simpleClassName(out.fullClassName()), String.class);
+                out.simpleClassName(), String.class);
         out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptor(), b.basePath()), %s.config(), basePath);",
-                ClientBuilder.class, Names.simpleClassName(out.fullClassName()), out.add(names.globalsFullClassName()));
+                ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
         out.closeParen();
     }
 

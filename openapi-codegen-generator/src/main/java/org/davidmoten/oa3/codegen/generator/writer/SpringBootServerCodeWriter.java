@@ -58,16 +58,15 @@ public final class SpringBootServerCodeWriter {
     }
 
     private static void writeApplicationClass(CodePrintWriter out) {
-        out.line("package %s;", Names.pkg(out.fullClassName()));
+        out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", IMPORTS_HERE);
         out.println();
         out.line("@%s", SpringBootApplication.class);
-        String simpleClassName = Names.simpleClassName(out.fullClassName());
-        out.line("public class %s {", simpleClassName);
+        out.line("public class %s {", out.simpleClassName());
         out.println();
         out.line("public static void main(%s[] args) {", String.class);
-        out.line("%s.run(%s.class, args);", SpringApplication.class, simpleClassName);
+        out.line("%s.run(%s.class, args);", SpringApplication.class, out.simpleClassName());
         out.closeParen();
         out.left();
         out.println();
@@ -83,17 +82,16 @@ public final class SpringBootServerCodeWriter {
 
     private static void writeJacksonConfigurationClass(CodePrintWriter out, Names names
             ) {
-        out.line("package %s;", Names.pkg(out.fullClassName()));
+        out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", IMPORTS_HERE);
         out.println();
         out.line("@%s", Configuration.class);
-        String simpleClassName = Names.simpleClassName(out.fullClassName());
-        out.line("public class %s {", simpleClassName);
+        out.line("public class %s {", out.simpleClassName());
         out.println();
         out.line("private final %s config;", Config.class);
         out.println();
-        out.line("public %s(@%s(required = false) %s config) {", simpleClassName, Autowired.class,
+        out.line("public %s(@%s(required = false) %s config) {", out.simpleClassName(), Autowired.class,
                 Config.class);
         out.line("this.config = config == null ? %s.config() : config;", out.add(names.globalsFullClassName()));
         out.closeParen();
@@ -124,11 +122,11 @@ public final class SpringBootServerCodeWriter {
 
     private static void writeServiceInterfaceClass(CodePrintWriter out, Names names,
             List<Method> methods) {
-        out.line("package %s;", Names.pkg(out.fullClassName()));
+        out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", IMPORTS_HERE);
         WriterUtil.writeApiJavadoc(out, names);
-        out.line("public interface %s extends %s {", Names.simpleClassName(out.fullClassName()),
+        out.line("public interface %s extends %s {", out.simpleClassName(),
                 ErrorHandler.class);
         writeServiceMethods(out, methods, false, names);
         out.closeParen();
@@ -136,17 +134,16 @@ public final class SpringBootServerCodeWriter {
 
     private static void writeServiceControllerClass(CodePrintWriter out, Names names,
             List<Method> methods) {
-        out.line("package %s;", Names.pkg(out.fullClassName()));
+        out.line("package %s;", out.pkg());
         out.println();
         out.format("%s", IMPORTS_HERE);
         out.println();
         out.line("@%s", RestController.class);
-        String simpleClassName = Names.simpleClassName(out.fullClassName());
-        out.line("public class %s implements %s {", simpleClassName, ControllerExceptionHandler.class);
+        out.line("public class %s implements %s {", out.simpleClassName(), ControllerExceptionHandler.class);
         out.println();
         out.line("private final %s service;", out.add(names.serviceInterfaceFullClassName()));
         out.println();
-        out.line("public %s(@%s(required = false) %s service) {", simpleClassName, Autowired.class,
+        out.line("public %s(@%s(required = false) %s service) {", out.simpleClassName(), Autowired.class,
                 out.add(names.serviceInterfaceFullClassName()));
         out.line("this.service = %s.orElse(service, new %s() {});",
                 org.davidmoten.oa3.codegen.util.Util.class,

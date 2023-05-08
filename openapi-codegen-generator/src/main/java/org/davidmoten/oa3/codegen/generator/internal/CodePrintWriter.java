@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
+import org.davidmoten.oa3.codegen.generator.Names;
+
 public final class CodePrintWriter extends PrintWriter {
 
     private ByteArrayOutputStream bytes;
@@ -105,5 +107,14 @@ public final class CodePrintWriter extends PrintWriter {
     public String fullClassName() {
         return imports.fullClassName();
     }
+    
+    public String pkg() {
+        return Names.pkg(fullClassName());
+    }
+    
+    public String simpleClassName() {
+        return Names.simpleClassName(fullClassName());
+    }
+    
 
 }
