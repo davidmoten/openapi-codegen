@@ -643,7 +643,15 @@ public class SchemasTest {
         Dog2 a = m.readValue(json, Dog2.class);
         assertEquals("brown and curly", a.pet().description());
         assertEquals(DogBreed.CROSS, a.breeding().breed());
-        Dog2 b = new Dog2(new Pet("brown and curly"), new Breeding("Jane's Kennels", DogBreed.CROSS));
+        Dog2 b = Dog2.builder() //
+                .pet(Pet.builder() //
+                        .description("brown and curly") //
+                        .build()) //
+                .breeding(Breeding.builder() //
+                        .breeder("Jane's Kennels") //
+                        .breed(DogBreed.CROSS) //
+                        .build()) //
+                .build();
         assertEquals(json, m.writeValueAsString(b));
     }
 
