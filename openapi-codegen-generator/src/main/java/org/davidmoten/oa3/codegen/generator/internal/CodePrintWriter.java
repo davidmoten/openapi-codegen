@@ -46,13 +46,8 @@ public final class CodePrintWriter extends PrintWriter {
         return indent;
     }
 
-    public CodePrintWriter newLine() {
-        format("\n");
-        return this;
-    }
-
     public void println() {
-        newLine();
+        format("\n");
     }
 
     public void line(String format, Object... args) {

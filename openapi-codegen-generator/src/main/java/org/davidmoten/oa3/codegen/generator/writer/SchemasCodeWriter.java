@@ -301,7 +301,7 @@ public final class SchemasCodeWriter {
                             if (!x.isPrimitive() && x.required) {
                                 checkNotNull(cls, o, x);
                             } else {
-                                o.line("// ???");
+                                o.line("// TODO %s", x.fieldName);
                             }
                             validateMore(o, cls, x);
                         }));
