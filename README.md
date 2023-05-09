@@ -25,10 +25,23 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 using Jacks
 
 **Status**: in development, alpha release on Maven Central
 
+## Limitations
+* `allOf` only with object schemas
+* parameter types like explode, label, deepObject not implemented yet
+* json only (xml not supported)
+
 ## Usage
 As much as possible make sure you put your types in the components/schemas section of your openapi yaml/json file (use $ref!). Don't use anonymous types, it makes for an ugly experience with generated code. 
 
-TODO
+## Validation
+
+## Logging
+
+## Interceptors
+
+## Authentication
+
+## HTTP Patch 
 
 ### Mixed usage with *openapi-generator*
 See [this](https://github.com/davidmoten/openapi-codegen/wiki/openapi-generator#mixed-usage-with-openapi-generator).
@@ -49,21 +62,6 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * testing approach in the project lacks JSON serialization and deserialization tests at a unit level (as opposed to starting up servers and doing integration tests)
 * *import mapping* is very poor, doesn't handle related objects and doesn't update service classes (non-model classes)
 * a LOT of bugs (3,500 open issues is an indicator)
-
-## Limitations
-* `allOf` only with object schemas
-* parameter types like explode, label, deepObject not implemented yet
-* json only (xml not supported)
-
-## Validation
-
-## Logging
-
-## Interceptors
-
-## Authentication
-
-## HTTP Patch 
 
 ## TODO
 * `additionalProperties` (Dictionary) support
