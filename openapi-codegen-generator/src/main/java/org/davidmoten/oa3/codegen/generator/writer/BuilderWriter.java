@@ -145,6 +145,14 @@ public class BuilderWriter {
                 enhancedImportedType(field, out.imports()), field.fieldName);
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
+        
+        if (!field.required) {
+            out.println();
+            out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
+                    baseImportedType(field, out.imports()), field.fieldName);
+            out.line("return new %s(%s.of(%s));", importedBuiltType, Optional.class, field.fieldName);
+            out.closeParen();
+        }
     }
 
     private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType,

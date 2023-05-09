@@ -634,7 +634,7 @@ public class SchemasTest {
         assertEquals(Breed.CROSS, a.object1().breed().get());
         Dog b = Dog.builder() //
                 .pet(Pet.description("brown and curly")) //
-                .object1(Dog.Object1.breed(Optional.of(Breed.CROSS))) //
+                .object1(Dog.Object1.breed(Breed.CROSS)) //
                 .build();
         assertEquals(json, m.writeValueAsString(b));
     }

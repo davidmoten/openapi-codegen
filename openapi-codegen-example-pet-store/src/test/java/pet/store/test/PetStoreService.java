@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 import com.github.davidmoten.guavamini.Lists;
 
 import pet.store.path.PetsGet200Response;
+import pet.store.schema.Error;
 import pet.store.schema.NewPet;
 import pet.store.schema.Pet;
 import pet.store.schema.PetId;
 import pet.store.service.Service;
-import pet.store.schema.Error;
 
 @Component
 @Primary
@@ -24,16 +24,16 @@ public class PetStoreService implements Service {
 
     private List<Pet> pets = Lists.newArrayList( //
             new Pet(NewPet.builder().name("fido").tag("A0123").build(), //
-                    PetId.builder().id(321L).build()));
+                    PetId.id(321L)));
 
     @Override
     public PetsGet200Response petsGet(Optional<List<String>> tags, int limit) throws ServiceException {
-        return PetsGet200Response.builder().petsGet200ResponseItem(pets).build();
+        return PetsGet200Response.petsGet200ResponseItem(pets);
     }
 
     @Override
     public Pet petsPost(NewPet a) throws ServiceException {
-        Pet p = new Pet(a, PetId.builder().id(System.currentTimeMillis()).build());
+        Pet p = new Pet(a, PetId.id(System.currentTimeMillis()));
         pets.add(p);
         return p;
     }
@@ -44,7 +44,7 @@ public class PetStoreService implements Service {
         if (pet.isPresent()) {
             return pet.get();
         } else {
-            return response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error.builder().message("not found").build()));
+            return response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error.message("not found")));
         }
     }
 
@@ -54,13 +54,13 @@ public class PetStoreService implements Service {
         if (pet.isPresent()) {
             pets.remove(pet.get());
         } else {
-            response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error.builder().message("not found").build()));
+            response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error.message("not found")));
         }
     }
 
     @Override
     public Object errorResponseBody(int statusCode, Throwable e) {
-        return Error.builder().message("an error happened").build();
+        return Error.message("an error happened");
     }
 
 }
