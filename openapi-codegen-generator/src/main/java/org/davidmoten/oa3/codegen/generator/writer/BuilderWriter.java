@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
+import org.davidmoten.oa3.codegen.generator.internal.Util;
 
 public class BuilderWriter {
 
@@ -145,7 +146,7 @@ public class BuilderWriter {
                 enhancedImportedType(field, out.imports()), field.fieldName);
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
-        
+
         if (!field.required) {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
@@ -168,6 +169,8 @@ public class BuilderWriter {
     private static String baseImportedType(Field f, Imports imports) {
         if (f.isArray) {
             return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
+        } else if (f.required) {
+            return imports.add(Util.toPrimitive(f.fullClassName));
         } else {
             return imports.add(f.fullClassName);
         }
