@@ -392,10 +392,9 @@ public final class SchemasCodeWriter {
         out.left().left();
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
 
+        out.println();
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", out.add(JsonCreator.class));
-        } else {
-            out.println();
         }
         boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
