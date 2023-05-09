@@ -152,6 +152,21 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * *import mapping* is very poor, doesn't handle related objects and doesn't update service classes (non-model classes)
 * a LOT of bugs (3,500 open issues is an indicator)
 
+## Limitations
+* `allOf` only with object schemas
+* parameter types like explode, label, deepObject not implemented yet
+* json only (xml not supported)
+
+## Validation
+
+## Logging
+
+## Interceptors
+
+## Authentication
+
+## HTTP Patch 
+
 ## TODO
 * `additionalProperties` (Dictionary) support
 * generate javadoc for fields
