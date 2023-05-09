@@ -57,5 +57,4 @@ public class BuilderWriterTest {
             BuilderWriter.write(writer, fields, "Thing");
         }
     }
-
 }
