@@ -632,8 +632,10 @@ public class SchemasTest {
         Dog a = m.readValue(json, Dog.class);
         assertEquals("brown and curly", a.pet().description());
         assertEquals(Breed.CROSS, a.object1().breed().get());
-        Dog b = Dog.builder().pet(Pet.builder().description("brown and curly").build())
-                .object1(Dog.Object1.builder().breed(Breed.CROSS).build()).build();
+        Dog b = Dog.builder() //
+                .pet(Pet.description("brown and curly")) //
+                .object1(Dog.Object1.breed(Optional.of(Breed.CROSS))) //
+                .build();
         assertEquals(json, m.writeValueAsString(b));
     }
 
@@ -644,9 +646,7 @@ public class SchemasTest {
         assertEquals("brown and curly", a.pet().description());
         assertEquals(DogBreed.CROSS, a.breeding().breed());
         Dog2 b = Dog2.builder() //
-                .pet(Pet.builder() //
-                        .description("brown and curly") //
-                        .build()) //
+                .pet(Pet.description("brown and curly")) //
                 .breeding(Breeding.builder() //
                         .breeder("Jane's Kennels") //
                         .breed(DogBreed.CROSS) //

@@ -36,7 +36,7 @@ public class PathsService implements Service {
 
     @Override
     public Response2 responseRefGet() throws ServiceException {
-        return response(ResponseEntity.status(500).body(Response1.builder().thing("beehive").build()));
+        return response(ResponseEntity.status(500).body(Response1.thing("beehive")));
     }
 
     @Override

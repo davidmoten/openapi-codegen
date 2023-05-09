@@ -30,6 +30,10 @@ public class BuilderWriter {
         if (fields.isEmpty()) {
             return;
         }
+        if (fields.size() == 1) {
+            writeSimple(out, fields.get(0), importedBuiltType);
+            return;
+        }
         List<Field> sortedFields = new ArrayList<>(fields);
         // sort so required are first
         sortedFields.sort((a, b) -> Boolean.compare(b.required, a.required));
@@ -72,14 +76,13 @@ public class BuilderWriter {
                         }
                         if (fld.required) {
                             if (fld.isArray) {
-                                out.line("private %s<%s> %s;", List.class, out.add(fld.fullClassName),
-                                        fld.fieldName);
+                                out.line("private %s<%s> %s;", List.class, out.add(fld.fullClassName), fld.fieldName);
                             } else {
                                 out.line("private %s %s;", out.add(fld.fullClassName), fld.fieldName);
                             }
                         } else {
-                            out.line("private %s %s = %s.empty();", enhancedImportedType(fld, out.imports()), fld.fieldName,
-                                    Optional.class);
+                            out.line("private %s %s = %s.empty();", enhancedImportedType(fld, out.imports()),
+                                    fld.fieldName, Optional.class);
                         }
                     }
                     out.println();
@@ -89,7 +92,8 @@ public class BuilderWriter {
             }
             String builderField = inFirstBuilder ? "" : ".b";
             out.println();
-            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()), f.fieldName);
+            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
+                    f.fieldName);
             if (f.required) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else {
@@ -133,6 +137,14 @@ public class BuilderWriter {
             previousWasRequired = f.required;
             out.flush();
         }
+    }
+
+    private static void writeSimple(CodePrintWriter out, Field field, String importedBuiltType) {
+        out.println();
+        out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
+                enhancedImportedType(field, out.imports()), field.fieldName);
+        out.line("return new %s(%s);", importedBuiltType, field.fieldName);
+        out.closeParen();
     }
 
     private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType,
