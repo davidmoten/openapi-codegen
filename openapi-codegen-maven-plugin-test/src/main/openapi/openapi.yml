@@ -1516,5 +1516,22 @@ components:
             
     External:
       $ref: './fragment.yml#/components/schemas/Exter'
+      
+    SingleOptional:
+      type: object
+      properties:
+        single:
+          type: integer
+          format: int32
+          
+    SingleNotOptional:
+      type: object
+      properties:
+        single:
+          type: integer
+          format: int32
+      required: [single]
+          
+        
 
                 

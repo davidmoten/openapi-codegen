@@ -169,10 +169,8 @@ public class BuilderWriter {
     private static String baseImportedType(Field f, Imports imports) {
         if (f.isArray) {
             return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
-        } else if (f.required) {
-            return imports.add(Util.toPrimitive(f.fullClassName));
         } else {
-            return imports.add(f.fullClassName);
+            return imports.add(Util.toPrimitive(f.fullClassName));
         }
     }
 
@@ -186,7 +184,7 @@ public class BuilderWriter {
             }
         }
         if (f.required) {
-            return imports.add(f.fullClassName);
+            return imports.add(Util.toPrimitive(f.fullClassName));
         } else {
             return String.format("%s<%s>", imports.add(Optional.class), imports.add(f.fullClassName));
         }

@@ -77,6 +77,8 @@ import org.davidmoten.oa3.codegen.test.main.schema.SimpleIntegerArray;
 import org.davidmoten.oa3.codegen.test.main.schema.SimpleLong;
 import org.davidmoten.oa3.codegen.test.main.schema.SimpleString;
 import org.davidmoten.oa3.codegen.test.main.schema.SimpleTime;
+import org.davidmoten.oa3.codegen.test.main.schema.SingleNotOptional;
+import org.davidmoten.oa3.codegen.test.main.schema.SingleOptional;
 import org.davidmoten.oa3.codegen.test.main.schema.Square;
 import org.davidmoten.oa3.codegen.test.main.schema.Square2;
 import org.davidmoten.oa3.codegen.test.main.schema.Status;
@@ -740,6 +742,20 @@ public class SchemasTest {
         } catch (IllegalArgumentException e) {
             // all good
         }
+    }
+
+    @Test
+    public void testBuilderOptionalPrimitive() throws NoSuchMethodException, SecurityException {
+        SingleOptional.class.getMethod("single", int.class);
+        assertEquals(1, SingleOptional.single(1).single().get());
+        assertEquals(2, SingleOptional.single(Optional.of(2)).single().get());
+        assertFalse(SingleOptional.single(Optional.empty()).single().isPresent());
+    }
+
+    @Test
+    public void testBuilderNotOptionalPrimitive() throws NoSuchMethodException, SecurityException {
+        SingleNotOptional.class.getMethod("single", int.class);
+        assertEquals(1, SingleNotOptional.single(1).single());
     }
 
     private static void onePublicConstructor(Class<?> c) {
