@@ -106,7 +106,6 @@
                             <generator>spring</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.main</basePackage>
                             <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
                                     <include>openapi.yml</include>
                                 </includes>
@@ -122,7 +121,6 @@
                             <generator>spring</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.paths</basePackage>
                             <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
                                     <include>paths.yml</include>
                                 </includes>
@@ -139,7 +137,6 @@
                             <generator>spring</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.library</basePackage>
                             <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
                                 <includes>
                                     <include>library.yml</include>
                                 </includes>
@@ -213,7 +210,6 @@
                                     <generator>spring</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.cts</basePackage>
                                     <sources>
-                                        <directory>${project.basedir}/src/main/openapi</directory>
                                         <includes>
                                             <include>cts.yml</include>
                                         </includes>
@@ -229,7 +225,6 @@
                                     <generator>spring</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.ebay</basePackage>
                                     <sources>
-                                        <directory>${project.basedir}/src/main/openapi</directory>
                                         <includes>
                                             <include>ebay.yml</include>
                                         </includes>
@@ -245,7 +240,6 @@
                                     <generator>spring</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.marqueta</basePackage>
                                     <sources>
-                                        <directory>${project.basedir}/src/main/openapi</directory>
                                         <includes>
                                             <include>marqueta.yml</include>
                                         </includes>

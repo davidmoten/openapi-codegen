@@ -65,16 +65,20 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        File defaultSourceDirectory = new File(//
+                project.getBasedir(), //
+                "src" + File.separator //
+                        + "main" + File.separator //
+                        + "openapi");
         if (sources == null) {
             sources = new FileSet();
-            sources.setDirectory(new File(//
-                    project.getBasedir(), //
-                    "src" + File.separator //
-                            + "main" + File.separator //
-                            + "openapi").getAbsolutePath());
+            sources.setDirectory(defaultSourceDirectory.getAbsolutePath());
         }
         getLog().info("sources=" + sources);
         try {
+            if (sources.getDirectory() == null) {
+                sources.setDirectory(defaultSourceDirectory.getAbsolutePath());
+            }
             if (sources.getIncludes().isEmpty()) {
                 sources.addInclude("**/*.yml");
                 sources.addInclude("**/*.yaml");
