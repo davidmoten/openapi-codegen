@@ -118,6 +118,18 @@ paths:
         default:    
           $ref: '#/components/responses/Error'
           
+  /jsonString:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Name'
+        default:    
+          $ref: '#/components/responses/Error'          
+          
   /requestBodyMultiType:
     post:
       requestBody:
@@ -445,3 +457,6 @@ components:
           type: number
           format: double
       required: [lat, lon]                      
+    
+    Name:
+      type: string

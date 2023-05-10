@@ -148,5 +148,10 @@ public class PathsServerTest {
         org.davidmoten.oa3.codegen.test.paths.schema.Error e = r.dataUnwrapped();
         assertEquals("not found eh", e.errorMessage().orElse(""));
     }
+    
+    @Test
+    public void testSimpleStringJsonResponse() {
+        assertEquals("hello", client().jsonStringGet().value());
+    }
 
 }
