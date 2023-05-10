@@ -43,8 +43,10 @@ Some examples follow. Note the following:
 * constructor validation that can be configured off on a class by class basis
 * Optional should be used, not null values, in all public interactions  
 
-### *oneOf* without discriminator
+### *oneOf* with discriminator
 [Vehicle.java](src/docs/Vehicle.java), [Car.java](src/docs/Car.java), [Bike.java](src/docs/Bike.java)
+
+Note that discriminators are constants that the user does not set (in fact, cannot set) and are set in the private constructors of Car and Bike.
 
 ### *oneOf* without discriminator
 [Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
