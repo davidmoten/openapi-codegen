@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
-import org.davidmoten.oa3.codegen.generator.writer.BuilderWriter;
 import org.davidmoten.oa3.codegen.generator.writer.BuilderWriter.Field;
 import org.junit.jupiter.api.Test;
 
