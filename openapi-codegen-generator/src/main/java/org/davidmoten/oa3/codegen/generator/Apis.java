@@ -64,7 +64,6 @@ class Apis {
     }
 
     private static Header resolveRefs(OpenAPI api, Header header) {
-        // Note that components.pathItems only exists with OpenApi 3.1
         while (header.get$ref() != null) {
             header = api.getComponents().getHeaders().get(Names.lastComponent(header.get$ref()));
         }
