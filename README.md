@@ -33,6 +33,15 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 using Jacks
 ## Usage
 As much as possible make sure you put your types in the components/schemas section of your openapi yaml/json file (use $ref!). Don't use anonymous types, it makes for an ugly experience with generated code. 
 
+## Generated code examples
+Here are some examples:
+
+### *oneOf* without discriminator
+[Vehicle.java](src/docs/Vehicle.java), [Car.java](src/docs/Car.java), [Bike.java](src/docs/Bike.java)
+
+### *oneOf* without discriminator
+[Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
+
 ## Validation
 
 ## Logging
