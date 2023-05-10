@@ -22,22 +22,14 @@ public class LibraryServerTest {
 
     @Test
     public void testClientServerAllOf() {
+        BearerAuthenticator authenticator = () -> "tokenthingy";
         Client client = Client //
                 .basePath("http://localhost:" + serverPort) //
-                .interceptor(new Authenticator()) //
+                .interceptor(authenticator) //
                 .build();
         UsersPage page = client.userGet(Optional.empty(), Optional.empty());
         assertEquals(20, page.users().value().size());
         assertEquals("User19", page.users().value().get(18).user().firstName());
-    }
-
-    public static final class Authenticator implements BearerAuthenticator {
-
-        @Override
-        public String token() {
-            return "tokenthingy";
-        }
-
     }
 
 }

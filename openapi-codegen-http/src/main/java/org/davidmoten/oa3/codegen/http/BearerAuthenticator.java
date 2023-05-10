@@ -1,5 +1,6 @@
 package org.davidmoten.oa3.codegen.http;
 
+@FunctionalInterface
 public interface BearerAuthenticator extends Interceptor {
 
     String token();
