@@ -37,7 +37,7 @@ As much as possible make sure you put your types in the components/schemas secti
 Some examples follow. Note the following:
 
 * really clean code, formatted, sensible whitespacing, no long code lines 
-* minimal generated code (for example toString, equals, hashCode are one statement methods that pass off to non-generated runtime dependencies)
+* minimal generated code (for example toString, hashCode, and oneOf Deserializer are one statement methods that pass off to non-generated runtime dependencies)
 * type safety
 * concise builders
 * constructor validation that can be configured off on a class by class basis
