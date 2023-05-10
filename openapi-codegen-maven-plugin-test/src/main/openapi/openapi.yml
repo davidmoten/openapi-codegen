@@ -243,7 +243,7 @@ paths:
             schema:
               $ref: '#/components/schemas/MsiContent'
       responses:
-        '200':    
+        '201':    
           description: The unique identifier of the newly created MSI
           content:
             application/json:
@@ -505,7 +505,7 @@ paths:
         has already been sent or the MSI has been cancelled then 
         nothing occurs (this method is idempotent). 
       responses:
-        '200':    
+        '204':    
           description: OK
         '400':    
           $ref: '#/components/responses/BadRequest'
@@ -771,7 +771,7 @@ components:
       - $ref: '#/components/schemas/NavBroadcast'
       - $ref: '#/components/schemas/PiracyBroadcast'
       example:
-        geometry: 
+        sarArea: 
           lat: -34.5
           lon: 145.44
           radiusNm: 150
@@ -800,7 +800,15 @@ components:
             of this MSI 
           example: '2022-04-24T10:25:43.511Z'
         payload: 
-          $ref: '#/components/schemas/Payload'          
+          $ref: '#/components/schemas/Payload'   
+        echo: 
+          description: |
+            If the satellite provider supports echo then setting this field to true
+            will request a repeat broadcast is made a short time after the first 
+            (Inmarsat applies a 6 minute interval). Consult the satellite provider
+            documentation about under what circumstances the echo will be honoured.
+          type: boolean
+          default: false        
         repetition:
           $ref: '#/components/schemas/Repetition'
         readAcksEnabled:
@@ -861,7 +869,15 @@ components:
         payload: 
           $ref: '#/components/schemas/Payload'
         status:
-          $ref: '#/components/schemas/Status'   
+          $ref: '#/components/schemas/Status' 
+        echo: 
+          description: |
+            If the satellite provider supports echo then setting this field to true
+            will request a repeat broadcast is made a short time after the first 
+            (Inmarsat applies a 6 minute interval). Consult the satellite provider
+            documentation about under what circumstances the echo will be honoured.
+          type: boolean
+          default: false     
         repetition:
           $ref: '#/components/schemas/Repetition'
         readAcksEnabled:
@@ -887,7 +903,7 @@ components:
         area is optional. If omitted then corresponds to the
         entire coverage area.
       properties: 
-        geometry:
+        sarArea:
           $ref: '#/components/schemas/SARBroadcastArea'
         priority:
           $ref: '#/components/schemas/SARPriority'
@@ -911,7 +927,7 @@ components:
       oneOf:
       - $ref: '#/components/schemas/Geometry'
       - $ref: '#/components/schemas/MetArea'
-      - $ref: '#/components/schemas/CoastalWarningArea'
+      - $ref: '#/components/schemas/MetCoastalWarningArea'
         
     NavBroadcast:
       type: object
@@ -937,7 +953,7 @@ components:
       oneOf:
       - $ref: '#/components/schemas/Geometry'
       - $ref: '#/components/schemas/NavArea'
-      - $ref: '#/components/schemas/CoastalWarningArea'
+      - $ref: '#/components/schemas/NavCoastalWarningArea'
               
     NavArea:
       properties: 
@@ -954,13 +970,27 @@ components:
     MetArea:
       properties: 
         metAreaCode:
-          type: integer
-          format: int32
-          minimum: 1
-          maximum: 21
+          $ref: '#/components/schemas/MetAreaCode'
       required: [metAreaCode]
-          
-    CoastalWarningArea:
+    
+    MetAreaCode:
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 21
+      
+    MetCoastalWarningArea:
+      properties: 
+        subjectIndicator:
+          $ref: '#/components/schemas/SubjectIndicator'          
+        metAreaCode:
+          $ref: '#/components/schemas/MetAreaCode'
+        coastalWarningAreaCode:
+          type: string
+          pattern: '[a-zA-Z]'
+      required: [subjectIndicator, metAreaCode, coastalWarningAreaCode]
+
+    NavCoastalWarningArea:
       properties: 
         subjectIndicator:
           $ref: '#/components/schemas/SubjectIndicator'          
@@ -969,8 +999,8 @@ components:
         coastalWarningAreaCode:
           type: string
           pattern: '[a-zA-Z]'
-      required: [subjectIndicator, navAreaCode, coastalWarningAreaCode]
-          
+      required: [subjectIndicator, navAreaCode, coastalWarningAreaCode]          
+
     SubjectIndicator:
       type: string
       enum: 
@@ -997,19 +1027,29 @@ components:
     Repetition:
       type: object
       properties:
-        repeatTillCancelled: 
-          type: boolean
-          description: |
-            if false then one repetition is made (that
-            is the broadcast happens twice)
+        number: 
+          $ref: '#/components/schemas/NumRepetitions'
         intervalHours: 
-          type: integer
-          format: int32
-          enum: [1,2,3,4,5,6,12,18,24,30,36,48,60,72,96,120]  
-          description: |
-            the time gap between broadcasts of the same MSI   
-      required: [repeatTillCancelled, intervalHours] 
+          $ref: '#/components/schemas/IntervalHours'
+      required: [number, intervalHours] 
       
+    NumRepetitions:
+      description: |
+        the number of non-echo repeats of a broadcast (so total number of broadcasts not 
+        including echoes will be that number plus one being the initial broadcast)
+      type: string
+      enum: [ONCE, TWICE, TILL_CANCELLED]
+      
+    IntervalHours:
+      type: integer
+      format: int32
+      enum: [1,2,3,4,5,6,12,18,24,30,36,48,60,72,96,120]  
+      description: |
+        The time gap between broadcasts of the same MSI.   
+        The satellite service provider documentation should be 
+        consulted to determine what values are supported and 
+        under what criteria.      
+            
     ContinuationToken:
       type: string
       minLength: 1
@@ -1019,6 +1059,7 @@ components:
         of results. The token is not expected to be anywhere near as
         long as 4096 characters but good to put an upper bound on it. 
       example: 10
+
 
 ##########################################
 ### End of egc-api, start of unit tests

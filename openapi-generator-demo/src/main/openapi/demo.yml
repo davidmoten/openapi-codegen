@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+    
+  title: path tests
+  version: v0.1
+
+paths:
+          
+  /jsonString:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Name'
+             
+components:
+  schemas:
+    Name:
+      type: string
