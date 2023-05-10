@@ -523,7 +523,8 @@ public class Generator {
         public String discriminatorValueFromFullClassName(String fullClassName) {
             String value = fullClassNameToPropertyValue.get(fullClassName);
             if (value == null) {
-                // TODO review using simple class name for value because collision risk
+                // TODO review using simple class name for value because collision risk, better
+                // to use $ref value like '#/components/schemas/Oval'
                 return Names.simpleClassName(fullClassName);
             } else {
                 return value;
