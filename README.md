@@ -34,7 +34,14 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 using Jacks
 As much as possible make sure you put your types in the components/schemas section of your openapi yaml/json file (use $ref!). Don't use anonymous types, it makes for an ugly experience with generated code. 
 
 ## Generated code examples
-Here are some examples:
+Some examples follow. Note the following:
+
+* really clean code, formatted, sensible whitespacing, no long code lines 
+* minimal generated code (for example toString, equals, hashCode are one statement methods that pass of to non-generated runtime dependencies)
+* type safety
+* concise builders
+* constructor validation
+* Optional should be used, not null values, in all public interactions  
 
 ### *oneOf* without discriminator
 [Vehicle.java](src/docs/Vehicle.java), [Car.java](src/docs/Car.java), [Bike.java](src/docs/Bike.java)
