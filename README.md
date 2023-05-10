@@ -40,7 +40,7 @@ Some examples follow. Note the following:
 * minimal generated code (for example toString, equals, hashCode are one statement methods that pass off to non-generated runtime dependencies)
 * type safety
 * concise builders
-* constructor validation
+* constructor validation that can be configured off on a class by class basis
 * Optional should be used, not null values, in all public interactions  
 
 ### *oneOf* without discriminator
