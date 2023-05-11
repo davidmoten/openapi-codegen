@@ -443,5 +443,6 @@ public class SerializationTest {
         public Map<String, String> map() {
             return Collections.unmodifiableMap(map);
         }
+
     }
 }
