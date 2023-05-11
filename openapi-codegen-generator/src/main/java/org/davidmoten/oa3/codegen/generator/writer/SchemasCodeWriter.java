@@ -31,6 +31,8 @@ import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -121,7 +123,7 @@ public final class SchemasCodeWriter {
 
     private static void addOverrideAnnotation(CodePrintWriter out) {
         out.println();
-        out.line("@%s", out.add(Override.class));
+        out.line("@%s", Override.class);
     }
 
     private static void writeEnumCreator(CodePrintWriter out, Cls cls) {
@@ -326,16 +328,16 @@ public final class SchemasCodeWriter {
         if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
             out.line("this.value = value;");
         } else {
-            out.line("this.value = %s.checkNotNull(value, \"value\");", out.add(Preconditions.class));
+            out.line("this.value = %s.checkNotNull(value, \"value\");", Preconditions.class);
         }
         out.closeParen();
     }
 
     private static void writeOneOfAnyOfNonDiscriminatedObjectConstructor(CodePrintWriter out, Cls cls) {
         out.println();
-        out.line("@%s", out.add(JsonCreator.class));
-        out.line("private %s(%s value) {", cls.simpleName(), out.add(Object.class));
-        out.line("this.value = %s.checkNotNull(value, \"value\");", out.add(Preconditions.class));
+        out.line("@%s", JsonCreator.class);
+        out.line("private %s(%s value) {", cls.simpleName(), Object.class);
+        out.line("this.value = %s.checkNotNull(value, \"value\");", Preconditions.class);
         out.closeParen();
     }
 
@@ -349,15 +351,21 @@ public final class SchemasCodeWriter {
                 out.println();
             }
             first.value = false;
-            if (cls.classType == ClassType.ALL_OF) {
-                out.line("@%s", out.add(JsonUnwrapped.class));
+            if (f.isMap) {
+                out.line("@%s", JsonAnyGetter.class);
+                out.line("@%s", JsonAnySetter.class);
+            } else if (cls.classType == ClassType.ALL_OF) {
+                out.line("@%s", JsonUnwrapped.class);
             } else if (cls.unwrapSingleField()) {
                 writeJsonValueAnnotation(out);
             } else {
-                out.line("@%s(\"%s\")", out.add(JsonProperty.class), f.name);
+                out.line("@%s(\"%s\")", JsonProperty.class, f.name);
             }
             final String fieldType;
-            if (f.encoding == Encoding.OCTET) {
+            if (f.isMap) {
+                fieldType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
+                        f.resolvedTypeNullable(out.imports()));
+            } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
             } else {
                 fieldType = f.resolvedTypeNullable(out.imports());
@@ -367,7 +375,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeJsonValueAnnotation(CodePrintWriter out) {
-        out.line("@%s", out.add(JsonValue.class));
+        out.line("@%s", JsonValue.class);
     }
 
     private static void writeConstructor(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces,
@@ -394,7 +402,7 @@ public final class SchemasCodeWriter {
 
         out.println();
         if (cls.classType != ClassType.ENUM) {
-            out.line("@%s", out.add(JsonCreator.class));
+            out.line("@%s", JsonCreator.class);
         }
         boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
@@ -483,7 +491,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void assignEncodedOctets(CodePrintWriter out, Cls cls, Field x) {
-        out.line("this.%s = %s.encodeOctets(%s);", x.fieldName(cls), out.add(Util.class), x.fieldName(cls));
+        out.line("this.%s = %s.encodeOctets(%s);", x.fieldName(cls), Util.class, x.fieldName(cls));
     }
 
     private static void assignOptionalField(CodePrintWriter out, Cls cls, Field x) {
@@ -569,7 +577,7 @@ public final class SchemasCodeWriter {
         }
         addOverrideAnnotation(out);
         out.line("public int hashCode() {");
-        out.line("return %s.hash(%s);", out.add(Objects.class), s);
+        out.line("return %s.hash(%s);", Objects.class, s);
         out.closeParen();
     }
 
@@ -587,7 +595,7 @@ public final class SchemasCodeWriter {
         }
         addOverrideAnnotation(out);
         out.line("public String toString() {");
-        out.line("return %s.toString(%s.class%s);", out.add(Util.class), cls.simpleName(), s);
+        out.line("return %s.toString(%s.class%s);", Util.class, cls.simpleName(), s);
         out.closeParen();
     }
 
