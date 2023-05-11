@@ -31,7 +31,11 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 using Jacks
 * json only (xml not supported)
 
 ## Usage
-As much as possible make sure you put your types in the components/schemas section of your openapi yaml/json file (use $ref!). Don't use anonymous types, it makes for an ugly experience with generated code. 
+
+## General advice
+* As much as possible make sure you put your types in the `#/components/schemas` section of your openapi yaml/json file (use $ref!). The same goes for responses, pathItems, and anything else that can be referred to with a ref. Don't use anonymous types, it makes for an ugly experience with generated code.
+* Specify `format: int32` on integers to ensure you end up with `int/integer` types in generated code
+* Be sure to specify required properties
 
 ## Generated code examples
 Some examples follow. Note the following:
@@ -52,14 +56,20 @@ Note that discriminators are constants that the user does not set (in fact, cann
 [Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
 
 ## Validation
+Enabled/disabled by setting a new `Globals.config`.
 
 ## Logging
+`slf4j` is used for logging. Add the implementation of your choice. 
 
 ## Interceptors
+Interceptors are specified in a client builder and allow the modification (method, url, headers) of all requests. An obvious application for an interceptor is authentication where you can 
+add a Bearer token to every request. 
 
 ## Authentication
+Set an interceptor in the client builder to an instance of `BearerAuthenticator` or `BasicAuthenticator` or do your own thing entirely.
 
 ## HTTP Patch 
+Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. This library makes PATCH calls as POST calls with an TODO header which is understood by most web servers.
 
 ### Mixed usage with *openapi-generator*
 See [this](https://github.com/davidmoten/openapi-codegen/wiki/openapi-generator#mixed-usage-with-openapi-generator).
