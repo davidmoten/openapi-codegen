@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
@@ -13,6 +15,8 @@ import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -326,6 +330,20 @@ public class SerializationTest {
     }
 
     @Test
+    public void testWithMap() throws JsonProcessingException {
+        WithMap a = new WithMap();
+        a.map = new HashMap<>();
+        a.map.put("nickname", "fred");
+        a.map.put("suburb", "crace");
+        a.name = "alf";
+        String json = m.writeValueAsString(a);
+        WithMap b = m.readValue(json, WithMap.class);
+        assertEquals("alf", b.name);
+        assertEquals("fred", b.map.get("nickname"));
+        assertEquals("crace", b.map.get("suburb"));
+    }
+
+    @Test
     public void testAllOf() throws JsonMappingException, JsonProcessingException {
         String json = "{\"firstName\":\"Dave\",\"numBikes\":3,\"common\":\"abc\"}";
         ObjectMapper mapper = m.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -383,5 +401,15 @@ public class SerializationTest {
     public static final class HasBikes {
         public int numBikes;
         public String common;
+    }
+
+    public static final class WithMap {
+
+        @JsonProperty("name")
+        public String name;
+
+        @JsonAnyGetter
+        @JsonAnySetter
+        public Map<String, String> map;
     }
 }
