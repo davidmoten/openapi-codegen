@@ -11,6 +11,8 @@ import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.runtime.MapBuilder;
+import org.davidmoten.oa3.codegen.runtime.Preconditions;
 
 public class BuilderWriter {
 
@@ -99,6 +101,23 @@ public class BuilderWriter {
             }
             String builderField = inFirstBuilder ? "" : ".b";
             out.println();
+            if (f.isMap) {
+                out.line("public %s<%s, %s> add(%s key, %s value) {", MapBuilder.class, out.add(f.fullClassName),
+                        nextBuilderName, String.class, out.add(f.fullClassName));
+                out.line("%s.checkNotNull(value, \"value\");", Preconditions.class);
+                out.line("return new %s<%s, %s>(new %s(this%s), x -> this%s.%s = x).add(key, value);", MapBuilder.class,
+                        out.add(f.fullClassName), nextBuilderName, nextBuilderName, builderField, builderField,
+                        f.fieldName);
+                out.closeParen();
+                out.println();
+                out.line("public %s<%s, %s> addAll(%s<%s, %s> map) {", MapBuilder.class, out.add(f.fullClassName),
+                        nextBuilderName, Map.class, String.class, out.add(f.fullClassName));
+                out.line("return new %s<%s, %s>(new %s(this%s), x -> this%s.%s = x).addAll(map);", MapBuilder.class,
+                        out.add(f.fullClassName), nextBuilderName, nextBuilderName, builderField, builderField,
+                        f.fieldName);
+                out.closeParen();
+                out.println();
+            }
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
             if (f.required) {
