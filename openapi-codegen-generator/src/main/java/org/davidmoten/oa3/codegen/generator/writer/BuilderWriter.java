@@ -123,7 +123,7 @@ public class BuilderWriter {
             } else {
                 out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
             }
-            if (f.required || f.isMap) {
+            if (f.required) {
                 out.line("return new %s(this%s);", nextBuilderName, builderField);
             } else {
                 out.line("return this;");
