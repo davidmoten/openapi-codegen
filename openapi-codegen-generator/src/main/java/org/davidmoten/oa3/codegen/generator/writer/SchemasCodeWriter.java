@@ -308,7 +308,7 @@ public final class SchemasCodeWriter {
     private static void writeAllOfBuilder(CodePrintWriter out, Cls cls) {
         List<BuilderWriter.Field> fields = //
                 cls.fields.stream() //
-                        .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray, f.isMap)) //
+                        .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required, f.isArray, f.isMap)) //
                         .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -501,7 +501,7 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = cls.fields //
                 .stream() //
                 .filter(x -> !isDiscriminator(interfaces, x)) //
-                .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray, f.isMap))
+                .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required, f.isArray, f.isMap))
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }

@@ -28,7 +28,7 @@ public class PetStoreService implements Service {
 
     @Override
     public PetsGet200Response petsGet(Optional<List<String>> tags, int limit) throws ServiceException {
-        return PetsGet200Response.petsGet200ResponseItem(pets);
+        return PetsGet200Response.value(pets);
     }
 
     @Override
