@@ -129,25 +129,32 @@ public class Generator {
         }
 
         public String fieldName(Field f) {
-            if (unwrapSingleField()) {
+            if (f.isMap) {
+                // if another field exists with the name `map` then put an underscore after this
+                // one
+                return fields.stream().filter(x -> !x.isMap && x.fieldName.equalsIgnoreCase("map")).findAny()
+                        .map(x -> "map_").orElse("map");
+            } else if (unwrapSingleField()) {
                 return "value";
             } else {
                 return f.fieldName;
             }
         }
 
-        void addField(String fullType, String name, String fieldName, boolean required, boolean isArray) {
+        void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
+                boolean isMap) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
                     Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false,
-                    false, Encoding.DEFAULT));
+                    false, Encoding.DEFAULT, isMap));
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
-                Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding) {
+                Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
+                boolean isMap) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, minItems, maxItems, minLength, maxLength,
-                    pattern, min, max, exclusiveMin, exclusiveMax, encoding));
+                    pattern, min, max, exclusiveMin, exclusiveMax, encoding, isMap));
         }
 
         public String pkg() {
@@ -225,11 +232,13 @@ public class Generator {
         public final boolean exclusiveMax;
         public final Optional<Integer> minItems;
         public final Optional<Integer> maxItems;
+        public final boolean isMap;
 
         Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
-                Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding) {
+                Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
+                boolean isMap) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
@@ -245,6 +254,7 @@ public class Generator {
             this.encoding = encoding;
             this.min = min;
             this.max = max;
+            this.isMap = isMap;
         }
 
         public String fieldName(Cls cls) {
@@ -257,6 +267,10 @@ public class Generator {
 
         public String resolvedTypeNullable(Imports imports) {
             return Generator.resolvedTypeNullable(this, imports);
+        }
+
+        public String resolvedTypeMap(Imports imports) {
+            return Generator.resolvedMapType(this, imports);
         }
 
         public boolean isPrimitive() {
@@ -312,8 +326,7 @@ public class Generator {
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
-                            previous.get().classType == ClassType.ARRAY_WRAPPER));
-
+                            previous.get().classType == ClassType.ARRAY_WRAPPER, isMap(schemaPath)));
                 } else {
                     cls.fullClassName = names.schemaNameToFullClassName(cls.category, last.name);
                 }
@@ -384,7 +397,8 @@ public class Generator {
                     boolean exclusiveMin = orElse(schema.getExclusiveMinimum(), false);
                     boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
-                            minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding);
+                            minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding,
+                            isMap(schemaPath));
                 } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
@@ -393,7 +407,7 @@ public class Generator {
                     // TODO pick up other constraints
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                            false, false, Encoding.DEFAULT);
+                            false, false, Encoding.DEFAULT, isMap(schemaPath));
                 } else {
                     throw new RuntimeException("unexpected schema: " + schema);
                 }
@@ -447,7 +461,8 @@ public class Generator {
         cls.classType = ClassType.CLASS;
         cls.hasProperties = Util.isObject(schema);
         boolean required = fieldIsRequired(schemaPath);
-        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
+        previous.ifPresent(
+                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, isMap(schemaPath)));
     }
 
     public enum Encoding {
@@ -464,7 +479,17 @@ public class Generator {
             return Util.isPrimitive(last.schema) || Util.isRef(last.schema) || Util.isArray(last.schema);
         } else {
             return contains(schemaPath.secondLast().schema.getRequired(), last.name)
-                    || Util.isAllOf(schemaPath.secondLast().schema) || Util.isArray(schemaPath.secondLast().schema);
+                    || Util.isAllOf(schemaPath.secondLast().schema) || Util.isArray(schemaPath.secondLast().schema)
+                    // or is additional properties schema
+                    || isMap(schemaPath);
+        }
+    }
+
+    private static boolean isMap(ImmutableList<SchemaWithName> schemaPath) {
+        if (schemaPath.size() <= 1) {
+            return false;
+        } else {
+            return schemaPath.secondLast().schema.getAdditionalProperties() == schemaPath.last().schema;
         }
     }
 
@@ -494,7 +519,8 @@ public class Generator {
             cls.classType = ClassType.ALL_OF;
         }
         boolean required = fieldIsRequired(schemaPath);
-        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray));
+        previous.ifPresent(
+                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, isMap(schemaPath)));
     }
 
     private static PolymorphicType polymorphicType(Schema<?> schema) {
@@ -546,10 +572,10 @@ public class Generator {
                 used.add(o.toString());
             }
         }
-        cls.addField(cls.enumFullType, "value", "value", true, false);
+        cls.addField(cls.enumFullType, "value", "value", true, false, isMap(schemaPath));
         boolean required = fieldIsRequired(schemaPath);
-        previous.ifPresent(
-                p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required, isArray));
+        previous.ifPresent(p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required,
+                isArray, isMap(schemaPath)));
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
@@ -575,6 +601,18 @@ public class Generator {
         } else {
             return String.format("%s<%s>", imports.add(List.class), imports.add(fullClassName));
         }
+    }
+
+    private static String resolvedMapType(Field f, Imports imports) {
+        final String t;
+        if (f.isOctets()) {
+            t = "byte[]";
+        } else if (f.isArray) {
+            t = toList(f.fullClassName, imports, false);
+        } else {
+            t = imports.add(f.fullClassName);
+        }
+        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
     }
 
     private static String resolvedType(Field f, Imports imports) {

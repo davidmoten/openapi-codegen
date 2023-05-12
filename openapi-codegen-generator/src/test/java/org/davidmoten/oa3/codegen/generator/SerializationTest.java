@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
@@ -13,6 +16,8 @@ import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -29,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -326,6 +332,25 @@ public class SerializationTest {
     }
 
     @Test
+    public void testWithMap() throws JsonProcessingException {
+        Map<String, String> map = new HashMap<>();
+        map.put("nickname", "fred");
+        map.put("suburb", "crace");
+        WithMap a = new WithMap("alf", map);
+        String json = m.writeValueAsString(a);
+        JsonNode tree = m.readTree(json);
+
+        // ensure that map entries are top-level properties
+        assertEquals("alf", tree.get("name").asText());
+        assertEquals("fred", tree.get("nickname").asText());
+
+        WithMap b = m.readValue(json, WithMap.class);
+        assertEquals("alf", b.name);
+        assertEquals("fred", b.map.get("nickname"));
+        assertEquals("crace", b.map.get("suburb"));
+    }
+
+    @Test
     public void testAllOf() throws JsonMappingException, JsonProcessingException {
         String json = "{\"firstName\":\"Dave\",\"numBikes\":3,\"common\":\"abc\"}";
         ObjectMapper mapper = m.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -383,5 +408,40 @@ public class SerializationTest {
     public static final class HasBikes {
         public int numBikes;
         public String common;
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    public static final class WithMap {
+
+        @JsonProperty("name")
+        private String name;
+
+        @JsonAnyGetter
+        private Map<String, String> map;
+
+        @JsonCreator
+        public WithMap(@JsonProperty("name") String name) {
+            this.name = name;
+            this.map = new HashMap<>();
+        }
+        
+        public WithMap(String name, Map<String, String> map) {
+            this.name = name;
+            this.map = map;
+        }
+        
+        @JsonAnySetter
+        private void put(String key, String value) {
+            map.put(key, value);
+        }
+        
+        public String name() {
+            return name;
+        }
+
+        public Map<String, String> map() {
+            return Collections.unmodifiableMap(map);
+        }
     }
 }

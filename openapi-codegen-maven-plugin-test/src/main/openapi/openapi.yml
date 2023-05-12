@@ -1573,6 +1573,16 @@ components:
           format: int32
       required: [single]
           
-        
+    AdditionalProperties:
+      type: object
+      properties:
+        name:
+          type: string
+        age:
+          type: integer
+          format: int32
+      additionalProperties:
+        type: integer
+        minimum: 0        
 
                 

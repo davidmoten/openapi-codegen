@@ -4,6 +4,7 @@ import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +32,8 @@ import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -121,7 +124,7 @@ public final class SchemasCodeWriter {
 
     private static void addOverrideAnnotation(CodePrintWriter out) {
         out.println();
-        out.line("@%s", out.add(Override.class));
+        out.line("@%s", Override.class);
     }
 
     private static void writeEnumCreator(CodePrintWriter out, Cls cls) {
@@ -222,8 +225,8 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeAutoDetectAnnotation(CodePrintWriter out) {
-        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)", JsonAutoDetect.class, Visibility.class,
-                Visibility.class);
+        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY, setterVisibility = %s.ANY)",
+                JsonAutoDetect.class, Visibility.class, Visibility.class, Visibility.class);
     }
 
     private static void writeEnumMembers(CodePrintWriter out, Cls cls) {
@@ -305,7 +308,8 @@ public final class SchemasCodeWriter {
     private static void writeAllOfBuilder(CodePrintWriter out, Cls cls) {
         List<BuilderWriter.Field> fields = //
                 cls.fields.stream() //
-                        .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray)) //
+                        .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required, f.isArray,
+                                f.isMap)) //
                         .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -326,16 +330,16 @@ public final class SchemasCodeWriter {
         if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
             out.line("this.value = value;");
         } else {
-            out.line("this.value = %s.checkNotNull(value, \"value\");", out.add(Preconditions.class));
+            out.line("this.value = %s.checkNotNull(value, \"value\");", Preconditions.class);
         }
         out.closeParen();
     }
 
     private static void writeOneOfAnyOfNonDiscriminatedObjectConstructor(CodePrintWriter out, Cls cls) {
         out.println();
-        out.line("@%s", out.add(JsonCreator.class));
-        out.line("private %s(%s value) {", cls.simpleName(), out.add(Object.class));
-        out.line("this.value = %s.checkNotNull(value, \"value\");", out.add(Preconditions.class));
+        out.line("@%s", JsonCreator.class);
+        out.line("private %s(%s value) {", cls.simpleName(), Object.class);
+        out.line("this.value = %s.checkNotNull(value, \"value\");", Preconditions.class);
         out.closeParen();
     }
 
@@ -349,15 +353,20 @@ public final class SchemasCodeWriter {
                 out.println();
             }
             first.value = false;
-            if (cls.classType == ClassType.ALL_OF) {
-                out.line("@%s", out.add(JsonUnwrapped.class));
+            if (f.isMap) {
+                out.line("@%s", JsonAnyGetter.class);
+                out.line("@%s", JsonAnySetter.class);
+            } else if (cls.classType == ClassType.ALL_OF) {
+                out.line("@%s", JsonUnwrapped.class);
             } else if (cls.unwrapSingleField()) {
                 writeJsonValueAnnotation(out);
             } else {
-                out.line("@%s(\"%s\")", out.add(JsonProperty.class), f.name);
+                out.line("@%s(\"%s\")", JsonProperty.class, f.name);
             }
             final String fieldType;
-            if (f.encoding == Encoding.OCTET) {
+            if (f.isMap) {
+                fieldType = f.resolvedTypeMap(out.imports());
+            } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
             } else {
                 fieldType = f.resolvedTypeNullable(out.imports());
@@ -367,7 +376,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeJsonValueAnnotation(CodePrintWriter out) {
-        out.line("@%s", out.add(JsonValue.class));
+        out.line("@%s", JsonValue.class);
     }
 
     private static void writeConstructor(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces,
@@ -384,17 +393,19 @@ public final class SchemasCodeWriter {
             parametersNullable = cls.fields.stream().map(x -> String.format("\n%s%s %s", out.indent(),
                     x.resolvedTypeNullable(out.imports()), x.fieldName(cls))).collect(Collectors.joining(","));
         } else {
-            parametersNullable = cls.fields
-                    .stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class),
-                            x.name, x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
+            parametersNullable = cls.fields.stream() //
+                    .filter(x -> !x.isMap) //
+                    .map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
+                            x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
         }
         out.left().left();
+
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
 
         out.println();
         if (cls.classType != ClassType.ENUM) {
-            out.line("@%s", out.add(JsonCreator.class));
+            out.line("@%s", JsonCreator.class);
         }
         boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
@@ -408,17 +419,24 @@ public final class SchemasCodeWriter {
             addConstructorBindingAnnotation(out, names);
         }
         out.line("%s %s(%s) {", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
+
         ifValidate(cls, out, names, //
-                out2 -> cls.fields.stream().forEach(x -> {
-                    if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                        checkNotNull(cls, out2, x);
-                    }
-                    validateMore(out2, cls, x);
-                }));
+                out2 -> cls.fields.stream() //
+                        .filter(x -> !x.isMap) //
+                        .forEach(x -> {
+                            if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
+                                checkNotNull(cls, out2, x);
+                            }
+                            validateMore(out2, cls, x);
+                        }));
 
         // assign
         cls.fields.stream().forEach(x -> {
-            assignField(out, cls, x);
+            if (x.isMap) {
+                out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
+            } else {
+                assignField(out, cls, x);
+            }
         });
         out.closeParen();
         if (hasOptional || !interfaces.isEmpty() || hasBinary) {
@@ -427,7 +445,10 @@ public final class SchemasCodeWriter {
                     .stream() //
                     // ignore discriminators that should be constants
                     .filter(x -> !isDiscriminator(interfaces, x)) //
-                    .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()), x.fieldName(cls))) //
+                    .map(x -> {
+                        String t = x.isMap ? x.resolvedTypeMap(out.imports()) : x.resolvedType(out.imports());
+                        return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
+                    }) //
                     .collect(Collectors.joining(","));
             out.left().left();
             out.println();
@@ -435,32 +456,40 @@ public final class SchemasCodeWriter {
             out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersOptional);
             // validate
             ifValidate(cls, out, names, //
-                    out2 -> cls.fields.stream().forEach(x -> {
-                        if (!isDiscriminator(interfaces, x) && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
-                            checkNotNull(cls, out2, x);
-                            validateMore(out2, cls, x);
-                        }
-                    }));
+                    out2 -> cls.fields.stream() //
+                            .filter(x -> !x.isMap) //
+                            .forEach(x -> {
+                                if (!isDiscriminator(interfaces, x)
+                                        && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
+                                    checkNotNull(cls, out2, x);
+                                    validateMore(out2, cls, x);
+                                }
+                            }));
 
             // assign
-            cls.fields.stream().forEach(x -> {
-                Optional<Discriminator> disc = discriminator(interfaces, x);
-                if (disc.isPresent()) {
-                    // write constant value for discriminator
-                    out.line("this.%s = \"%s\";", x.fieldName(cls),
-                            disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
-                } else if (!x.isPrimitive() && !x.isByteArray()) {
-                    if (x.required) {
-                        assignField(out, cls, x);
-                    } else {
-                        assignOptionalField(out, cls, x);
-                    }
-                } else if (x.isOctets()) {
-                    assignEncodedOctets(out, cls, x);
-                } else {
-                    assignField(out, cls, x);
-                }
-            });
+            cls.fields.stream() //
+                    .forEach(x -> {
+                        if (x.isMap) {
+                            out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                            return;
+                        }
+                        Optional<Discriminator> disc = discriminator(interfaces, x);
+                        if (disc.isPresent()) {
+                            // write constant value for discriminator
+                            out.line("this.%s = \"%s\";", x.fieldName(cls),
+                                    disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
+                        } else if (!x.isPrimitive() && !x.isByteArray()) {
+                            if (x.required) {
+                                assignField(out, cls, x);
+                            } else {
+                                assignOptionalField(out, cls, x);
+                            }
+                        } else if (x.isOctets()) {
+                            assignEncodedOctets(out, cls, x);
+                        } else {
+                            assignField(out, cls, x);
+                        }
+                    });
             out.closeParen();
         }
     }
@@ -473,7 +502,8 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = cls.fields //
                 .stream() //
                 .filter(x -> !isDiscriminator(interfaces, x)) //
-                .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray))
+                .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required && !f.isMap, f.isArray,
+                        f.isMap))
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -483,7 +513,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void assignEncodedOctets(CodePrintWriter out, Cls cls, Field x) {
-        out.line("this.%s = %s.encodeOctets(%s);", x.fieldName(cls), out.add(Util.class), x.fieldName(cls));
+        out.line("this.%s = %s.encodeOctets(%s);", x.fieldName(cls), Util.class, x.fieldName(cls));
     }
 
     private static void assignOptionalField(CodePrintWriter out, Cls cls, Field x) {
@@ -569,7 +599,7 @@ public final class SchemasCodeWriter {
         }
         addOverrideAnnotation(out);
         out.line("public int hashCode() {");
-        out.line("return %s.hash(%s);", out.add(Objects.class), s);
+        out.line("return %s.hash(%s);", Objects.class, s);
         out.closeParen();
     }
 
@@ -587,7 +617,7 @@ public final class SchemasCodeWriter {
         }
         addOverrideAnnotation(out);
         out.line("public String toString() {");
-        out.line("return %s.toString(%s.class%s);", out.add(Util.class), cls.simpleName(), s);
+        out.line("return %s.toString(%s.class%s);", Util.class, cls.simpleName(), s);
         out.closeParen();
     }
 
@@ -616,21 +646,35 @@ public final class SchemasCodeWriter {
     private static void writeGetters(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
-            if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
-                addOverrideAnnotation(out);
-            } else {
+            if (f.isMap) {
+                writeJsonAnySetter(out, cls, f);
                 out.println();
-            }
-            final String value;
-            if (!f.isOctets() && !f.required) {
-                value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
-            } else if (f.isOctets()) {
-                value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
+                writeGetter(out, f.resolvedTypeMap(out.imports()), f.fieldName(cls), f.fieldName(cls));
             } else {
-                value = f.fieldName(cls);
+                if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
+                    addOverrideAnnotation(out);
+                } else {
+                    out.println();
+                }
+                final String value;
+                if (!f.isOctets() && !f.required) {
+                    value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
+                } else if (f.isOctets()) {
+                    value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
+                } else {
+                    value = f.fieldName(cls);
+                }
+                writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
             }
-            writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
         });
+    }
+
+    private static void writeJsonAnySetter(CodePrintWriter out, Cls cls, Field f) {
+        out.println();
+        out.line("@%s", JsonAnySetter.class);
+        out.line("private void put(%s key, %s value) {", String.class, out.add(f.fullClassName));
+        out.line("this.%s.put(key, value);", f.fieldName(cls));
+        out.closeParen();
     }
 
     private static void writeGetter(CodePrintWriter out, String returnImportedType, String fieldName, String value) {
