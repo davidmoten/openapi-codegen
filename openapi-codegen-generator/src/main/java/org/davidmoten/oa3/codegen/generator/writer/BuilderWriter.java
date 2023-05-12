@@ -105,34 +105,32 @@ public class BuilderWriter {
                 out.line("public %s<%s, %s> add(%s key, %s value) {", MapBuilder.class, out.add(f.fullClassName),
                         nextBuilderName, String.class, out.add(f.fullClassName));
                 out.line("%s.checkNotNull(value, \"value\");", Preconditions.class);
-                out.line("return new %s<%s, %s>(new %s(this%s), x -> this%s.%s = x).add(key, value);", MapBuilder.class,
-                        out.add(f.fullClassName), nextBuilderName, nextBuilderName, builderField, builderField,
-                        f.fieldName);
+                out.line("return new %s<%s, %s>(this, x -> this%s.%s = x).add(key, value);", MapBuilder.class,
+                        out.add(f.fullClassName), nextBuilderName, builderField, f.fieldName);
                 out.closeParen();
                 out.println();
                 out.line("public %s<%s, %s> addAll(%s<%s, %s> map) {", MapBuilder.class, out.add(f.fullClassName),
                         nextBuilderName, Map.class, String.class, out.add(f.fullClassName));
-                out.line("return new %s<%s, %s>(new %s(this%s), x -> this%s.%s = x).addAll(map);", MapBuilder.class,
-                        out.add(f.fullClassName), nextBuilderName, nextBuilderName, builderField, builderField,
-                        f.fieldName);
+                out.line("return new %s<%s, %s>(this, x -> this%s.%s = x).addAll(map);", MapBuilder.class,
+                        out.add(f.fullClassName), nextBuilderName, builderField, f.fieldName);
                 out.closeParen();
                 out.println();
             }
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
-            if (f.required) {
+            if (f.required || f.isMap) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else {
                 out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
             }
-            if (f.required) {
+            if (f.required || f.isMap) {
                 out.line("return new %s(this%s);", nextBuilderName, builderField);
             } else {
                 out.line("return this;");
             }
             out.closeParen();
 
-            if (!f.required) {
+            if (!f.required && !f.isMap) {
                 out.println();
                 out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, out.imports()),
                         f.fieldName);
