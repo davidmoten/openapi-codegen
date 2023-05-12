@@ -130,7 +130,10 @@ public class Generator {
 
         public String fieldName(Field f) {
             if (f.isMap) {
-                return "map";
+                // if another field exists with the name `map` then put an underscore after this
+                // one
+                return fields.stream().filter(x -> !x.isMap && x.fieldName.equalsIgnoreCase("map")).findAny()
+                        .map(x -> "map_").orElse("map");
             } else if (unwrapSingleField()) {
                 return "value";
             } else {
@@ -265,7 +268,7 @@ public class Generator {
         public String resolvedTypeNullable(Imports imports) {
             return Generator.resolvedTypeNullable(this, imports);
         }
-        
+
         public String resolvedTypeMap(Imports imports) {
             return Generator.resolvedMapType(this, imports);
         }
@@ -605,7 +608,7 @@ public class Generator {
         if (f.isOctets()) {
             t = "byte[]";
         } else if (f.isArray) {
-            t =  toList(f.fullClassName, imports, false);
+            t = toList(f.fullClassName, imports, false);
         } else {
             t = imports.add(f.fullClassName);
         }
