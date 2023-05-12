@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
+import org.davidmoten.oa3.codegen.test.main.schema.AdditionalProperties;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty.Counts;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfComplexType;
@@ -90,6 +91,7 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.github.davidmoten.guavamini.Lists;
@@ -756,6 +758,28 @@ public class SchemasTest {
     public void testBuilderNotOptionalPrimitive() throws NoSuchMethodException, SecurityException {
         SingleNotOptional.class.getMethod("single", int.class);
         assertEquals(1, SingleNotOptional.single(1).single());
+    }
+
+    @Test
+    public void testAdditionalProperties() throws JsonProcessingException {
+        AdditionalProperties a = AdditionalProperties.builder() //
+                .add("hello", 1L) //
+                .add("there", 23L) //
+                .buildMap() //
+                .age(21) //
+                .name("fred") //
+                .build();
+        String json = m.writeValueAsString(a);
+        JsonNode tree = m.readTree(json);
+        assertEquals("fred", tree.get("name").asText());
+        assertEquals(21, tree.get("age").asInt());
+        assertEquals(1L, a.map().get("hello"));
+        assertEquals(23L, a.map().get("there"));
+        AdditionalProperties b = m.readValue(json, AdditionalProperties.class);
+        assertEquals("fred", b.name().get());
+        assertEquals(21, b.age().get());
+        assertEquals(1L, b.map().get("hello"));
+        assertEquals(23L, b.map().get("there"));
     }
 
     private static void onePublicConstructor(Class<?> c) {
