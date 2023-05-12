@@ -435,6 +435,10 @@ public class SerializationTest {
         private void put(String key, String value) {
             map.put(key, value);
         }
+        
+        public String name() {
+            return name;
+        }
 
         public Map<String, String> map() {
             return Collections.unmodifiableMap(map);
