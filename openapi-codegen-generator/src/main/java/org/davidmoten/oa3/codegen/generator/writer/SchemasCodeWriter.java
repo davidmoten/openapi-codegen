@@ -363,8 +363,7 @@ public final class SchemasCodeWriter {
             }
             final String fieldType;
             if (f.isMap) {
-                fieldType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
-                        f.resolvedTypeMapValue(out.imports()));
+                fieldType = f.resolvedTypeMap(out.imports());
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
             } else {
@@ -392,10 +391,15 @@ public final class SchemasCodeWriter {
             parametersNullable = cls.fields.stream().map(x -> String.format("\n%s%s %s", out.indent(),
                     x.resolvedTypeNullable(out.imports()), x.fieldName(cls))).collect(Collectors.joining(","));
         } else {
-            parametersNullable = cls.fields
-                    .stream().map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class),
-                            x.name, x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
-                    .collect(Collectors.joining(","));
+            parametersNullable = cls.fields.stream().map(x -> {
+                if (x.isMap) {
+                    return String.format("\n%s@%s @%s %s %s", out.indent(), out.add(JsonAnyGetter.class),
+                            out.add(JsonAnySetter.class), x.resolvedTypeMap(out.imports()), x.fieldName(cls));
+                } else {
+                    return String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
+                            x.resolvedTypeNullable(out.imports()), x.fieldName(cls));
+                }
+            }).collect(Collectors.joining(","));
         }
         out.left().left();
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());

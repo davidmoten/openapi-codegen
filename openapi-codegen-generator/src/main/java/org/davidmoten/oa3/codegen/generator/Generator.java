@@ -266,8 +266,8 @@ public class Generator {
             return Generator.resolvedTypeNullable(this, imports);
         }
         
-        public String resolvedTypeMapValue(Imports imports) {
-            return Generator.resolvedMapValueType(this, imports);
+        public String resolvedTypeMap(Imports imports) {
+            return Generator.resolvedMapType(this, imports);
         }
 
         public boolean isPrimitive() {
@@ -600,14 +600,16 @@ public class Generator {
         }
     }
 
-    private static String resolvedMapValueType(Field f, Imports imports) {
+    private static String resolvedMapType(Field f, Imports imports) {
+        final String t;
         if (f.isOctets()) {
-            return "byte[]";
+            t = "byte[]";
         } else if (f.isArray) {
-            return toList(f.fullClassName, imports, false);
+            t =  toList(f.fullClassName, imports, false);
         } else {
-            return imports.add(f.fullClassName);
+            t = imports.add(f.fullClassName);
         }
+        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
     }
 
     private static String resolvedType(Field f, Imports imports) {
