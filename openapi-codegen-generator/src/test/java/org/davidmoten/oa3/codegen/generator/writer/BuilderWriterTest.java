@@ -14,10 +14,10 @@ public class BuilderWriterTest {
     @Test
     public void testMixed() throws FileNotFoundException {
         List<Field> fields = new ArrayList<>();
-        fields.add(new Field("firstName", String.class.getCanonicalName(), true, false));
-        fields.add(new Field("lastName", String.class.getCanonicalName(), true, true));
-        fields.add(new Field("mobile", String.class.getCanonicalName(), false, false));
-        fields.add(new Field("age", Integer.class.getCanonicalName(), false, false));
+        fields.add(new Field("firstName", String.class.getCanonicalName(), true, false, false));
+        fields.add(new Field("lastName", String.class.getCanonicalName(), true, true, false));
+        fields.add(new Field("mobile", String.class.getCanonicalName(), false, false, false));
+        fields.add(new Field("age", Integer.class.getCanonicalName(), false, false, false));
         try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Mixed.java"), "Mixed")) {
             BuilderWriter.write(writer, fields, "Thing");
         }
@@ -26,10 +26,10 @@ public class BuilderWriterTest {
     @Test
     public void testJustOptional() throws FileNotFoundException {
         List<Field> fields = new ArrayList<>();
-        fields.add(new Field("firstName", String.class.getCanonicalName(), false, false));
-        fields.add(new Field("lastName", String.class.getCanonicalName(), false, true));
-        fields.add(new Field("mobile", String.class.getCanonicalName(), false, false));
-        fields.add(new Field("age", Integer.class.getCanonicalName(), false, false));
+        fields.add(new Field("firstName", String.class.getCanonicalName(), false, false, false));
+        fields.add(new Field("lastName", String.class.getCanonicalName(), false, true, false));
+        fields.add(new Field("mobile", String.class.getCanonicalName(), false, false, false));
+        fields.add(new Field("age", Integer.class.getCanonicalName(), false, false, false));
         try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Optionals.java"), "Optionals")) {
             BuilderWriter.write(writer, fields, "Thing");
         }
@@ -38,10 +38,10 @@ public class BuilderWriterTest {
     @Test
     public void testJustRequired() throws FileNotFoundException {
         List<Field> fields = new ArrayList<>();
-        fields.add(new Field("firstName", String.class.getCanonicalName(), true, false));
-        fields.add(new Field("lastName", String.class.getCanonicalName(), true, true));
-        fields.add(new Field("mobile", String.class.getCanonicalName(), true, false));
-        fields.add(new Field("age", Integer.class.getCanonicalName(), true, false));
+        fields.add(new Field("firstName", String.class.getCanonicalName(), true, false, false));
+        fields.add(new Field("lastName", String.class.getCanonicalName(), true, true, false));
+        fields.add(new Field("mobile", String.class.getCanonicalName(), true, false, false));
+        fields.add(new Field("age", Integer.class.getCanonicalName(), true, false, false));
         try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Required.java"), "Required")) {
             BuilderWriter.write(writer, fields, "Thing");
         }
@@ -50,9 +50,22 @@ public class BuilderWriterTest {
     @Test
     public void testNameValue() throws FileNotFoundException {
         List<Field> fields = new ArrayList<>();
-        fields.add(new Field("name", String.class.getCanonicalName(), false, false));
-        fields.add(new Field("value", String.class.getCanonicalName(), true, false));
+        fields.add(new Field("name", String.class.getCanonicalName(), false, false, false));
+        fields.add(new Field("value", String.class.getCanonicalName(), true, false, false));
         try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/NameValue.java"), "NameValue")) {
+            BuilderWriter.write(writer, fields, "Thing");
+        }
+    }
+    
+    @Test
+    public void testMixedWithMap() throws FileNotFoundException {
+        List<Field> fields = new ArrayList<>();
+        fields.add(new Field("map", String.class.getCanonicalName(), true, false, true));
+        fields.add(new Field("firstName", String.class.getCanonicalName(), true, false, false));
+        fields.add(new Field("lastName", String.class.getCanonicalName(), true, true, false));
+        fields.add(new Field("mobile", String.class.getCanonicalName(), false, false, false));
+        fields.add(new Field("age", Integer.class.getCanonicalName(), false, false, false));
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/WithMap.java"), "Mixed")) {
             BuilderWriter.write(writer, fields, "Thing");
         }
     }

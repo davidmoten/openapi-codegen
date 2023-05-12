@@ -1,7 +1,9 @@
 package org.davidmoten.oa3.codegen.generator.writer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -17,14 +19,15 @@ public class BuilderWriter {
         private final String fullClassName;
         private final boolean required;
         private final boolean isArray;
+        private final boolean isMap;
 
-        public Field(String fieldName, String fullClassName, boolean required, boolean isArray) {
+        public Field(String fieldName, String fullClassName, boolean required, boolean isArray, boolean isMap) {
             this.fieldName = fieldName;
             this.fullClassName = fullClassName;
             this.required = required;
             this.isArray = isArray;
+            this.isMap = isMap;
         }
-
     }
 
     public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
@@ -75,7 +78,10 @@ public class BuilderWriter {
                             out.println();
                             first = false;
                         }
-                        if (fld.required) {
+                        if (fld.isMap) {
+                            out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
+                                    out.add(fld.fullClassName), fld.fieldName, HashMap.class);
+                        } else if (fld.required) {
                             if (fld.isArray) {
                                 out.line("private %s<%s> %s;", List.class, out.add(fld.fullClassName), fld.fieldName);
                             } else {
@@ -167,15 +173,24 @@ public class BuilderWriter {
     }
 
     private static String baseImportedType(Field f, Imports imports) {
-        if (f.isArray) {
+        if (f.isMap) {
+            return mapImportedType(f, imports);
+        } else if (f.isArray) {
             return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
         } else {
             return imports.add(Util.toPrimitive(f.fullClassName));
         }
     }
 
+    private static String mapImportedType(Field f, Imports imports) {
+        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                imports.add(f.fullClassName));
+    }
+
     private static String enhancedImportedType(Field f, Imports imports) {
-        if (f.isArray) {
+        if (f.isMap) {
+            return mapImportedType(f, imports);
+        } else if (f.isArray) {
             if (f.required) {
                 return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
             } else {

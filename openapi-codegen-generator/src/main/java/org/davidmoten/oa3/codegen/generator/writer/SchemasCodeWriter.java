@@ -225,8 +225,8 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeAutoDetectAnnotation(CodePrintWriter out) {
-        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY)", JsonAutoDetect.class, Visibility.class,
-                Visibility.class);
+        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY, setterVisibility = %s.ANY)", JsonAutoDetect.class, Visibility.class,
+                Visibility.class, Visibility.class);
     }
 
     private static void writeEnumMembers(CodePrintWriter out, Cls cls) {
@@ -308,7 +308,7 @@ public final class SchemasCodeWriter {
     private static void writeAllOfBuilder(CodePrintWriter out, Cls cls) {
         List<BuilderWriter.Field> fields = //
                 cls.fields.stream() //
-                        .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray)) //
+                        .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray, f.isMap)) //
                         .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -420,12 +420,14 @@ public final class SchemasCodeWriter {
         out.line("%s %s(%s) {", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
 
         ifValidate(cls, out, names, //
-                out2 -> cls.fields.stream().forEach(x -> {
-                    if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                        checkNotNull(cls, out2, x);
-                    }
-                    validateMore(out2, cls, x);
-                }));
+                out2 -> cls.fields.stream() //
+                        .filter(x -> !x.isMap) //
+                        .forEach(x -> {
+                            if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
+                                checkNotNull(cls, out2, x);
+                            }
+                            validateMore(out2, cls, x);
+                        }));
 
         // assign
         cls.fields.stream().forEach(x -> {
@@ -442,7 +444,10 @@ public final class SchemasCodeWriter {
                     .stream() //
                     // ignore discriminators that should be constants
                     .filter(x -> !isDiscriminator(interfaces, x)) //
-                    .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()), x.fieldName(cls))) //
+                    .map(x -> {
+                        String t = x.isMap ? x.resolvedTypeMap(out.imports()) : x.resolvedType(out.imports());
+                        return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
+                    }) //
                     .collect(Collectors.joining(","));
             out.left().left();
             out.println();
@@ -451,33 +456,39 @@ public final class SchemasCodeWriter {
             // validate
             ifValidate(cls, out, names, //
                     out2 -> cls.fields.stream() //
-                    .filter(x -> !x.isMap) //
-                    .forEach(x -> {
-                        if (!isDiscriminator(interfaces, x) && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
-                            checkNotNull(cls, out2, x);
-                            validateMore(out2, cls, x);
-                        }
-                    }));
+                            .filter(x -> !x.isMap) //
+                            .forEach(x -> {
+                                if (!isDiscriminator(interfaces, x)
+                                        && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
+                                    checkNotNull(cls, out2, x);
+                                    validateMore(out2, cls, x);
+                                }
+                            }));
 
             // assign
-            cls.fields.stream().forEach(x -> {
-                Optional<Discriminator> disc = discriminator(interfaces, x);
-                if (disc.isPresent()) {
-                    // write constant value for discriminator
-                    out.line("this.%s = \"%s\";", x.fieldName(cls),
-                            disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
-                } else if (!x.isPrimitive() && !x.isByteArray()) {
-                    if (x.required) {
-                        assignField(out, cls, x);
-                    } else {
-                        assignOptionalField(out, cls, x);
-                    }
-                } else if (x.isOctets()) {
-                    assignEncodedOctets(out, cls, x);
-                } else {
-                    assignField(out, cls, x);
-                }
-            });
+            cls.fields.stream() //
+                    .forEach(x -> {
+                        if (x.isMap) {
+                            out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                            return;
+                        }
+                        Optional<Discriminator> disc = discriminator(interfaces, x);
+                        if (disc.isPresent()) {
+                            // write constant value for discriminator
+                            out.line("this.%s = \"%s\";", x.fieldName(cls),
+                                    disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
+                        } else if (!x.isPrimitive() && !x.isByteArray()) {
+                            if (x.required) {
+                                assignField(out, cls, x);
+                            } else {
+                                assignOptionalField(out, cls, x);
+                            }
+                        } else if (x.isOctets()) {
+                            assignEncodedOctets(out, cls, x);
+                        } else {
+                            assignField(out, cls, x);
+                        }
+                    });
             out.closeParen();
         }
     }
@@ -490,7 +501,7 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = cls.fields //
                 .stream() //
                 .filter(x -> !isDiscriminator(interfaces, x)) //
-                .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray))
+                .map(f -> new BuilderWriter.Field(f.fieldName, f.fullClassName, f.required, f.isArray, f.isMap))
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -633,21 +644,35 @@ public final class SchemasCodeWriter {
     private static void writeGetters(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
-            if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
-                addOverrideAnnotation(out);
-            } else {
+            if (f.isMap) {
+                writeJsonAnySetter(out, cls, f);
                 out.println();
-            }
-            final String value;
-            if (!f.isOctets() && !f.required) {
-                value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
-            } else if (f.isOctets()) {
-                value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
+                writeGetter(out, f.resolvedTypeMap(out.imports()), f.fieldName(cls), f.fieldName(cls));
             } else {
-                value = f.fieldName(cls);
+                if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
+                    addOverrideAnnotation(out);
+                } else {
+                    out.println();
+                }
+                final String value;
+                if (!f.isOctets() && !f.required) {
+                    value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
+                } else if (f.isOctets()) {
+                    value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
+                } else {
+                    value = f.fieldName(cls);
+                }
+                writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
             }
-            writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
         });
+    }
+
+    private static void writeJsonAnySetter(CodePrintWriter out, Cls cls, Field f) {
+        out.println();
+        out.line("@%s", JsonAnySetter.class);
+        out.line("private void put(%s key, %s value) {", String.class, out.add(f.fullClassName));
+        out.line("this.%s.put(key, value);", f.fieldName(cls));
+        out.closeParen();
     }
 
     private static void writeGetter(CodePrintWriter out, String returnImportedType, String fieldName, String value) {
