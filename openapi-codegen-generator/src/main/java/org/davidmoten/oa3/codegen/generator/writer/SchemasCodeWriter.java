@@ -4,6 +4,7 @@ import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -391,17 +392,14 @@ public final class SchemasCodeWriter {
             parametersNullable = cls.fields.stream().map(x -> String.format("\n%s%s %s", out.indent(),
                     x.resolvedTypeNullable(out.imports()), x.fieldName(cls))).collect(Collectors.joining(","));
         } else {
-            parametersNullable = cls.fields.stream().map(x -> {
-                if (x.isMap) {
-                    return String.format("\n%s@%s @%s %s %s", out.indent(), out.add(JsonAnyGetter.class),
-                            out.add(JsonAnySetter.class), x.resolvedTypeMap(out.imports()), x.fieldName(cls));
-                } else {
-                    return String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
-                            x.resolvedTypeNullable(out.imports()), x.fieldName(cls));
-                }
-            }).collect(Collectors.joining(","));
+            parametersNullable = cls.fields.stream() //
+                    .filter(x -> !x.isMap) //
+                    .map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
+                            x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
+                    .collect(Collectors.joining(","));
         }
         out.left().left();
+
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
 
         out.println();
@@ -420,6 +418,7 @@ public final class SchemasCodeWriter {
             addConstructorBindingAnnotation(out, names);
         }
         out.line("%s %s(%s) {", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
+
         ifValidate(cls, out, names, //
                 out2 -> cls.fields.stream().forEach(x -> {
                     if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
@@ -430,7 +429,11 @@ public final class SchemasCodeWriter {
 
         // assign
         cls.fields.stream().forEach(x -> {
-            assignField(out, cls, x);
+            if (x.isMap) {
+                out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
+            } else {
+                assignField(out, cls, x);
+            }
         });
         out.closeParen();
         if (hasOptional || !interfaces.isEmpty() || hasBinary) {
@@ -447,7 +450,9 @@ public final class SchemasCodeWriter {
             out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersOptional);
             // validate
             ifValidate(cls, out, names, //
-                    out2 -> cls.fields.stream().forEach(x -> {
+                    out2 -> cls.fields.stream() //
+                    .filter(x -> !x.isMap) //
+                    .forEach(x -> {
                         if (!isDiscriminator(interfaces, x) && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
                             checkNotNull(cls, out2, x);
                             validateMore(out2, cls, x);
