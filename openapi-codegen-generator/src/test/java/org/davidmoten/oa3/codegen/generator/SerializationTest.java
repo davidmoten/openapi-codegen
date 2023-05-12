@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -331,12 +333,17 @@ public class SerializationTest {
 
     @Test
     public void testWithMap() throws JsonProcessingException {
-        WithMap a = new WithMap();
-        a.map = new HashMap<>();
-        a.map.put("nickname", "fred");
-        a.map.put("suburb", "crace");
-        a.name = "alf";
+        Map<String, String> map = new HashMap<>();
+        map.put("nickname", "fred");
+        map.put("suburb", "crace");
+        WithMap a = new WithMap("alf", map);
         String json = m.writeValueAsString(a);
+        JsonNode tree = m.readTree(json);
+
+        // ensure that map entries are top-level properties
+        assertEquals("alf", tree.get("name").asText());
+        assertEquals("fred", tree.get("nickname").asText());
+
         WithMap b = m.readValue(json, WithMap.class);
         assertEquals("alf", b.name);
         assertEquals("fred", b.map.get("nickname"));
@@ -403,13 +410,34 @@ public class SerializationTest {
         public String common;
     }
 
+    @JsonInclude(Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
     public static final class WithMap {
 
         @JsonProperty("name")
-        public String name;
+        private String name;
 
         @JsonAnyGetter
+        private Map<String, String> map;
+
+        @JsonCreator
+        public WithMap(@JsonProperty("name") String name) {
+            this.name = name;
+            this.map = new HashMap<>();
+        }
+        
+        public WithMap(String name, Map<String, String> map) {
+            this.name = name;
+            this.map = map;
+        }
+        
         @JsonAnySetter
-        public Map<String, String> map;
+        private void put(String key, String value) {
+            map.put(key, value);
+        }
+
+        public Map<String, String> map() {
+            return Collections.unmodifiableMap(map);
+        }
     }
 }
