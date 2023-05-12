@@ -364,7 +364,7 @@ public final class SchemasCodeWriter {
             final String fieldType;
             if (f.isMap) {
                 fieldType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
-                        f.resolvedTypeNullable(out.imports()));
+                        f.resolvedTypeMapValue(out.imports()));
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
             } else {

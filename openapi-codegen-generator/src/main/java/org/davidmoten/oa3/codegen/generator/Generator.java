@@ -265,6 +265,10 @@ public class Generator {
         public String resolvedTypeNullable(Imports imports) {
             return Generator.resolvedTypeNullable(this, imports);
         }
+        
+        public String resolvedTypeMapValue(Imports imports) {
+            return Generator.resolvedMapValueType(this, imports);
+        }
 
         public boolean isPrimitive() {
             return required && PRIMITIVE_CLASS_NAMES.contains(Util.toPrimitive(fullClassName));
@@ -593,6 +597,16 @@ public class Generator {
                     imports.add(fullClassName));
         } else {
             return String.format("%s<%s>", imports.add(List.class), imports.add(fullClassName));
+        }
+    }
+
+    private static String resolvedMapValueType(Field f, Imports imports) {
+        if (f.isOctets()) {
+            return "byte[]";
+        } else if (f.isArray) {
+            return toList(f.fullClassName, imports, false);
+        } else {
+            return imports.add(f.fullClassName);
         }
     }
 
