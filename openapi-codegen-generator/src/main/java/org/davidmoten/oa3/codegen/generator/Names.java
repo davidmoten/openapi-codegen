@@ -44,8 +44,12 @@ public final class Names {
 
     private final OpenAPI api;
 
+    private final ServerGeneratorType generatorType;
+
     Names(Definition definition) {
         this.definition = definition;
+        this.generatorType = definition.generator().map(x -> ServerGeneratorType.valueOf(x.toUpperCase(Locale.ENGLISH)))
+                .orElse(ServerGeneratorType.SPRING2);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         OpenAPIParser parser = new OpenAPIParser();
@@ -343,8 +347,9 @@ public final class Names {
     public ApiResponse lookupResponse(String ref) {
         return api.getComponents().getResponses().get(lastComponent(ref));
     }
-
-    public boolean generatorIsSpring3() {
-        return definition.generator().orElse("").equals("spring3");
+    
+    public ServerGeneratorType generatorType() {
+        return generatorType;
     }
+
 }

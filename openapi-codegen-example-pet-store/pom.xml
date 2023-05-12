@@ -106,7 +106,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring</generator>
+                            <generator>spring2</generator>
                             <basePackage>pet.store</basePackage>
                         </configuration>
                     </execution>
@@ -116,6 +116,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <generator>spring2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.generated.cts</basePackage>
                             <sources>
                                 <directory>${project.basedir}/src/main/openapi</directory>

@@ -103,7 +103,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring</generator>
+                            <generator>spring2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.main</basePackage>
                             <sources>
                                 <includes>
@@ -118,7 +118,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring</generator>
+                            <generator>spring2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.paths</basePackage>
                             <sources>
                                 <includes>
@@ -134,7 +134,7 @@
                         </goals>
                         <configuration>
                             <failOnParseErrors>false</failOnParseErrors>
-                            <generator>spring</generator>
+                            <generator>spring2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.library</basePackage>
                             <sources>
                                 <includes>
@@ -191,6 +191,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
+                                <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.maps</basePackage>
                                     <failOnParseErrors>false</failOnParseErrors>
                                     <sources>
@@ -207,7 +208,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring</generator>
+                                <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.cts</basePackage>
                                     <sources>
                                         <includes>
@@ -222,7 +223,6 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.ebay</basePackage>
                                     <sources>
                                         <includes>
@@ -237,7 +237,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring</generator>
+                                    <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.marqueta</basePackage>
                                     <sources>
                                         <includes>

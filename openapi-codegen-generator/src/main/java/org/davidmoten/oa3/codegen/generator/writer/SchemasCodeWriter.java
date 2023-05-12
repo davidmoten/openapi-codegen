@@ -20,6 +20,7 @@ import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.SchemaCategory;
+import org.davidmoten.oa3.codegen.generator.ServerGeneratorType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
@@ -212,7 +213,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
-        if (names.generatorIsSpring3()) {
+        if (names.generatorType() == ServerGeneratorType.SPRING3) {
             out.line("@%s", out
                     .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
         } else {
