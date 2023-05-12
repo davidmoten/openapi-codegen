@@ -92,10 +92,13 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * a LOT of bugs (3,500 open issues is an indicator)
 
 ## TODO
-* `additionalProperties` (Dictionary) support
+* ~~`additionalProperties` (Dictionary) support~~, done
 * generate javadoc for fields
 * `not` support
 * delegate constructors using `this(`
 * workaround JsonCreator not being able to pass `5` into a double argument, must be `5.0` (https://github.com/FasterXML/jackson-core/issues/532)
 * document limited support for parameter style with spring-boot rest
+* support form-style request bodies
+* support more parameter styles
+* support xml
 * write docs
