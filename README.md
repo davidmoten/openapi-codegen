@@ -90,8 +90,12 @@ Here's an example showing more configuration options:
                     </includes>
                 </sources>
                 <failOnParseErrors>false</failOnParseErrors>
-                <includeSchemas>Thing</includeSchemas>
-                <excludeSchemas>Error</excludeSchemas>
+                <includeSchemas>
+                    <includeSchema>Thing</includeSchema>
+                </includeSchemas>
+                <excludeSchemas>
+                    <excludeSchema>Error</excludeSchema>
+                </excludeSchemas>
                 <mapIntegerToBigInteger>false</mapIntegerToBigInteger>
                 <generator>spring2</generator>
                 <generateService>true</generateService>
