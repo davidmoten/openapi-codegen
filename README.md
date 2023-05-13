@@ -30,7 +30,46 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 using Jacks
 * parameter types like explode, label, deepObject not implemented yet
 * json only (xml not supported)
 
-## Usage
+## Getting started
+Add this to your pom.xml in the `build/plugins` section:
+```xml
+<plugin>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>openapi-codegen-maven-plugin</artifactId>
+    <version>VERSION_HERE</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <basePackage>pet.store</basePackage>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <version>3.4.0</version>
+    <executions>
+        <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+                <goal>add-source</goal>
+            </goals>
+            <configuration>
+                <sources>
+                    <source>${project.build.directory}/generated-sources/java</source>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+``` 
+We include *build-helper-maven-plugin* to help IDEs be aware that source generation is part of a Maven refresh in the IDE (for example in Eclipse **Maven - Update project** will run the codegen plugin and display the generated sources on the build path.  
+
 
 ## General advice
 * As much as possible make sure you put your types in the `#/components/schemas` section of your openapi yaml/json file (use $ref!). The same goes for responses, pathItems, and anything else that can be referred to with a ref. Don't use anonymous types, it makes for an ugly experience with generated code.
