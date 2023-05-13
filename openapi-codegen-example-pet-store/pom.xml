@@ -101,29 +101,11 @@
                 <version>${project.parent.version}</version>
                 <executions>
                     <execution>
-                        <id>unit-test</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring2</generator>
                             <basePackage>pet.store</basePackage>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cts</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <generator>spring2</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.test.generated.cts</basePackage>
-                            <sources>
-                                <directory>${project.basedir}/src/main/openapi</directory>
-                                <includes>
-                                    <include>cts.yml</include>
-                                </includes>
-                            </sources>
                         </configuration>
                     </execution>
                 </executions>
