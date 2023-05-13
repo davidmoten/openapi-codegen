@@ -36,9 +36,6 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "basePackage", defaultValue = "openapi.generated")
     private String basePackage;
 
-    @Parameter(name = "charset", defaultValue = "UTF-8")
-    private String charset;
-
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
