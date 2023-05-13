@@ -41,15 +41,15 @@ public class ClientCodeWriter {
         // add fields
         out.println();
         out.line("private final %s serializer;", Serializer.class);
-        out.line("private final %s interceptor;", Interceptor.class);
+        out.line("private final %s<%s> interceptors;", List.class, Interceptor.class);
         out.line("private final %s basePath;", String.class);
 
         // write constructor
         out.println();
-        out.line("private %s(%s serializer, %s interceptor, %s basePath) {", out.simpleClassName(),
-                Serializer.class, Interceptor.class, String.class);
+        out.line("private %s(%s serializer, %s<%s> interceptors, %s basePath) {", out.simpleClassName(),
+                Serializer.class, List.class, Interceptor.class, String.class);
         out.line("this.serializer = serializer;");
-        out.line("this.interceptor = interceptor;");
+        out.line("this.interceptors = interceptors;");
         out.line("this.basePath = basePath;");
         out.closeParen();
 
@@ -57,7 +57,7 @@ public class ClientCodeWriter {
         out.println();
         out.line("public static %s<%s> basePath(%s basePath) {", ClientBuilder.class,
                 out.simpleClassName(), String.class);
-        out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptor(), b.basePath()), %s.config(), basePath);",
+        out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptors(), b.basePath()), %s.config(), basePath);",
                 ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
         out.closeParen();
     }
@@ -110,7 +110,7 @@ public class ClientCodeWriter {
             out.line(".basePath(this.basePath)");
             out.line(".path(\"%s\")", m.path);
             out.line(".serializer(this.serializer)");
-            out.line(".interceptor(this.interceptor)");
+            out.line(".interceptors(this.interceptors)");
             out.line(".acceptApplicationJson()");
             m.parameters.forEach(p -> {
                 if (p.type == ParamType.QUERY) {

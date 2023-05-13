@@ -47,7 +47,7 @@ public final class Http {
         private final List<ParameterValue> values = new ArrayList<>();
         private final List<ResponseDescriptor> responseDescriptors = new ArrayList<>();
         private Serializer serializer;
-        private Interceptor interceptor = x -> x;
+        private List<Interceptor> interceptors = new ArrayList<>();
 
         Builder(HttpMethod method) {
             this.method = method;
@@ -67,7 +67,12 @@ public final class Http {
         }
 
         public Builder interceptor(Interceptor interceptor) {
-            this.interceptor = interceptor;
+            this.interceptors.add(interceptor);
+            return this;
+        }
+        
+        public Builder interceptors(Iterable<? extends Interceptor> list) {
+            interceptors.forEach(x -> interceptor(x));
             return this;
         }
 
@@ -118,7 +123,7 @@ public final class Http {
         }
 
         public HttpResponse call() {
-            return Http.call(method, basePath, path, serializer, interceptor, headers, values, responseDescriptors);
+            return Http.call(method, basePath, path, serializer, interceptors, headers, values, responseDescriptors);
         }
 
     }
@@ -215,12 +220,12 @@ public final class Http {
             String basePath, //
             String pathTemplate, //
             Serializer serializer, //
-            Interceptor interceptor, //
+            List<Interceptor> interceptors, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode, contentType, class)
             List<ResponseDescriptor> descriptors) {
-        return call(method, basePath, pathTemplate, serializer, interceptor, requestHeaders, parameters,
+        return call(method, basePath, pathTemplate, serializer, interceptors, requestHeaders, parameters,
                 (statusCode, contentType) -> match(descriptors, statusCode, contentType));
     }
 
@@ -241,7 +246,7 @@ public final class Http {
             String basePath, //
             String pathTemplate, //
             Serializer serializer, //
-            Interceptor interceptor, //
+            List<Interceptor> interceptors, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode x contentType) -> class
@@ -259,7 +264,10 @@ public final class Http {
                 requestMethod = method;
             }
             // modify request metadata (like insert auth related headers)
-            RequestBase r = interceptor.intercept(new RequestBase(requestMethod, url, headers));
+            RequestBase r = new RequestBase(requestMethod, url, headers);
+            for (Interceptor interceptor: interceptors) {
+                r = interceptor.intercept(r);
+            }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(),
                     r.method());
