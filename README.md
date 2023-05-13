@@ -140,14 +140,28 @@ Enabled/disabled by setting a new `Globals.config`. Configurable on a class-by-c
 ## Logging
 `slf4j` is used for logging. Add the implementation of your choice. 
 
-## Interceptors
+## Client
+The generated client is used like so:
+
+```java
+BearerAuthenticator authenticator = () -> "tokenthingy";
+Client client = Client
+     .basePath("https://myservice.com/api")
+     .interceptor(authenticator)
+     .build();
+
+// make calls to the service methods:
+Thing thing = client.thingGet("abc123");
+```
+
+### Interceptors
 Interceptors are specified in a client builder and allow the modification (method, url, headers) of all requests. An obvious application for an interceptor is authentication where you can 
 add a Bearer token to every request. 
 
-## Authentication
+### Authentication
 Set an interceptor in the client builder to an instance of `BearerAuthenticator` or `BasicAuthenticator` or do your own thing entirely.
 
-## HTTP Patch 
+### HTTP Patch 
 Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. This library makes PATCH calls as POST calls with the header `X-HTTP-Method-Override: PATCH` which is understood by most web servers. If you'd like to use the PATCH verb you can make it happen in an Interceptor (just look for that header).
 
 ### Mixed usage with *openapi-generator*
