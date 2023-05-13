@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.client.runtime;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import org.davidmoten.oa3.codegen.http.DefaultSerializer;
@@ -11,13 +13,13 @@ public final class ClientBuilder<T> {
 
     private final Function<ClientBuilder<T>, T> creator;
     private final String basePath;
+    private final List<Interceptor> interceptors;
     private Serializer serializer;
-    private Interceptor interceptor;
 
     public ClientBuilder(Function<ClientBuilder<T>, T> creator, Config config, String basePath) {
         this.creator = creator;
         this.serializer = new DefaultSerializer(config.mapper());
-        this.interceptor = x -> x;
+        this.interceptors = new ArrayList<>();
         this.basePath = trimAndRemoveFinalSlash(basePath);
     }
 
@@ -35,7 +37,12 @@ public final class ClientBuilder<T> {
      * @return this
      */
     public ClientBuilder<T> interceptor(Interceptor interceptor) {
-        this.interceptor = interceptor;
+        this.interceptors.add(interceptor);
+        return this;
+    }
+    
+    public ClientBuilder<T> interceptors(Iterable<? extends Interceptor> list) {
+        list.forEach(x -> interceptor(x));
         return this;
     }
 
@@ -43,8 +50,8 @@ public final class ClientBuilder<T> {
         return serializer;
     }
 
-    public Interceptor interceptor() {
-        return interceptor;
+    public List<Interceptor> interceptors() {
+        return interceptors;
     }
 
     public String basePath() {

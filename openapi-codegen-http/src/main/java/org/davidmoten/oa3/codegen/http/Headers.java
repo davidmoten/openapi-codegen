@@ -54,6 +54,11 @@ public final class Headers {
         return this;
     }
 
+    public Headers remove(String key) {
+        map.remove(key.toUpperCase(Locale.ENGLISH));
+        return this;
+    }
+
     public boolean contains(String name, String value) {
         Preconditions.checkArgumentNotNull(name);
         Preconditions.checkArgumentNotNull(value);

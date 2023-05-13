@@ -47,7 +47,8 @@ public final class Http {
         private final List<ParameterValue> values = new ArrayList<>();
         private final List<ResponseDescriptor> responseDescriptors = new ArrayList<>();
         private Serializer serializer;
-        private Interceptor interceptor = x -> x;
+        private List<Interceptor> interceptors = new ArrayList<>();
+        private boolean allowPatch = false;
 
         Builder(HttpMethod method) {
             this.method = method;
@@ -66,8 +67,22 @@ public final class Http {
             return this;
         }
 
+        public Builder allowPatch() {
+            return allowPatch(true);
+        }
+
+        private Builder allowPatch(boolean allowPatch) {
+            this.allowPatch = allowPatch;
+            return this;
+        }
+
         public Builder interceptor(Interceptor interceptor) {
-            this.interceptor = interceptor;
+            this.interceptors.add(interceptor);
+            return this;
+        }
+
+        public Builder interceptors(Iterable<? extends Interceptor> list) {
+            interceptors.forEach(x -> interceptor(x));
             return this;
         }
 
@@ -118,7 +133,8 @@ public final class Http {
         }
 
         public HttpResponse call() {
-            return Http.call(method, basePath, path, serializer, interceptor, headers, values, responseDescriptors);
+            return Http.call(method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
+                    allowPatch);
         }
 
     }
@@ -215,13 +231,13 @@ public final class Http {
             String basePath, //
             String pathTemplate, //
             Serializer serializer, //
-            Interceptor interceptor, //
+            List<Interceptor> interceptors, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode, contentType, class)
-            List<ResponseDescriptor> descriptors) {
-        return call(method, basePath, pathTemplate, serializer, interceptor, requestHeaders, parameters,
-                (statusCode, contentType) -> match(descriptors, statusCode, contentType));
+            List<ResponseDescriptor> descriptors, boolean allowPatch) {
+        return call(method, basePath, pathTemplate, serializer, interceptors, requestHeaders, parameters,
+                (statusCode, contentType) -> match(descriptors, statusCode, contentType), allowPatch);
     }
 
     private static Optional<Class<?>> match(List<ResponseDescriptor> descriptors, Integer statusCode,
@@ -241,25 +257,28 @@ public final class Http {
             String basePath, //
             String pathTemplate, //
             Serializer serializer, //
-            Interceptor interceptor, //
+            List<Interceptor> interceptors, //
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode x contentType) -> class
-            BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls) {
+            BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, boolean allowPatch) {
         String url = buildUrl(basePath, pathTemplate, parameters);
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
         try {
             Headers headers = new Headers(requestHeaders);
             final HttpMethod requestMethod;
-            if (method.equals(HttpMethod.PATCH)) {
+            if (!allowPatch && method.equals(HttpMethod.PATCH)) {
                 headers.put("X-HTTP-Method-Override", HttpMethod.PATCH.name());
                 requestMethod = HttpMethod.POST;
             } else {
                 requestMethod = method;
             }
             // modify request metadata (like insert auth related headers)
-            RequestBase r = interceptor.intercept(new RequestBase(requestMethod, url, headers));
+            RequestBase r = new RequestBase(requestMethod, url, headers);
+            for (Interceptor interceptor : interceptors) {
+                r = interceptor.intercept(r);
+            }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(),
                     r.method());
