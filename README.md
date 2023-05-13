@@ -68,7 +68,7 @@ Add this to your pom.xml in the `build/plugins` section:
     </executions>
 </plugin>
 ``` 
-We include *build-helper-maven-plugin* to help IDEs be aware that source generation is part of a Maven refresh in the IDE (for example in Eclipse **Maven - Update project** will run the codegen plugin and display the generated sources on the build path.  
+We include *build-helper-maven-plugin* to help IDEs be aware that source generation is part of a Maven refresh in the IDE (for example in Eclipse **Maven - Update project** will run the codegen plugin and display the generated sources on the build path).  
 
 
 ## General advice
@@ -95,7 +95,7 @@ Note that discriminators are constants that the user does not set (in fact, cann
 [Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
 
 ## Validation
-Enabled/disabled by setting a new `Globals.config`.
+Enabled/disabled by setting a new `Globals.config`. Configurable on a class-by-class basis.
 
 ## Logging
 `slf4j` is used for logging. Add the implementation of your choice. 
@@ -108,7 +108,7 @@ add a Bearer token to every request.
 Set an interceptor in the client builder to an instance of `BearerAuthenticator` or `BasicAuthenticator` or do your own thing entirely.
 
 ## HTTP Patch 
-Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. This library makes PATCH calls as POST calls with an TODO header which is understood by most web servers.
+Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. This library makes PATCH calls as POST calls with the header `X-HTTP-Method-Override: PATCH` which is understood by most web servers.
 
 ### Mixed usage with *openapi-generator*
 See [this](https://github.com/davidmoten/openapi-codegen/wiki/openapi-generator#mixed-usage-with-openapi-generator).
