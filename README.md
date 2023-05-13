@@ -148,7 +148,7 @@ add a Bearer token to every request.
 Set an interceptor in the client builder to an instance of `BearerAuthenticator` or `BasicAuthenticator` or do your own thing entirely.
 
 ## HTTP Patch 
-Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. This library makes PATCH calls as POST calls with the header `X-HTTP-Method-Override: PATCH` which is understood by most web servers.
+Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. This library makes PATCH calls as POST calls with the header `X-HTTP-Method-Override: PATCH` which is understood by most web servers. If you'd like to use the PATCH verb you can make it happen in an Interceptor (just look for that header).
 
 ### Mixed usage with *openapi-generator*
 See [this](https://github.com/davidmoten/openapi-codegen/wiki/openapi-generator#mixed-usage-with-openapi-generator).
