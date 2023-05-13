@@ -85,8 +85,9 @@ Here's an example showing more configuration options:
                 <basePackage>pet.store</basePackage>
                 <outputDirectory>${project.build.directory}/generated-sources/java</outputDirectory>
                 <sources>
+                    <directory>${project.basedir}/src/main/openapi</directory>
                     <includes>
-                        <include>pet-store-api.yml</include>
+                        <include>**/*.yml</include>
                     </includes>
                 </sources>
                 <failOnParseErrors>false</failOnParseErrors>
