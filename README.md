@@ -70,6 +70,37 @@ Add this to your pom.xml in the `build/plugins` section:
 ``` 
 We include *build-helper-maven-plugin* to help IDEs be aware that source generation is part of a Maven refresh in the IDE (for example in Eclipse **Maven - Update project** will run the codegen plugin and display the generated sources on the build path).  
 
+Here's an example showing more configuration options:
+```xml
+<plugin>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>openapi-codegen-maven-plugin</artifactId>
+    <version>VERSION_HERE</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+            <configuration>
+                <basePackage>pet.store</basePackage>
+                <outputDirectory>${project.build.directory}/generated-sources/java</outputDirectory>
+                <sources>
+                    <includes>
+                        <include>pet-store-api.yml</include>
+                    </includes>
+                </sources>
+                <failOnParseErrors>false</failOnParseErrors>
+                <includeSchemas>Thing</includeSchemas>
+                <excludeSchemas>Error</excludeSchemas>
+                <mapIntegerToBigInteger>false</mapIntegerToBigInteger>
+                <generator>spring2</generator>
+                <generateService>true</generateService>
+                <generateClient>true</generateClient>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
 
 ## General advice
 * As much as possible make sure you put your types in the `#/components/schemas` section of your openapi yaml/json file (use $ref!). The same goes for responses, pathItems, and anything else that can be referred to with a ref. Don't use anonymous types, it makes for an ugly experience with generated code.
