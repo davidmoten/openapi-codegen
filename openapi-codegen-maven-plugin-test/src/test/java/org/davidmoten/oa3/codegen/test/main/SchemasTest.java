@@ -780,6 +780,11 @@ public class SchemasTest {
         assertEquals(21, b.age().get());
         assertEquals(1L, b.map().get("hello"));
         assertEquals(23L, b.map().get("there"));
+        Geometry g = Geometry.of(Circle.builder() //
+                .lat(Latitude.value(-35f)) //
+                .lon(Longitude.value(142f)) //
+                .radiusNm(20) //
+                .build());
     }
 
     private static void onePublicConstructor(Class<?> c) {
