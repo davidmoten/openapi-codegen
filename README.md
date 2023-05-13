@@ -130,6 +130,10 @@ Note that discriminators are constants that the user does not set (in fact, cann
 ### *oneOf* without discriminator
 [Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
 
+## Builders
+All generated schema classes have useful static builder methods. Note that mandatory fields are modelled using chained builders so that you get you get compile-time confirmation 
+that they have been set (and you don't need to set the optional fields). Public constructors are also available if you prefer.
+
 ## Validation
 Enabled/disabled by setting a new `Globals.config`. Configurable on a class-by-class basis.
 
