@@ -440,7 +440,8 @@ public final class SchemasCodeWriter {
             }
         });
         out.closeParen();
-        if (hasOptional || !interfaces.isEmpty() || hasBinary) {
+        boolean hasMap = cls.fields.stream().anyMatch(x -> x.isMap);
+        if (hasOptional || !interfaces.isEmpty() || hasBinary || hasMap) {
             out.right().right();
             String parametersOptional = cls.fields //
                     .stream() //

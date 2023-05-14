@@ -141,6 +141,9 @@ public class BuilderWriter {
                     writeBuildMethod(out, fields, importedBuiltType, builderField);
                 }
             }
+            if (f.isMap && f == last) {
+                writeBuildMethod(out, fields, importedBuiltType, builderField);
+            }
             if (f.required || f == last) {
                 out.closeParen();
             }
@@ -170,7 +173,7 @@ public class BuilderWriter {
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
 
-        if (!field.required) {
+        if (!field.required && !field.isMap) {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
