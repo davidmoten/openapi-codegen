@@ -1348,6 +1348,10 @@ components:
     SimpleEnum:
       type: string
       enum: [hello,there,you]    
+    
+    SingletonEnum:
+      type: string
+      enum: [hello]
       
     MinMaxLength:
       type: object

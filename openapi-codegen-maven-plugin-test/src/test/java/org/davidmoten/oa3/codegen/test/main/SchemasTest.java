@@ -83,6 +83,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.SimpleString;
 import org.davidmoten.oa3.codegen.test.main.schema.SimpleTime;
 import org.davidmoten.oa3.codegen.test.main.schema.SingleNotOptional;
 import org.davidmoten.oa3.codegen.test.main.schema.SingleOptional;
+import org.davidmoten.oa3.codegen.test.main.schema.SingletonEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.Square;
 import org.davidmoten.oa3.codegen.test.main.schema.Square2;
 import org.davidmoten.oa3.codegen.test.main.schema.Status;
@@ -279,6 +280,17 @@ public class SchemasTest {
         assertEquals(0, SimpleEnum.class.getConstructors().length);
     }
 
+    @Test
+    public void testSingletonEnum() throws JsonMappingException, JsonProcessingException {
+        String json = "\"hello\"";
+        SingletonEnum a = m.readValue(json, SingletonEnum.class);
+        assertEquals(SingletonEnum.HELLO, a);
+        assertEquals("hello", a.value());
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(SingletonEnum.HELLO, m.readValue(json,  SingletonEnum.class));
+        assertEquals(0, SimpleEnum.class.getConstructors().length);
+    }
+    
     @Test
     public void testArrayOfComplexType() throws JsonMappingException, JsonProcessingException {
         String json = "[{\"name\":\"Fred\"},{\"name\":\"Sam\"}]";
