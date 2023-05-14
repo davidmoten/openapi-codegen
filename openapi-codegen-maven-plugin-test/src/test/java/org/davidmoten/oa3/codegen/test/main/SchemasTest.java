@@ -59,6 +59,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.MsiId;
 import org.davidmoten.oa3.codegen.test.main.schema.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectNoOptionalFields;
+import org.davidmoten.oa3.codegen.test.main.schema.Oval3;
 import org.davidmoten.oa3.codegen.test.main.schema.Pet;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyAnonymous;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyNotRequired;
@@ -67,6 +68,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.PropertyRefOptional;
 import org.davidmoten.oa3.codegen.test.main.schema.Ref;
 import org.davidmoten.oa3.codegen.test.main.schema.Shape;
 import org.davidmoten.oa3.codegen.test.main.schema.Shape2;
+import org.davidmoten.oa3.codegen.test.main.schema.Shape3;
 import org.davidmoten.oa3.codegen.test.main.schema.SimpleBinary;
 import org.davidmoten.oa3.codegen.test.main.schema.SimpleBoolean;
 import org.davidmoten.oa3.codegen.test.main.schema.SimpleByteArray;
@@ -815,7 +817,6 @@ public class SchemasTest {
                 .name("fred") //
                 .build();
         String json = m.writeValueAsString(a);
-        System.out.println(json);
         JsonNode tree = m.readTree(json);
         assertEquals("fred", tree.get("name").asText());
         assertEquals(21, tree.get("age").asInt());
@@ -841,6 +842,16 @@ public class SchemasTest {
         UntypedObject b = m.readValue(json, UntypedObject.class);
         assertEquals("there", b.map().get("hello"));
         assertEquals(42, b.map().get("answer"));
+    }
+    
+    @Test
+    public void testOneOfWithDiscriminatorUsingEnums() throws JsonProcessingException, NoSuchMethodException, SecurityException {
+        Shape3 a = new Oval3();
+        String json = m.writeValueAsString(a);
+        assertEquals("{\"shapeType\":\"oval\"}", json);
+        assertEquals("oval", a.shapeType());
+        Shape3 b = m.readValue(json, Shape3.class);
+        assertEquals(a, b);
     }
 
     private static void onePublicConstructor(Class<?> c) {
