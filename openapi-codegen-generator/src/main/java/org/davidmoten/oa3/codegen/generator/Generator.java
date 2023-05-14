@@ -20,8 +20,6 @@ import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.generator.writer.SchemasCodeWriter;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.davidmoten.guavamini.Sets;
 
@@ -29,8 +27,6 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 public class Generator {
-    
-    private static final Logger log = LoggerFactory.getLogger(Generator.class);
 
     private final Definition definition;
 
@@ -413,7 +409,8 @@ public class Generator {
                             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
                             false, false, Encoding.DEFAULT, isMap(schemaPath));
                 } else {
-                    log.warn("unexpected schema: " + schema);
+                    // any object
+                    current.addField(Object.class.getCanonicalName(), "map", "map", true, false, true);
                 }
             }
         }

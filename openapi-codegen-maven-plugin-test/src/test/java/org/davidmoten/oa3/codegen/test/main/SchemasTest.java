@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.stream.IntStream;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalProperties;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty.Counts;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfComplexType;
@@ -289,10 +291,10 @@ public class SchemasTest {
         assertEquals(SingletonEnum.HELLO, a);
         assertEquals("hello", a.value());
         assertEquals(json, m.writeValueAsString(a));
-        assertEquals(SingletonEnum.HELLO, m.readValue(json,  SingletonEnum.class));
+        assertEquals(SingletonEnum.HELLO, m.readValue(json, SingletonEnum.class));
         assertEquals(0, SimpleEnum.class.getConstructors().length);
     }
-    
+
     @Test
     public void testArrayOfComplexType() throws JsonMappingException, JsonProcessingException {
         String json = "[{\"name\":\"Fred\"},{\"name\":\"Sam\"}]";
@@ -831,7 +833,7 @@ public class SchemasTest {
         assertEquals(11.0, (Double) circle.get("lat"), 0.0001);
         assertEquals(123.0, (Double) circle.get("lon"), 0.0001);
     }
-    
+
     @Test
     public void testUntypedObjectHasAdditionalProperties() throws JsonProcessingException {
         Map<String, Object> map = new HashMap<>();
@@ -843,15 +845,23 @@ public class SchemasTest {
         assertEquals("there", b.map().get("hello"));
         assertEquals(42, b.map().get("answer"));
     }
-    
+
     @Test
-    public void testOneOfWithDiscriminatorUsingEnums() throws JsonProcessingException, NoSuchMethodException, SecurityException {
+    public void testOneOfWithDiscriminatorUsingEnums()
+            throws JsonProcessingException, NoSuchMethodException, SecurityException {
         Shape3 a = new Oval3();
         String json = m.writeValueAsString(a);
         assertEquals("{\"shapeType\":\"oval\"}", json);
         assertEquals("oval", a.shapeType());
         Shape3 b = m.readValue(json, Shape3.class);
         assertEquals(a, b);
+    }
+
+    @Test
+    public void testAnyObjectProperty() {
+        // use of {} type translates to a Map (normally a LinkedHashMap)
+        AnyObjectProperty a = AnyObjectProperty.map(Collections.emptyMap());
+        assertTrue(a.map().isEmpty());
     }
 
     private static void onePublicConstructor(Class<?> c) {
