@@ -1325,6 +1325,36 @@ components:
           type: string
       required: [shapeType]   
       
+    ######################################
+    ## polymorphism, discriminated using 
+    ## singleton enums
+    ######################################      
+    Shape3:
+      oneOf:
+      - $ref: '#/components/schemas/Oval3'
+      - $ref: '#/components/schemas/Square3'
+      discriminator:
+        propertyName: shapeType
+        mapping: 
+          oval: '#/components/schemas/Oval3'
+          square: '#/components/schemas/Square3'
+          
+    Oval3:
+      type: object
+      properties:
+        shapeType:
+          type: string
+          enum: [oval]
+      required: [shapeType]
+      
+    Square3:
+      type: object
+      properties:
+        shapeType:
+          type: string
+          enum: [square]
+      required: [shapeType]          
+      
     ######################
     ## refs
     ######################

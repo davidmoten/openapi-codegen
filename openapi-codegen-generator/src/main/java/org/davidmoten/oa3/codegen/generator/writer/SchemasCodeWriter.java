@@ -657,17 +657,14 @@ public final class SchemasCodeWriter {
                 // grab it's value using the DiscriminatorHelper
                 String value = String.format("%s.value(%s)",out.add(DiscriminatorHelper.class), f.fieldName(cls));
                 out.println();
+                addOverrideAnnotation(out);
                 writeGetter(out, out.add(String.class), f.fieldName(cls), value);
             } else if (f.isMap) {
                 writeJsonAnySetter(out, cls, f);
                 out.println();
                 writeGetter(out, f.resolvedTypeMap(out.imports()), f.fieldName(cls), f.fieldName(cls));
             } else {
-                if (interfaces.stream().anyMatch(c -> c.discriminator.propertyName.equals(f.name))) {
-                    addOverrideAnnotation(out);
-                } else {
-                    out.println();
-                }
+                out.println();
                 final String value;
                 if (!f.isOctets() && !f.required) {
                     value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
