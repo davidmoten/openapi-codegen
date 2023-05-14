@@ -656,7 +656,6 @@ public final class SchemasCodeWriter {
                 // write constant value for discriminator, if is enum then
                 // grab it's value using the DiscriminatorHelper
                 String value = String.format("%s.value(%s)",out.add(DiscriminatorHelper.class), f.fieldName(cls));
-                out.println();
                 addOverrideAnnotation(out);
                 writeGetter(out, out.add(String.class), f.fieldName(cls), value);
             } else if (f.isMap) {
