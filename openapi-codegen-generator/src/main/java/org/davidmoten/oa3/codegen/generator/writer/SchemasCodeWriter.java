@@ -27,6 +27,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.runtime.Config;
+import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
@@ -477,8 +478,10 @@ public final class SchemasCodeWriter {
                         }
                         Optional<Discriminator> disc = discriminator(interfaces, x);
                         if (disc.isPresent()) {
-                            // write constant value for discriminator
-                            out.line("this.%s = \"%s\";", x.fieldName(cls),
+                            // write constant value for discriminator, if is enum then
+                            // grab it's value using the DiscriminatorHelper
+                            out.line("this.%s = %s.value(%s.class, \"%s\");", x.fieldName(cls),
+                                    DiscriminatorHelper.class, out.add(x.fullClassName),
                                     disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
                         } else if (!x.isPrimitive() && !x.isByteArray()) {
                             if (x.required) {
@@ -648,7 +651,14 @@ public final class SchemasCodeWriter {
     private static void writeGetters(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
-            if (f.isMap) {
+            Optional<Discriminator> disc = discriminator(interfaces, f);
+            if (disc.isPresent()) {
+                // write constant value for discriminator, if is enum then
+                // grab it's value using the DiscriminatorHelper
+                String value = String.format("%s.value(%s)",out.add(DiscriminatorHelper.class), f.fieldName(cls));
+                out.println();
+                writeGetter(out, out.add(String.class), f.fieldName(cls), value);
+            } else if (f.isMap) {
                 writeJsonAnySetter(out, cls, f);
                 out.println();
                 writeGetter(out, f.resolvedTypeMap(out.imports()), f.fieldName(cls), f.fieldName(cls));
