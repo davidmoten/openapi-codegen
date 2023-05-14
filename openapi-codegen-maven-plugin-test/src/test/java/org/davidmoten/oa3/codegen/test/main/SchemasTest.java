@@ -87,6 +87,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.Square2;
 import org.davidmoten.oa3.codegen.test.main.schema.Status;
 import org.davidmoten.oa3.codegen.test.main.schema.Table;
 import org.davidmoten.oa3.codegen.test.main.schema.Table.TableItem;
+import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.junit.jupiter.api.Test;
@@ -814,6 +815,12 @@ public class SchemasTest {
         Map<String, Object> circle = (Map<String, Object>) b.map().get("there");
         assertEquals(11.0, (Double) circle.get("lat"), 0.0001);
         assertEquals(123.0, (Double) circle.get("lon"), 0.0001);
+    }
+    
+    @Test
+    public void testUntypedObjectHasAdditionalProperties() {
+        UntypedObject o = new UntypedObject();
+        // TODO should have map method
     }
 
     private static void onePublicConstructor(Class<?> c) {
