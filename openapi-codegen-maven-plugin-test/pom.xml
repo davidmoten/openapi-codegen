@@ -246,6 +246,21 @@
                                     </sources>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>openflow</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.openflow</basePackage>
+                                    <sources>
+                                        <includes>
+                                            <include>openflow.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>
