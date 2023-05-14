@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -818,9 +819,15 @@ public class SchemasTest {
     }
     
     @Test
-    public void testUntypedObjectHasAdditionalProperties() {
-        UntypedObject o = new UntypedObject();
-        // TODO should have map method
+    public void testUntypedObjectHasAdditionalProperties() throws JsonProcessingException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("hello", "there");
+        map.put("answer", 42);
+        UntypedObject a = UntypedObject.map(map);
+        String json = m.writeValueAsString(a);
+        UntypedObject b = m.readValue(json, UntypedObject.class);
+        assertEquals("there", b.map().get("hello"));
+        assertEquals(42, b.map().get("answer"));
     }
 
     private static void onePublicConstructor(Class<?> c) {
