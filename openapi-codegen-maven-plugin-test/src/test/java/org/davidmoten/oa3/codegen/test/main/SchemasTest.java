@@ -15,12 +15,14 @@ import java.time.OffsetTime;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalProperties;
+import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty.Counts;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfComplexType;
@@ -785,6 +787,33 @@ public class SchemasTest {
                 .lon(Longitude.value(142f)) //
                 .radiusNm(20) //
                 .build());
+    }
+
+    @Test
+    public void testAdditionalPropertiesTrue() throws JsonProcessingException {
+        Circle c = Circle.builder().lat(Latitude.value(11f)).lon(Longitude.value(123f)).radiusNm(123).build();
+        AdditionalPropertiesTrue a = AdditionalPropertiesTrue.builder() //
+                .add("hello", 1L) //
+                .add("there", c) //
+                .buildMap() //
+                .age(21) //
+                .name("fred") //
+                .build();
+        String json = m.writeValueAsString(a);
+        System.out.println(json);
+        JsonNode tree = m.readTree(json);
+        assertEquals("fred", tree.get("name").asText());
+        assertEquals(21, tree.get("age").asInt());
+        assertEquals(1L, a.map().get("hello"));
+        assertEquals(c, a.map().get("there"));
+        AdditionalPropertiesTrue b = m.readValue(json, AdditionalPropertiesTrue.class);
+        assertEquals("fred", b.name().get());
+        assertEquals(21, b.age().get());
+        assertEquals(1, b.map().get("hello"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> circle = (Map<String, Object>) b.map().get("there");
+        assertEquals(11.0, (Double) circle.get("lat"), 0.0001);
+        assertEquals(123.0, (Double) circle.get("lon"), 0.0001);
     }
 
     private static void onePublicConstructor(Class<?> c) {

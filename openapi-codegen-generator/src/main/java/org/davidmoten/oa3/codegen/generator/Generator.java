@@ -463,6 +463,11 @@ public class Generator {
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(
                 p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, isMap(schemaPath)));
+        // add additionalProperties if typed as Object 
+        if (schema.getAdditionalProperties() == Boolean.TRUE) {
+            // TODO handle name collisions with `map` and other fields
+            cls.addField(Object.class.getCanonicalName(), "map", "map", true, false, true);
+        }
     }
 
     public enum Encoding {

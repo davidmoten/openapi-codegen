@@ -1584,5 +1584,13 @@ components:
       additionalProperties:
         type: integer
         minimum: 0        
-
                 
+    AdditionalPropertiesTrue:
+      type: object
+      properties:
+        name: 
+          type: string
+        age: 
+          type: integer
+          format: int32
+      additionalProperties: true
