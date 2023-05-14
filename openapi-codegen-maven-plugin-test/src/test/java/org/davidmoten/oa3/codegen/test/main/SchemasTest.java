@@ -784,6 +784,7 @@ public class SchemasTest {
         assertEquals(21, b.age().get());
         assertEquals(1L, b.map().get("hello"));
         assertEquals(23L, b.map().get("there"));
+        @SuppressWarnings("unused")
         Geometry g = Geometry.of(Circle.builder() //
                 .lat(Latitude.value(-35f)) //
                 .lon(Longitude.value(142f)) //
