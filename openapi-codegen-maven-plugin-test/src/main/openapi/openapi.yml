@@ -1639,3 +1639,28 @@ components:
       properties:
         stuff: {}
         
+    AnyObjectProperty2:
+      type: object
+      properties:
+        stuff: {}     
+        other: 
+          type: string
+      required: [other, stuff]   
+
+    AnyObjectArrayProperty:
+      type: object
+      properties:
+        stuff: 
+          type: array
+          items: {}   
+        
+    AnyObjectArrayProperty2:
+      type: object
+      properties:
+        stuff: 
+          type: array
+          items: {}   
+        other: 
+          type: string
+      required: [other, stuff]     
+        

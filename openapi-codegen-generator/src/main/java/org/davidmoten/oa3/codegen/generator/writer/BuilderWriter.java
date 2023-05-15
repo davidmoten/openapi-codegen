@@ -203,8 +203,13 @@ public class BuilderWriter {
     }
 
     private static String mapImportedType(Field f, Imports imports) {
-        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
-                imports.add(f.fullClassName));
+        if (f.isArray) {
+            return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                    imports.add(String.class), imports.add(f.fullClassName));
+        } else {
+            return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                    imports.add(f.fullClassName));
+        }
     }
 
     private static String enhancedImportedType(Field f, Imports imports) {

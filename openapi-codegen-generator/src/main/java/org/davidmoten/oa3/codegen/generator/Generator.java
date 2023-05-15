@@ -269,8 +269,8 @@ public class Generator {
             return Generator.resolvedTypeNullable(this, imports);
         }
 
-        public String resolvedTypeMap(Imports imports) {
-            return Generator.resolvedMapType(this, imports);
+        public String resolvedTypeMap(Imports imports, boolean isArray) {
+            return Generator.resolvedMapType(this, imports, isArray);
         }
 
         public boolean isPrimitive() {
@@ -410,7 +410,7 @@ public class Generator {
                             false, false, Encoding.DEFAULT, isMap(schemaPath));
                 } else {
                     // any object
-                    current.addField(Object.class.getCanonicalName(), "map", "map", true, false, true);
+                    current.addField(Object.class.getCanonicalName(), "map", "map", true, isArray, true);
                 }
             }
         }
@@ -592,6 +592,9 @@ public class Generator {
     private static String resolvedTypeNullable(Field f, Imports imports) {
         if (f.encoding == Encoding.OCTET) {
             return imports.add(String.class);
+        } else if (f.isArray && f.isMap) {
+            return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                    imports.add(String.class), imports.add(Object.class));
         } else if (f.isArray) {
             return toList(f.fullClassName, imports, false);
         } else if (f.required) {
@@ -610,16 +613,19 @@ public class Generator {
         }
     }
 
-    private static String resolvedMapType(Field f, Imports imports) {
+    private static String resolvedMapType(Field f, Imports imports, boolean isArray) {
         final String t;
         if (f.isOctets()) {
             t = "byte[]";
-        } else if (f.isArray) {
-            t = toList(f.fullClassName, imports, false);
         } else {
             t = imports.add(f.fullClassName);
         }
-        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
+        if (isArray) {
+            return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                    imports.add(String.class), t);
+        } else {
+            return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
+        }
     }
 
     private static String resolvedType(Field f, Imports imports) {
