@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.generator.writer;
 import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -355,7 +356,7 @@ public final class SchemasCodeWriter {
                 out.println();
             }
             first.value = false;
-            if (f.isMap) {
+            if (f.isMap && !f.isArray) {
                 out.line("@%s", JsonAnyGetter.class);
                 out.line("@%s", JsonAnySetter.class);
             } else if (cls.classType == ClassType.ALL_OF) {
@@ -367,7 +368,7 @@ public final class SchemasCodeWriter {
             }
             final String fieldType;
             if (f.isMap) {
-                fieldType = f.resolvedTypeMap(out.imports());
+                fieldType = f.resolvedTypeMap(out.imports(), f.isArray);
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
             } else {
@@ -392,8 +393,10 @@ public final class SchemasCodeWriter {
         if (cls.unwrapSingleField()) {
             // don't annotate parameters with JsonProperty because we will annotate field
             // with JsonValue
-            parametersNullable = cls.fields.stream().map(x -> String.format("\n%s%s %s", out.indent(),
-                    x.resolvedTypeNullable(out.imports()), x.fieldName(cls))).collect(Collectors.joining(","));
+            parametersNullable = cls.fields.stream() //
+                    .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedTypeNullable(out.imports()),
+                            x.fieldName(cls)))
+                    .collect(Collectors.joining(","));
         } else {
             parametersNullable = cls.fields.stream() //
                     .filter(x -> !x.isMap) //
@@ -435,7 +438,11 @@ public final class SchemasCodeWriter {
         // assign
         cls.fields.stream().forEach(x -> {
             if (x.isMap) {
-                out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
+                if (x.isArray) {
+                    out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+                } else {
+                    out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
+                }
             } else {
                 assignField(out, cls, x);
             }
@@ -448,8 +455,10 @@ public final class SchemasCodeWriter {
                     .stream() //
                     // ignore discriminators that should be constants
                     .filter(x -> !isDiscriminator(interfaces, x)) //
+                    .filter(x -> !x.isMap || !x.isArray) //
                     .map(x -> {
-                        String t = x.isMap ? x.resolvedTypeMap(out.imports()) : x.resolvedType(out.imports());
+                        String t = x.isMap ? x.resolvedTypeMap(out.imports(), x.isArray)
+                                : x.resolvedType(out.imports());
                         return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
                     }) //
                     .collect(Collectors.joining(","));
@@ -473,7 +482,11 @@ public final class SchemasCodeWriter {
             cls.fields.stream() //
                     .forEach(x -> {
                         if (x.isMap) {
-                            out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                            if (x.isArray) {
+                                out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+                            } else {
+                                out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                            }
                             return;
                         }
                         Optional<Discriminator> disc = discriminator(interfaces, x);
@@ -655,13 +668,15 @@ public final class SchemasCodeWriter {
             if (disc.isPresent()) {
                 // write constant value for discriminator, if is enum then
                 // grab it's value using the DiscriminatorHelper
-                String value = String.format("%s.value(%s)",out.add(DiscriminatorHelper.class), f.fieldName(cls));
+                String value = String.format("%s.value(%s)", out.add(DiscriminatorHelper.class), f.fieldName(cls));
                 addOverrideAnnotation(out);
                 writeGetter(out, out.add(String.class), f.fieldName(cls), value);
             } else if (f.isMap) {
-                writeJsonAnySetter(out, cls, f);
+                if (!f.isArray) {
+                    writeJsonAnySetter(out, cls, f);
+                }
                 out.println();
-                writeGetter(out, f.resolvedTypeMap(out.imports()), f.fieldName(cls), f.fieldName(cls));
+                writeGetter(out, f.resolvedTypeMap(out.imports(), f.isArray), f.fieldName(cls), f.fieldName(cls));
             } else {
                 out.println();
                 final String value;
