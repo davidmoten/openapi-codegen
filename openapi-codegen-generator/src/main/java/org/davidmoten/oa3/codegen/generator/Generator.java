@@ -410,7 +410,7 @@ public class Generator {
                             false, false, Encoding.DEFAULT, isMap(schemaPath));
                 } else {
                     // any object
-                    current.addField(Object.class.getCanonicalName(), "map", "map", true, false, true);
+                    current.addField(Object.class.getCanonicalName(), "map", "map", true, isArray, true);
                 }
             }
         }

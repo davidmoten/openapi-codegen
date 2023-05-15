@@ -1639,3 +1639,10 @@ components:
       properties:
         stuff: {}
         
+    AnyObjectArrayProperty:
+      type: object
+      properties:
+        stuff: 
+          type: array
+          items: {}        
+        
