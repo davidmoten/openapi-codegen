@@ -783,7 +783,7 @@ public class SchemasTest {
     @Test
     public void testAdditionalProperties() throws JsonProcessingException {
         AdditionalProperties a = AdditionalProperties.builder() //
-                .add("hello", 1L) //
+                .addToAdditionalProperties("hello", 1L) //
                 .add("there", 23L) //
                 .buildMap() //
                 .age(21) //
@@ -793,13 +793,13 @@ public class SchemasTest {
         JsonNode tree = m.readTree(json);
         assertEquals("fred", tree.get("name").asText());
         assertEquals(21, tree.get("age").asInt());
-        assertEquals(1L, a.map().get("hello"));
-        assertEquals(23L, a.map().get("there"));
+        assertEquals(1L, a.additionalProperties().get("hello"));
+        assertEquals(23L, a.additionalProperties().get("there"));
         AdditionalProperties b = m.readValue(json, AdditionalProperties.class);
         assertEquals("fred", b.name().get());
         assertEquals(21, b.age().get());
-        assertEquals(1L, b.map().get("hello"));
-        assertEquals(23L, b.map().get("there"));
+        assertEquals(1L, b.additionalProperties().get("hello"));
+        assertEquals(23L, b.additionalProperties().get("there"));
         @SuppressWarnings("unused")
         Geometry g = Geometry.of(Circle.builder() //
                 .lat(Latitude.value(-35f)) //
@@ -812,7 +812,7 @@ public class SchemasTest {
     public void testAdditionalPropertiesTrue() throws JsonProcessingException {
         Circle c = Circle.builder().lat(Latitude.value(11f)).lon(Longitude.value(123f)).radiusNm(123).build();
         AdditionalPropertiesTrue a = AdditionalPropertiesTrue.builder() //
-                .add("hello", 1L) //
+                .addToMap("hello", 1L) //
                 .add("there", c) //
                 .buildMap() //
                 .age(21) //
@@ -860,8 +860,8 @@ public class SchemasTest {
     @Test
     public void testAnyObjectProperty() {
         // use of {} type translates to a Map (normally a LinkedHashMap)
-        AnyObjectProperty a = AnyObjectProperty.map(Collections.emptyMap());
-        assertTrue(a.map().isEmpty());
+        AnyObjectProperty a = AnyObjectProperty.stuff(Collections.emptyMap());
+        assertTrue(a.stuff().isEmpty());
     }
 
     private static void onePublicConstructor(Class<?> c) {

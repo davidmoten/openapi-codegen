@@ -129,12 +129,7 @@ public class Generator {
         }
 
         public String fieldName(Field f) {
-            if (f.isMap) {
-                // if another field exists with the name `map` then put an underscore after this
-                // one
-                return fields.stream().filter(x -> !x.isMap && x.fieldName.equalsIgnoreCase("map")).findAny()
-                        .map(x -> "map_").orElse("map");
-            } else if (unwrapSingleField()) {
+            if (unwrapSingleField()) {
                 return "value";
             } else {
                 return f.fieldName;
@@ -410,7 +405,8 @@ public class Generator {
                             false, false, Encoding.DEFAULT, isMap(schemaPath));
                 } else {
                     // any object
-                    current.addField(Object.class.getCanonicalName(), "map", "map", true, isArray, true);
+                    String fieldName = current.nextFieldName(last.name);
+                    current.addField(Object.class.getCanonicalName(), last.name, fieldName, true, isArray, true);
                 }
             }
         }
@@ -468,7 +464,8 @@ public class Generator {
         if (schema.getAdditionalProperties() == Boolean.TRUE
                 || schema.getAdditionalProperties() == null && schema.getProperties() == null) {
             // TODO handle name collisions with `map` and other fields
-            cls.addField(Object.class.getCanonicalName(), "map", "map", true, false, true);
+            cls.addField(Object.class.getCanonicalName(), fieldName.orElse("map"), fieldName.orElse("map"), true, false,
+                    true);
         }
     }
 

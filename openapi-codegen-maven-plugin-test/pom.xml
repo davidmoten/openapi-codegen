@@ -261,6 +261,21 @@
                                     </sources>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>jira</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.jira.openflow</basePackage>
+                                    <sources>
+                                        <includes>
+                                            <include>jira.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>

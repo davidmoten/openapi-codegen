@@ -86,12 +86,26 @@ public final class PreconditionsBase {
         }
         return s;
     }
+    
+    public <T extends Collection<String>> T checkMinLength(T list, int minLength, String name) {
+        if (list.stream().filter(x -> x.length() < minLength).findAny().isPresent()) {
+            throw factory.apply(name + " elements must have a length of at least " + minLength); 
+        }
+        return list;
+    }
 
     public String checkMaxLength(String s, int maxLength, String name) {
         if (s.length() > maxLength) {
             throw factory.apply(name + " must have a length of at most " + maxLength);
         }
         return s;
+    }
+    
+    public <T extends Collection<String>> T checkMaxLength(T list, int maxLength, String name) {
+        if (list.stream().filter(x -> x.length() > maxLength).findAny().isPresent()) {
+            throw factory.apply(name + " elements must have a length of at most " + maxLength); 
+        }
+        return list;
     }
 
     public Optional<String> checkMaxLength(Optional<String> s, int maxLength, String name) {
@@ -135,6 +149,13 @@ public final class PreconditionsBase {
         }
         return s;
     }
+    
+    public <T extends Collection<String>> T checkMatchesPattern(T list, String pattern, String name) {
+        if (list != null && list.stream().filter(x -> !Pattern.matches(pattern, x)).findAny().isPresent()) {
+            throw factory.apply(name + " elements must match this regex pattern: " + pattern);
+        }
+        return list;
+    }
 
     public Optional<String> checkMatchesPattern(Optional<String> s, String pattern, String name) {
         if (s.isPresent()) {
@@ -142,7 +163,5 @@ public final class PreconditionsBase {
         } else {
             return s;
         }
-
     }
-
 }

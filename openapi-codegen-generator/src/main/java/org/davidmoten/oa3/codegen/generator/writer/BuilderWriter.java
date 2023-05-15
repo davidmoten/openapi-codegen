@@ -102,15 +102,15 @@ public class BuilderWriter {
             String builderField = inFirstBuilder ? "" : ".b";
             out.println();
             if (f.isMap) {
-                out.line("public %s<%s, %s> add(%s key, %s value) {", MapBuilder.class, out.add(f.fullClassName),
-                        nextBuilderName, String.class, out.add(f.fullClassName));
+                out.line("public %s<%s, %s> addTo%s(%s key, %s value) {", MapBuilder.class, out.add(f.fullClassName),
+                        nextBuilderName, Names.upperFirst(f.fieldName), String.class, out.add(f.fullClassName));
                 out.line("%s.checkNotNull(value, \"value\");", Preconditions.class);
                 out.line("return new %s<%s, %s>(this, x -> this%s.%s = x).add(key, value);", MapBuilder.class,
                         out.add(f.fullClassName), nextBuilderName, builderField, f.fieldName);
                 out.closeParen();
                 out.println();
-                out.line("public %s<%s, %s> addAll(%s<%s, %s> map) {", MapBuilder.class, out.add(f.fullClassName),
-                        nextBuilderName, Map.class, String.class, out.add(f.fullClassName));
+                out.line("public %s<%s, %s> addAllTo%s(%s<%s, %s> map) {", MapBuilder.class, out.add(f.fullClassName),
+                        nextBuilderName, Names.upperFirst(f.fieldName), Map.class, String.class, out.add(f.fullClassName));
                 out.line("return new %s<%s, %s>(this, x -> this%s.%s = x).addAll(map);", MapBuilder.class,
                         out.add(f.fullClassName), nextBuilderName, builderField, f.fieldName);
                 out.closeParen();

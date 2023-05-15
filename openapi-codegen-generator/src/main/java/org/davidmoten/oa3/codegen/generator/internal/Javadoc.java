@@ -87,9 +87,12 @@ public final class Javadoc {
 
     private static String encodeJavadoc(String x, boolean isHtml) {
         x = x.replace("@", "&#064;") //
-                .replace("\\", "{@literal \\}");
+                .replace("\\", "{@literal \\}") //
+        ;
 //                .replace("&", "&amp;");
-        if (!isHtml) {
+        if (isHtml) {
+            x = x.replace("</p>", "").replace("*/", "*&#47;");
+        } else {
             x = x.replace("<", "&lt;") //
                     .replace(">", "&gt;");
         }
