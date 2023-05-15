@@ -1663,4 +1663,10 @@ components:
         other: 
           type: string
       required: [other, stuff]     
+      
+    TwoMaps:
+      type: object
+      properties:
+        stuff: {}
+        other: {}
         
