@@ -13,6 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
 @SpringBootTest(classes = { LibraryApplication.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 public class LibraryServerTest {
@@ -30,6 +33,13 @@ public class LibraryServerTest {
         UsersPage page = client.userGet(Optional.empty(), Optional.empty());
         assertEquals(20, page.users().value().size());
         assertEquals("User19", page.users().value().get(18).user().firstName());
+    }
+    
+    public static final class Thing {
+        
+        @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+        public static final class Visibility2 {
+        }
     }
 
 }

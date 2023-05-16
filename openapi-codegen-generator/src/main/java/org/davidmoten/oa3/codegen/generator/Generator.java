@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.LinkedStack;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
+import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.generator.writer.SchemasCodeWriter;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
@@ -138,9 +139,9 @@ public class Generator {
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
                 Optional<MapType> mapType) {
-            fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
-                    Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false,
-                    false, Encoding.DEFAULT, mapType));
+            addField(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(), Optional.empty(),
+                    Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false, false,
+                    Encoding.DEFAULT, mapType);
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
@@ -150,6 +151,11 @@ public class Generator {
                 Optional<MapType> mapType) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, minItems, maxItems, minLength, maxLength,
                     pattern, min, max, exclusiveMin, exclusiveMax, encoding, mapType));
+            if (WriterUtil.DEBUG && mapType.isPresent()) {
+                System.err.println(fullClassName);
+                System.err.println(fields.get(fields.size() - 1));
+                Thread.dumpStack();
+            }
         }
 
         public String pkg() {
@@ -288,15 +294,49 @@ public class Generator {
             return mapType.equals(Optional.of(MapType.ADDITIONAL_PROPERTIES));
         }
 
-        @Override
-        public String toString() {
-            return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
-                    + ", required=" + required + ", minLength=" + minLength + ", maxLength=" + maxLength + "]";
-        }
-
         public boolean mapTypeIs(MapType mt) {
             return this.mapType.equals(Optional.of(mt));
         }
+
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            b.append("Field [fullClassName=");
+            b.append(fullClassName);
+            b.append(", name=");
+            b.append(name);
+            b.append(", fieldName=");
+            b.append(fieldName);
+            b.append(", required=");
+            b.append(required);
+            b.append(", minLength=");
+            b.append(minLength);
+            b.append(", maxLength=");
+            b.append(maxLength);
+            b.append(", pattern=");
+            b.append(pattern);
+            b.append(", min=");
+            b.append(min);
+            b.append(", max=");
+            b.append(max);
+            b.append(", isArray=");
+            b.append(isArray);
+            b.append(", encoding=");
+            b.append(encoding);
+            b.append(", exclusiveMin=");
+            b.append(exclusiveMin);
+            b.append(", exclusiveMax=");
+            b.append(exclusiveMax);
+            b.append(", minItems=");
+            b.append(minItems);
+            b.append(", maxItems=");
+            b.append(maxItems);
+            b.append(", mapType=");
+            b.append(mapType);
+            b.append("]");
+            return b.toString();
+        }
+
     }
 
     public static final class MyVisitor implements Visitor {
@@ -471,11 +511,16 @@ public class Generator {
         cls.classType = ClassType.CLASS;
         cls.hasProperties = Util.isObject(schema);
         boolean required = fieldIsRequired(schemaPath);
-        previous.ifPresent(
-                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mapType(schemaPath)));
+        Optional<MapType> mt = mapType(schemaPath);
+        if (mt.isPresent() && mt.get() == MapType.FIELD) {
+            mt = Optional.empty();
+        }
+        Optional<MapType> mt2 = mt;
+        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mt2));
+        // TODO this block may not be needed, nest
         // add additionalProperties if typed as Object
         if (schema.getAdditionalProperties() == Boolean.TRUE
-                || schema.getAdditionalProperties() == null && schema.getProperties() == null) {
+                || schema.getProperties() == null && schema.get$ref() == null) {
             // TODO handle name collisions with `map` and other fields
             final MapType mapType;
             if (schema.getAdditionalProperties() == Boolean.TRUE) {
@@ -617,8 +662,8 @@ public class Generator {
                 return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
                         imports.add(String.class), imports.add(f.fullClassName));
             } else {
-                return String.format("%s<%s, %s>", imports.add(Map.class),
-                        imports.add(String.class), imports.add(f.fullClassName));
+                return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                        imports.add(f.fullClassName));
             }
         } else if (f.isArray) {
             return toList(f.fullClassName, imports, false);

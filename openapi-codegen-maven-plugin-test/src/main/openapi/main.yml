@@ -1631,6 +1631,19 @@ components:
           format: int32
       additionalProperties: true
       
+    AdditionalPropertiesOnly:
+      type: object
+      additionalProperties:
+        type: boolean
+        
+    AdditionalPropertiesOnProperty:
+      type: object
+      properties:
+        props:
+          type: object
+          additionalProperties:
+            type: integer        
+      
     UntypedObject:
       type: object
       
