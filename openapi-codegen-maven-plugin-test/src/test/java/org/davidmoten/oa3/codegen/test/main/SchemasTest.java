@@ -92,6 +92,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.Square;
 import org.davidmoten.oa3.codegen.test.main.schema.Square2;
 import org.davidmoten.oa3.codegen.test.main.schema.Status;
 import org.davidmoten.oa3.codegen.test.main.schema.Table;
+import org.davidmoten.oa3.codegen.test.main.schema.TwoMaps;
 import org.davidmoten.oa3.codegen.test.main.schema.Table.TableItem;
 import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
@@ -862,6 +863,19 @@ public class SchemasTest {
         // use of {} type translates to a Map (normally a LinkedHashMap)
         AnyObjectProperty a = AnyObjectProperty.stuff(Collections.emptyMap());
         assertTrue(a.stuff().isEmpty());
+    }
+    
+    @Test
+    public void testTwoMaps() throws JsonProcessingException {
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("hello", "there");
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put("buy", "nothing");
+        TwoMaps a = TwoMaps.builder().stuff(map1).other(map2).build();
+        String json = m.writeValueAsString(a);
+        TwoMaps b = m.readValue(json, TwoMaps.class);
+        assertEquals(map1, b.stuff());
+        assertEquals(map2, b.other());
     }
 
     private static void onePublicConstructor(Class<?> c) {
