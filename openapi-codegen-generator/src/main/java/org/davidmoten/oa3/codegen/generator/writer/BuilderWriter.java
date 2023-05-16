@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.Generator.MapType;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
@@ -21,14 +22,15 @@ public class BuilderWriter {
         private final String fullClassName;
         private final boolean required;
         private final boolean isArray;
-        private final boolean isMap;
+        private final Optional<MapType> mapType;
 
-        public Field(String fieldName, String fullClassName, boolean required, boolean isArray, boolean isMap) {
+        public Field(String fieldName, String fullClassName, boolean required, boolean isArray,
+                Optional<MapType> mapType) {
             this.fieldName = fieldName;
             this.fullClassName = fullClassName;
             this.required = required;
             this.isArray = isArray;
-            this.isMap = isMap;
+            this.mapType = mapType;
         }
     }
 
@@ -80,7 +82,7 @@ public class BuilderWriter {
                             out.println();
                             first = false;
                         }
-                        if (fld.isMap) {
+                        if (fld.mapType.isPresent()) {
                             out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
                                     out.add(fld.fullClassName), fld.fieldName, HashMap.class);
                         } else if (fld.required) {
@@ -101,7 +103,7 @@ public class BuilderWriter {
             }
             String builderField = inFirstBuilder ? "" : ".b";
             out.println();
-            if (f.isMap) {
+            if (f.mapType.isPresent() && f.mapType.get() == MapType.ADDITIONAL_PROPERTIES) {
                 out.line("public %s<%s, %s> addTo%s(%s key, %s value) {", MapBuilder.class, out.add(f.fullClassName),
                         nextBuilderName, Names.upperFirst(f.fieldName), String.class, out.add(f.fullClassName));
                 out.line("%s.checkNotNull(value, \"value\");", Preconditions.class);
@@ -110,7 +112,8 @@ public class BuilderWriter {
                 out.closeParen();
                 out.println();
                 out.line("public %s<%s, %s> addAllTo%s(%s<%s, %s> map) {", MapBuilder.class, out.add(f.fullClassName),
-                        nextBuilderName, Names.upperFirst(f.fieldName), Map.class, String.class, out.add(f.fullClassName));
+                        nextBuilderName, Names.upperFirst(f.fieldName), Map.class, String.class,
+                        out.add(f.fullClassName));
                 out.line("return new %s<%s, %s>(this, x -> this%s.%s = x).addAll(map);", MapBuilder.class,
                         out.add(f.fullClassName), nextBuilderName, builderField, f.fieldName);
                 out.closeParen();
@@ -118,7 +121,7 @@ public class BuilderWriter {
             }
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
-            if (f.required || f.isMap) {
+            if (f.required || f.mapType.isPresent()) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else {
                 out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
@@ -130,7 +133,7 @@ public class BuilderWriter {
             }
             out.closeParen();
 
-            if (!f.required && !f.isMap) {
+            if (!f.required && !f.mapType.isPresent()) {
                 out.println();
                 out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, out.imports()),
                         f.fieldName);
@@ -141,7 +144,7 @@ public class BuilderWriter {
                     writeBuildMethod(out, fields, importedBuiltType, builderField);
                 }
             }
-            if (f.isMap && f == last) {
+            if (f.mapType.isPresent() && f == last) {
                 writeBuildMethod(out, fields, importedBuiltType, builderField);
             }
             if (f.required || f == last) {
@@ -173,7 +176,7 @@ public class BuilderWriter {
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
 
-        if (!field.required && !field.isMap) {
+        if (!field.required && !field.mapType.isPresent()) {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
@@ -193,7 +196,7 @@ public class BuilderWriter {
     }
 
     private static String baseImportedType(Field f, Imports imports) {
-        if (f.isMap) {
+        if (f.mapType.isPresent()) {
             return mapImportedType(f, imports);
         } else if (f.isArray) {
             return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
@@ -213,7 +216,7 @@ public class BuilderWriter {
     }
 
     private static String enhancedImportedType(Field f, Imports imports) {
-        if (f.isMap) {
+        if (f.mapType.isPresent()) {
             return mapImportedType(f, imports);
         } else if (f.isArray) {
             if (f.required) {

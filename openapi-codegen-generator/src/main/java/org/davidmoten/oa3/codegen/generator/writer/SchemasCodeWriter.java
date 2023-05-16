@@ -19,6 +19,7 @@ import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
 import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
+import org.davidmoten.oa3.codegen.generator.Generator.MapType;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.SchemaCategory;
 import org.davidmoten.oa3.codegen.generator.ServerGeneratorType;
@@ -312,7 +313,7 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = //
                 cls.fields.stream() //
                         .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required, f.isArray,
-                                f.isMap)) //
+                                f.mapType)) //
                         .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -356,7 +357,7 @@ public final class SchemasCodeWriter {
                 out.println();
             }
             first.value = false;
-            if (f.isMap && !f.isArray) {
+            if (f.isAdditionalProperties() && !f.isArray) {
                 out.line("@%s", JsonAnyGetter.class);
                 out.line("@%s", JsonAnySetter.class);
             } else if (cls.classType == ClassType.ALL_OF) {
@@ -367,7 +368,7 @@ public final class SchemasCodeWriter {
                 out.line("@%s(\"%s\")", JsonProperty.class, f.name);
             }
             final String fieldType;
-            if (f.isMap) {
+            if (f.mapType.isPresent()) {
                 fieldType = f.resolvedTypeMap(out.imports(), f.isArray);
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
@@ -399,7 +400,7 @@ public final class SchemasCodeWriter {
                     .collect(Collectors.joining(","));
         } else {
             parametersNullable = cls.fields.stream() //
-                    .filter(x -> !x.isMap) //
+                    .filter(x -> !x.isAdditionalProperties()) //
                     .map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
                             x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
                     .collect(Collectors.joining(","));
@@ -427,7 +428,7 @@ public final class SchemasCodeWriter {
 
         ifValidate(cls, out, names, //
                 out2 -> cls.fields.stream() //
-                        .filter(x -> !x.isMap) //
+                        .filter(x -> !x.isAdditionalProperties()) //
                         .forEach(x -> {
                             if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
                                 checkNotNull(cls, out2, x);
@@ -437,7 +438,7 @@ public final class SchemasCodeWriter {
 
         // assign
         cls.fields.stream().forEach(x -> {
-            if (x.isMap) {
+            if (x.mapTypeIs(MapType.ADDITIONAL_PROPERTIES)) {
                 if (x.isArray) {
                     out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
                 } else {
@@ -448,16 +449,17 @@ public final class SchemasCodeWriter {
             }
         });
         out.closeParen();
-        boolean hasMap = cls.fields.stream().anyMatch(x -> x.isMap);
-        if (hasOptional || !interfaces.isEmpty() || hasBinary || hasMap) {
+        boolean hasAdditionalProperties = cls.fields.stream()
+                .anyMatch(Field::isAdditionalProperties);
+        if (hasOptional || !interfaces.isEmpty() || hasBinary || hasAdditionalProperties) {
             out.right().right();
             String parametersOptional = cls.fields //
                     .stream() //
                     // ignore discriminators that should be constants
                     .filter(x -> !isDiscriminator(interfaces, x)) //
-                    .filter(x -> !x.isMap || !x.isArray) //
+                    .filter(x -> !x.isAdditionalProperties() || !x.isArray) //
                     .map(x -> {
-                        String t = x.isMap ? x.resolvedTypeMap(out.imports(), x.isArray)
+                        String t = x.mapType.isPresent() ? x.resolvedTypeMap(out.imports(), x.isArray)
                                 : x.resolvedType(out.imports());
                         return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
                     }) //
@@ -469,7 +471,7 @@ public final class SchemasCodeWriter {
             // validate
             ifValidate(cls, out, names, //
                     out2 -> cls.fields.stream() //
-                            .filter(x -> !x.isMap) //
+                            .filter(x -> !x.isAdditionalProperties()) //
                             .forEach(x -> {
                                 if (!isDiscriminator(interfaces, x)
                                         && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
@@ -481,7 +483,7 @@ public final class SchemasCodeWriter {
             // assign
             cls.fields.stream() //
                     .forEach(x -> {
-                        if (x.isMap) {
+                        if (x.mapType.isPresent()) {
                             if (x.isArray) {
                                 out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
                             } else {
@@ -520,8 +522,8 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = cls.fields //
                 .stream() //
                 .filter(x -> !isDiscriminator(interfaces, x)) //
-                .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required && !f.isMap, f.isArray,
-                        f.isMap))
+                .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required && !f.isAdditionalProperties(), f.isArray,
+                        f.mapType))
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -671,8 +673,8 @@ public final class SchemasCodeWriter {
                 String value = String.format("%s.value(%s)", out.add(DiscriminatorHelper.class), f.fieldName(cls));
                 addOverrideAnnotation(out);
                 writeGetter(out, out.add(String.class), f.fieldName(cls), value);
-            } else if (f.isMap) {
-                if (!f.isArray) {
+            } else if (f.mapType.isPresent()) {
+                if (!f.isArray && f.isAdditionalProperties()) {
                     writeJsonAnySetter(out, cls, f);
                 }
                 out.println();

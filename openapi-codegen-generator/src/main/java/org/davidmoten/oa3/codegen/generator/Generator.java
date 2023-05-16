@@ -137,19 +137,19 @@ public class Generator {
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
-                boolean isMap) {
+                Optional<MapType> mapType) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(),
                     Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false,
-                    false, Encoding.DEFAULT, isMap));
+                    false, Encoding.DEFAULT, mapType));
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
-                boolean isMap) {
+                Optional<MapType> mapType) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, minItems, maxItems, minLength, maxLength,
-                    pattern, min, max, exclusiveMin, exclusiveMax, encoding, isMap));
+                    pattern, min, max, exclusiveMin, exclusiveMax, encoding, mapType));
         }
 
         public String pkg() {
@@ -211,6 +211,10 @@ public class Generator {
     private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "long", "byte", "float", "double",
             "boolean", "short");
 
+    public enum MapType {
+        ADDITIONAL_PROPERTIES, FIELD;
+    }
+
     public final static class Field {
         public final String fullClassName;
         public final String name;
@@ -227,13 +231,13 @@ public class Generator {
         public final boolean exclusiveMax;
         public final Optional<Integer> minItems;
         public final Optional<Integer> maxItems;
-        public final boolean isMap;
+        public final Optional<MapType> mapType;
 
         Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
-                boolean isMap) {
+                Optional<MapType> mapType) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
@@ -249,7 +253,7 @@ public class Generator {
             this.encoding = encoding;
             this.min = min;
             this.max = max;
-            this.isMap = isMap;
+            this.mapType = mapType;
         }
 
         public String fieldName(Cls cls) {
@@ -280,10 +284,18 @@ public class Generator {
             return fullClassName.equals("byte[]");
         }
 
+        public boolean isAdditionalProperties() {
+            return mapType.equals(Optional.of(MapType.ADDITIONAL_PROPERTIES));
+        }
+
         @Override
         public String toString() {
             return "Field [fullClassName=" + fullClassName + ", name=" + name + ", fieldName=" + fieldName
                     + ", required=" + required + ", minLength=" + minLength + ", maxLength=" + maxLength + "]";
+        }
+
+        public boolean mapTypeIs(MapType mt) {
+            return this.mapType.equals(Optional.of(mt));
         }
     }
 
@@ -321,7 +333,7 @@ public class Generator {
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
-                            previous.get().classType == ClassType.ARRAY_WRAPPER, isMap(schemaPath)));
+                            previous.get().classType == ClassType.ARRAY_WRAPPER, mapType(schemaPath)));
                 } else {
                     cls.fullClassName = names.schemaNameToFullClassName(cls.category, last.name);
                 }
@@ -393,7 +405,7 @@ public class Generator {
                     boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding,
-                            isMap(schemaPath));
+                            mapType(schemaPath));
                 } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
@@ -402,11 +414,12 @@ public class Generator {
                     // TODO pick up other constraints
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                            false, false, Encoding.DEFAULT, isMap(schemaPath));
+                            false, false, Encoding.DEFAULT, mapType(schemaPath));
                 } else {
                     // any object
                     String fieldName = current.nextFieldName(last.name);
-                    current.addField(Object.class.getCanonicalName(), last.name, fieldName, true, isArray, true);
+                    current.addField(Object.class.getCanonicalName(), last.name, fieldName, true, isArray,
+                            Optional.of(MapType.FIELD));
                 }
             }
         }
@@ -459,13 +472,19 @@ public class Generator {
         cls.hasProperties = Util.isObject(schema);
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(
-                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, isMap(schemaPath)));
+                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mapType(schemaPath)));
         // add additionalProperties if typed as Object
         if (schema.getAdditionalProperties() == Boolean.TRUE
                 || schema.getAdditionalProperties() == null && schema.getProperties() == null) {
             // TODO handle name collisions with `map` and other fields
+            final MapType mapType;
+            if (schema.getAdditionalProperties() == Boolean.TRUE) {
+                mapType = MapType.ADDITIONAL_PROPERTIES;
+            } else {
+                mapType = MapType.FIELD;
+            }
             cls.addField(Object.class.getCanonicalName(), fieldName.orElse("map"), fieldName.orElse("map"), true, false,
-                    true);
+                    Optional.of(mapType));
         }
     }
 
@@ -485,15 +504,19 @@ public class Generator {
             return contains(schemaPath.secondLast().schema.getRequired(), last.name)
                     || Util.isAllOf(schemaPath.secondLast().schema) || Util.isArray(schemaPath.secondLast().schema)
                     // or is additional properties schema
-                    || isMap(schemaPath);
+                    || mapType(schemaPath).equals(Optional.of(MapType.ADDITIONAL_PROPERTIES));
         }
     }
 
-    private static boolean isMap(ImmutableList<SchemaWithName> schemaPath) {
-        if (schemaPath.size() <= 1) {
-            return false;
+    private static Optional<MapType> mapType(ImmutableList<SchemaWithName> schemaPath) {
+        Schema<?> schema = schemaPath.last().schema;
+        if (schemaPath.size() > 1
+                && schemaPath.secondLast().schema.getAdditionalProperties() == schemaPath.last().schema) {
+            return Optional.of(MapType.ADDITIONAL_PROPERTIES);
+        } else if (Util.isMap(schema)) {
+            return Optional.of(MapType.FIELD);
         } else {
-            return schemaPath.secondLast().schema.getAdditionalProperties() == schemaPath.last().schema;
+            return Optional.empty();
         }
     }
 
@@ -524,7 +547,7 @@ public class Generator {
         }
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(
-                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, isMap(schemaPath)));
+                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mapType(schemaPath)));
     }
 
     private static PolymorphicType polymorphicType(Schema<?> schema) {
@@ -576,10 +599,10 @@ public class Generator {
                 used.add(o.toString());
             }
         }
-        cls.addField(cls.enumFullType, "value", "value", true, false, isMap(schemaPath));
+        cls.addField(cls.enumFullType, "value", "value", true, false, mapType(schemaPath));
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required,
-                isArray, isMap(schemaPath)));
+                isArray, mapType(schemaPath)));
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
@@ -589,9 +612,14 @@ public class Generator {
     private static String resolvedTypeNullable(Field f, Imports imports) {
         if (f.encoding == Encoding.OCTET) {
             return imports.add(String.class);
-        } else if (f.isArray && f.isMap) {
-            return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
-                    imports.add(String.class), imports.add(Object.class));
+        } else if (f.mapType.isPresent()) {
+            if (f.isArray) {
+                return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                        imports.add(String.class), imports.add(f.fullClassName));
+            } else {
+                return String.format("%s<%s, %s>", imports.add(Map.class),
+                        imports.add(String.class), imports.add(f.fullClassName));
+            }
         } else if (f.isArray) {
             return toList(f.fullClassName, imports, false);
         } else if (f.required) {
