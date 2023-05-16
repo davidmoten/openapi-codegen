@@ -107,7 +107,7 @@
                             <basePackage>org.davidmoten.oa3.codegen.test.main</basePackage>
                             <sources>
                                 <includes>
-                                    <include>openapi.yml</include>
+                                    <include>main.yml</include>
                                 </includes>
                             </sources>
                         </configuration>
