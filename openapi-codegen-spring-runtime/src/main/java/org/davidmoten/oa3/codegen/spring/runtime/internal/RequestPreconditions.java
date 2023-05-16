@@ -1,6 +1,7 @@
 package org.davidmoten.oa3.codegen.spring.runtime.internal;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.runtime.PreconditionsBase;
@@ -58,7 +59,15 @@ public final class RequestPreconditions {
         return p.checkMaxLength(s, maxLength, name);
     }
 
-    public static Optional<String> checkMaxLength(Optional<String> s, int maxLength, String name) {
+    public static <T extends Collection<String>> T checkMinLength(T list, int minLength, String name) {
+        return p.checkMinLength(list, minLength, name);
+    }
+
+    public static <T extends Collection<String>> T checkMaxLength(T list, int maxLength, String name) {
+        return p.checkMaxLength(list, maxLength, name);
+    }
+
+    public static <T> Optional<T> checkMaxLength(Optional<T> s, int maxLength, String name) {
         return p.checkMaxLength(s, maxLength, name);
     }
 
@@ -80,6 +89,10 @@ public final class RequestPreconditions {
 
     public static String checkMatchesPattern(String s, String pattern, String name) {
         return p.checkMatchesPattern(s, pattern, name);
+    }
+    
+    public static <T extends Collection<String>> T checkMatchesPattern(T list, String pattern, String name) {
+        return p.checkMatchesPattern(list, pattern, name);
     }
 
     public static Optional<String> checkMatchesPattern(Optional<String> s, String pattern, String name) {
