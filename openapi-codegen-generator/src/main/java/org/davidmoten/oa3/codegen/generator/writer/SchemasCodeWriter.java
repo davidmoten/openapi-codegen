@@ -423,12 +423,12 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
+        boolean hasNonMapOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.mapType.isPresent());
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters
         // and a public constructor with Optional parameters
-        final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
+        final String visibility = cls.classType == ClassType.ENUM || hasNonMapOptional || hasBinary || !interfaces.isEmpty()
                 ? "private"
                 : "public";
         if (visibility.equals("public")) {
@@ -461,7 +461,7 @@ public final class SchemasCodeWriter {
         out.closeParen();
         boolean hasAdditionalProperties = cls.fields.stream()
                 .anyMatch(Field::isAdditionalProperties);
-        if (hasOptional || !interfaces.isEmpty() || hasBinary || hasAdditionalProperties) {
+        if (hasNonMapOptional || !interfaces.isEmpty() || hasBinary || hasAdditionalProperties) {
             out.right().right();
             String parametersOptional = cls.fields //
                     .stream() //

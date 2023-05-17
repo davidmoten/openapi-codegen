@@ -39,7 +39,7 @@ public final class Util {
     }
 
     public static boolean isObject(Schema<?> schema) {
-        return schema.getType() == null && schema.getProperties() != null || "object".equals(schema.getType());
+        return schema.getType() == null  || "object".equals(schema.getType());
     }
 
     public static boolean isArray(Schema<?> schema) {

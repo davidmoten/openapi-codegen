@@ -55,8 +55,8 @@ class Apis {
         }
     }
 
-    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, Header header, Visitor visitor,
-            OpenAPI api) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, Header header,
+            Visitor visitor, OpenAPI api) {
         if (header != null) {
             header = resolveRefs(api, header);
             visitSchemas(category, names, header.getSchema(), visitor);
@@ -199,7 +199,13 @@ class Apis {
     static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
         visitor.startSchema(category, schemaPath);
+        if (schema.getAdditionalProperties() == Boolean.TRUE) {
+            // modifies the tree because Boolean.TRUE here is equivalent to
+            // an the presence of an empty schema = Map<String, Object> resultant type
+            schema.setAdditionalProperties(new Schema<>());
+        }
         if (schema.getAdditionalProperties() instanceof Schema) {
+            System.out.println(schemaPath + ", " + schema.getAdditionalProperties().getClass());
             visitSchemas(category,
                     schemaPath.add(
                             new SchemaWithName("additionalProperties", (Schema<?>) schema.getAdditionalProperties())),

@@ -508,29 +508,35 @@ public class Generator {
 
     private static void handleObject(ImmutableList<SchemaWithName> schemaPath, SchemaWithName last, Schema<?> schema,
             final Cls cls, boolean isArray, Optional<Cls> previous, final Optional<String> fieldName) {
+        System.out.println("handleObject: " + schemaPath);
         cls.classType = ClassType.CLASS;
         cls.hasProperties = Util.isObject(schema);
         boolean required = fieldIsRequired(schemaPath);
         Optional<MapType> mt = mapType(schemaPath);
-        if (mt.isPresent() && mt.get() == MapType.FIELD) {
-            mt = Optional.empty();
+        if (!mt.isPresent() && "object".equals(schema.getType()) && schema.getProperties() == null
+                && schema.get$ref() == null) {
+            mt = Optional.of(MapType.FIELD);
         }
+        System.out.println("mt="+ mt);
+//        if (mt.isPresent() && mt.get() == MapType.FIELD) {
+//            mt = Optional.empty();
+//        }
         Optional<MapType> mt2 = mt;
         previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mt2));
-        // TODO this block may not be needed, nest
-        // add additionalProperties if typed as Object
-        if (schema.getAdditionalProperties() == Boolean.TRUE
-                || schema.getProperties() == null && schema.get$ref() == null) {
-            // TODO handle name collisions with `map` and other fields
-            final MapType mapType;
-            if (schema.getAdditionalProperties() == Boolean.TRUE) {
-                mapType = MapType.ADDITIONAL_PROPERTIES;
-            } else {
-                mapType = MapType.FIELD;
-            }
-            cls.addField(Object.class.getCanonicalName(), fieldName.orElse("map"), fieldName.orElse("map"), true, false,
-                    Optional.of(mapType));
-        }
+//        // TODO this block may not be needed, nest
+//        // add additionalProperties if typed as Object
+//        if (schema.getAdditionalProperties() == Boolean.TRUE
+//                || schema.getProperties() == null && schema.get$ref() == null) {
+//            // TODO handle name collisions with `map` and other fields
+//            final MapType mapType;
+//            if (schema.getAdditionalProperties() == Boolean.TRUE) {
+//                mapType = MapType.ADDITIONAL_PROPERTIES;
+//            } else {
+//                mapType = MapType.FIELD;
+//            }
+//            cls.addField(Object.class.getCanonicalName(), fieldName.orElse("map"), fieldName.orElse("map"), true, false,
+//                    Optional.of(mapType));
+//        }
     }
 
     public enum Encoding {
@@ -555,11 +561,14 @@ public class Generator {
 
     private static Optional<MapType> mapType(ImmutableList<SchemaWithName> schemaPath) {
         Schema<?> schema = schemaPath.last().schema;
-        if (schemaPath.size() > 1
-                && schemaPath.secondLast().schema.getAdditionalProperties() == schemaPath.last().schema) {
+        if (schemaPath.size() > 1 && schemaPath.secondLast().schema.getAdditionalProperties() == schema) {
             return Optional.of(MapType.ADDITIONAL_PROPERTIES);
         } else if (Util.isMap(schema)) {
-            return Optional.of(MapType.FIELD);
+            if (schemaPath.size() == 1) {
+                return Optional.of(MapType.ADDITIONAL_PROPERTIES);
+            } else {
+                return Optional.of(MapType.FIELD);
+            }
         } else {
             return Optional.empty();
         }
