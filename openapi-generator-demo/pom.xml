@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.github.davidmoten</groupId>
         <artifactId>openapi-codegen-parent</artifactId>
-        <version>0.1-alpha-3-SNAPSHOT</version>
+        <version>0.1-alpha-7-SNAPSHOT</version>
     </parent>
     <artifactId>openapi-generator-demo</artifactId>
     <name>${project.artifactId}</name>
@@ -63,6 +63,11 @@
             <artifactId>jackson-databind-nullable</artifactId>
             <version>0.2.6</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
     </dependencies>
 
     <!-- This is to ignore the managed version inherited from parent. spring-boot-starter breaks
@@ -93,7 +98,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml</inputSpec>
+                            <inputSpec>${project.basedir}/../openapi-codegen-maven-plugin-test/src/main/openapi/main.yml</inputSpec>
                             <generatorName>java</generatorName>
                             <apiPackage>demo.api</apiPackage>
                             <modelPackage>demo.model</modelPackage>
