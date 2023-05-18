@@ -789,7 +789,7 @@ public class SchemasTest {
     @Test
     public void testAdditionalProperties() throws JsonProcessingException {
         AdditionalProperties a = AdditionalProperties.builder() //
-                .addToMap("hello", 1L) //
+                .addToProperties("hello", 1L) //
                 .add("there", 23L) //
                 .buildMap() //
                 .age(21) //
@@ -799,13 +799,13 @@ public class SchemasTest {
         JsonNode tree = m.readTree(json);
         assertEquals("fred", tree.get("name").asText());
         assertEquals(21, tree.get("age").asInt());
-        assertEquals(1L, a.map().get("hello"));
-        assertEquals(23L, a.map().get("there"));
+        assertEquals(1L, a.properties().get("hello"));
+        assertEquals(23L, a.properties().get("there"));
         AdditionalProperties b = m.readValue(json, AdditionalProperties.class);
         assertEquals("fred", b.name().get());
         assertEquals(21, b.age().get());
-        assertEquals(1L, b.map().get("hello"));
-        assertEquals(23L, b.map().get("there"));
+        assertEquals(1L, b.properties().get("hello"));
+        assertEquals(23L, b.properties().get("there"));
         @SuppressWarnings("unused")
         Geometry g = Geometry.of(Circle.builder() //
                 .lat(Latitude.value(-35f)) //
@@ -818,7 +818,7 @@ public class SchemasTest {
     public void testAdditionalPropertiesTrue() throws JsonProcessingException {
         Circle c = Circle.builder().lat(Latitude.value(11f)).lon(Longitude.value(123f)).radiusNm(123).build();
         AdditionalPropertiesTrue a = AdditionalPropertiesTrue.builder() //
-                .addToMap("hello", 1L) //
+                .addToProperties("hello", 1L) //
                 .add("there", c) //
                 .buildMap() //
                 .age(21) //
@@ -828,26 +828,26 @@ public class SchemasTest {
         JsonNode tree = m.readTree(json);
         assertEquals("fred", tree.get("name").asText());
         assertEquals(21, tree.get("age").asInt());
-        assertEquals(1L, a.map().get("hello"));
-        assertEquals(c, a.map().get("there"));
+        assertEquals(1L, a.properties().get("hello"));
+        assertEquals(c, a.properties().get("there"));
         AdditionalPropertiesTrue b = m.readValue(json, AdditionalPropertiesTrue.class);
         assertEquals("fred", b.name().get());
         assertEquals(21, b.age().get());
-        assertEquals(1, b.map().get("hello"));
+        assertEquals(1, b.properties().get("hello"));
         @SuppressWarnings("unchecked")
-        Map<String, Object> circle = (Map<String, Object>) b.map().get("there");
+        Map<String, Object> circle = (Map<String, Object>) b.properties().get("there");
         assertEquals(11.0, (Double) circle.get("lat"), 0.0001);
         assertEquals(123.0, (Double) circle.get("lon"), 0.0001);
     }
     
     @Test
     public void testAdditionalPropertiesNested() throws JsonProcessingException {
-        Map<String, AdditionalPropertiesNested.Map> map = new HashMap<>();
-        map.put("hello",AdditionalPropertiesNested.Map.map(Maps.hashMap().put("hi", "hola").build()));
-        AdditionalPropertiesNested a = AdditionalPropertiesNested.map(map);
+        Map<String, AdditionalPropertiesNested.Properties> map = new HashMap<>();
+        map.put("hello",AdditionalPropertiesNested.Properties.properties(Maps.hashMap().put("hi", "hola").build()));
+        AdditionalPropertiesNested a = AdditionalPropertiesNested.properties(map);
         String json = m.writeValueAsString(a);
         AdditionalPropertiesNested b = m.readValue(json, AdditionalPropertiesNested.class);
-        assertEquals(map, b.map());
+        assertEquals(map, b.properties());
     }
 
     @Test
@@ -855,11 +855,11 @@ public class SchemasTest {
         Map<String, Object> map = new HashMap<>();
         map.put("hello", "there");
         map.put("answer", 42);
-        UntypedObject a = UntypedObject.map(map);
+        UntypedObject a = UntypedObject.properties(map);
         String json = m.writeValueAsString(a);
         UntypedObject b = m.readValue(json, UntypedObject.class);
-        assertEquals("there", b.map().get("hello"));
-        assertEquals(42, b.map().get("answer"));
+        assertEquals("there", b.properties().get("hello"));
+        assertEquals(42, b.properties().get("answer"));
     }
 
     @Test
