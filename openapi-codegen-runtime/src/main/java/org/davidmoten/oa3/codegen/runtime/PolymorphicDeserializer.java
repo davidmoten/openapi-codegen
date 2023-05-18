@@ -42,6 +42,8 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
     private static <T> T deserializePoly(ObjectMapper mapper, JsonParser p, DeserializationContext ctxt,
             List<Class<?>> classes, Class<T> cls, PolymorphicType type) throws IOException {
         TreeNode tree = p.getCodec().readTree(p);
+        // TODO don't have to generate json because can use tree.traverse to get a
+        // parser to read value, perf advantage and can stop plugging in ObjectMapper
         String json = mapper.writeValueAsString(tree);
         if (type == PolymorphicType.ANY_OF) {
             return deserializeAnyOf(mapper, json, classes, cls, ctxt);
@@ -59,7 +61,8 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
             try {
                 Object o = mapper.readValue(json, c);
                 return newInstance(cls, o);
-            } catch (DatabindException e) {} // NOPMD
+            } catch (DatabindException e) {
+            } // NOPMD
         }
         throw JsonMappingException.from(ctxt,
                 "json did not match any of the possible classes: " + classes + ", json=\n" + json);
@@ -78,7 +81,8 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                     v = newInstance(cls, o);
                     count++;
                 }
-            } catch (DatabindException e) {} // NOPMD
+            } catch (DatabindException e) {
+            } // NOPMD
         }
         if (count == 1) {
             return v;
