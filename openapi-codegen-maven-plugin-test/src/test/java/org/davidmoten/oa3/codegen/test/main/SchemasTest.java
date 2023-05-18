@@ -106,6 +106,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.github.davidmoten.guavamini.Lists;
+import com.github.davidmoten.guavamini.Maps;
 
 public class SchemasTest {
 
@@ -860,20 +861,25 @@ public class SchemasTest {
     }
 
     @Test
-    public void testAnyObjectProperty() {
+    public void testAnyObjectProperty() throws JsonProcessingException {
         // use of {} type translates to a Map (normally a LinkedHashMap)
-        AnyObjectProperty a = AnyObjectProperty.stuff(Collections.emptyMap());
-        assertTrue(a.stuff().isEmpty());
+        Map<String, Object> map = Maps.hashMap().<String, Object>put("hello", "there").build();
+        AnyObjectProperty a = AnyObjectProperty.stuff(map);
+        String json = m.writeValueAsString(a);
+        AnyObjectProperty b = m.readValue(json, AnyObjectProperty.class);
+        assertEquals(map, b.stuff());
     }
-    
+
     @Test
-    public void testAnyObjectProperty2() {
+    public void testAnyObjectProperty2() throws JsonProcessingException {
         // use of {} type translates to a Map (normally a LinkedHashMap)
         AnyObjectProperty2 a = AnyObjectProperty2.builder().stuff(Collections.emptyMap()).other("abc").build();
-        assertTrue(a.stuff().isEmpty());
-        assertEquals("abc", a.other());
+        String json = m.writeValueAsString(a);
+        AnyObjectProperty2 b = m.readValue(json, AnyObjectProperty2.class);
+        assertTrue(b.stuff().isEmpty());
+        assertEquals("abc", b.other());
     }
-    
+
     @Test
     public void testTwoMaps() throws JsonProcessingException {
         Map<String, Object> map1 = new HashMap<>();
