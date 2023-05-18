@@ -118,7 +118,7 @@ public class Generator {
                     } else {
                         a = s;
                     }
-                    if (!fieldNames.contains(a)) {
+                    if (!fieldNames.contains(s)) {
                         break;
                     }
                     i++;
@@ -510,7 +510,7 @@ public class Generator {
             final Cls cls, boolean isArray, Optional<Cls> previous, final Optional<String> fieldName) {
         System.out.println("handleObject: " + schemaPath);
         cls.classType = ClassType.CLASS;
-        cls.hasProperties = true;
+        cls.hasProperties = Util.isObject(schema);
         boolean required = fieldIsRequired(schemaPath);
         Optional<MapType> mt = mapType(schemaPath);
         if (!mt.isPresent() && "object".equals(schema.getType()) && schema.getProperties() == null
