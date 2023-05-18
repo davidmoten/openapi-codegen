@@ -905,14 +905,20 @@ components:
       properties: 
         sarArea:
           $ref: '#/components/schemas/SARBroadcastArea'
+        serviceType:
+          $ref: '#/components/schemas/SARServiceType'
         priority:
           $ref: '#/components/schemas/SARPriority'
-      required: [priority]
+      required: [priority, serviceType]
           
     SARBroadcastArea:
       oneOf:
       - $ref: '#/components/schemas/Geometry'
       - $ref: '#/components/schemas/NavArea'
+      
+    SARServiceType:
+      type: string
+      enum: [SHORE_TO_SHIP_DISTRESS_ALERT, SAR_COORDINATION, SHORE_TO_SHIP_URGENCY_OR_SAFETY, GENERAL]
          
     MetBroadcast:
       type: object
@@ -921,7 +927,7 @@ components:
           $ref: '#/components/schemas/MetBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
-      required: [area]
+      required: [area, priority]
       
     MetBroadcastArea:
       oneOf:
@@ -938,7 +944,7 @@ components:
           $ref: '#/components/schemas/NavOrPiracyBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
-      required: [area]    
+      required: [navBroadcastArea, priority]    
       
     PiracyBroadcast:
       type: object
@@ -947,7 +953,7 @@ components:
           $ref: '#/components/schemas/NavOrPiracyBroadcastArea' 
         priority:
           $ref: '#/components/schemas/NonSARPriority'
-      required: [area]    
+      required: [piracyBroadcastArea, priority]    
         
     NavOrPiracyBroadcastArea:
       oneOf:
@@ -1060,7 +1066,6 @@ components:
         long as 4096 characters but good to put an upper bound on it. 
       example: 10
 
-
 ##########################################
 ### End of egc-api, start of unit tests
 ##########################################      
@@ -1128,7 +1133,6 @@ components:
       items:
         type: integer
         format: int32
-        
         
     ArrayComplex:
       type: array
@@ -1204,8 +1208,6 @@ components:
         shapeType:
           type: string
       required: [shapeType]      
-      
-      
       
     SimpleLong:
       type: integer
