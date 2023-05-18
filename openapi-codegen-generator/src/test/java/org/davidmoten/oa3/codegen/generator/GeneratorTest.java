@@ -17,7 +17,7 @@ public final class GeneratorTest {
     }
 
     @Test
-    public void testGenerateOpenApi() throws IOException {
+    public void testGenerateMain() throws IOException {
         generate("main.yml");
     }
     

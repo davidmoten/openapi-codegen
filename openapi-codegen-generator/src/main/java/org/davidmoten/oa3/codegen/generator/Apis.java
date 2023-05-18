@@ -55,8 +55,8 @@ class Apis {
         }
     }
 
-    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, Header header, Visitor visitor,
-            OpenAPI api) {
+    private static void visitSchemas(SchemaCategory category, ImmutableList<String> names, Header header,
+            Visitor visitor, OpenAPI api) {
         if (header != null) {
             header = resolveRefs(api, header);
             visitSchemas(category, names, header.getSchema(), visitor);
@@ -199,13 +199,19 @@ class Apis {
     static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
         visitor.startSchema(category, schemaPath);
+        if (schema instanceof ObjectSchema && schema.getProperties() == null
+                && schema.getAdditionalProperties() == null) {
+            schema.setAdditionalProperties(Boolean.TRUE);
+        }
+        if (Boolean.TRUE.equals(schema.getAdditionalProperties())) {
+            schema.setAdditionalProperties(new Schema<>());
+        }
         if (schema.getAdditionalProperties() instanceof Schema) {
             visitSchemas(category,
                     schemaPath.add(
                             new SchemaWithName("additionalProperties", (Schema<?>) schema.getAdditionalProperties())),
                     visitor);
-        }
-        if (schema.getNot() != null) {
+        } else if (schema.getNot() != null) {
             visitSchemas(category, schemaPath.add(new SchemaWithName("not", schema.getNot())), visitor);
         }
         if (schema.getProperties() != null) {

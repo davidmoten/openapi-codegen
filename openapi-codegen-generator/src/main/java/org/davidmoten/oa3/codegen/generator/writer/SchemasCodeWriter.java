@@ -101,6 +101,8 @@ public final class SchemasCodeWriter {
             out.println();
             out.format("%s", IMPORTS_HERE);
         }
+        // reserve class names in Imports for member classes
+        reserveMemberClassNamesInImports(out.imports(), cls);
         writeClassDeclaration(out, cls, fullClassNameInterfaces);
         writeEnumMembers(out, cls);
         if (isPolymorphic(cls)) {
@@ -119,6 +121,14 @@ public final class SchemasCodeWriter {
             writeToStringMethod(out, cls);
         }
         out.closeParen();
+    }
+
+    private static void reserveMemberClassNamesInImports(Imports imports, Cls cls) {
+        if (cls.classes.isEmpty()) {
+            return;
+        }
+        cls.classes.forEach(c -> reserveMemberClassNamesInImports(imports, c));
+        cls.classes.forEach(c -> imports.add(c.fullClassName));
     }
 
     private static boolean isPolymorphic(Cls cls) {
@@ -587,7 +597,7 @@ public final class SchemasCodeWriter {
 
     private static void writeEqualsMethod(CodePrintWriter out, Cls cls) {
         addOverrideAnnotation(out);
-        out.line("public boolean equals(Object o) {");
+        out.line("public boolean equals(%s o) {", Object.class);
         out.line("if (this == o) {");
         out.line("return true;");
         out.closeParen();

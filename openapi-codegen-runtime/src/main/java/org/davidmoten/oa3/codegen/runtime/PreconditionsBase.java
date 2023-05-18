@@ -80,16 +80,22 @@ public final class PreconditionsBase {
         return s;
     }
 
-    public Optional<String> checkMinLength(Optional<String> s, int minLength, String name) {
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> checkMinLength(Optional<T> s, int minLength, String name) {
         if (s.isPresent()) {
-            checkMinLength(s.get(), minLength, name);
+            if (s.get() instanceof Collection) {
+                checkMaxLength((Collection<String>) s.get(), minLength, name);
+            } else {
+                checkMinLength((String) s.get(), minLength, name);
+            }
         }
         return s;
     }
-    
+
+
     public <T extends Collection<String>> T checkMinLength(T list, int minLength, String name) {
         if (list.stream().filter(x -> x.length() < minLength).findAny().isPresent()) {
-            throw factory.apply(name + " elements must have a length of at least " + minLength); 
+            throw factory.apply(name + " elements must have a length of at least " + minLength);
         }
         return list;
     }
@@ -100,17 +106,22 @@ public final class PreconditionsBase {
         }
         return s;
     }
-    
+
     public <T extends Collection<String>> T checkMaxLength(T list, int maxLength, String name) {
         if (list.stream().filter(x -> x.length() > maxLength).findAny().isPresent()) {
-            throw factory.apply(name + " elements must have a length of at most " + maxLength); 
+            throw factory.apply(name + " elements must have a length of at most " + maxLength);
         }
         return list;
     }
 
-    public Optional<String> checkMaxLength(Optional<String> s, int maxLength, String name) {
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> checkMaxLength(Optional<T> s, int maxLength, String name) {
         if (s.isPresent()) {
-            checkMaxLength(s.get(), maxLength, name);
+            if (s.get() instanceof Collection) {
+                checkMaxLength((Collection<String>) s.get(), maxLength, name);
+            } else {
+                checkMaxLength((String) s.get(), maxLength, name);
+            }
         }
         return s;
     }
@@ -149,7 +160,7 @@ public final class PreconditionsBase {
         }
         return s;
     }
-    
+
     public <T extends Collection<String>> T checkMatchesPattern(T list, String pattern, String name) {
         if (list != null && list.stream().filter(x -> !Pattern.matches(pattern, x)).findAny().isPresent()) {
             throw factory.apply(name + " elements must match this regex pattern: " + pattern);
