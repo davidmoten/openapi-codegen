@@ -58,11 +58,12 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
             DeserializationContext ctxt) throws JsonProcessingException {
         for (Class<?> c : classes) {
             // try to deserialize with each of the member classes
+            // @formatter:off            
             try {
                 Object o = mapper.readValue(json, c);
                 return newInstance(cls, o);
-            } catch (DatabindException e) {
-            } // NOPMD
+            } catch (DatabindException e) {} // NOPMD
+            // @formatter:on
         }
         throw JsonMappingException.from(ctxt,
                 "json did not match any of the possible classes: " + classes + ", json=\n" + json);
@@ -74,6 +75,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         int count = 0;
         for (Class<?> c : classes) {
             // try to deserialize with each of the member classes
+            // @formatter:off
             try {
                 // Jackson very permissive with readValue so we will tighten things up a bit
                 if (!c.equals(String.class) || json.startsWith("\"") && json.endsWith("\"")) {
@@ -81,8 +83,8 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                     v = newInstance(cls, o);
                     count++;
                 }
-            } catch (DatabindException e) {
-            } // NOPMD
+            } catch (DatabindException e) {} // NOPMD
+            // @formatter:on
         }
         if (count == 1) {
             return v;
