@@ -201,7 +201,15 @@ public final class Names {
     }
 
     public static String simpleClassNameFromSimpleName(String name) {
-        return upperFirst(toIdentifier(name));
+        return upperFirst(skipUnderscoresAtStart(toIdentifier(name)));
+    }
+
+    private static String skipUnderscoresAtStart(String s) {
+        int i = 0;
+        while (s.charAt(i) == '_' && i < s.length() - 1) {
+            i++;
+        }
+        return s.substring(i);
     }
 
     public static String enumNameToEnumConstant(String s) {
