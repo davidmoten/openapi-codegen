@@ -459,7 +459,7 @@ public class Generator {
                     // any object
                     String fieldName = current.nextFieldName(last.name);
                     current.addField(Object.class.getCanonicalName(), last.name, fieldName, true, isArray,
-                            Optional.of(MapType.FIELD));
+                            mapType(schemaPath));
                 }
             }
         }
@@ -517,20 +517,6 @@ public class Generator {
         }
         Optional<MapType> mt2 = mt;
         previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mt2));
-        // TODO this block may not be needed, nest
-        // add additionalProperties if typed as Object
-        if (schema.getAdditionalProperties() == Boolean.TRUE
-                || schema.getProperties() == null && schema.get$ref() == null) {
-            // TODO handle name collisions with `map` and other fields
-            final MapType mapType;
-            if (schema.getAdditionalProperties() == Boolean.TRUE) {
-                mapType = MapType.ADDITIONAL_PROPERTIES;
-            } else {
-                mapType = MapType.FIELD;
-            }
-            cls.addField(Object.class.getCanonicalName(), fieldName.orElse("map"), fieldName.orElse("map"), true, false,
-                    Optional.of(mapType));
-        }
     }
 
     public enum Encoding {
@@ -558,11 +544,16 @@ public class Generator {
         if (schemaPath.size() > 1
                 && schemaPath.secondLast().schema.getAdditionalProperties() == schemaPath.last().schema) {
             return Optional.of(MapType.ADDITIONAL_PROPERTIES);
-        } else if (Util.isMap(schema)) {
+        } else if (Util.isMap(schema) || allNulls(schema)) {
             return Optional.of(MapType.FIELD);
         } else {
             return Optional.empty();
         }
+    }
+
+    private static boolean allNulls(Schema<?> s) {
+        return s.getClass().equals(Schema.class) && s.getType() == null && s.getProperties() == null
+                && s.getAdditionalProperties() == null && s.get$ref() == null && s.getAdditionalItems() == null;
     }
 
     private static void handlePolymorphism(ImmutableList<SchemaWithName> schemaPath, Cls cls, Names names,

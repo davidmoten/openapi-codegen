@@ -26,6 +26,7 @@ import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalProperties;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty.Counts;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfComplexType;
@@ -92,8 +93,8 @@ import org.davidmoten.oa3.codegen.test.main.schema.Square;
 import org.davidmoten.oa3.codegen.test.main.schema.Square2;
 import org.davidmoten.oa3.codegen.test.main.schema.Status;
 import org.davidmoten.oa3.codegen.test.main.schema.Table;
-import org.davidmoten.oa3.codegen.test.main.schema.TwoMaps;
 import org.davidmoten.oa3.codegen.test.main.schema.Table.TableItem;
+import org.davidmoten.oa3.codegen.test.main.schema.TwoMaps;
 import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
 import org.davidmoten.oa3.codegen.util.Util;
@@ -813,7 +814,7 @@ public class SchemasTest {
     public void testAdditionalPropertiesTrue() throws JsonProcessingException {
         Circle c = Circle.builder().lat(Latitude.value(11f)).lon(Longitude.value(123f)).radiusNm(123).build();
         AdditionalPropertiesTrue a = AdditionalPropertiesTrue.builder() //
-                .addToMap("hello", 1L) //
+                .addToAdditionalProperties("hello", 1L) //
                 .add("there", c) //
                 .buildMap() //
                 .age(21) //
@@ -823,14 +824,14 @@ public class SchemasTest {
         JsonNode tree = m.readTree(json);
         assertEquals("fred", tree.get("name").asText());
         assertEquals(21, tree.get("age").asInt());
-        assertEquals(1L, a.map().get("hello"));
-        assertEquals(c, a.map().get("there"));
+        assertEquals(1L, a.additionalProperties().get("hello"));
+        assertEquals(c, a.additionalProperties().get("there"));
         AdditionalPropertiesTrue b = m.readValue(json, AdditionalPropertiesTrue.class);
         assertEquals("fred", b.name().get());
         assertEquals(21, b.age().get());
-        assertEquals(1, b.map().get("hello"));
+        assertEquals(1, b.additionalProperties().get("hello"));
         @SuppressWarnings("unchecked")
-        Map<String, Object> circle = (Map<String, Object>) b.map().get("there");
+        Map<String, Object> circle = (Map<String, Object>) b.additionalProperties().get("there");
         assertEquals(11.0, (Double) circle.get("lat"), 0.0001);
         assertEquals(123.0, (Double) circle.get("lon"), 0.0001);
     }
@@ -840,11 +841,11 @@ public class SchemasTest {
         Map<String, Object> map = new HashMap<>();
         map.put("hello", "there");
         map.put("answer", 42);
-        UntypedObject a = UntypedObject.map(map);
+        UntypedObject a = UntypedObject.additionalProperties(map);
         String json = m.writeValueAsString(a);
         UntypedObject b = m.readValue(json, UntypedObject.class);
-        assertEquals("there", b.map().get("hello"));
-        assertEquals(42, b.map().get("answer"));
+        assertEquals("there", b.additionalProperties().get("hello"));
+        assertEquals(42, b.additionalProperties().get("answer"));
     }
 
     @Test
@@ -863,6 +864,14 @@ public class SchemasTest {
         // use of {} type translates to a Map (normally a LinkedHashMap)
         AnyObjectProperty a = AnyObjectProperty.stuff(Collections.emptyMap());
         assertTrue(a.stuff().isEmpty());
+    }
+    
+    @Test
+    public void testAnyObjectProperty2() {
+        // use of {} type translates to a Map (normally a LinkedHashMap)
+        AnyObjectProperty2 a = AnyObjectProperty2.builder().stuff(Collections.emptyMap()).other("abc").build();
+        assertTrue(a.stuff().isEmpty());
+        assertEquals("abc", a.other());
     }
     
     @Test
