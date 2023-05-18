@@ -1642,7 +1642,14 @@ components:
         props:
           type: object
           additionalProperties:
-            type: integer        
+            type: integer       
+
+    AdditionalPropertiesNested:
+      type: object
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: string                           
       
     UntypedObject:
       type: object
