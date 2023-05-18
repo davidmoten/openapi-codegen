@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalProperties;
+import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNested;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
@@ -837,6 +838,16 @@ public class SchemasTest {
         Map<String, Object> circle = (Map<String, Object>) b.map().get("there");
         assertEquals(11.0, (Double) circle.get("lat"), 0.0001);
         assertEquals(123.0, (Double) circle.get("lon"), 0.0001);
+    }
+    
+    @Test
+    public void testAdditionalPropertiesNested() throws JsonProcessingException {
+        Map<String, AdditionalPropertiesNested.Map> map = new HashMap<>();
+        map.put("hello",AdditionalPropertiesNested.Map.map(Maps.hashMap().put("hi", "hola").build()));
+        AdditionalPropertiesNested a = AdditionalPropertiesNested.map(map);
+        String json = m.writeValueAsString(a);
+        AdditionalPropertiesNested b = m.readValue(json, AdditionalPropertiesNested.class);
+        assertEquals(map, b.map());
     }
 
     @Test
