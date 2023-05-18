@@ -118,7 +118,7 @@ public class Generator {
                     } else {
                         a = s;
                     }
-                    if (!fieldNames.contains(s)) {
+                    if (!fieldNames.contains(a)) {
                         break;
                     }
                     i++;
