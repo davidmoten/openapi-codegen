@@ -292,7 +292,11 @@ public class ClientServerGenerator {
     private Schema<?> resolveRefs(Schema<?> schema) {
         Schema<?> s = schema;
         while (s.get$ref() != null) {
-            s = refCls.get(s.get$ref()).schema.get();
+            Cls x = refCls.get(s.get$ref());
+            if (x == null) {
+                throw new RuntimeException("could not find cls for $ref=" + s.get$ref());
+            }
+            s = x.schema.get();
         }
         return s;
     }

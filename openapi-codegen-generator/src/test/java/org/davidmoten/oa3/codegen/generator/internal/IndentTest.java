@@ -1,15 +1,18 @@
 package org.davidmoten.oa3.codegen.generator.internal;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class IndentTest {
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testMoreLeftThanRight() {
-        Indent indent = new Indent();
-        indent.left();
+        assertThrows(RuntimeException.class, () -> {
+            Indent indent = new Indent();
+            indent.left();
+        });
     }
 
     @Test
