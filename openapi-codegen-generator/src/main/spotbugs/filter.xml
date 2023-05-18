@@ -11,8 +11,6 @@
   <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
   <Bug pattern="EI_EXPOSE_REP"/>
   <Bug pattern="EI_EXPOSE_REP2"/>
-  <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
-
   <And>
     <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
     <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
@@ -20,6 +18,10 @@
   <And>
     <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
     <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>
+  </And>
+  <And>
+    <Bug pattern="RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN"/>
+    <Class name="org.davidmoten.oa3.codegen.generator.Generator"/>
   </And>
   <And>
     <Bug category="STYLE"/>

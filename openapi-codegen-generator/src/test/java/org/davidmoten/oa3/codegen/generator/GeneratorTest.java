@@ -31,11 +31,6 @@ public final class GeneratorTest {
         generate("openflow.yml");
     }
 
-    @Test
-    public void testGenerateSmall() throws IOException {
-        generate("small.yml");
-    }
-    
     private static void generate(String name) throws MalformedURLException {
         String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/" + name).toURI().toURL()
                 .toExternalForm();

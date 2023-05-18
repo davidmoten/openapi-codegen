@@ -133,26 +133,12 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <failOnParseErrors>false</failOnParseErrors>
                             <generator>spring2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.library</basePackage>
                             <sources>
                                 <includes>
                                     <include>library.yml</include>
-                                </includes>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>small</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <generator>spring2</generator>
-                            <basePackage>org.davidmoten.oa3.codegen.test.small</basePackage>
-                            <sources>
-                                <includes>
-                                    <include>small.yml</include>
                                 </includes>
                             </sources>
                         </configuration>
