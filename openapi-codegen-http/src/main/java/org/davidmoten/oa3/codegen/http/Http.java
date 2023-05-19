@@ -59,12 +59,22 @@ public final class Http {
             return new BuilderWithBasePath(this);
         }
 
-        public Builder header(String key, String value) {
+        public Builder header(String key, Object value) {
             if ("CONTENT-TYPE".equals(key.toUpperCase(Locale.ENGLISH))) {
                 throw new IllegalArgumentException("set content type in the builder just after setting the body");
             }
-            headers.put(key, value);
+            if (value != null) {
+                headers.put(key, value.toString());
+            }
             return this;
+        }
+
+        public Builder header(String key, Optional<?> value) {
+            if (value.isPresent()) {
+                return header(key, value.get());
+            } else {
+                return this;
+            }
         }
 
         public Builder allowPatch() {

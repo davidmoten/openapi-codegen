@@ -24,7 +24,7 @@ public final class WriterUtil {
 
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
     public static final String IMPORTS_HERE = "IMPORTS_HERE";
-    
+
     private static final String version = readVersion();
 
     private static String readVersion() {
@@ -74,12 +74,16 @@ public final class WriterUtil {
                 .map(Optional::get) //
                 .collect(Collectors.joining("\n\n"));
         if (!Javadoc.printJavadoc(out, out.indent(), WriterUtil.markdownToHtml(text), true)) {
-           out.println();
+            out.println();
         }
     }
-    
+
     public static void addGeneratedAnnotation(CodePrintWriter out) {
         out.line("@%s(value = \"%s\")", Generated.class, version);
+    }
+
+    public static String escapePattern(String pattern) {
+        return pattern.replace("\\", "\\\\");
     }
 
 }

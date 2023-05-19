@@ -294,7 +294,7 @@ public final class ServerCodeWriterSpringBoot {
                 }
                 if (x.pattern.isPresent()) {
                     out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class, p.identifier,
-                            x.pattern.get(), p.identifier);
+                            WriterUtil.escapePattern(x.pattern.get()), p.identifier);
                 }
                 if (x.min.isPresent()) {
                     out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,

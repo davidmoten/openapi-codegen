@@ -571,7 +571,7 @@ public final class SchemasCodeWriter {
         }
         if (x.pattern.isPresent()) {
             out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
-                    escapePattern(x.pattern.get()), x.fieldName(cls));
+                    WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
         }
         if (x.min.isPresent()) {
             out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(),
@@ -590,11 +590,7 @@ public final class SchemasCodeWriter {
                     x.fieldName(cls));
         }
     }
-
-    private static String escapePattern(String pattern) {
-        return pattern.replace("\\", "\\\\");
-    }
-
+    
     private static void writeEqualsMethod(CodePrintWriter out, Cls cls) {
         addOverrideAnnotation(out);
         out.line("public boolean equals(%s o) {", Object.class);
