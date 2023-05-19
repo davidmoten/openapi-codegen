@@ -1709,5 +1709,7 @@ components:
       properties:
         the_thing:
           type: string
-          enum: [helo, plane]          
+          enum: [helo, plane]   
+          
+    
 

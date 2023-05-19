@@ -3,11 +3,13 @@ package org.davidmoten.oa3.codegen.generator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
@@ -90,6 +92,7 @@ public class ClientServerGenerator {
         Optional<String> returnFullClassName = Optional.empty();
         List<String> consumes = new ArrayList<>();
         List<String> produces = new ArrayList<>();
+        Set<String> parameterNames = new HashSet<>();
         if (operation.getParameters() != null) {
             operation.getParameters() //
                     .forEach(p -> {
@@ -103,18 +106,25 @@ public class ClientServerGenerator {
                         }
                         s = resolveRefs(s);
                         Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
+                        String parameterName = Names.toIdentifier(p.getName());
+                        int i = 2;
+                        while (parameterNames.contains(parameterName)) {
+                            parameterName = Names.toIdentifier(p.getName()) + i;
+                            i++;
+                        }
+                        parameterNames.add(parameterName);
                         final Param param;
                         if (Util.isPrimitive(s)) {
                             // handle simple schemas
                             Class<?> c = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
-                            param = new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                            param = new Param(p.getName(), parameterName, defaultValue,
                                     p.getRequired(), c.getCanonicalName(), isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false,
                                     Optional.ofNullable(p.getDescription()));
                         } else {
                             // is complex schema
                             Cls cls = schemaCls.get(s);
-                            param = new Param(p.getName(), Names.toIdentifier(p.getName()), defaultValue,
+                            param = new Param(p.getName(), parameterName, defaultValue,
                                     p.getRequired(), cls.fullClassName, isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true,
                                     Optional.ofNullable(p.getDescription()));
