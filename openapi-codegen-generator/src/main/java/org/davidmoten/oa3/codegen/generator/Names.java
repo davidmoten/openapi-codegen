@@ -272,7 +272,7 @@ public final class Names {
     static Map<String, String> getEnumValueToIdentifierMap(List<?> values) {
         Map<String, String> map = new HashMap<>();
         Set<String> set = new LinkedHashSet<>();
-        values.forEach(o -> set.add(o.toString()));
+        values.forEach(o -> set.add(String.valueOf(o)));
         for (String o : set) {
             int i = 0;
             String name = enumNameToEnumConstant(o);

@@ -630,9 +630,9 @@ public class Generator {
         Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
         Set<String> used = new HashSet<>();
         for (Object o : schema.getEnum()) {
-            if (!used.contains(o.toString())) {
-                cls.enumMembers.add(new EnumMember(map.get(o.toString()), o));
-                used.add(o.toString());
+            if (!used.contains(String.valueOf(o))) {
+                cls.enumMembers.add(new EnumMember(map.get(String.valueOf(o)), o));
+                used.add(String.valueOf(o));
             }
         }
         cls.addField(cls.enumFullType, "value", "value", true, false, mapType(schemaPath));

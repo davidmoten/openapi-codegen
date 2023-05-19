@@ -33,7 +33,7 @@ public final class GeneratorTest {
     
     @Test
     public void testSmall() throws MalformedURLException {
-        generate("small.yml");
+        generate("bitbucket.yml");
     }
 
     private static void generate(String name) throws MalformedURLException {
