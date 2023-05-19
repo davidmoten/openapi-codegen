@@ -282,10 +282,42 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.jira</basePackage>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.jira</basePackage>
                                     <sources>
                                         <includes>
                                             <include>jira.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>bitbucket</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
+                                    <sources>
+                                        <directory>${project.basedir}/../../openapi-directory/APIs/bitbucket.org/2.0</directory>
+                                        <includes>
+                                            <include>openapi.yaml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>s3</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.s3</basePackage>
+                                    <sources>
+                                        <directory>${project.basedir}/../../openapi-directory/APIs/amazonaws.com/s3/2006-03-01</directory>
+                                        <includes>
+                                            <include>openapi.yaml</include>
                                         </includes>
                                     </sources>
                                 </configuration>
