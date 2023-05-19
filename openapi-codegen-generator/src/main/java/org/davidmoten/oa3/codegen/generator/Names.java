@@ -164,7 +164,11 @@ public final class Names {
     }
 
     public static String upperFirst(String name) {
-        return name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
+        if (name.isEmpty()) {
+            return name;
+        } else {
+            return name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1);
+        }
     }
 
     private static String lowerFirst(String name) {

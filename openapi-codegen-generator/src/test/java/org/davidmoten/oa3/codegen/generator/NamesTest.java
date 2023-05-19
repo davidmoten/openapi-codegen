@@ -35,5 +35,12 @@ public class NamesTest {
         assertEquals("helloThere", Names.underscoreToCamel("hello_there_"));
         assertEquals("HelloThere", Names.underscoreToCamel("_hello_there"));
     }
+    
+    @Test
+    public void testUpperFirst() {
+        assertEquals("Ab", Names.upperFirst("ab"));
+        assertEquals("A", Names.upperFirst("a"));
+        assertEquals("", Names.upperFirst(""));
+    }
 
 }
