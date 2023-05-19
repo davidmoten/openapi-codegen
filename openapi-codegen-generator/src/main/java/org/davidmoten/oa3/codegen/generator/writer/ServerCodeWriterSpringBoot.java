@@ -243,8 +243,6 @@ public final class ServerCodeWriterSpringBoot {
     }
 
     static void writeMethodJavadoc(CodePrintWriter out, Method m, Optional<String> returns) {
-        System.out.println(m.methodName);
-        System.out.println(m.parameters.stream().map(x -> x.identifier).collect(Collectors.joining(", ")));
         Map<String, String> parameterDescriptions = m.parameters //
                 .stream() //
                 .collect(Collectors.toMap(x -> x.identifier,

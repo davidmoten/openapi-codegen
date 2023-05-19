@@ -322,6 +322,22 @@
                                     </sources>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>github</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.github</basePackage>
+                                    <sources>
+                                        <directory>${project.basedir}/../../openapi-directory/APIs/github.com/api.github.com.2022-11-28/1.1.4</directory>
+                                        <includes>
+                                            <include>openapi.yaml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>

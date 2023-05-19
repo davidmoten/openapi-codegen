@@ -53,6 +53,8 @@ public final class Names {
                 .orElse(ServerGeneratorType.SPRING2);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        // github api goes over snake yaml parser max code points
+        System.setProperty("maxYamlCodePoints","999999999");
         OpenAPIParser parser = new OpenAPIParser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
