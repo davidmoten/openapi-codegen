@@ -841,11 +841,11 @@ public class SchemasTest {
         assertEquals(11.0, (Double) circle.get("lat"), 0.0001);
         assertEquals(123.0, (Double) circle.get("lon"), 0.0001);
     }
-    
+
     @Test
     public void testAdditionalPropertiesNested() throws JsonProcessingException {
         Map<String, AdditionalPropertiesNested.Properties> map = new HashMap<>();
-        map.put("hello",AdditionalPropertiesNested.Properties.properties(Maps.hashMap().put("hi", "hola").build()));
+        map.put("hello", AdditionalPropertiesNested.Properties.properties(Maps.hashMap().put("hi", "hola").build()));
         AdditionalPropertiesNested a = AdditionalPropertiesNested.properties(map);
         String json = m.writeValueAsString(a);
         AdditionalPropertiesNested b = m.readValue(json, AdditionalPropertiesNested.class);
@@ -907,9 +907,9 @@ public class SchemasTest {
         assertEquals(map1, b.stuff());
         assertEquals(map2, b.other());
     }
-    
+
     @Test
-    public void testHasUnderscores() {
+    public void testUnderscoresAreRemovedAndCamelCaseAppliedInGeneratedClasses() {
         HasUnderscores.the_thing(TheThing.PLANE);
     }
 
