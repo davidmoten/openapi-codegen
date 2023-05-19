@@ -1692,4 +1692,15 @@ components:
         stuff: {}
         other: {}
 
+    ## member class naming and name collision test 
+    PropertyStartsWithUnderscore:
+      type: object
+      properties:
+        _type:
+          type: string
+          enum: [hello, there]        
+        type: 
+          type: integer
+          format: int32
+          enum: [1,2,4,8]
 
