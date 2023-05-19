@@ -89,7 +89,7 @@ public final class Names {
     }
 
     public String schemaNameToSimpleClassName(String schemaName) {
-        return upperFirst(toIdentifier(schemaName));
+        return simpleClassNameFromSimpleName(schemaName);
     }
 
     public File fullClassNameToJavaFile(String fullClassName) {
