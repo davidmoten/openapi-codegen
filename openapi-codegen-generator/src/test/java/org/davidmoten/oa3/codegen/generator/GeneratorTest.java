@@ -13,36 +13,41 @@ public final class GeneratorTest {
 
     @Test
     public void testGeneratePaths() throws IOException {
-        generate("paths.yml");
+        generateLocal("paths.yml");
     }
 
     @Test
     public void testGenerateMain() throws IOException {
-        generate("main.yml");
+        generateLocal("main.yml");
     }
     
     @Test
     public void testGenerateLibraryApi() throws IOException {
-        generate("library.yml");
+        generateLocal("library.yml");
     }
     
     @Test
     public void testGenerateOpenFlow() throws IOException {
-        generate("openflow.yml");
+        generateLocal("openflow.yml");
     }
     
     @Test
     public void testSmall() throws MalformedURLException {
-        generate("small.yml");
+        generateLocal("small.yml");
+//        generate("../../openapi-directory/APIs/amazonaws.com/s3/2006-03-01/openapi.yaml");
     }
 
     private static void generate(String name) throws MalformedURLException {
-        String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/" + name).toURI().toURL()
+        String definition = new File(name).toURI().toURL()
                 .toExternalForm();
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
                 Collections.emptySet(), Collections.emptySet(), false, true, Optional.empty());
         new Generator(d).generate();
+    }
+
+    private static void generateLocal(String name) throws MalformedURLException {
+        generate("../openapi-codegen-maven-plugin-test/src/main/openapi/" + name);
     }
 
 }
