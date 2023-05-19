@@ -1691,10 +1691,5 @@ components:
       properties:
         stuff: {}
         other: {}
-        
-    PropertyStartsWithUnderscore:
-      properties:
-        _type:
-          type: string
-          enum: [hello, there]        
-        
+
+

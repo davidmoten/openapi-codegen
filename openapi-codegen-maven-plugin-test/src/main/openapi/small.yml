@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+
+  version: 1.0
+
+  title: Small test
+
+  description: Used to isolate small fragments for testing
+
+paths:
+  /dummy:
+
+    get:
+      responses:
+        '200':
+          description: ok
+          
+    
+components:
+
+  schemas:
+
+    Dummy:
+      type: string
+      
+    PropertyStartsWithUnderscore:
+      type: object
+      properties:
+        _type:
+          type: string
+          enum: [hello, there]        
+        type: 
+          type: integer
+          format: int32
+          enum: [1,2,4,8]

@@ -151,11 +151,11 @@ public class Generator {
                 Optional<MapType> mapType) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, minItems, maxItems, minLength, maxLength,
                     pattern, min, max, exclusiveMin, exclusiveMax, encoding, mapType));
-            if (WriterUtil.DEBUG && mapType.isPresent()) {
-                System.err.println(fullClassName);
-                System.err.println(fields.get(fields.size() - 1));
-                Thread.dumpStack();
-            }
+//            if (WriterUtil.DEBUG && mapType.isPresent()) {
+//                System.err.println(fullClassName);
+//                System.err.println(fields.get(fields.size() - 1));
+//                Thread.dumpStack();
+//            }
         }
 
         public String pkg() {
@@ -180,7 +180,7 @@ public class Generator {
                 set.add(c.owner.get().simpleName());
                 c = c.owner.get();
             }
-            classes.forEach(x -> set.add(x.simpleName()));
+            classes.stream().filter(x -> x.fullClassName != null).forEach(x -> set.add(x.simpleName()));
             return set;
         }
     }
@@ -398,7 +398,8 @@ public class Generator {
                     // both with the owning class heirarchy and with siblings
                     String candidate = previous.get().fullClassName + "."
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
-                    cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
+                    String candidate2 = resolveCandidateFullClassName(cls, candidate);
+                    cls.fullClassName = resolveCandidateFullClassName(cls.owner.get(), candidate2);
                 } else {
                     fieldName = Optional.empty();
                     String candidate = names.schemaNameToFullClassName(cls.category, last.name);
