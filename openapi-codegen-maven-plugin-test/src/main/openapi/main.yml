@@ -1703,4 +1703,11 @@ components:
           type: integer
           format: int32
           enum: [1,2,4,8]
+          
+    _has_underscores:
+      type: object
+      properties:
+        the_thing:
+          type: string
+          enum: [helo, plane]          
 

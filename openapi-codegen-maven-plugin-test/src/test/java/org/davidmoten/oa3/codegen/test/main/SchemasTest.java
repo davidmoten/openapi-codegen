@@ -49,6 +49,8 @@ import org.davidmoten.oa3.codegen.test.main.schema.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.main.schema.ExclusiveMinMaxInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.External;
 import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
+import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
+import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
 import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
 import org.davidmoten.oa3.codegen.test.main.schema.Longitude;
 import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcast;
@@ -904,6 +906,11 @@ public class SchemasTest {
         TwoMaps b = m.readValue(json, TwoMaps.class);
         assertEquals(map1, b.stuff());
         assertEquals(map2, b.other());
+    }
+    
+    @Test
+    public void testHasUnderscores() {
+        HasUnderscores.the_thing(TheThing.PLANE);
     }
 
     private static void onePublicConstructor(Class<?> c) {

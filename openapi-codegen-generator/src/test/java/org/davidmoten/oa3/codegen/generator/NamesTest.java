@@ -27,5 +27,13 @@ public class NamesTest {
         assertEquals("B", map.get("b"));
         assertEquals(2, map.size());
     }
+    
+    @Test
+    public void testUnderscoresToCamel() {
+        assertEquals("helloThere", Names.underscoreToCamel("hello_there"));
+        assertEquals("helloThere", Names.underscoreToCamel("hello__there"));
+        assertEquals("helloThere", Names.underscoreToCamel("hello_there_"));
+        assertEquals("HelloThere", Names.underscoreToCamel("_hello_there"));
+    }
 
 }

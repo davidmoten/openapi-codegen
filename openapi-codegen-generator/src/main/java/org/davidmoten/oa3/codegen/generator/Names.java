@@ -16,6 +16,7 @@ import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
+import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -201,7 +202,29 @@ public final class Names {
     }
 
     public static String simpleClassNameFromSimpleName(String name) {
-        return upperFirst(skipUnderscoresAtStart(toIdentifier(name)));
+        return upperFirst(underscoreToCamel(skipUnderscoresAtStart(toIdentifier(name))));
+    }
+
+    @VisibleForTesting
+    static String underscoreToCamel(String s) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < s.length() - 1; i++) {
+            char ch = s.charAt(i);
+            char next = s.charAt(i + 1);
+            if (ch == '_') {
+                if (next != '_') {
+                    b.append(Character.toUpperCase(next));
+                    i++;
+                }
+            } else {
+                b.append(ch);
+            }
+        }
+        char ch = s.charAt(s.length() - 1);
+        if (ch != '_') {
+            b.append(ch);
+        }
+        return b.toString();
     }
 
     private static String skipUnderscoresAtStart(String s) {
@@ -355,7 +378,7 @@ public final class Names {
     public ApiResponse lookupResponse(String ref) {
         return api.getComponents().getResponses().get(lastComponent(ref));
     }
-    
+
     public ServerGeneratorType generatorType() {
         return generatorType;
     }
