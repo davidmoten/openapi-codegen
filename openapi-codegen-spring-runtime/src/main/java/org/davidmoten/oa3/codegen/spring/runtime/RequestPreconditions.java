@@ -1,10 +1,10 @@
-package org.davidmoten.oa3.codegen.spring.runtime.internal;
+package org.davidmoten.oa3.codegen.spring.runtime;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.runtime.PreconditionsBase;
-import org.davidmoten.oa3.codegen.spring.runtime.BadRequestException;
 
 public final class RequestPreconditions {
 
@@ -38,11 +38,27 @@ public final class RequestPreconditions {
         p.checkMinimum(x, min, name, exclusive);
     }
 
+    public static void checkMinimum(List<? extends Number> x, String min, String name) {
+        p.checkMinimum(x, min, name);
+    }
+
+    public static void checkMinimum(List<? extends Number> x, String min, String name, boolean exclusive) {
+        p.checkMinimum(x, min, name, exclusive);
+    }
+    
     public static void checkMaximum(Number x, String max, String name, boolean exclusive) {
         p.checkMaximum(x, max, name, exclusive);
     }
 
     public static void checkMaximum(Optional<? extends Number> x, String max, String name, boolean exclusive) {
+        p.checkMaximum(x, max, name, exclusive);
+    }
+
+    public static void checkMaximum(List<? extends Number> x, String max, String name) {
+        p.checkMaximum(x, max, name);
+    }
+
+    public static void checkMaximum(List<? extends Number> x, String max, String name, boolean exclusive) {
         p.checkMaximum(x, max, name, exclusive);
     }
 
@@ -89,7 +105,7 @@ public final class RequestPreconditions {
     public static String checkMatchesPattern(String s, String pattern, String name) {
         return p.checkMatchesPattern(s, pattern, name);
     }
-    
+
     public static <T extends Collection<String>> T checkMatchesPattern(T list, String pattern, String name) {
         return p.checkMatchesPattern(list, pattern, name);
     }

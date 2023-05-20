@@ -92,7 +92,6 @@ public final class PreconditionsBase {
         return s;
     }
 
-
     public <T extends Collection<String>> T checkMinLength(T list, int minLength, String name) {
         if (list.stream().filter(x -> x.length() < minLength).findAny().isPresent()) {
             throw factory.apply(name + " elements must have a length of at least " + minLength);
@@ -174,5 +173,28 @@ public final class PreconditionsBase {
         } else {
             return s;
         }
+    }
+
+    public <T extends Collection<? extends Number>> T checkMaximum(T list, String max, String name) {
+        return checkMaximum(list, max, name, false);
+    }
+
+    public <T extends Collection<? extends Number>> T checkMaximum(T list, String max, String name, boolean exclusive) {
+        for (Number x : list) {
+            checkMaximum(x, max, name, exclusive);
+        }
+        return list;
+    }
+
+    public <T extends Collection<? extends Number>> T checkMinimum(T list, String min, String name) {
+        return checkMinimum(list, min, name, false);
+    }
+
+    public <T extends Collection<? extends Number>> T checkMinimum(T list, String min, String name, boolean exclusive) {
+        for (Number x : list) {
+            checkMinimum(x, min, name, exclusive);
+        }
+        return list;
+
     }
 }
