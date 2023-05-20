@@ -925,15 +925,23 @@ public class SchemasTest {
 
     @Test
     public void testArbitraryPrecisionNumberOutOfRange() {
-        assertThrows(IllegalArgumentException.class,
-                () -> ArbitraryPrecisionNumber.value(BigDecimal.valueOf(30.123)));
+        assertThrows(IllegalArgumentException.class, () -> ArbitraryPrecisionNumber.value(BigDecimal.valueOf(30.123)));
     }
-    
+
     @Test
     public void testArbitraryPrecisionInteger() {
         assertEquals(18L, ArbitraryPrecisionInteger.value(BigInteger.valueOf(18)).value().longValue());
     }
-    
+
+    @Test
+    public void testArbitraryPrecisionNumberSerialization() throws JsonProcessingException {
+        String num = "15.123456789012345678901234567890123456789";
+        ArbitraryPrecisionNumber a = ArbitraryPrecisionNumber.value(new BigDecimal(num));
+        assertEquals(num, a.value().toString());
+        String json = m.writeValueAsString(a);
+        assertEquals(num, m.readValue(json, ArbitraryPrecisionNumber.class).value().toString());
+    }
+
     @Test
     public void testBlankEnum() {
         assertTrue(BlankStringEnum.BLANK.value().isEmpty());
