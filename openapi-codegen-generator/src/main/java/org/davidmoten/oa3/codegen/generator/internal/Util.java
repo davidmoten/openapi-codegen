@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.github.davidmoten.guavamini.Preconditions;
@@ -74,7 +75,8 @@ public final class Util {
         return schema instanceof MapSchema;
     }
 
-    public static Class<?> toClass(String type, String format, boolean mapIntegerToBigInteger, boolean mapDoubleToBigDouble) {
+    public static Class<?> toClass(String type, String format, Map<String, Object> extensions,
+            boolean mapIntegerToBigInteger, boolean mapDoubleToBigDouble) {
         Preconditions.checkNotNull(type);
         if ("string".equals(type)) {
             if ("date-time".equals(format)) {
@@ -98,7 +100,7 @@ public final class Util {
             } else if ("int64".equals(format)) {
                 return Long.class;
             } else {
-                return mapIntegerToBigInteger ? BigInteger.class : Long.class;
+                return mapIntegerToBigInteger || isArbitraryPrecision(extensions) ? BigInteger.class : Long.class;
             }
         } else if ("number".equals(type)) {
             if ("float".equals(format)) {
@@ -106,7 +108,7 @@ public final class Util {
             } else if ("double".equals(format)) {
                 return Double.class;
             } else {
-                return mapDoubleToBigDouble ? BigDecimal.class : Double.class;
+                return mapDoubleToBigDouble || isArbitraryPrecision(extensions) ? BigDecimal.class : Double.class;
             }
         } else if ("array".equals(type)) {
             return List.class;
@@ -115,6 +117,11 @@ public final class Util {
         } else {
             throw new RuntimeException("unexpected type and format: " + type + ", " + format);
         }
+    }
+
+    private static boolean isArbitraryPrecision(Map<String, Object> extensions) {
+        return extensions != null
+                && "true".equalsIgnoreCase(String.valueOf(extensions.get("x-openapi-codegen-arbitrary-precision")));
     }
 
     public static String toPrimitive(String canonicalClassName) {
@@ -132,7 +139,7 @@ public final class Util {
             return "boolean";
         } else if (canonicalClassName.equals(Byte.class.getCanonicalName())) {
             return "byte";
-        }  else {
+        } else {
             return canonicalClassName;
         }
     }

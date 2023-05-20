@@ -116,16 +116,17 @@ public class ClientServerGenerator {
                         final Param param;
                         if (Util.isPrimitive(s)) {
                             // handle simple schemas
-                            Class<?> c = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
-                            param = new Param(p.getName(), parameterName, defaultValue,
-                                    p.getRequired(), c.getCanonicalName(), isArray, false, constraints(s),
+                            Class<?> c = Util.toClass(s.getType(), s.getFormat(), s.getExtensions(),
+                                    names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
+                            param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
+                                    c.getCanonicalName(), isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false,
                                     Optional.ofNullable(p.getDescription()));
                         } else {
                             // is complex schema
                             Cls cls = schemaCls.get(s);
-                            param = new Param(p.getName(), parameterName, defaultValue,
-                                    p.getRequired(), cls.fullClassName, isArray, false, constraints(s),
+                            param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
+                                    cls.fullClassName, isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true,
                                     Optional.ofNullable(p.getDescription()));
                         }
@@ -420,8 +421,8 @@ public class ClientServerGenerator {
         public final boolean isComplexQueryParameter;
         public final Optional<String> description;
 
-        public Param(String name, String identifier, Optional<Object> defaultValue, boolean required, String fullClassName,
-                boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
+        public Param(String name, String identifier, Optional<Object> defaultValue, boolean required,
+                String fullClassName, boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
                 boolean isComplexQueryParameter, Optional<String> description) {
             this.name = name;
             this.identifier = identifier;

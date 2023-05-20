@@ -422,7 +422,8 @@ public class Generator {
                 Cls current = stack.peek();
                 final String fullClassName;
                 if (Util.isPrimitive(schema)) {
-                    Class<?> c = Util.toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
+                    Class<?> c = Util.toClass(schema.getType(), schema.getFormat(), schema.getExtensions(),
+                            names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
                     final Optional<Integer> maxLength;
@@ -625,7 +626,8 @@ public class Generator {
             boolean isArray, Optional<String> fieldName, Names names) {
         Schema<?> schema = schemaPath.last().schema;
         cls.classType = ClassType.ENUM;
-        Class<?> valueCls = Util.toClass(schema.getType(), schema.getFormat(), names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
+        Class<?> valueCls = Util.toClass(schema.getType(), schema.getFormat(), schema.getExtensions(),
+                names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
         cls.enumFullType = valueCls.getCanonicalName();
         Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
         Set<String> used = new HashSet<>();
