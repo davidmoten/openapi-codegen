@@ -41,6 +41,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfOneOf.ArrayOfOneOfItem
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfOneOfString;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfOneOfString.ArrayOfOneOfStringItem;
 import org.davidmoten.oa3.codegen.test.main.schema.Bike;
+import org.davidmoten.oa3.codegen.test.main.schema.BlankStringEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.Breeding;
 import org.davidmoten.oa3.codegen.test.main.schema.Broadcast;
 import org.davidmoten.oa3.codegen.test.main.schema.Circle;
@@ -931,6 +932,13 @@ public class SchemasTest {
     @Test
     public void testArbitraryPrecisionInteger() {
         assertEquals(18L, ArbitraryPrecisionInteger.value(BigInteger.valueOf(18)).value().longValue());
+    }
+    
+    @Test
+    public void testBlankEnum() {
+        assertTrue(BlankStringEnum.BLANK.value().isEmpty());
+        assertEquals("yes", BlankStringEnum.YES.value());
+        assertEquals("no", BlankStringEnum.NO.value());
     }
 
     private static void onePublicConstructor(Class<?> c) {

@@ -1726,3 +1726,7 @@ components:
       enum: [1, 2, 4, 8]
       x-openapi-codegen-arbitrary-precision: true
       
+    BlankStringEnum:
+      type: string
+      enum: ["", "yes", "no"]
+      
