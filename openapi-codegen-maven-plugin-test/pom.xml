@@ -326,6 +326,24 @@
                                 </configuration>
                             </execution>
                             <execution>
+                                <id>docusign</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>true</skip>
+                                    <!-- need to deal with too many properties, > 256, in schema object --> 
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.docusign</basePackage>
+                                    <sources>
+                                        <directory>${cache}</directory>
+                                        <includes>
+                                            <include>docusign.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>github</id>
                                 <goals>
                                     <goal>generate</goal>

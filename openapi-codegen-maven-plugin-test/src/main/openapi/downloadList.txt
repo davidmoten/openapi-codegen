@@ -4,3 +4,4 @@ https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/bitbucke
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/spotify.com/1.0.0/openapi.yaml,spotify.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/digitalocean.com/2.0/openapi.yaml,digitalocean.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/fec.gov/1.0/openapi.yaml,fec.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/docusign.net/v2.1/openapi.yaml,docusign.yml
