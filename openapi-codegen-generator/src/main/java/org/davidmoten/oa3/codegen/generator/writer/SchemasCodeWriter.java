@@ -246,7 +246,12 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeEnumMembers(CodePrintWriter out, Cls cls) {
-        String parameterFullClassName = cls.fields.get(0).fullClassName;
+        final String parameterFullClassName;
+        if (!cls.fields.isEmpty()) {
+            parameterFullClassName = cls.fields.get(0).fullClassName;
+        } else {
+            parameterFullClassName = "NotUsed";
+        }
         String text = cls.enumMembers.stream().map(x -> {
             if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
                     || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
