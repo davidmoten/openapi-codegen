@@ -64,10 +64,20 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "downloadList")
     private File downloadList;
 
+    @Parameter(name = "cacheDirectory", defaultValue = "${project.basedir}/.openapi-codegen/cache")
+    private File cacheDirectory;
+    
+    @Parameter(name="skip", defaultValue = "false")
+    private boolean skip;
+
     @Override
     public void execute() throws MojoExecutionException {
+        if (skip) {
+            System.out.println("[INFO] skipping");
+            return;
+        }
         if (downloadList != null) {
-            DownloadExtras.run(downloadList);
+            DownloadExtras.run(downloadList, cacheDirectory);
         }
         File defaultSourceDirectory = new File(//
                 project.getBasedir(), //

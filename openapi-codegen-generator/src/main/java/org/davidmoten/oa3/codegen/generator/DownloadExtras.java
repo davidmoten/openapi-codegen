@@ -12,11 +12,9 @@ import java.nio.file.Files;
 
 public class DownloadExtras {
 
-    public static void run(File list) {
+    public static void run(File list, File cacheDirectory) {
         try {
-            File cacheDirectory = new File(".openapi-codegen/cache");
             cacheDirectory.mkdirs();
-
             Files.readAllLines(list.toPath()) //
                     .stream().map(x -> x.trim()) //
                     .filter(x -> !x.isEmpty()) //
