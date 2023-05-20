@@ -29,7 +29,7 @@ public class DownloadExtras {
 
     private static void download(String url, String toFilename, File cacheDirectory) {
         if (new File(cacheDirectory, toFilename).exists()) {
-            System.out.println("[INFO ]" + toFilename + " exists alread in cache");
+            System.out.println("[INFO] " + toFilename + " exists alread in cache " + cacheDirectory);
             return;
         }
         System.out.println("[INFO] downloading " + url);
@@ -44,7 +44,7 @@ public class DownloadExtras {
             }
             File destination = new File(cacheDirectory, toFilename);
             tmp.renameTo(destination);
-            System.out.println("[INFO] downloaded " + toFilename + " to cache");
+            System.out.println("[INFO] downloaded " + toFilename + " to cache " + cacheDirectory);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -53,7 +53,7 @@ public class DownloadExtras {
     private static void copy(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[8192];
         int n;
-        while ((n = in.read(buffer))!= -1) {
+        while ((n = in.read(buffer)) != -1) {
             out.write(buffer, 0, n);
         }
     }

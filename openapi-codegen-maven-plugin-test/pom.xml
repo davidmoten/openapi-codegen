@@ -279,6 +279,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
+                                    <downloadList>src/main/openapi/downloadList.txt</downloadList>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
                                     <sources>
