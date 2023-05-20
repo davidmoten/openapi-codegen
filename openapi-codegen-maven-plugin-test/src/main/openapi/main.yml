@@ -1730,3 +1730,35 @@ components:
       type: string
       enum: ["", "yes", "no"]
       
+    AnonymousOneOf:
+      oneOf:
+      - type: object
+        properties: 
+          name:
+            type: string
+        required: [name]
+      - type: object
+        properties: 
+          nom:
+            type: string
+        required: [nom]
+        
+    AnonymousOneOfDiscriminated:
+      oneOf:
+      - type: object
+        properties: 
+          idName:
+            type: string
+          name:
+            type: string
+        required: [idName, name]
+      - type: object
+        properties: 
+          idName:
+            type: string
+          nom:
+            type: string
+        required: [idName,nom]        
+      discriminator:
+        propertyName: idName
+        type: string      

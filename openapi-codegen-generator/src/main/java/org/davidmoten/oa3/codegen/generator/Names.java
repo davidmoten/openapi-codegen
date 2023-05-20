@@ -2,6 +2,7 @@ package org.davidmoten.oa3.codegen.generator;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -264,8 +265,7 @@ public final class Names {
     private static Map<Schema<?>, Set<Schema<?>>> superSchemas(OpenAPI api) {
         Predicate<Schema<?>> predicate = x -> x instanceof ComposedSchema && ((ComposedSchema) x).getOneOf() != null;
         Map<Schema<?>, Set<Schema<?>>> map = new HashMap<>();
-        api.getComponents() //
-                .getSchemas() //
+        schemas(api) //
                 .entrySet() //
                 .stream() //
                 .flatMap(x -> findSchemas(SchemaCategory.SCHEMA, x.getKey(), x.getValue(), predicate).stream()) //
@@ -281,6 +281,16 @@ public final class Names {
                     }
                 });
         return map;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Schema<?>> schemas(OpenAPI api) {
+        if (api.getComponents() == null || api.getComponents().getSchemas() == null) {
+            return Collections.emptyMap();
+        } else {
+            return (Map<String, Schema<?>>) (Map<?, ?>) api.getComponents() //
+                    .getSchemas();
+        }
     }
 
     private static List<Schema<?>> findSchemas(SchemaCategory category, String name, Schema<?> schema,
@@ -373,7 +383,15 @@ public final class Names {
     }
 
     public Parameter lookupParameter(String name) {
-        return api.getComponents().getParameters().get(lastComponent(name));
+        return parameters(api).get(lastComponent(name));
+    }
+
+    private static Map<String, Parameter> parameters(OpenAPI api) {
+        if (api.getComponents() == null || api.getComponents().getParameters() == null) {
+            return Collections.emptyMap();
+        } else {
+            return api.getComponents().getParameters();
+        }
     }
 
     public static String lastComponent(String ref) {
@@ -382,11 +400,27 @@ public final class Names {
     }
 
     public RequestBody lookupRequestBody(String ref) {
-        return api.getComponents().getRequestBodies().get(lastComponent(ref));
+        return requestBodies(api).get(lastComponent(ref));
+    }
+
+    private static Map<String, RequestBody> requestBodies(OpenAPI api) {
+        if (api.getComponents() == null || api.getComponents().getRequestBodies() == null) {
+            return Collections.emptyMap();
+        } else {
+            return api.getComponents().getRequestBodies();
+        }
     }
 
     public ApiResponse lookupResponse(String ref) {
-        return api.getComponents().getResponses().get(lastComponent(ref));
+        return responses(api).get(lastComponent(ref));
+    }
+
+    private Map<String, ApiResponse> responses(OpenAPI api) {
+        if (api.getComponents() == null || api.getComponents().getResponses() == null) {
+            return Collections.emptyMap();
+        } else {
+            return api.getComponents().getResponses();
+        }
     }
 
     public ServerGeneratorType generatorType() {

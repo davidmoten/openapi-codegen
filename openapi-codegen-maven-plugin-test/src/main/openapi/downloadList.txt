@@ -5,3 +5,4 @@ https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/spotify.
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/digitalocean.com/2.0/openapi.yaml,digitalocean.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/fec.gov/1.0/openapi.yaml,fec.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/docusign.net/v2.1/openapi.yaml,docusign.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/mailchimp.com/3.0.55/openapi.yaml,mailchimp.yml

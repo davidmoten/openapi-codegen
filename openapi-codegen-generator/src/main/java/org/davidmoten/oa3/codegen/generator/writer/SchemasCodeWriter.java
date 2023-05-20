@@ -218,11 +218,17 @@ public final class SchemasCodeWriter {
         out.line("@%s(use = %s.NAME, property = \"%s\", include = %s.EXISTING_PROPERTY, visible = true)",
                 JsonTypeInfo.class, Id.class, cls.discriminator.propertyName, As.class);
         out.right().right();
-        String types = cls.fields.stream()
-                .map(x -> String.format("\n%s@%s(value = %s.class, name = \"%s\")", out.indent(), out.add(Type.class),
-                        out.add(x.fullClassName),
-                        cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName)))
-                .collect(Collectors.joining(", "));
+        String types = cls.fields.stream().map(x -> {
+            final String fieldImportedType;
+            if (x.fullClassName.startsWith(cls.fullClassName)) {
+                fieldImportedType = Names.simpleClassName(cls.fullClassName)
+                        + x.fullClassName.substring(cls.fullClassName.length());
+            } else {
+                fieldImportedType = out.add(x.fullClassName);
+            }
+            return String.format("\n%s@%s(value = %s.class, name = \"%s\")", out.indent(), out.add(Type.class),
+                    fieldImportedType, cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName));
+        }).collect(Collectors.joining(", "));
         out.left().left();
         out.line("@%s({%s})", JsonSubTypes.class, types);
     }
