@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -29,7 +30,8 @@ import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNested;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
-import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumberField;
+import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionInteger;
+import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumber;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty.Counts;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfComplexType;
@@ -916,14 +918,19 @@ public class SchemasTest {
     }
 
     @Test
-    public void testArbitraryPrecision() {
-        assertEquals(18L, ArbitraryPrecisionNumberField.value(BigDecimal.valueOf(18)).value().longValue());
+    public void testArbitraryPrecisionNumber() {
+        assertEquals(18L, ArbitraryPrecisionNumber.value(BigDecimal.valueOf(18)).value().longValue());
     }
 
     @Test
-    public void testArbitraryPrecisionOutOfRange() {
+    public void testArbitraryPrecisionNumberOutOfRange() {
         assertThrows(IllegalArgumentException.class,
-                () -> ArbitraryPrecisionNumberField.value(BigDecimal.valueOf(30.123)));
+                () -> ArbitraryPrecisionNumber.value(BigDecimal.valueOf(30.123)));
+    }
+    
+    @Test
+    public void testArbitraryPrecisionInteger() {
+        assertEquals(18L, ArbitraryPrecisionInteger.value(BigInteger.valueOf(18)).value().longValue());
     }
 
     private static void onePublicConstructor(Class<?> c) {

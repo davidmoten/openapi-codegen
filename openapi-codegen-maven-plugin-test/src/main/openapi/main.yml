@@ -1711,9 +1711,14 @@ components:
           type: string
           enum: [helo, plane]   
           
-    ArbitraryPrecisionNumberField:
+    ArbitraryPrecisionNumber:
       type: number
       x-openapi-codegen-arbitrary-precision: true
       minimum: 12.5
       maximum: 21.7
+      
+    ArbitraryPrecisionInteger:
+      type: integer
+      x-openapi-codegen-arbitrary-precision: true
+      
 
