@@ -11,6 +11,7 @@
   <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
   <Bug pattern="EI_EXPOSE_REP"/>
   <Bug pattern="EI_EXPOSE_REP2"/>
+  <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
   <And>
     <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
     <Class name="org.davidmoten.oa3.codegen.generator.CodeWriter"/>

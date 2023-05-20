@@ -1,0 +1,5 @@
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/amazonaws.com/s3/2006-03-01/openapi.yaml,s3.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/blob/main/APIs/github.com/api.github.com.2022-11-28/1.1.4/openapi.yaml,github.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/bitbucket.org/2.0/openapi.yaml,bitbucket.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/spotify.com/1.0.0/openapi.yaml,spotify.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/digitalocean.com/2.0/openapi.yaml,digitalocean.yml

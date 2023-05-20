@@ -19,6 +19,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.utils.io.FileUtils;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator;
 import org.davidmoten.oa3.codegen.generator.Definition;
+import org.davidmoten.oa3.codegen.generator.DownloadExtras;
 import org.davidmoten.oa3.codegen.generator.Generator;
 import org.davidmoten.oa3.codegen.generator.Packages;
 
@@ -60,8 +61,14 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "generateClient", defaultValue = "true")
     private boolean generateClient;
 
+    @Parameter(name = "downloadList")
+    private File downloadList;
+
     @Override
     public void execute() throws MojoExecutionException {
+        if (downloadList != null) {
+            DownloadExtras.run(downloadList);
+        }
         File defaultSourceDirectory = new File(//
                 project.getBasedir(), //
                 "src" + File.separator //

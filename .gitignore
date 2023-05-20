@@ -12,3 +12,4 @@ buildNumber.properties
 .settings
 .project
 .classpath
+.openapi-codegen/
