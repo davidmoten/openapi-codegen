@@ -310,6 +310,22 @@
                                 </configuration>
                             </execution>
                             <execution>
+                                <id>fec</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.fec</basePackage>
+                                    <sources>
+                                        <directory>${cache}</directory>
+                                        <includes>
+                                            <include>fec.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>github</id>
                                 <goals>
                                     <goal>generate</goal>

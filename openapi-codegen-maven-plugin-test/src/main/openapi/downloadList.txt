@@ -3,3 +3,4 @@ https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/github.c
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/bitbucket.org/2.0/openapi.yaml,bitbucket.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/spotify.com/1.0.0/openapi.yaml,spotify.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/digitalocean.com/2.0/openapi.yaml,digitalocean.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/fec.gov/1.0/openapi.yaml,fec.yml

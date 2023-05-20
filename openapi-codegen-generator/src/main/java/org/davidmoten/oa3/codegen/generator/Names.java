@@ -54,7 +54,7 @@ public final class Names {
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         // github api goes over snake yaml parser max code points
-        System.setProperty("maxYamlCodePoints","999999999");
+        System.setProperty("maxYamlCodePoints", "999999999");
         OpenAPIParser parser = new OpenAPIParser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
@@ -242,7 +242,11 @@ public final class Names {
     }
 
     public static String enumNameToEnumConstant(String s) {
-        return camelToUpper(toIdentifier(s));
+        if (s.isEmpty()) {
+            return "BLANK";
+        } else {
+            return camelToUpper(toIdentifier(s));
+        }
     }
 
     public static String camelToUpper(String s) {
