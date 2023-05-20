@@ -11,6 +11,9 @@
     <name>${project.artifactId}</name>
     <description />
     <packaging>jar</packaging>
+    <properties>
+        <cache>${project.basedir}/.openapi-codegen/cache</cache>
+    </properties>
 
     <dependencies>
 
@@ -283,7 +286,7 @@
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
                                     <sources>
-                                        <directory>.openapi-codegen/cache</directory>
+                                        <directory>${cache}</directory>
                                         <includes>
                                             <include>bitbucket.yml</include>
                                         </includes>
@@ -299,7 +302,7 @@
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.spotify</basePackage>
                                     <sources>
-                                        <directory>.openapi-codegen/cache</directory>
+                                        <directory>${cache}</directory>
                                         <includes>
                                             <include>spotify.yml</include>
                                         </includes>
@@ -315,25 +318,9 @@
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.github</basePackage>
                                     <sources>
-                                        <directory>.openapi-codegen/cache</directory>
+                                        <directory>${cache}</directory>
                                         <includes>
                                             <include>github.yml</include>
-                                        </includes>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>digitalocean</id>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                                <configuration>
-                                    <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.digitalocean</basePackage>
-                                    <sources>
-                                        <directory>.openapi-codegen/cache</directory>
-                                        <includes>
-                                            <include>digitalocean.yml</include>
                                         </includes>
                                     </sources>
                                 </configuration>
