@@ -15,7 +15,7 @@ public class ClientServerGeneratorTest {
                 .toExternalForm();
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
-                Collections.emptySet(), Collections.emptySet(), false, true, Optional.empty());
+                Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty());
         ClientServerGenerator generator = new ClientServerGenerator(d);
         generator.generateServer();
         generator.generateClient();

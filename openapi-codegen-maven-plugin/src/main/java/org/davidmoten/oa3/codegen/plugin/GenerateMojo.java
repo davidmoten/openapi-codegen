@@ -49,6 +49,9 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "mapIntegerToBigInteger", defaultValue = "false")
     private boolean mapIntegerToBigInteger;
 
+    @Parameter(name = "mapNumberToBigDecimal", defaultValue = "false")
+    private boolean mapNumberToBigDecimal;
+
     @Parameter(name = "failOnParseErrors", defaultValue = "true")
     private boolean failOnParseErrors;
 
@@ -66,8 +69,8 @@ public final class GenerateMojo extends AbstractMojo {
 
     @Parameter(name = "cacheDirectory", defaultValue = "${project.basedir}/.openapi-codegen/cache")
     private File cacheDirectory;
-    
-    @Parameter(name="skip", defaultValue = "false")
+
+    @Parameter(name = "skip", defaultValue = "false")
     private boolean skip;
 
     @Override
@@ -106,7 +109,7 @@ public final class GenerateMojo extends AbstractMojo {
                 Definition d = new Definition(definition, packages, outputDirectory, x -> x,
                         Sets.newHashSet(orElse(includeSchemas, Collections.emptyList())),
                         Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
-                        failOnParseErrors, Optional.ofNullable(generator));
+                        mapNumberToBigDecimal, failOnParseErrors, Optional.ofNullable(generator));
                 new Generator(d).generate();
                 if (generateService || generateClient) {
                     ClientServerGenerator g = new ClientServerGenerator(d);

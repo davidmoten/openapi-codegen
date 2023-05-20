@@ -74,7 +74,7 @@ public final class Util {
         return schema instanceof MapSchema;
     }
 
-    public static Class<?> toClass(String type, String format, boolean mapIntegerToBigInteger) {
+    public static Class<?> toClass(String type, String format, boolean mapIntegerToBigInteger, boolean mapDoubleToBigDouble) {
         Preconditions.checkNotNull(type);
         if ("string".equals(type)) {
             if ("date-time".equals(format)) {
@@ -106,7 +106,7 @@ public final class Util {
             } else if ("double".equals(format)) {
                 return Double.class;
             } else {
-                return BigDecimal.class;
+                return mapDoubleToBigDouble ? BigDecimal.class : Double.class;
             }
         } else if ("array".equals(type)) {
             return List.class;

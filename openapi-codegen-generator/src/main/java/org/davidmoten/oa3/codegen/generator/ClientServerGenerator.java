@@ -116,7 +116,7 @@ public class ClientServerGenerator {
                         final Param param;
                         if (Util.isPrimitive(s)) {
                             // handle simple schemas
-                            Class<?> c = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger());
+                            Class<?> c = Util.toClass(s.getType(), s.getFormat(), names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
                             param = new Param(p.getName(), parameterName, defaultValue,
                                     p.getRequired(), c.getCanonicalName(), isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false,

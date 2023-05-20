@@ -389,4 +389,8 @@ public final class Names {
         return generatorType;
     }
 
+    public boolean mapNumberToBigDecimal() {
+        return definition.mapNumberToBigDecimal();
+    }
+
 }
