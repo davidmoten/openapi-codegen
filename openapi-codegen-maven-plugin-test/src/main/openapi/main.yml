@@ -1721,4 +1721,8 @@ components:
       type: integer
       x-openapi-codegen-arbitrary-precision: true
       
-
+    ArbitraryPrecisionEnum:
+      type: integer
+      enum: [1, 2, 4, 8]
+      x-openapi-codegen-arbitrary-precision: true
+      

@@ -3,6 +3,8 @@ package org.davidmoten.oa3.codegen.generator.writer;
 import static org.davidmoten.oa3.codegen.generator.internal.Util.toPrimitive;
 import static org.davidmoten.oa3.codegen.generator.internal.WriterUtil.IMPORTS_HERE;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -244,9 +246,16 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeEnumMembers(CodePrintWriter out, Cls cls) {
+        String parameterFullClassName = cls.fields.get(0).fullClassName;
         String text = cls.enumMembers.stream().map(x -> {
-            String delim = x.parameter instanceof String ? "\"" : "";
-            return String.format("%s%s(%s%s%s)", out.indent(), x.name, delim, x.parameter, delim);
+            if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
+                    || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
+                return String.format("%s%s(new %s(\"\"))", out.indent(), x.name, out.add(parameterFullClassName),
+                        x.parameter);
+            } else {
+                String delim = x.parameter instanceof String ? "\"" : "";
+                return String.format("%s%s(%s%s%s)", out.indent(), x.name, delim, x.parameter, delim);
+            }
         }).collect(Collectors.joining(",\n"));
         if (!text.isEmpty()) {
             out.println("\n" + text + ";");
@@ -459,8 +468,7 @@ public final class SchemasCodeWriter {
             }
         });
         out.closeParen();
-        boolean hasAdditionalProperties = cls.fields.stream()
-                .anyMatch(Field::isAdditionalProperties);
+        boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
         if (hasOptional || !interfaces.isEmpty() || hasBinary || hasAdditionalProperties) {
             out.right().right();
             String parametersOptional = cls.fields //
@@ -532,8 +540,8 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = cls.fields //
                 .stream() //
                 .filter(x -> !isDiscriminator(interfaces, x)) //
-                .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required && !f.isAdditionalProperties(), f.isArray,
-                        f.mapType))
+                .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
+                        f.required && !f.isAdditionalProperties(), f.isArray, f.mapType))
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -590,7 +598,7 @@ public final class SchemasCodeWriter {
                     x.fieldName(cls));
         }
     }
-    
+
     private static void writeEqualsMethod(CodePrintWriter out, Cls cls) {
         addOverrideAnnotation(out);
         out.line("public boolean equals(%s o) {", Object.class);
