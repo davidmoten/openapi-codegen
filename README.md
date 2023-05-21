@@ -131,7 +131,19 @@ Note that discriminators are constants that the user does not set (in fact, cann
 [Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
 
 ### Immutability
-All generated classes are immutable though List and Map field types used are not (for general convenience).
+All generated classes are immutable though List and Map implementations are up to the user (you can use mutable java platform implementations or another library's immutable implementations).
+
+To modify one field (or more) of a generated schema object, use the `with*` methods. But remember, these are immutable classes, you must assign the result. For example:
+
+```java
+Circle circle = Circle
+    .builder()
+    .latitude(Latitude.value(-10))
+    .longitude(Longitude.value(140))
+    .radiusNm(200)
+    .build();
+Circle circle2 = circle.withRadiusNm(250);
+```
 
 ## Builders
 All generated schema classes have useful static builder methods. Note that mandatory fields are modelled using chained builders so that you get you get compile-time confirmation 
