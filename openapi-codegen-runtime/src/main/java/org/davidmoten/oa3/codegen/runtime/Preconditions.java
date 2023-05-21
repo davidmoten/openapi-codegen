@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.runtime;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 public final class Preconditions {
@@ -16,11 +15,11 @@ public final class Preconditions {
         p.checkMaximum(x, max, name);
     }
 
-    public static void checkMaximum(List<? extends Number> x, String max, String name) {
+    public static void checkMaximum(Collection<? extends Number> x, String max, String name) {
         p.checkMaximum(x, max, name);
     }
     
-    public static void checkMaximum(List<? extends Number> x, String max, String name, boolean exclusive) {
+    public static void checkMaximum(Collection<? extends Number> x, String max, String name, boolean exclusive) {
         p.checkMaximum(x, max, name, exclusive);
     }
 
@@ -52,11 +51,11 @@ public final class Preconditions {
         p.checkMinimum(x, min, name, exclusive);
     }
     
-    public static void checkMinimum(List<? extends Number> x, String min, String name) {
+    public static void checkMinimum(Collection<? extends Number> x, String min, String name) {
         p.checkMinimum(x, min, name);
     }
     
-    public static void checkMinimum(List<? extends Number> x, String min, String name, boolean exclusive) {
+    public static void checkMinimum(Collection<? extends Number> x, String min, String name, boolean exclusive) {
         p.checkMinimum(x, min, name, exclusive);
     }
 
@@ -67,7 +66,7 @@ public final class Preconditions {
     public static <T extends Collection<String>> T checkMinLength(T list, int minLength, String name) {
         return p.checkMinLength(list, minLength, name);
     }
-
+    
     public static Optional<String> checkMinLength(Optional<String> s, int minLength, String name) {
         return p.checkMinLength(s, minLength, name);
     }
@@ -79,7 +78,7 @@ public final class Preconditions {
     public static <T extends Collection<String>> T checkMaxLength(T list, int maxLength, String name) {
         return p.checkMaxLength(list, maxLength, name);
     }
-
+    
     public static Optional<String> checkMaxLength(Optional<String> s, int maxLength, String name) {
         return p.checkMaxLength(s, maxLength, name);
     }
@@ -99,17 +98,17 @@ public final class Preconditions {
     public static <S extends Collection<T>, T> Optional<S> checkMaxSize(Optional<S> collection, int max, String name) {
         return p.checkMaxSize(collection, max, name);
     }
-
+    
     public static String checkMatchesPattern(String s, String pattern, String name) {
         return p.checkMatchesPattern(s, pattern, name);
     }
 
-    public static Optional<String> checkMatchesPattern(Optional<String> s, String pattern, String name) {
+    public static <T> Optional<T> checkMatchesPattern(Optional<T> s, String pattern, String name) {
         return p.checkMatchesPattern(s, pattern, name);
     }
 
-    public static <T extends Collection<String>> T checkMatchesPatternList(T s, String pattern, String name) {
-        return p.checkMatchesPatternList(s, pattern, name);
+    public static <T extends Collection<String>> T checkMatchesPattern(T s, String pattern, String name) {
+        return p.checkMatchesPattern(s, pattern, name);
     }
 
 }

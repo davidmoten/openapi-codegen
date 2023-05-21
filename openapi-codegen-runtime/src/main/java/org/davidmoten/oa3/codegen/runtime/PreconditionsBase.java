@@ -21,6 +21,10 @@ public final class PreconditionsBase {
         return t;
     }
 
+    ////////////////////////////////
+    // minimum
+    ////////////////////////////////
+
     public void checkMinimum(Number x, String min, String name) {
         checkMinimum(x, min, name, false);
     }
@@ -30,17 +34,18 @@ public final class PreconditionsBase {
             checkMinimum(x.get(), min, name, false);
         }
     }
-
-    public void checkMaximum(Number x, String max, String name) {
-        checkMaximum(x, max, name, false);
+    
+    public <T extends Collection<? extends Number>> T checkMinimum(T list, String min, String name) {
+        return checkMinimum(list, min, name, false);
     }
-
-    public void checkMaximum(Optional<? extends Number> x, String max, String name) {
-        if (x.isPresent()) {
-            checkMaximum(x.get(), max, name, false);
+    
+    public <T extends Collection<? extends Number>> T checkMinimum(T list, String min, String name, boolean exclusive) {
+        for (Number x : list) {
+            checkMinimum(x, min, name, exclusive);
         }
+        return list;
     }
-
+    
     public void checkMinimum(Number x, String min, String name, boolean exclusive) {
         int compare = new BigDecimal(min).compareTo(BigDecimal.valueOf(x.doubleValue()));
         if (!exclusive && compare > 0) {
@@ -50,10 +55,35 @@ public final class PreconditionsBase {
             throw factory.apply(name + " must be > " + min);
         }
     }
-
+    
     public void checkMinimum(Optional<? extends Number> x, String min, String name, boolean exclusive) {
         if (x.isPresent()) {
             checkMinimum(x.get(), min, name, exclusive);
+        }
+    }
+    
+    ////////////////////////////////
+    // maximum
+    ////////////////////////////////
+
+    public <T extends Collection<? extends Number>> T checkMaximum(T list, String max, String name) {
+        return checkMaximum(list, max, name, false);
+    }
+
+    public <T extends Collection<? extends Number>> T checkMaximum(T list, String max, String name, boolean exclusive) {
+        for (Number x : list) {
+            checkMaximum(x, max, name, exclusive);
+        }
+        return list;
+    }
+
+    public void checkMaximum(Number x, String max, String name) {
+        checkMaximum(x, max, name, false);
+    }
+
+    public void checkMaximum(Optional<? extends Number> x, String max, String name) {
+        if (x.isPresent()) {
+            checkMaximum(x.get(), max, name, false);
         }
     }
 
@@ -73,6 +103,10 @@ public final class PreconditionsBase {
         }
     }
 
+    ////////////////////////////////
+    // minLength
+    ////////////////////////////////
+    
     public String checkMinLength(String s, int minLength, String name) {
         if (s.length() < minLength) {
             throw factory.apply(name + " must have a length of at least " + minLength);
@@ -98,6 +132,10 @@ public final class PreconditionsBase {
         }
         return list;
     }
+    
+    ////////////////////////////////
+    // maxLength
+    ////////////////////////////////
 
     public String checkMaxLength(String s, int maxLength, String name) {
         if (s.length() > maxLength) {
@@ -124,6 +162,10 @@ public final class PreconditionsBase {
         }
         return s;
     }
+    
+    ////////////////////////////////
+    // minSize
+    ////////////////////////////////
 
     public <S extends Collection<T>, T> S checkMinSize(S collection, int min, String name) {
         if (collection.size() < min) {
@@ -138,6 +180,10 @@ public final class PreconditionsBase {
         }
         return collection;
     }
+    
+    ////////////////////////////////
+    // maxSize
+    ////////////////////////////////
 
     public <S extends Collection<T>, T> S checkMaxSize(S collection, int max, String name) {
         if (collection != null && collection.size() > max) {
@@ -152,6 +198,10 @@ public final class PreconditionsBase {
         }
         return collection;
     }
+    
+    ////////////////////////////////
+    // matchesPattern
+    ////////////////////////////////
 
     public String checkMatchesPattern(String s, String pattern, String name) {
         if (s != null && !Pattern.matches(pattern, s)) {
@@ -160,49 +210,23 @@ public final class PreconditionsBase {
         return s;
     }
 
-    public <T extends Collection<String>> T checkMatchesPatternList(T list, String pattern, String name) {
+    public <T extends Collection<String>> T checkMatchesPattern(T list, String pattern, String name) {
         if (list != null && list.stream().filter(x -> !Pattern.matches(pattern, x)).findAny().isPresent()) {
             throw factory.apply(name + " elements must match this regex pattern: " + pattern);
         }
         return list;
     }
 
-    public <T extends Collection<String>> Optional<T> checkMatchesPatternList(Optional<T> list, String pattern,
-            String name) {
-        if (list.isPresent()) {
-            return Optional.of(checkMatchesPatternList(list.get(), pattern, name));
-        }
-        return list;
-    }
-
-    public Optional<String> checkMatchesPattern(Optional<String> s, String pattern, String name) {
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> checkMatchesPattern(Optional<T> s, String pattern, String name) {
         if (s.isPresent()) {
-            return Optional.of(checkMatchesPattern(s.get(), pattern, name));
-        } else {
-            return s;
+            if (s.get() instanceof Collection) {
+                checkMatchesPattern((Collection<String>) s.get(), pattern, name);
+            } else {
+                checkMatchesPattern((String) s.get(), pattern, name);
+            }
         }
+        return s;
     }
-
-    public <T extends Collection<? extends Number>> T checkMaximum(T list, String max, String name) {
-        return checkMaximum(list, max, name, false);
-    }
-
-    public <T extends Collection<? extends Number>> T checkMaximum(T list, String max, String name, boolean exclusive) {
-        for (Number x : list) {
-            checkMaximum(x, max, name, exclusive);
-        }
-        return list;
-    }
-
-    public <T extends Collection<? extends Number>> T checkMinimum(T list, String min, String name) {
-        return checkMinimum(list, min, name, false);
-    }
-
-    public <T extends Collection<? extends Number>> T checkMinimum(T list, String min, String name, boolean exclusive) {
-        for (Number x : list) {
-            checkMinimum(x, min, name, exclusive);
-        }
-        return list;
-
-    }
+    
 }

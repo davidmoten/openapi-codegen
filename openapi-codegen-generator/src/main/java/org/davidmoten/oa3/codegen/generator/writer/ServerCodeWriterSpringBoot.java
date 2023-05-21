@@ -291,13 +291,8 @@ public final class ServerCodeWriterSpringBoot {
                             x.maxLength.get(), p.identifier);
                 }
                 if (x.pattern.isPresent()) {
-                    if (p.isArray) {
-                        out.line("%s.checkMatchesPatternList(%s, \"%s\", \"%s\");", RequestPreconditions.class,
-                                p.identifier, WriterUtil.escapePattern(x.pattern.get()), p.identifier);
-                    } else {
-                        out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class,
-                                p.identifier, WriterUtil.escapePattern(x.pattern.get()), p.identifier);
-                    }
+                    out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class, p.identifier,
+                            WriterUtil.escapePattern(x.pattern.get()), p.identifier);
                 }
                 if (x.min.isPresent()) {
                     out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,

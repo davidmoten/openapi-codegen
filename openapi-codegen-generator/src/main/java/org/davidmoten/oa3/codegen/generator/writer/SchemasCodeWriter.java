@@ -596,13 +596,8 @@ public final class SchemasCodeWriter {
                     x.fieldName(cls));
         }
         if (x.pattern.isPresent()) {
-            if (x.isArray) {
-                out.line("%s.checkMatchesPatternList(%s, \"%s\", \"%s\");", Preconditions.class, raw,
-                        WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
-            } else {
-                out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
-                        WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
-            }
+            out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
+                    WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
         }
         if (x.min.isPresent()) {
             out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(),
