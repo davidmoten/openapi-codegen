@@ -114,6 +114,7 @@ public final class SchemasCodeWriter {
             writeConstructor(out, cls, fullClassNameInterfaces, names);
             writeBuilder(out, cls, fullClassNameInterfaces);
             writeGetters(out, cls, fullClassNameInterfaces);
+            writeMutators(out, cls, fullClassNameInterfaces);
         }
         writeEnumCreator(out, cls);
         writeMemberClasses(out, cls, fullClassNameInterfaces, names);
@@ -323,6 +324,7 @@ public final class SchemasCodeWriter {
                 writeAllOfBuilder(out, cls);
 
                 writeGetters(out, cls, fullClassNameInterfaces);
+
             }
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
@@ -437,7 +439,7 @@ public final class SchemasCodeWriter {
         }
         out.left().left();
 
-        Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
+        Set<Cls> interfaces = interfaces(cls, fullClassNameInterfaces);
 
         out.println();
         if (cls.classType != ClassType.ENUM) {
@@ -541,6 +543,11 @@ public final class SchemasCodeWriter {
                     });
             out.closeParen();
         }
+    }
+
+    private static Set<Cls> interfaces(Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
+        Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
+        return interfaces;
     }
 
     private static void writeBuilder(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
@@ -716,6 +723,35 @@ public final class SchemasCodeWriter {
                 }
                 writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
             }
+        });
+    }
+
+    private static void writeMutators(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
+        List<Field> fields = cls.fields //
+                .stream() //
+                // ignore discriminators that should be constants
+                .filter(x -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), x)) //
+                .collect(Collectors.toList());
+        if (fields.size() <= 1) {
+            return;
+        }
+        fields.forEach(x -> {
+            String t = x.mapType.isPresent() ? x.resolvedTypeMap(out.imports(), x.isArray)
+                    : x.resolvedType(out.imports());
+            out.println();
+            out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
+                    x.fieldName(cls));
+            String params = fields.stream() //
+                    .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
+                    .map(y -> {
+                        if (y.fieldName(cls).equals(x.fieldName(cls)) || y.required) {
+                            return y.fieldName(cls);
+                        } else {
+                            return String.format("%s.ofNullable(%s)", out.add(Optional.class), y.fieldName(cls));
+                        }
+                    }).collect(Collectors.joining(", "));
+            out.line("return new %s(%s);", cls.simpleName(), params);
+            out.closeParen();
         });
     }
 

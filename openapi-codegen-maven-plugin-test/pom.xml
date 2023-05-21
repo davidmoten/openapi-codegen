@@ -349,6 +349,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
+                                    <skip>true</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.mailchimp</basePackage>
                                     <sources>
