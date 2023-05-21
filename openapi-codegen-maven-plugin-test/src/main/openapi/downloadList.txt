@@ -7,3 +7,4 @@ https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/fec.gov/
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/docusign.net/v2.1/openapi.yaml,docusign.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/mailchimp.com/3.0.55/openapi.yaml,mailchimp.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/googleapis.com/chat/v1/openapi.yaml,chat.yml
+https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/twitter.com/current/2.62/openapi.yaml,twitter.yml

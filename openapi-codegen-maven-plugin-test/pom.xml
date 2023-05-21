@@ -237,6 +237,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
+                                    <skip>true</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.marqueta</basePackage>
                                     <sources>
@@ -282,7 +283,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <downloadList>src/main/openapi/downloadList.txt</downloadList>
+                                    <skip>true</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
                                     <sources>
@@ -299,6 +300,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
+                                    <downloadList>src/main/openapi/downloadList.txt</downloadList>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.spotify</basePackage>
                                     <sources>
@@ -332,7 +334,7 @@
                                 </goals>
                                 <configuration>
                                     <skip>true</skip>
-                                    <!-- need to deal with too many properties, > 256, in schema object --> 
+                                    <!-- need to deal with too many properties, > 256, in schema object -->
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.docusign</basePackage>
                                     <sources>
@@ -358,7 +360,24 @@
                                         </includes>
                                     </sources>
                                 </configuration>
-                            </execution><execution>
+                            </execution>
+                            <execution>
+                                <id>twitter</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.chat</basePackage>
+                                    <sources>
+                                        <directory>${cache}</directory>
+                                        <includes>
+                                            <include>chat.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
                                 <id>mailchimp</id>
                                 <goals>
                                     <goal>generate</goal>
