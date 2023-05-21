@@ -344,6 +344,21 @@
                                 </configuration>
                             </execution>
                             <execution>
+                                <id>chat</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.chat</basePackage>
+                                    <sources>
+                                        <directory>${cache}</directory>
+                                        <includes>
+                                            <include>chat.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution><execution>
                                 <id>mailchimp</id>
                                 <goals>
                                     <goal>generate</goal>
