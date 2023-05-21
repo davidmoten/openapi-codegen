@@ -1764,4 +1764,12 @@ components:
         type: string      
         
     2StartWithInteger:
-      type: string        
+      type: string    
+      
+    NullableExample:
+      type: object
+      properties: 
+        mine:
+          type: integer
+          format: int32
+          nullable: true    

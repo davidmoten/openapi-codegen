@@ -137,19 +137,19 @@ public class Generator {
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
-                Optional<MapType> mapType) {
+                Optional<MapType> mapType, boolean nullable) {
             addField(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(), Optional.empty(),
                     Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false, false,
-                    Encoding.DEFAULT, mapType);
+                    Encoding.DEFAULT, mapType, nullable);
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
-                Optional<MapType> mapType) {
+                Optional<MapType> mapType, boolean nullable) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, minItems, maxItems, minLength, maxLength,
-                    pattern, min, max, exclusiveMin, exclusiveMax, encoding, mapType));
+                    pattern, min, max, exclusiveMin, exclusiveMax, encoding, mapType, nullable));
 //            if (WriterUtil.DEBUG && mapType.isPresent()) {
 //                System.err.println(fullClassName);
 //                System.err.println(fields.get(fields.size() - 1));
@@ -237,12 +237,13 @@ public class Generator {
         public final Optional<Integer> minItems;
         public final Optional<Integer> maxItems;
         public final Optional<MapType> mapType;
+        public final boolean nullable;
 
         Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
-                Optional<MapType> mapType) {
+                Optional<MapType> mapType, boolean nullable) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
@@ -259,6 +260,7 @@ public class Generator {
             this.min = min;
             this.max = max;
             this.mapType = mapType;
+            this.nullable = nullable;
         }
 
         public String fieldName(Cls cls) {
@@ -372,7 +374,8 @@ public class Generator {
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
-                            previous.get().classType == ClassType.ARRAY_WRAPPER, mapType(schemaPath)));
+                            previous.get().classType == ClassType.ARRAY_WRAPPER, mapType(schemaPath),
+                            isNullable(schema)));
                 } else {
                     cls.fullClassName = names.schemaNameToFullClassName(cls.category, last.name);
                 }
@@ -446,7 +449,7 @@ public class Generator {
                     boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding,
-                            mapType(schemaPath));
+                            mapType(schemaPath), isNullable(schema));
                 } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
@@ -455,12 +458,12 @@ public class Generator {
                     // TODO pick up other constraints
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                            false, false, Encoding.DEFAULT, mapType(schemaPath));
+                            false, false, Encoding.DEFAULT, mapType(schemaPath), isNullable(schema));
                 } else {
                     // any object
                     String fieldName = current.nextFieldName(last.name);
                     current.addField(Object.class.getCanonicalName(), last.name, fieldName, true, isArray,
-                            mapType(schemaPath));
+                            mapType(schemaPath), isNullable(schema));
                 }
             }
         }
@@ -492,6 +495,10 @@ public class Generator {
         }
     }
 
+    private static boolean isNullable(Schema<?> schema) {
+        return Boolean.TRUE.equals(schema.getNullable());
+    }
+
     private static Encoding encoding(Schema<?> schema) {
         if ("binary".equals(schema.getFormat())) {
             return Encoding.OCTET;
@@ -517,7 +524,8 @@ public class Generator {
             mt = Optional.empty();
         }
         Optional<MapType> mt2 = mt;
-        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mt2));
+        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mt2,
+                isNullable(schema)));
     }
 
     public enum Encoding {
@@ -583,8 +591,8 @@ public class Generator {
             cls.classType = ClassType.ALL_OF;
         }
         boolean required = fieldIsRequired(schemaPath);
-        previous.ifPresent(
-                p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray, mapType(schemaPath)));
+        previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required, isArray,
+                mapType(schemaPath), isNullable(schemaPath.last().schema)));
     }
 
     private static PolymorphicType polymorphicType(Schema<?> schema) {
@@ -637,10 +645,10 @@ public class Generator {
                 used.add(String.valueOf(o));
             }
         }
-        cls.addField(cls.enumFullType, "value", "value", true, false, mapType(schemaPath));
+        cls.addField(cls.enumFullType, "value", "value", true, false, mapType(schemaPath), isNullable(schema));
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required,
-                isArray, mapType(schemaPath)));
+                isArray, mapType(schemaPath), isNullable(schema)));
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {
