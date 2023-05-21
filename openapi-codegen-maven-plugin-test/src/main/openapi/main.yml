@@ -1762,3 +1762,6 @@ components:
       discriminator:
         propertyName: idName
         type: string      
+        
+    2StartWithInteger:
+      type: string        

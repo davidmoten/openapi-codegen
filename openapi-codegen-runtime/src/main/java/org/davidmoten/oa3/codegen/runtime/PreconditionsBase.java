@@ -160,9 +160,17 @@ public final class PreconditionsBase {
         return s;
     }
 
-    public <T extends Collection<String>> T checkMatchesPattern(T list, String pattern, String name) {
+    public <T extends Collection<String>> T checkMatchesPatternList(T list, String pattern, String name) {
         if (list != null && list.stream().filter(x -> !Pattern.matches(pattern, x)).findAny().isPresent()) {
             throw factory.apply(name + " elements must match this regex pattern: " + pattern);
+        }
+        return list;
+    }
+
+    public <T extends Collection<String>> Optional<T> checkMatchesPatternList(Optional<T> list, String pattern,
+            String name) {
+        if (list.isPresent()) {
+            return Optional.of(checkMatchesPatternList(list.get(), pattern, name));
         }
         return list;
     }

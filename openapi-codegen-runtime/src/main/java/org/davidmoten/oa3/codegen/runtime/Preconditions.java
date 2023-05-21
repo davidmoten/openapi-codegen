@@ -108,8 +108,8 @@ public final class Preconditions {
         return p.checkMatchesPattern(s, pattern, name);
     }
 
-    public static <T extends Collection<String>> T checkMatchesPattern(T s, String pattern, String name) {
-        return p.checkMatchesPattern(s, pattern, name);
+    public static <T extends Collection<String>> T checkMatchesPatternList(T s, String pattern, String name) {
+        return p.checkMatchesPatternList(s, pattern, name);
     }
 
 }

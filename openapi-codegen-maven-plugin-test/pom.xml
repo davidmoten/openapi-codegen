@@ -368,11 +368,11 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.chat</basePackage>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.twitter</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
-                                            <include>chat.yml</include>
+                                            <include>twitter.yml</include>
                                         </includes>
                                     </sources>
                                 </configuration>

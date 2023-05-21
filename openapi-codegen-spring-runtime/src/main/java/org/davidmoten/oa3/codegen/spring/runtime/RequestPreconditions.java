@@ -106,10 +106,14 @@ public final class RequestPreconditions {
         return p.checkMatchesPattern(s, pattern, name);
     }
 
-    public static <T extends Collection<String>> T checkMatchesPattern(T list, String pattern, String name) {
-        return p.checkMatchesPattern(list, pattern, name);
+    public static <T extends Collection<String>> T checkMatchesPatternList(T list, String pattern, String name) {
+        return p.checkMatchesPatternList(list, pattern, name);
     }
-
+    
+    public static <T extends Collection<String>> Optional<T> checkMatchesPatternList(Optional<T> list, String pattern, String name) {
+        return p.checkMatchesPatternList(list, pattern, name);
+    }
+    
     public static Optional<String> checkMatchesPattern(Optional<String> s, String pattern, String name) {
         return p.checkMatchesPattern(s, pattern, name);
     }

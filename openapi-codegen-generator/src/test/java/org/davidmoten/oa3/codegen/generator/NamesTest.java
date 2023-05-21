@@ -27,15 +27,17 @@ public class NamesTest {
         assertEquals("B", map.get("b"));
         assertEquals(2, map.size());
     }
-    
+
     @Test
     public void testUnderscoresToCamel() {
         assertEquals("helloThere", Names.underscoreToCamel("hello_there"));
         assertEquals("helloThere", Names.underscoreToCamel("hello__there"));
         assertEquals("helloThere", Names.underscoreToCamel("hello_there_"));
-        assertEquals("HelloThere", Names.underscoreToCamel("_hello_there"));
+        // must preserve leading underscore so an identifier like _2 does not get
+        // trimmed to 2
+        assertEquals("_helloThere", Names.underscoreToCamel("_hello_there"));
     }
-    
+
     @Test
     public void testUpperFirst() {
         assertEquals("Ab", Names.upperFirst("ab"));

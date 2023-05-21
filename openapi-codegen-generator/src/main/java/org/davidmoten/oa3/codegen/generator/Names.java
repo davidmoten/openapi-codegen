@@ -209,13 +209,14 @@ public final class Names {
     }
 
     public static String simpleClassNameFromSimpleName(String name) {
-        return upperFirst(underscoreToCamel(skipUnderscoresAtStart(toIdentifier(name))));
+        return upperFirst(underscoreToCamel(toIdentifier(skipUnderscoresAtStart(name))));
     }
 
     @VisibleForTesting
     static String underscoreToCamel(String s) {
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i < s.length() - 1; i++) {
+        b.append(s.charAt(0));
+        for (int i = 1; i < s.length() - 1; i++) {
             char ch = s.charAt(i);
             char next = s.charAt(i + 1);
             if (ch == '_') {
