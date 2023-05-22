@@ -972,8 +972,7 @@ public class SchemasTest {
         // TODO cannot read from serialized NullableStringEnum.NULL_
     }
 
-    //    @Test
-    // TODO fix nullable enum serialization
+    @Test
     public void testNullableStringEnumObject() throws JsonProcessingException {
         NullableStringEnumObject a = NullableStringEnumObject.thing(NullableStringEnum.NULL_);
         String json = m.writeValueAsString(a);

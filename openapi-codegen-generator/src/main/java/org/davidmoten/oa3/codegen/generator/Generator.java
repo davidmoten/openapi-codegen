@@ -187,6 +187,10 @@ public class Generator {
         public boolean isNullableEnum() {
             return !enumMembers.isEmpty() && enumMembers.get(0).nullable;
         }
+        
+        public boolean hasEnumNullValue() {
+            return enumMembers.stream().anyMatch(x -> x.parameter == null);
+        }
     }
 
     public static class EnumMember {

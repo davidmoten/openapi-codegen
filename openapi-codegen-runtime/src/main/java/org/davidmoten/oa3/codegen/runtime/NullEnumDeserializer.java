@@ -8,9 +8,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-@SuppressWarnings("serial")
 public class NullEnumDeserializer<T> extends StdDeserializer<T> {
 
+    private static final long serialVersionUID = 689714537246694439L;
+    
     private final Class<T> cls;
     private final T nullValue;
 

@@ -32,6 +32,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
+import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
@@ -118,6 +119,7 @@ public final class SchemasCodeWriter {
             writeMutators(out, cls, fullClassNameInterfaces);
         }
         writeEnumCreator(out, cls);
+        writeEnumDeserializer(out, cls);
         writeMemberClasses(out, cls, fullClassNameInterfaces, names);
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeEqualsMethod(out, cls);
@@ -166,6 +168,20 @@ public final class SchemasCodeWriter {
         }
     }
 
+    private static void writeEnumDeserializer(CodePrintWriter out, Cls cls) {
+        if (cls.hasEnumNullValue()) {
+            String nullValueMemberName = cls.enumMembers.stream().filter(x -> x.parameter == null).map(x -> x.name)
+                    .findFirst().get();
+            out.println();
+            out.line("@%s(\"serial\")", SuppressWarnings.class);
+            out.line("public static class Deserializer extends %s<%s> {", NullEnumDeserializer.class, cls.simpleName());
+            out.line("public Deserializer() {");
+            out.line("super(%s.class, %s);", cls.simpleName(), nullValueMemberName);
+            out.closeParen();
+            out.closeParen();
+        }
+    }
+
     private static void writeClassDeclaration(CodePrintWriter out, Cls cls,
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         String modifier = classModifier(cls);
@@ -189,10 +205,17 @@ public final class SchemasCodeWriter {
             writeJsonIncludeAnnotation(out);
             writeAutoDetectAnnotation(out);
         }
+        if (cls.classType == ClassType.ENUM && cls.hasEnumNullValue()) {
+            writeEnumNullValueDeserializerAnnotation(out, cls);
+        }
         if (cls.topLevel) {
             WriterUtil.addGeneratedAnnotation(out);
         }
         out.line("public %s%s %s%s {", modifier, cls.classType.word(), cls.simpleName(), implementsClause);
+    }
+
+    private static void writeEnumNullValueDeserializerAnnotation(CodePrintWriter out, Cls cls) {
+        out.line("@s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
     }
 
     private static void writeJsonIncludeAnnotation(CodePrintWriter out) {
