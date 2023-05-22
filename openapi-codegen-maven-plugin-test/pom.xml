@@ -13,6 +13,7 @@
     <packaging>jar</packaging>
     <properties>
         <cache>${project.basedir}/.openapi-codegen/cache</cache>
+        <skip>${skip}</skip>
     </properties>
 
     <dependencies>
@@ -186,7 +187,7 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>${deploy.version}</version>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>${skip}</skip>
                 </configuration>
             </plugin>
         </plugins>
@@ -237,7 +238,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>true</skip>
+                                    <skip>${skip}</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.marqueta</basePackage>
                                     <sources>
@@ -283,7 +284,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>true</skip>
+                                    <skip>${skip}</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
                                     <sources>
@@ -333,7 +334,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>true</skip>
+                                    <skip>${skip}</skip>
                                     <!-- need to deal with too many properties, > 256, in schema object -->
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.docusign</basePackage>
@@ -384,7 +385,8 @@
                                 </goals>
                                 <configuration>
                                     <!-- has some dodgy default values in schemas -->
-                                    <skip>true</skip>
+                                    <failOnParseErrors>false</failOnParseErrors>
+                                    <skip>${skip}</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.openai</basePackage>
                                     <sources>
@@ -401,7 +403,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>true</skip>
+                                    <skip>${skip}</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.mailchimp</basePackage>
                                     <sources>
@@ -418,7 +420,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>true</skip>
+                                    <skip>${skip}</skip>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.github</basePackage>
                                     <sources>
