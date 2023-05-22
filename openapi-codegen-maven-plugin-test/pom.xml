@@ -414,19 +414,95 @@
                                     </sources>
                                 </configuration>
                             </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>github</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.davidmoten</groupId>
+                        <artifactId>openapi-codegen-maven-plugin</artifactId>
+                        <version>${project.parent.version}</version>
+                        <executions>
                             <execution>
                                 <id>github</id>
                                 <goals>
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${skip}</skip>
+                                    <downloadList>src/main/openapi/downloadList.txt</downloadList>
                                     <generator>spring2</generator>
                                     <basePackage>org.davidmoten.oa3.codegen.test.github</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
                                             <include>github.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>mailchimp</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.davidmoten</groupId>
+                        <artifactId>openapi-codegen-maven-plugin</artifactId>
+                        <version>${project.parent.version}</version>
+                        <executions>
+                            <execution>
+                                <id>mailchimp</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <downloadList>src/main/openapi/downloadList.txt</downloadList>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.mailchimp</basePackage>
+                                    <sources>
+                                        <directory>${cache}</directory>
+                                        <includes>
+                                            <include>mailchimp.yml</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docusign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.davidmoten</groupId>
+                        <artifactId>openapi-codegen-maven-plugin</artifactId>
+                        <version>${project.parent.version}</version>
+                        <executions>
+                            <execution>
+                                <id>docusign</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <downloadList>src/main/openapi/downloadList.txt</downloadList>
+                                    <generator>spring2</generator>
+                                    <basePackage>org.davidmoten.oa3.codegen.test.docusign</basePackage>
+                                    <sources>
+                                        <directory>${cache}</directory>
+                                        <includes>
+                                            <include>docusign.yml</include>
                                         </includes>
                                     </sources>
                                 </configuration>
