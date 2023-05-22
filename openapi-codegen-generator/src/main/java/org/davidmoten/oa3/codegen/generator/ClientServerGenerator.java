@@ -85,8 +85,12 @@ public class ClientServerGenerator {
     }
 
     private void gatherMethods(String pathName, HttpMethod method, Operation operation, List<Method> methods) {
-        String methodName = Names
-                .toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
+        final String methodName;
+        if (operation.getOperationId() != null) {
+            methodName = Names.toIdentifier(operation.getOperationId());
+        } else {
+            methodName = Names.toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
+        }
         Optional<Integer> statusCode = Optional.empty();
         List<Param> params = new ArrayList<>();
         Optional<String> returnFullClassName = Optional.empty();

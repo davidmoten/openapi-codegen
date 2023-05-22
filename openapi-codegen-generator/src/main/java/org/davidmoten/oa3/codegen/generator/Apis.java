@@ -208,8 +208,7 @@ class Apis {
         }
         if (schema.getAdditionalProperties() instanceof Schema) {
             visitSchemas(category,
-                    schemaPath.add(
-                            new SchemaWithName("properties", (Schema<?>) schema.getAdditionalProperties())),
+                    schemaPath.add(new SchemaWithName("properties", (Schema<?>) schema.getAdditionalProperties())),
                     visitor);
         } else if (schema.getNot() != null) {
             visitSchemas(category, schemaPath.add(new SchemaWithName("not", schema.getNot())), visitor);

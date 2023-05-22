@@ -1,16 +1,17 @@
 openapi: 3.0.0
 info:
 
-  version: 1.0
+  version: v1.0
 
   title: Library Demo
 
-  description: Library
+  description: Library demonstration of some features of OpenAPI 3 and *openapi-codegen*
 
 paths:
   /user:
 
     post:
+      operationId: createUser
       description: Creates a new user
       requestBody:
         description: Defines a new user
@@ -26,6 +27,7 @@ paths:
           $ref: '#/components/responses/Error'
           
     get:
+      operationId: getUsers
       description: List users page by page, filtered by search if present
       parameters:
       - in: query
@@ -58,6 +60,7 @@ paths:
         minLength: 1
 
     get:
+      operationId: getUser
       description: Gets user details
       responses:
         '200':
@@ -70,6 +73,7 @@ paths:
           $ref: '#/components/responses/Error'
 
     put:
+      operationId: updateUser
       description: Updates a user
       requestBody:
         required: true
@@ -84,6 +88,7 @@ paths:
           $ref: '#/components/responses/Error'
 
     delete:
+      operationId: deleteUser
       description: Deletes a user (logically)
       responses:
         '204':
@@ -100,6 +105,7 @@ paths:
       schema:
         $ref: '#/components/schemas/ItemId'
     get:
+      operationId: getItem
       description: Gets item details
       responses:
         '200':

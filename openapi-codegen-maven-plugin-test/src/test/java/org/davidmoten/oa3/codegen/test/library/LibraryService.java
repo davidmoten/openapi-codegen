@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class LibraryService implements Service {
 
     @Override
-    public UsersPage userGet(Optional<String> search, Optional<String> continuationToken) throws ServiceException {
+    public UsersPage getUsers(Optional<String> search, Optional<String> continuationToken) throws ServiceException {
         Users users = new Users(IntStream.range(1, 21).mapToObj(i -> createUser(i)).collect(Collectors.toList()));
         return new UsersPage(users, Optional.empty());
     }
@@ -34,28 +34,28 @@ public class LibraryService implements Service {
     }
 
     @Override
-    public void userPost(User requestBody) throws ServiceException {
-        Service.super.userPost(requestBody);
+    public void createUser(User requestBody) throws ServiceException {
+        Service.super.createUser(requestBody);
     }
 
     @Override
-    public User userIdGet(String id) throws ServiceException {
-        return Service.super.userIdGet(id);
+    public User getUser(String id) throws ServiceException {
+        return Service.super.getUser(id);
     }
 
     @Override
-    public void userIdPut(String id, User requestBody) throws ServiceException {
-        Service.super.userIdPut(id, requestBody);
+    public void updateUser(String id, User requestBody) throws ServiceException {
+        Service.super.updateUser(id, requestBody);
     }
 
     @Override
-    public void userIdDelete(String id) throws ServiceException {
-        Service.super.userIdDelete(id);
+    public void deleteUser(String id) throws ServiceException {
+        Service.super.deleteUser(id);
     }
 
     @Override
-    public Item itemItemIdGet(String itemId) throws ServiceException {
-        return Service.super.itemItemIdGet(itemId);
+    public Item getItem(String itemId) throws ServiceException {
+        return Service.super.getItem(itemId);
     }
 
 }

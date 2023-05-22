@@ -30,7 +30,7 @@ public class LibraryServerTest {
                 .basePath("http://localhost:" + serverPort) //
                 .interceptor(authenticator) //
                 .build();
-        UsersPage page = client.userGet(Optional.empty(), Optional.empty());
+        UsersPage page = client.getUsers(Optional.empty(), Optional.empty());
         assertEquals(20, page.users().value().size());
         assertEquals("User19", page.users().value().get(18).user().firstName());
     }

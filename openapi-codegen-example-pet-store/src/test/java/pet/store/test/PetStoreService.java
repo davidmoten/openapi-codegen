@@ -27,19 +27,19 @@ public class PetStoreService implements Service {
                     PetId.id(321L)));
 
     @Override
-    public PetsGet200Response petsGet(Optional<List<String>> tags, int limit) throws ServiceException {
+    public PetsGet200Response findPets(Optional<List<String>> tags, int limit) throws ServiceException {
         return PetsGet200Response.value(pets);
     }
 
     @Override
-    public Pet petsPost(NewPet a) throws ServiceException {
+    public Pet addPet(NewPet a) throws ServiceException {
         Pet p = new Pet(a, PetId.id(System.currentTimeMillis()));
         pets.add(p);
         return p;
     }
 
     @Override
-    public Pet petsIdGet(long id) throws ServiceException {
+    public Pet find_pet_by_id(long id) throws ServiceException {
         Optional<Pet> pet = pets.stream().filter(p -> p.petId().id() == id).findAny();
         if (pet.isPresent()) {
             return pet.get();
@@ -49,7 +49,7 @@ public class PetStoreService implements Service {
     }
 
     @Override
-    public void petsIdDelete(long id) throws ServiceException {
+    public void deletePet(long id) throws ServiceException {
         Optional<Pet> pet = pets.stream().filter(p -> p.petId().id() == id).findAny();
         if (pet.isPresent()) {
             pets.remove(pet.get());
