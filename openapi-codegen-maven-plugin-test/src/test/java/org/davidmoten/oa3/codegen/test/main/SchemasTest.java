@@ -58,6 +58,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
 import org.davidmoten.oa3.codegen.test.main.schema.Longitude;
 import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcast;
@@ -963,12 +964,20 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(a, b);
     }
-    
+
     @Test
     public void testNullableStringEnum() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableStringEnum.HELLO);
         assertEquals(NullableStringEnum.HELLO, m.readValue(json, NullableStringEnum.class));
-        //TODO cannot read from serialized NullableStringEnum.NULL_
+        // TODO cannot read from serialized NullableStringEnum.NULL_
+    }
+
+    //    @Test
+    // TODO fix nullable enum serialization
+    public void testNullableStringEnumObject() throws JsonProcessingException {
+        NullableStringEnumObject a = NullableStringEnumObject.thing(NullableStringEnum.NULL_);
+        String json = m.writeValueAsString(a);
+        assertEquals(NullableStringEnum.NULL_, m.readValue(json, NullableStringEnumObject.class).thing());
     }
 
     private static void onePublicConstructor(Class<?> c) {

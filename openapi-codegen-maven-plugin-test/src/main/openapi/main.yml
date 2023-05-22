@@ -1796,3 +1796,10 @@ components:
       type: string
       enum: [hello, there, null]
       nullable: true
+      
+    NullableStringEnumObject:
+      type: object
+      properties:
+        thing: 
+          $ref: '#/components/schemas/NullableStringEnum'
+      required: [thing]
