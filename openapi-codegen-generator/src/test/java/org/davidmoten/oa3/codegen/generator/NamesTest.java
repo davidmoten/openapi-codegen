@@ -45,4 +45,29 @@ public class NamesTest {
         assertEquals("", Names.upperFirst(""));
     }
 
+    @Test
+    public void testToIdentifier() {
+        assertEquals("b", Names.toIdentifier("b"));
+    }
+
+    @Test
+    public void testEnumClassName() {
+        assertEquals("B", Names.simpleClassNameFromSimpleName("b"));
+    }
+
+    @Test
+    public void testUnderscoreToCamel() {
+        assertEquals("b", Names.underscoreToCamel("b"));
+    }
+
+    @Test
+    public void testUnderscoreToCamel2() {
+        assertEquals("b", Names.underscoreToCamel("b_"));
+    }
+    
+    @Test
+    public void testUnderscoreToCamel3() {
+        assertEquals("b", Names.underscoreToCamel("b__"));
+    }
+
 }

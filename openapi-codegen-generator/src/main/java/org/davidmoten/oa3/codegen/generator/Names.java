@@ -228,9 +228,11 @@ public final class Names {
                 b.append(ch);
             }
         }
-        char ch = s.charAt(s.length() - 1);
-        if (ch != '_') {
-            b.append(ch);
+        if (s.length() > 1) {
+            char ch = s.charAt(s.length() - 1);
+            if (ch != '_') {
+                b.append(ch);
+            }
         }
         return b.toString();
     }
