@@ -56,6 +56,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.External;
 import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
 import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
 import org.davidmoten.oa3.codegen.test.main.schema.Longitude;
 import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcast;
@@ -69,6 +70,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.Msi;
 import org.davidmoten.oa3.codegen.test.main.schema.MsiId;
 import org.davidmoten.oa3.codegen.test.main.schema.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.main.schema.NonSARPriority;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableExample;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectNoOptionalFields;
 import org.davidmoten.oa3.codegen.test.main.schema.Oval3;
@@ -108,6 +110,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -947,6 +950,17 @@ public class SchemasTest {
         assertTrue(BlankStringEnum.BLANK.value().isEmpty());
         assertEquals("yes", BlankStringEnum.YES.value());
         assertEquals("no", BlankStringEnum.NO.value());
+    }
+
+    @Test
+    public void testNullable() throws JsonProcessingException {
+        NullableExample a = NullableExample.builder().a(123).b(B.HELLO).notReq(JsonNullable.of(null)).build();
+        String json = m.writeValueAsString(a);
+        assertTrue(json.contains("\"req\":null"));
+        assertTrue(json.contains("\"notReq\":null"));
+        NullableExample b = m.readValue(json, NullableExample.class);
+        assertEquals(json, m.writeValueAsString(a));
+        assertEquals(a, b);
     }
 
     private static void onePublicConstructor(Class<?> c) {
