@@ -1791,3 +1791,8 @@ components:
         name:
           type: string
           nullable: true
+          
+    NullableStringEnum:
+      type: string
+      enum: [hello, there, null]
+      nullable: true

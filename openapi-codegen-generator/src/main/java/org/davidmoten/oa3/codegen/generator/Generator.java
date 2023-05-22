@@ -183,15 +183,21 @@ public class Generator {
             classes.stream().filter(x -> x.fullClassName != null).forEach(x -> set.add(x.simpleName()));
             return set;
         }
+
+        public boolean isNullableEnum() {
+            return !enumMembers.isEmpty() && enumMembers.get(0).nullable;
+        }
     }
 
     public static class EnumMember {
         public final String name;
         public final Object parameter;
+        public final boolean nullable;
 
-        public EnumMember(String name, Object parameter) {
+        public EnumMember(String name, Object parameter, boolean nullable) {
             this.name = name;
             this.parameter = parameter;
+            this.nullable = nullable;
         }
     }
 
@@ -675,7 +681,7 @@ public class Generator {
         Set<String> used = new HashSet<>();
         for (Object o : schema.getEnum()) {
             if (!used.contains(String.valueOf(o))) {
-                cls.enumMembers.add(new EnumMember(map.get(String.valueOf(o)), o));
+                cls.enumMembers.add(new EnumMember(map.get(String.valueOf(o)), o, isNullable(schema)));
                 used.add(String.valueOf(o));
             }
         }

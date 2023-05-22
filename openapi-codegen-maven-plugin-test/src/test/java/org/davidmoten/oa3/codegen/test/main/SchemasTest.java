@@ -57,6 +57,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
 import org.davidmoten.oa3.codegen.test.main.schema.Longitude;
 import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcast;
@@ -961,6 +962,13 @@ public class SchemasTest {
         NullableExample b = m.readValue(json, NullableExample.class);
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(a, b);
+    }
+    
+    @Test
+    public void testNullableStringEnum() throws JsonProcessingException {
+        String json = m.writeValueAsString(NullableStringEnum.HELLO);
+        NullableStringEnum a = m.readValue(json, NullableStringEnum.class);
+        assertEquals(NullableStringEnum.HELLO, a);
     }
 
     private static void onePublicConstructor(Class<?> c) {

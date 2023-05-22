@@ -153,7 +153,11 @@ public final class SchemasCodeWriter {
             out.line("public static %s fromValue(%s value) {", simpleClassName, Object.class);
             out.line("for (%s x: %s.values()) {", simpleClassName, simpleClassName);
             // be careful because x.value can be primitive
-            out.line("if (value.equals(x.value)) {");
+            if (cls.isNullableEnum()) {
+                out.line("if (%s.equals(value, x.value.get())) {", Objects.class);
+            } else {
+                out.line("if (%s.equals(value, x.value)) {", Objects.class);
+            }
             out.line("return x;");
             out.closeParen();
             out.closeParen();
@@ -267,7 +271,12 @@ public final class SchemasCodeWriter {
                         x.parameter);
             } else {
                 String delim = x.parameter instanceof String ? "\"" : "";
-                return String.format("%s%s(%s%s%s)", out.indent(), x.name, delim, x.parameter, delim);
+                if (x.nullable) {
+                    return String.format("%s%s(%s.of(%s%s%s))", out.indent(), x.name, out.add(JsonNullable.class),
+                            delim, x.parameter, delim);
+                } else {
+                    return String.format("%s%s(%s%s%s)", out.indent(), x.name, delim, x.parameter, delim);
+                }
             }
         }).collect(Collectors.joining(",\n"));
         if (!text.isEmpty()) {
@@ -482,7 +491,8 @@ public final class SchemasCodeWriter {
         });
         out.closeParen();
         boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
-        if (hasOptional || !interfaces.isEmpty() || hasBinary || hasAdditionalProperties) {
+        if (cls.classType != ClassType.ENUM
+                && (hasOptional || !interfaces.isEmpty() || hasBinary || hasAdditionalProperties)) {
             out.right().right();
             String parametersOptional = cls.fields //
                     .stream() //
@@ -498,7 +508,8 @@ public final class SchemasCodeWriter {
             out.left().left();
             out.println();
             addConstructorBindingAnnotation(out, names);
-            out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersOptional);
+            String modifier = cls.classType == ClassType.ENUM ? "private" : "public";
+            out.line("%s %s(%s) {", modifier, Names.simpleClassName(cls.fullClassName), parametersOptional);
             // validate
             ifValidate(cls, out, names, //
                     out2 -> cls.fields.stream() //
