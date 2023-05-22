@@ -1,6 +1,8 @@
 package org.davidmoten.oa3.codegen.generator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +17,7 @@ import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -37,7 +40,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -47,7 +49,7 @@ public class SerializationTest {
 
     private static final Config CONFIG = Config.builder().build();
 
-    private static final ObjectMapper m = new ObjectMapper().registerModule(new Jdk8Module());
+    private static final ObjectMapper m = Config.builder().build().mapper();
 
     @Test
     public void testEnumSerializeAndDeserialize() throws JsonProcessingException {
@@ -373,7 +375,7 @@ public class SerializationTest {
         assertEquals("abc", b.bikes.common);
 
     }
-    
+
     @Test
     public void testListOfMap() throws JsonProcessingException {
         Map<String, Object> map1 = new HashMap<>();
@@ -388,25 +390,69 @@ public class SerializationTest {
         ListOfMap b = m.readValue(json, ListOfMap.class);
         assertEquals(list, b.list());
     }
+
+    @Test
+    public void testNullableRequiredIsNull() throws JsonProcessingException {
+        NullableRequired a = new NullableRequired(Optional.empty());
+        String json = m.writeValueAsString(a);
+        NullableRequired b = m.readValue(json, NullableRequired.class);
+        assertTrue(b.name.isPresent());
+        assertNull(b.name.get());
+    }
+
+    @Test
+    public void testNullableRequiredIsNotNull() throws JsonProcessingException {
+        NullableRequired a = new NullableRequired(Optional.of("hi"));
+        String json = m.writeValueAsString(a);
+        NullableRequired b = m.readValue(json, NullableRequired.class);
+        assertTrue(b.name.isPresent());
+        assertEquals("hi", b.name.get());
+    }
+
+    @Test
+    public void testNullableNotRequiredIsUndefined() throws JsonProcessingException {
+        NullableNotRequired a = new NullableNotRequired(JsonNullable.undefined());
+        String json = m.writeValueAsString(a);
+        NullableNotRequired b = m.readValue(json, NullableNotRequired.class);
+        assertFalse(b.name.isPresent());
+    }
+    
+    @Test
+    public void testNullableNotRequiredIsNull() throws JsonProcessingException {
+        NullableNotRequired a = new NullableNotRequired(JsonNullable.of(null));
+        String json = m.writeValueAsString(a);
+        NullableNotRequired b = m.readValue(json, NullableNotRequired.class);
+        assertTrue(b.name.isPresent());
+        assertNull(b.name.get());
+    }
+    
+    @Test
+    public void testNullableNotRequiredIsNotNull() throws JsonProcessingException {
+        NullableNotRequired a = new NullableNotRequired(JsonNullable.of("hi"));
+        String json = m.writeValueAsString(a);
+        NullableNotRequired b = m.readValue(json, NullableNotRequired.class);
+        assertTrue(b.name.isPresent());
+        assertEquals("hi", b.name.get());
+    }
     
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
     public static final class ListOfMap {
-        
+
         @JsonValue
         private final List<Map<String, Object>> list;
-        
+
         @JsonCreator
         public ListOfMap(List<Map<String, Object>> list) {
             this.list = list;
         }
-        
+
         public List<Map<String, Object>> list() {
             return list;
         }
-        
+
     }
-    
+
     @JsonInclude(Include.NON_NULL)
     @JsonDeserialize(using = AllOf.Deserializer.class)
     public static final class AllOf {
@@ -459,23 +505,57 @@ public class SerializationTest {
             this.name = name;
             this.map = new HashMap<>();
         }
-        
+
         public WithMap(String name, Map<String, String> map) {
             this.name = name;
             this.map = map;
         }
-        
+
         @JsonAnySetter
         private void put(String key, String value) {
             map.put(key, value);
         }
-        
+
         public String name() {
             return name;
         }
 
         public Map<String, String> map() {
             return Collections.unmodifiableMap(map);
+        }
+
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    public static final class NullableRequired {
+
+        @JsonProperty("name")
+        private final JsonNullable<String> name;
+
+        @JsonCreator
+        private NullableRequired(@JsonProperty("name") JsonNullable<String> name) {
+            Preconditions.checkArgumentNotNull(name, "name");
+            this.name = name;
+        }
+
+        public NullableRequired(Optional<String> name) {
+            Preconditions.checkArgumentNotNull(name, "name");
+            this.name = JsonNullable.of(name.orElse(null));
+        }
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    public static final class NullableNotRequired {
+
+        @JsonProperty("name")
+        private final JsonNullable<String> name;
+
+        @JsonCreator
+        public NullableNotRequired(@JsonProperty("name") JsonNullable<String> name) {
+            Preconditions.checkArgumentNotNull(name, "name");
+            this.name = name;
         }
 
     }

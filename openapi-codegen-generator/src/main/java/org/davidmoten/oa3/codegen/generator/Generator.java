@@ -20,6 +20,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.generator.writer.SchemasCodeWriter;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.github.davidmoten.guavamini.Sets;
 
@@ -268,11 +269,39 @@ public class Generator {
         }
 
         public String resolvedType(Imports imports) {
-            return Generator.resolvedType(this, imports);
+            if (isOctets()) {
+                return "byte[]";
+            } else if (isArray) {
+                return toList(fullClassName, imports, !required);
+            } else if (nullable) {
+                return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
+            } else if (required) {
+                return imports.add(Util.toPrimitive(fullClassName));
+            } else {
+                return imports.add(Optional.class) + "<" + imports.add(fullClassName) + ">";
+            }
         }
 
         public String resolvedTypeNullable(Imports imports) {
-            return Generator.resolvedTypeNullable(this, imports);
+            if (encoding == Encoding.OCTET) {
+                return imports.add(String.class);
+            } else if (mapType.isPresent()) {
+                if (isArray) {
+                    return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                            imports.add(String.class), imports.add(fullClassName));
+                } else {
+                    return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                            imports.add(fullClassName));
+                }
+            } else if (isArray) {
+                return toList(fullClassName, imports, false);
+            } else if (nullable) {
+                return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
+            } else if (required) {
+                return imports.add(Util.toPrimitive(fullClassName));
+            } else {
+                return imports.add(fullClassName);
+            }
         }
 
         public String resolvedTypeMap(Imports imports, boolean isArray) {
@@ -655,26 +684,6 @@ public class Generator {
         return collection != null && t != null && collection.contains(t);
     }
 
-    private static String resolvedTypeNullable(Field f, Imports imports) {
-        if (f.encoding == Encoding.OCTET) {
-            return imports.add(String.class);
-        } else if (f.mapType.isPresent()) {
-            if (f.isArray) {
-                return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
-                        imports.add(String.class), imports.add(f.fullClassName));
-            } else {
-                return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
-                        imports.add(f.fullClassName));
-            }
-        } else if (f.isArray) {
-            return toList(f.fullClassName, imports, false);
-        } else if (f.required) {
-            return imports.add(Util.toPrimitive(f.fullClassName));
-        } else {
-            return imports.add(f.fullClassName);
-        }
-    }
-
     private static String toList(String fullClassName, Imports imports, boolean useOptional) {
         if (useOptional) {
             return String.format("%s<%s<%s>>", imports.add(Optional.class), imports.add(List.class),
@@ -696,18 +705,6 @@ public class Generator {
                     imports.add(String.class), t);
         } else {
             return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
-        }
-    }
-
-    private static String resolvedType(Field f, Imports imports) {
-        if (f.isOctets()) {
-            return "byte[]";
-        } else if (f.isArray) {
-            return toList(f.fullClassName, imports, !f.required);
-        } else if (f.required) {
-            return imports.add(Util.toPrimitive(f.fullClassName));
-        } else {
-            return imports.add(Optional.class) + "<" + imports.add(f.fullClassName) + ">";
         }
     }
 

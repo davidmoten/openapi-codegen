@@ -2,6 +2,8 @@ package org.davidmoten.oa3.codegen.runtime;
 
 import java.util.function.Predicate;
 
+import org.openapitools.jackson.nullable.JsonNullableModule;
+
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -35,7 +37,8 @@ public final class Config {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) //
                 .build() //
                 .registerModule(new JavaTimeModule()) //
-                .registerModule(new Jdk8Module());
+                .registerModule(new Jdk8Module()) //
+                .registerModule(new JsonNullableModule());
 
         private Predicate<? super Class<?>> validateInConstructor = x -> true;
         private Predicate<? super String> validateInControllerMethod = x -> true;
