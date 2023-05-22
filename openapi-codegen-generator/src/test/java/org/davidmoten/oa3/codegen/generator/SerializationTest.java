@@ -6,13 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import org.davidmoten.oa3.codegen.generator.SerializationTest.NullableEnum.Deserializer;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
@@ -34,12 +37,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -416,7 +423,7 @@ public class SerializationTest {
         NullableNotRequired b = m.readValue(json, NullableNotRequired.class);
         assertFalse(b.name.isPresent());
     }
-    
+
     @Test
     public void testNullableNotRequiredIsNull() throws JsonProcessingException {
         NullableNotRequired a = new NullableNotRequired(JsonNullable.of(null));
@@ -425,7 +432,7 @@ public class SerializationTest {
         assertTrue(b.name.isPresent());
         assertNull(b.name.get());
     }
-    
+
     @Test
     public void testNullableNotRequiredIsNotNull() throws JsonProcessingException {
         NullableNotRequired a = new NullableNotRequired(JsonNullable.of("hi"));
@@ -434,7 +441,14 @@ public class SerializationTest {
         assertTrue(b.name.isPresent());
         assertEquals("hi", b.name.get());
     }
-    
+
+    @Test
+    public void testNullableEnum() throws JsonProcessingException {
+        String json = m.writeValueAsString(NullableEnum.NULL_);
+        assertEquals("null", json);
+        assertEquals(NullableEnum.NULL_, m.readValue(json, NullableEnum.class));
+    }
+
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
     public static final class ListOfMap {
@@ -559,4 +573,63 @@ public class SerializationTest {
         }
 
     }
+
+    @JsonDeserialize(using = Deserializer.class)
+    public enum NullableEnum {
+
+        HELLO(JsonNullable.of("hello")), THERE(JsonNullable.of("there")), NULL_(JsonNullable.of(null));
+
+        @JsonValue
+        private final JsonNullable<String> value;
+
+        private NullableEnum(JsonNullable<String> value) {
+            this.value = value;
+        }
+
+        public Optional<String> value() {
+            return Optional.ofNullable(value.get());
+        }
+
+        @JsonCreator
+        public static NullableEnum fromValue(Object value) {
+            for (NullableEnum x : NullableEnum.values()) {
+                if (Objects.equals(value, x.value.get())) {
+                    return x;
+                }
+            }
+            throw new IllegalArgumentException("unexpected enum value: '" + value + "'");
+        }
+
+        @SuppressWarnings("serial")
+        public static class Deserializer extends NullEnumDeserializer<NullableEnum> {
+            Deserializer() {
+                super(NullableEnum.class, NULL_);
+            }
+        }
+    }
+    
+    @SuppressWarnings("serial")
+    public static class NullEnumDeserializer<T> extends StdDeserializer<T> {
+        
+        private final Class<T> cls;
+        private final T nullValue;
+
+        public NullEnumDeserializer(Class<T> cls, T nullValue) {
+            super(cls);
+            this.cls = cls;
+            this.nullValue = nullValue;
+        }
+
+        @Override
+        public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+           return p.readValueAs(cls);
+        }
+
+        @Override
+        public T getNullValue(DeserializationContext ctxt) throws JsonMappingException {
+            return nullValue;
+        }
+        
+    }
+
 }
