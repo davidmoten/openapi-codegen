@@ -1784,3 +1784,10 @@ components:
           type: string
           enum: [hello, there]
       required: [req, a, b]
+      
+    NullableSingle:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true

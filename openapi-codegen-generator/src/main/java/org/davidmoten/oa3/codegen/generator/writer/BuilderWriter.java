@@ -198,7 +198,8 @@ public class BuilderWriter {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
-            out.line("return new %s(%s.of(%s));", importedBuiltType, Optional.class, field.fieldName);
+            Class<?> c = field.nullable && !field.required ? JsonNullable.class : Optional.class;
+            out.line("return new %s(%s.of(%s));", importedBuiltType, c, field.fieldName);
             out.closeParen();
         }
     }

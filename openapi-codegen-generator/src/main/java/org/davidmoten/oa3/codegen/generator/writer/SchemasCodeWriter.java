@@ -446,11 +446,10 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required || f.nullable);
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
-        // nullable parameters
-        // and a public constructor with Optional parameters
+        // nullable parameters and a public constructor with Optional parameters
         final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
                 ? "private"
                 : "public";
@@ -758,7 +757,21 @@ public final class SchemasCodeWriter {
             String params = fields.stream() //
                     .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
                     .map(y -> {
-                        if (y.fieldName(cls).equals(x.fieldName(cls)) || y.required || y.nullable) {
+                        if (y.fieldName(cls).equals(x.fieldName(cls))) {
+                            if (y.nullable && !y.required) {
+                                return String.format("%s.of(%s.orElse(null))", out.add(JsonNullable.class),
+                                        y.fieldName(cls));
+                            } else {
+                                return y.fieldName(cls);
+                            }
+                        } else if (y.nullable) {
+                            if (y.required) {
+                                return String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
+                                        y.fieldName(cls));
+                            } else {
+                                return y.fieldName(cls);
+                            }
+                        } else if (y.required) {
                             return y.fieldName(cls);
                         } else {
                             return String.format("%s.ofNullable(%s)", out.add(Optional.class), y.fieldName(cls));
