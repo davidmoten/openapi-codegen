@@ -529,7 +529,8 @@ public class Generator {
     }
 
     private static boolean isNullable(Schema<?> schema) {
-        return Boolean.TRUE.equals(schema.getNullable());
+        return Boolean.TRUE.equals(schema.getNullable())
+                || schema.getTypes() != null && schema.getTypes().contains("null");
     }
 
     private static Encoding encoding(Schema<?> schema) {
