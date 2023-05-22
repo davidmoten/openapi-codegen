@@ -3,6 +3,8 @@ package org.davidmoten.oa3.codegen.runtime;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.openapitools.jackson.nullable.JsonNullable;
+
 public final class Preconditions {
 
     private static final PreconditionsBase p = new PreconditionsBase(IllegalArgumentException::new);
@@ -18,12 +20,16 @@ public final class Preconditions {
     public static void checkMaximum(Collection<? extends Number> x, String max, String name) {
         p.checkMaximum(x, max, name);
     }
-    
+
     public static void checkMaximum(Collection<? extends Number> x, String max, String name, boolean exclusive) {
         p.checkMaximum(x, max, name, exclusive);
     }
 
     public static void checkMaximum(Optional<? extends Number> x, String max, String name) {
+        p.checkMaximum(x, max, name);
+    }
+
+    public static void checkMaximum(JsonNullable<? extends Number> x, String max, String name) {
         p.checkMaximum(x, max, name);
     }
 
@@ -35,6 +41,10 @@ public final class Preconditions {
         p.checkMaximum(x, max, name, exclusive);
     }
 
+    public static void checkMaximum(JsonNullable<? extends Number> x, String max, String name, boolean exclusive) {
+        p.checkMaximum(x, max, name, exclusive);
+    }
+
     public static void checkMinimum(Number x, String min, String name) {
         p.checkMinimum(x, min, name);
     }
@@ -42,73 +52,101 @@ public final class Preconditions {
     public static void checkMinimum(Number x, String min, String name, boolean exclusive) {
         p.checkMinimum(x, min, name, exclusive);
     }
-    
+
     public static void checkMinimum(Optional<? extends Number> x, String min, String name) {
+        p.checkMinimum(x, min, name);
+    }
+
+    public static void checkMinimum(JsonNullable<? extends Number> x, String min, String name) {
         p.checkMinimum(x, min, name);
     }
 
     public static void checkMinimum(Optional<? extends Number> x, String min, String name, boolean exclusive) {
         p.checkMinimum(x, min, name, exclusive);
     }
-    
+
+    public static void checkMinimum(JsonNullable<? extends Number> x, String min, String name, boolean exclusive) {
+        p.checkMinimum(x, min, name, exclusive);
+    }
+
     public static void checkMinimum(Collection<? extends Number> x, String min, String name) {
         p.checkMinimum(x, min, name);
     }
-    
+
     public static void checkMinimum(Collection<? extends Number> x, String min, String name, boolean exclusive) {
         p.checkMinimum(x, min, name, exclusive);
     }
 
-    public static String checkMinLength(String s, int minLength, String name) {
-        return p.checkMinLength(s, minLength, name);
+    public static void checkMinLength(String s, int minLength, String name) {
+        p.checkMinLength(s, minLength, name);
     }
 
-    public static <T extends Collection<String>> T checkMinLength(T list, int minLength, String name) {
-        return p.checkMinLength(list, minLength, name);
-    }
-    
-    public static Optional<String> checkMinLength(Optional<String> s, int minLength, String name) {
-        return p.checkMinLength(s, minLength, name);
+    public static  void checkMinLength(Collection<String> list, int minLength, String name) {
+        p.checkMinLength(list, minLength, name);
     }
 
-    public static String checkMaxLength(String s, int maxLength, String name) {
-        return p.checkMaxLength(s, maxLength, name);
+    public static void checkMinLength(Optional<String> s, int minLength, String name) {
+        p.checkMinLength(s, minLength, name);
     }
 
-    public static <T extends Collection<String>> T checkMaxLength(T list, int maxLength, String name) {
-        return p.checkMaxLength(list, maxLength, name);
-    }
-    
-    public static Optional<String> checkMaxLength(Optional<String> s, int maxLength, String name) {
-        return p.checkMaxLength(s, maxLength, name);
+    public static void checkMinLength(JsonNullable<String> s, int minLength, String name) {
+        p.checkMinLength(s, minLength, name);
     }
 
-    public static <S extends Collection<T>, T> S checkMinSize(S collection, int min, String name) {
-        return p.checkMinSize(collection, min, name);
+    public static void checkMaxLength(String s, int maxLength, String name) {
+        p.checkMaxLength(s, maxLength, name);
     }
 
-    public static <S extends Collection<T>, T> Optional<S> checkMinSize(Optional<S> collection, int min, String name) {
-        return p.checkMinSize(collection, min, name);
+    public static void checkMaxLength(Collection<String> list, int maxLength, String name) {
+        p.checkMaxLength(list, maxLength, name);
     }
 
-    public static <S extends Collection<T>, T> S checkMaxSize(S collection, int max, String name) {
-        return p.checkMaxSize(collection, max, name);
+    public static void checkMaxLength(Optional<String> s, int maxLength, String name) {
+        p.checkMaxLength(s, maxLength, name);
     }
 
-    public static <S extends Collection<T>, T> Optional<S> checkMaxSize(Optional<S> collection, int max, String name) {
-        return p.checkMaxSize(collection, max, name);
-    }
-    
-    public static String checkMatchesPattern(String s, String pattern, String name) {
-        return p.checkMatchesPattern(s, pattern, name);
+    public static void checkMaxLength(JsonNullable<String> s, int maxLength, String name) {
+        p.checkMaxLength(s, maxLength, name);
     }
 
-    public static <T> Optional<T> checkMatchesPattern(Optional<T> s, String pattern, String name) {
-        return p.checkMatchesPattern(s, pattern, name);
+    public static void checkMinSize(Collection<?> collection, int min, String name) {
+        p.checkMinSize(collection, min, name);
     }
 
-    public static <T extends Collection<String>> T checkMatchesPattern(T s, String pattern, String name) {
-        return p.checkMatchesPattern(s, pattern, name);
+    public static <T> void checkMinSize(Optional<? extends Collection<T>> collection, int min, String name) {
+        p.checkMinSize(collection, min, name);
+    }
+
+    public static <T> void checkMinSize(JsonNullable<? extends Collection<T>> collection, int min, String name) {
+        p.checkMinSize(collection, min, name);
+    }
+
+    public static void checkMaxSize(Collection<?> collection, int max, String name) {
+        p.checkMaxSize(collection, max, name);
+    }
+
+    public static <T> void checkMaxSize(Optional<? extends Collection<T>> collection, int max, String name) {
+        p.checkMaxSize(collection, max, name);
+    }
+
+    public static <T> void checkMaxSize(JsonNullable<? extends Collection<T>> collection, int max, String name) {
+        p.checkMaxSize(collection, max, name);
+    }
+
+    public static void checkMatchesPattern(String s, String pattern, String name) {
+        p.checkMatchesPattern(s, pattern, name);
+    }
+
+    public static void checkMatchesPattern(Optional<?> s, String pattern, String name) {
+        p.checkMatchesPattern(s, pattern, name);
+    }
+
+    public static void checkMatchesPattern(JsonNullable<?> s, String pattern, String name) {
+        p.checkMatchesPattern(s, pattern, name);
+    }
+
+    public static void checkMatchesPattern(Collection<String> s, String pattern, String name) {
+        p.checkMatchesPattern(s, pattern, name);
     }
 
 }

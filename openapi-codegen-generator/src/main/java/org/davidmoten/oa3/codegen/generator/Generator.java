@@ -274,7 +274,11 @@ public class Generator {
             } else if (isArray) {
                 return toList(fullClassName, imports, !required);
             } else if (nullable) {
-                return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
+                if (required) {
+                    return String.format("%s<%s>", imports.add(Optional.class), imports.add(fullClassName));
+                } else {
+                    return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
+                }
             } else if (required) {
                 return imports.add(Util.toPrimitive(fullClassName));
             } else {

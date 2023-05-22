@@ -1769,7 +1769,12 @@ components:
     NullableExample:
       type: object
       properties: 
-        mine:
+        req:
           type: integer
           format: int32
           nullable: true    
+        notReq:
+          type: string
+          minLength: 4
+          nullable: true
+      required: [req]
