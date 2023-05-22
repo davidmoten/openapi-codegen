@@ -35,6 +35,10 @@ public class BuilderWriter {
             this.mapType = mapType;
             this.nullable = nullable;
         }
+
+        public boolean mandatory() {
+            return required && !nullable;
+        }
     }
 
     public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
@@ -47,21 +51,21 @@ public class BuilderWriter {
         }
         List<Field> sortedFields = new ArrayList<>(fields);
         // sort so required are first
-        sortedFields.sort((a, b) -> Boolean.compare(b.required || b.nullable, a.required || a.nullable));
+        sortedFields.sort((a, b) -> Boolean.compare(b.mandatory(), a.mandatory()));
 
         String builderName = "Builder";
         boolean passBuilderIntoConstructor = false;
-        boolean previousWasRequired = true;
+        boolean previousWasMandatory = true;
         boolean inFirstBuilder = true;
         Field last = sortedFields.get(sortedFields.size() - 1);
         for (Field f : sortedFields) {
             final String nextBuilderName;
-            if (f.required) {
+            if (f.mandatory()) {
                 nextBuilderName = "BuilderWith" + Names.upperFirst(f.fieldName);
             } else {
                 nextBuilderName = builderName;
             }
-            if (previousWasRequired) {
+            if (previousWasMandatory) {
                 if (!passBuilderIntoConstructor) {
                     out.println();
                     out.line("public static %s builder() {", builderName);
@@ -85,17 +89,17 @@ public class BuilderWriter {
                             out.println();
                             first = false;
                         }
-                        if (fld.nullable) {
-                            if (fld.required) {
-                                out.line("private %s<%s> %s;", Optional.class, out.add(fld.fullClassName),
-                                        fld.fieldName);
-                            } else {
-                                out.line("private %s<%s> %s;", JsonNullable.class, out.add(fld.fullClassName),
-                                        fld.fieldName);
-                            }
-                        } else if (fld.mapType.isPresent()) {
+                        if (fld.mapType.isPresent()) {
                             out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
                                     out.add(fld.fullClassName), fld.fieldName, HashMap.class);
+                        } else if (fld.nullable) {
+                            if (fld.required) {
+                                out.line("private %s<%s> %s = %s.empty();", Optional.class, out.add(fld.fullClassName),
+                                        fld.fieldName, Optional.class);
+                            } else {
+                                out.line("private %s<%s> %s = %s.undefined();", JsonNullable.class,
+                                        out.add(fld.fullClassName), fld.fieldName, JsonNullable.class);
+                            }
                         } else if (fld.required) {
                             if (fld.isArray) {
                                 out.line("private %s<%s> %s;", List.class, out.add(fld.fullClassName), fld.fieldName);
@@ -132,31 +136,21 @@ public class BuilderWriter {
             }
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
-            if (f.nullable) {
-                if (f.required) {
-                    out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
-                } else {
-                    out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
-                }
-            } else if (f.required || f.mapType.isPresent()) {
+            if (f.mandatory() || f.mapType.isPresent()) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
+            } else if (f.nullable && !f.required) {
+                out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, JsonNullable.class, f.fieldName);
             } else {
                 out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
             }
-            if (f.required) {
+            if (f.mandatory()) {
                 out.line("return new %s(this%s);", nextBuilderName, builderField);
             } else {
                 out.line("return this;");
             }
             out.closeParen();
-            if (f.required && f.nullable) {
-                out.println();
-                out.line("public %s %sNull() {", nextBuilderName, f.fieldName);
-                out.line("this%s.%s = %s.empty();", builderField, f.fieldName, Optional.class);
-                out.line("return new %s(this%s);", nextBuilderName, builderField);
-            }
 
-            if (!f.required && !f.nullable && !f.mapType.isPresent()) {
+            if (!f.mandatory() && !f.mapType.isPresent()) {
                 out.println();
                 out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, out.imports()),
                         f.fieldName);
@@ -170,10 +164,10 @@ public class BuilderWriter {
             if (f.mapType.isPresent() && f == last) {
                 writeBuildMethod(out, fields, importedBuiltType, builderField);
             }
-            if (f.required || f.nullable || f == last) {
+            if (f.mandatory() || f == last) {
                 out.closeParen();
             }
-            if (f == last && (f.required || f.nullable)) {
+            if (f == last && f.mandatory()) {
                 out.println();
                 out.line("public static final class %s {", nextBuilderName);
                 out.println();
@@ -185,11 +179,12 @@ public class BuilderWriter {
                 writeBuildMethod(out, fields, importedBuiltType, ".b");
                 out.closeParen();
             }
-            passBuilderIntoConstructor = f.required;
+            passBuilderIntoConstructor = f.mandatory();
             builderName = nextBuilderName;
-            previousWasRequired = f.required;
+            previousWasMandatory = f.mandatory();
             out.flush();
         }
+
     }
 
     private static void writeSimple(CodePrintWriter out, Field field, String importedBuiltType) {
@@ -199,7 +194,7 @@ public class BuilderWriter {
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
 
-        if (!field.required && !field.mapType.isPresent()) {
+        if (!field.mandatory() && !field.mapType.isPresent()) {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
@@ -223,8 +218,6 @@ public class BuilderWriter {
             return mapImportedType(f, imports);
         } else if (f.isArray) {
             return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
-        } else if (f.nullable && !f.required) {
-            return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(f.fullClassName));
         } else {
             return imports.add(Util.toPrimitive(f.fullClassName));
         }
@@ -250,11 +243,11 @@ public class BuilderWriter {
                 return String.format("%s<%s<%s>>", imports.add(Optional.class), imports.add(List.class),
                         imports.add(f.fullClassName));
             }
-        }
-        if (f.required) {
+        } else if (f.required && !f.nullable) {
             return imports.add(Util.toPrimitive(f.fullClassName));
-        } else {
+        } else if (f.nullable && !f.required) {
+            return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(f.fullClassName));
+        } else
             return String.format("%s<%s>", imports.add(Optional.class), imports.add(f.fullClassName));
-        }
     }
 }
