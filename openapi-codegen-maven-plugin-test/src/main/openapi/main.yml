@@ -1773,8 +1773,14 @@ components:
           type: integer
           format: int32
           nullable: true    
+        a: 
+          type: integer
+          format: int64
         notReq:
           type: string
           minLength: 4
           nullable: true
-      required: [req]
+        b: 
+          type: string
+          enum: [hello, there]
+      required: [req, a, b]

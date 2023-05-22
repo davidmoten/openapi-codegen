@@ -104,7 +104,7 @@ public class BuilderWriter {
                             if (fld.isArray) {
                                 out.line("private %s<%s> %s;", List.class, out.add(fld.fullClassName), fld.fieldName);
                             } else {
-                                out.line("private %s %s;", out.add(fld.fullClassName), fld.fieldName);
+                                out.line("private %s %s;", out.add(Util.toPrimitive(fld.fullClassName)), fld.fieldName);
                             }
                         } else {
                             out.line("private %s %s = %s.empty();", enhancedImportedType(fld, out.imports()),
