@@ -36,6 +36,7 @@ import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.util.Util;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -445,7 +446,7 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required);
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required || f.nullable);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters
@@ -529,6 +530,13 @@ public final class SchemasCodeWriter {
                             out.line("this.%s = %s.value(%s.class, \"%s\");", x.fieldName(cls),
                                     DiscriminatorHelper.class, out.add(x.fullClassName),
                                     disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
+                        } else if (x.nullable) {
+                            if (x.required) {
+                                out.line("this.%s = %s.of(%s.orElse(null));", x.fieldName(cls), JsonNullable.class,
+                                        x.fieldName(cls));
+                            } else {
+                                assignField(out, cls, x);
+                            }
                         } else if (!x.isPrimitive() && !x.isByteArray()) {
                             if (x.required) {
                                 assignField(out, cls, x);
@@ -714,7 +722,13 @@ public final class SchemasCodeWriter {
             } else {
                 out.println();
                 final String value;
-                if (!f.isOctets() && !f.required) {
+                if (f.nullable) {
+                    if (f.required) {
+                        value = String.format("%s.ofNullable(%s.get())", out.add(Optional.class), f.fieldName(cls));
+                    } else {
+                        value = f.fieldName(cls);
+                    }
+                } else if (!f.isOctets() && !f.required) {
                     value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
                 } else if (f.isOctets()) {
                     value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
@@ -744,7 +758,7 @@ public final class SchemasCodeWriter {
             String params = fields.stream() //
                     .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
                     .map(y -> {
-                        if (y.fieldName(cls).equals(x.fieldName(cls)) || y.required) {
+                        if (y.fieldName(cls).equals(x.fieldName(cls)) || y.required || y.nullable) {
                             return y.fieldName(cls);
                         } else {
                             return String.format("%s.ofNullable(%s)", out.add(Optional.class), y.fieldName(cls));
