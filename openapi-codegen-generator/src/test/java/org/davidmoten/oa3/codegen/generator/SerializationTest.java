@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,8 +14,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.davidmoten.oa3.codegen.generator.SerializationTest.NullableEnum.Deserializer;
 import org.davidmoten.oa3.codegen.runtime.Config;
+import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.junit.jupiter.api.Test;
@@ -37,16 +36,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -574,7 +569,7 @@ public class SerializationTest {
 
     }
 
-    @JsonDeserialize(using = Deserializer.class)
+    @JsonDeserialize(using = NullableEnum.Deserializer.class)
     public enum NullableEnum {
 
         HELLO(JsonNullable.of("hello")), THERE(JsonNullable.of("there")), NULL_(JsonNullable.of(null));
@@ -606,30 +601,6 @@ public class SerializationTest {
                 super(NullableEnum.class, NULL_);
             }
         }
-    }
-    
-    @SuppressWarnings("serial")
-    public static class NullEnumDeserializer<T> extends StdDeserializer<T> {
-        
-        private final Class<T> cls;
-        private final T nullValue;
-
-        public NullEnumDeserializer(Class<T> cls, T nullValue) {
-            super(cls);
-            this.cls = cls;
-            this.nullValue = nullValue;
-        }
-
-        @Override
-        public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-           return p.readValueAs(cls);
-        }
-
-        @Override
-        public T getNullValue(DeserializationContext ctxt) throws JsonMappingException {
-            return nullValue;
-        }
-        
     }
 
 }
