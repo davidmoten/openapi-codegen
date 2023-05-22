@@ -967,8 +967,8 @@ public class SchemasTest {
     @Test
     public void testNullableStringEnum() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableStringEnum.HELLO);
-        NullableStringEnum a = m.readValue(json, NullableStringEnum.class);
-        assertEquals(NullableStringEnum.HELLO, a);
+        assertEquals(NullableStringEnum.HELLO, m.readValue(json, NullableStringEnum.class));
+        //TODO cannot read from serialized NullableStringEnum.NULL_
     }
 
     private static void onePublicConstructor(Class<?> c) {
