@@ -346,7 +346,7 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = //
                 cls.fields.stream() //
                         .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required, f.isArray,
-                                f.mapType)) //
+                                f.mapType, f.nullable)) //
                         .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -567,7 +567,7 @@ public final class SchemasCodeWriter {
                 .stream() //
                 .filter(x -> !isDiscriminator(interfaces, x)) //
                 .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        f.required && !f.isAdditionalProperties(), f.isArray, f.mapType))
+                        f.required && !f.isAdditionalProperties(), f.isArray, f.mapType, f.nullable))
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }

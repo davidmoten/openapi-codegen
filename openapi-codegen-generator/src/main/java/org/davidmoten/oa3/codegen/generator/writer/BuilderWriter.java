@@ -14,6 +14,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Imports;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.runtime.MapBuilder;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 public class BuilderWriter {
 
@@ -23,14 +24,16 @@ public class BuilderWriter {
         private final boolean required;
         private final boolean isArray;
         private final Optional<MapType> mapType;
+        private final boolean nullable;
 
         public Field(String fieldName, String fullClassName, boolean required, boolean isArray,
-                Optional<MapType> mapType) {
+                Optional<MapType> mapType, boolean nullable) {
             this.fieldName = fieldName;
             this.fullClassName = fullClassName;
             this.required = required;
             this.isArray = isArray;
             this.mapType = mapType;
+            this.nullable = nullable;
         }
     }
 
@@ -90,6 +93,14 @@ public class BuilderWriter {
                                 out.line("private %s<%s> %s;", List.class, out.add(fld.fullClassName), fld.fieldName);
                             } else {
                                 out.line("private %s %s;", out.add(fld.fullClassName), fld.fieldName);
+                            }
+                        } else if (f.nullable) {
+                            if (f.required) {
+                                out.line("private %s<%s> %s;", Optional.class, out.add(fld.fullClassName),
+                                        fld.fieldName);
+                            } else {
+                                out.line("private %s<%s> %s;", JsonNullable.class, out.add(fld.fullClassName),
+                                        fld.fieldName);
                             }
                         } else {
                             out.line("private %s %s = %s.empty();", enhancedImportedType(fld, out.imports()),
@@ -200,6 +211,8 @@ public class BuilderWriter {
             return mapImportedType(f, imports);
         } else if (f.isArray) {
             return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
+        } else if (f.nullable && !f.required) {
+            return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(f.fullClassName));
         } else {
             return imports.add(Util.toPrimitive(f.fullClassName));
         }
