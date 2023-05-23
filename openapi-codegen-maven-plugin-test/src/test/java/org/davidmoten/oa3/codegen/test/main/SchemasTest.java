@@ -72,6 +72,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.NonSARPriority;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableIntegerEnum;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableMapProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
@@ -986,6 +987,12 @@ public class SchemasTest {
     public void testNullableIntegerEnumNull() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableIntegerEnum.NULL_);
         assertEquals(NullableIntegerEnum.NULL_, m.readValue(json, NullableIntegerEnum.class));
+    }
+    
+    @Test
+    public void testNullableMap() throws JsonMappingException, JsonProcessingException {
+        String json = "{\"thing\":null}";
+        m.readValue(json, NullableMapProperty.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {

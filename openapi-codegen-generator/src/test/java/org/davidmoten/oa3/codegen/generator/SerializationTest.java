@@ -20,6 +20,7 @@ import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -445,13 +446,13 @@ public class SerializationTest {
         assertEquals("null", json);
         assertEquals(NullableEnum.NULL_, m.readValue(json, NullableEnum.class));
     }
-    
+
     @Test
     public void testNullableEnumWhenNotNull() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableEnum.HELLO);
         assertEquals(NullableEnum.HELLO, m.readValue(json, NullableEnum.class));
     }
-    
+
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
     public static final class ListOfMap {
@@ -576,7 +577,7 @@ public class SerializationTest {
         }
 
     }
-    
+
     @JsonDeserialize(using = NullableEnum.Deserializer.class)
     public enum NullableEnum {
 
@@ -612,4 +613,22 @@ public class SerializationTest {
         }
     }
 
+    @JsonInclude(Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    @Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.1-alpha-7-SNAPSHOT")
+    public final class NullableMapProperty {
+
+        @JsonProperty("thing")
+        private final JsonNullable<Map<String, Object>> thing;
+
+        @JsonCreator
+        private NullableMapProperty(@JsonProperty("thing") JsonNullable<Map<String, Object>> thing) {
+            this.thing = thing;
+        }
+
+        @ConstructorBinding
+        public NullableMapProperty(@JsonProperty("thing") Optional<Map<String, Object>> thing) {
+            this.thing = JsonNullable.of(thing.orElse(null));
+        }
+    }
 }

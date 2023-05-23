@@ -434,7 +434,7 @@ public final class SchemasCodeWriter {
             }
             final String fieldType;
             if (f.mapType.isPresent()) {
-                fieldType = f.resolvedTypeMap(out.imports(), f.isArray);
+                fieldType = f.resolvedTypeMapPrivate(out.imports());
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
             } else {
@@ -478,8 +478,7 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream()
-                .anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable && !f.mapType.isPresent());
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters and a public constructor with Optional parameters
@@ -524,8 +523,8 @@ public final class SchemasCodeWriter {
                     .filter(x -> !isDiscriminator(interfaces, x)) //
                     .filter(x -> !x.isAdditionalProperties() || !x.isArray) //
                     .map(x -> {
-                        String t = x.mapType.isPresent() ? x.resolvedTypeMap(out.imports(), x.isArray)
-                                : x.resolvedType(out.imports());
+                        String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
+                                : x.resolvedTypePublicConstructor(out.imports());
                         return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
                     }) //
                     .collect(Collectors.joining(","));
@@ -752,7 +751,7 @@ public final class SchemasCodeWriter {
                     writeJsonAnySetter(out, cls, f);
                 }
                 out.println();
-                writeGetter(out, f.resolvedTypeMap(out.imports(), f.isArray), f.fieldName(cls), f.fieldName(cls));
+                writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), f.fieldName(cls));
             } else {
                 out.println();
                 final String value;
@@ -769,7 +768,7 @@ public final class SchemasCodeWriter {
                 } else {
                     value = f.fieldName(cls);
                 }
-                writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
+                writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls), value);
             }
         });
     }
@@ -784,8 +783,8 @@ public final class SchemasCodeWriter {
             return;
         }
         fields.forEach(x -> {
-            String t = x.mapType.isPresent() ? x.resolvedTypeMap(out.imports(), x.isArray)
-                    : x.resolvedType(out.imports());
+            String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
+                    : x.resolvedTypePublicConstructor(out.imports());
             out.println();
             out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
                     x.fieldName(cls));

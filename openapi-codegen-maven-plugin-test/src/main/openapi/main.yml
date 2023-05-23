@@ -1856,7 +1856,7 @@ components:
       enum: [1, 2, null, 3]
       nullable: true
       
-    NullableProperty:
+    NullableMapProperty:
       type: object
       properties:
         thing:

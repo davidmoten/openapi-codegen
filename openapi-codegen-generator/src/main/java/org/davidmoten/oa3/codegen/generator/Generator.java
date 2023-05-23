@@ -187,7 +187,7 @@ public class Generator {
         public boolean isNullableEnum() {
             return !enumMembers.isEmpty() && enumMembers.get(0).nullable;
         }
-        
+
         public boolean hasEnumNullValue() {
             return enumMembers.stream().anyMatch(x -> x.parameter == null);
         }
@@ -278,7 +278,7 @@ public class Generator {
             return cls.fieldName(this);
         }
 
-        public String resolvedType(Imports imports) {
+        public String resolvedTypePublicConstructor(Imports imports) {
             if (isOctets()) {
                 return "byte[]";
             } else if (isArray) {
@@ -301,7 +301,16 @@ public class Generator {
                 return imports.add(String.class);
             } else if (mapType.isPresent()) {
                 if (isArray) {
-                    return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                    if (nullable) {
+                        return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class),
+                                imports.add(List.class), imports.add(Map.class), imports.add(String.class),
+                                imports.add(fullClassName));
+                    } else {
+                        return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                                imports.add(String.class), imports.add(fullClassName));
+                    }
+                } else if (nullable) {
+                    return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
                             imports.add(String.class), imports.add(fullClassName));
                 } else {
                     return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
@@ -318,8 +327,64 @@ public class Generator {
             }
         }
 
-        public String resolvedTypeMap(Imports imports, boolean isArray) {
-            return Generator.resolvedMapType(this, imports, isArray);
+        public String resolvedTypeMapPrivate(Imports imports) {
+            final String t;
+            if (isOctets()) {
+                t = "byte[]";
+            } else {
+                t = imports.add(fullClassName);
+            }
+            if (isArray) {
+                if (nullable) {
+                    return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class), imports.add(List.class),
+                            imports.add(Map.class), imports.add(String.class), t);
+                } else {
+                    return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                            imports.add(String.class), t);
+                }
+            } else {
+                if (nullable) {
+                    return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
+                            imports.add(String.class), t);
+                } else {
+                    return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
+                }
+            }
+        }
+
+        public String resolvedTypeMapPublic(Imports imports) {
+            final String t;
+            if (isOctets()) {
+                t = "byte[]";
+            } else {
+                t = imports.add(fullClassName);
+            }
+            if (isArray) {
+                if (nullable) {
+                    if (required) {
+                        return String.format("%s<%s<%s<%s, %s>>>", imports.add(Optional.class), imports.add(List.class),
+                                imports.add(Map.class), imports.add(String.class), t);
+                    } else {
+                        return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class),
+                                imports.add(List.class), imports.add(Map.class), imports.add(String.class), t);
+                    }
+                } else {
+                    return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                            imports.add(String.class), t);
+                }
+            } else {
+                if (nullable) {
+                    if (required) {
+                        return String.format("%s<%s<%s, %s>>", imports.add(Optional.class), imports.add(Map.class),
+                                imports.add(String.class), t);
+                    } else {
+                        return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
+                                imports.add(String.class), t);
+                    }
+                } else {
+                    return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
+                }
+            }
         }
 
         public boolean isPrimitive() {
@@ -705,21 +770,6 @@ public class Generator {
                     imports.add(fullClassName));
         } else {
             return String.format("%s<%s>", imports.add(List.class), imports.add(fullClassName));
-        }
-    }
-
-    private static String resolvedMapType(Field f, Imports imports, boolean isArray) {
-        final String t;
-        if (f.isOctets()) {
-            t = "byte[]";
-        } else {
-            t = imports.add(f.fullClassName);
-        }
-        if (isArray) {
-            return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
-                    imports.add(String.class), t);
-        } else {
-            return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
         }
     }
 
