@@ -478,7 +478,8 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable);
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable
+                || f.required && f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES));
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters and a public constructor with Optional parameters
@@ -502,7 +503,7 @@ public final class SchemasCodeWriter {
 
         // assign
         cls.fields.stream().forEach(x -> {
-            if (x.mapTypeIs(MapType.ADDITIONAL_PROPERTIES)) {
+            if (x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                 if (x.isArray) {
                     out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
                 } else {
@@ -557,7 +558,7 @@ public final class SchemasCodeWriter {
                                     out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
                                 }
                             } else {
-                                if (x.nullable) {
+                                if (x.nullable && !x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                                     if (x.required) {
                                         out.line("this.%s = %s.of(%s.orElse(null));", x.fieldName(cls),
                                                 JsonNullable.class, x.fieldName(cls));
@@ -766,7 +767,7 @@ public final class SchemasCodeWriter {
                 }
                 out.println();
                 final String expression;
-                if (f.nullable) {
+                if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                     if (f.required) {
                         expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
                                 f.fieldName(cls));
@@ -844,7 +845,11 @@ public final class SchemasCodeWriter {
     private static void writeJsonAnySetter(CodePrintWriter out, Cls cls, Field f) {
         out.println();
         out.line("@%s", JsonAnySetter.class);
-        out.line("private void put(%s key, %s value) {", String.class, out.add(f.fullClassName));
+        if (f.nullable) {
+            out.line("private void put(%s key, %s<%s> value) {", String.class, JsonNullable.class, out.add(f.fullClassName));
+        } else {
+            out.line("private void put(%s key, %s value) {", String.class, out.add(f.fullClassName));
+        }
         out.line("this.%s.put(key, value);", f.fieldName(cls));
         out.closeParen();
     }

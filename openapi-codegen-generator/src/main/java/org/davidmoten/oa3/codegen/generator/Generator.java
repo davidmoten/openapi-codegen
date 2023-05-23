@@ -22,6 +22,7 @@ import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -331,6 +332,8 @@ public class Generator {
             final String t;
             if (isOctets()) {
                 t = "byte[]";
+            } else if (isMapType(MapType.ADDITIONAL_PROPERTIES) && nullable) {
+                t = String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
             } else {
                 t = imports.add(fullClassName);
             }
@@ -343,7 +346,7 @@ public class Generator {
                             imports.add(String.class), t);
                 }
             } else {
-                if (nullable) {
+                if (nullable && !isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                     return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
                             imports.add(String.class), t);
                 } else {
@@ -357,7 +360,11 @@ public class Generator {
             if (isOctets()) {
                 t = "byte[]";
             } else {
-                t = imports.add(fullClassName);
+                if (isMapType(MapType.ADDITIONAL_PROPERTIES) && nullable) {
+                    t = String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
+                } else {
+                    t = imports.add(fullClassName);
+                }
             }
             if (isArray) {
                 if (nullable) {
@@ -373,7 +380,7 @@ public class Generator {
                             imports.add(String.class), t);
                 }
             } else {
-                if (nullable) {
+                if (nullable && !isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                     if (required) {
                         return String.format("%s<%s<%s, %s>>", imports.add(Optional.class), imports.add(Map.class),
                                 imports.add(String.class), t);
@@ -403,7 +410,8 @@ public class Generator {
             return mapType.equals(Optional.of(MapType.ADDITIONAL_PROPERTIES));
         }
 
-        public boolean mapTypeIs(MapType mt) {
+        public boolean isMapType(MapType mt) {
+            Preconditions.checkNotNull(mt);
             return this.mapType.equals(Optional.of(mt));
         }
 
