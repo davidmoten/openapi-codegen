@@ -198,7 +198,8 @@ public class BuilderWriter {
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
 
-        if (!field.mandatory() && !(field.mapType.isPresent() && field.nullable && !field.required)) {
+        if (!field.mandatory() && !(field.isMapType(MapType.ADDITIONAL_PROPERTIES)
+                || field.mapType.isPresent() && field.nullable && !field.required)) {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
@@ -252,26 +253,6 @@ public class BuilderWriter {
         }
     }
 
-    private static String jsonNullableListMapType(Field f, Imports imports) {
-        return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class), imports.add(List.class),
-                imports.add(Map.class), imports.add(String.class), imports.add(f.fullClassName));
-    }
-
-    private static String listMapType(Field f, Imports imports) {
-        return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
-                imports.add(String.class), imports.add(f.fullClassName));
-    }
-
-    private static String jsonNullableMap(Field f, Imports imports) {
-        return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
-                imports.add(String.class), imports.add(f.fullClassName));
-    }
-
-    private static String mapType(Field f, Imports imports) {
-        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
-                imports.add(f.fullClassName));
-    }
-
     private static String mapImportedTypePublic(Field f, Imports imports) {
         if (f.isArray) {
             if (f.nullable) {
@@ -294,6 +275,26 @@ public class BuilderWriter {
                 return mapType(f, imports);
             }
         }
+    }
+
+    private static String jsonNullableListMapType(Field f, Imports imports) {
+        return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class), imports.add(List.class),
+                imports.add(Map.class), imports.add(String.class), imports.add(f.fullClassName));
+    }
+
+    private static String listMapType(Field f, Imports imports) {
+        return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                imports.add(String.class), imports.add(f.fullClassName));
+    }
+
+    private static String jsonNullableMap(Field f, Imports imports) {
+        return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
+                imports.add(String.class), imports.add(f.fullClassName));
+    }
+
+    private static String mapType(Field f, Imports imports) {
+        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                imports.add(f.fullClassName));
     }
 
     private static String optionalMapType(Field f, Imports imports) {
