@@ -45,6 +45,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.google.common.collect.Lists;
 
+import jakarta.annotation.Generated;
+
 public class SerializationTest {
 
     private static final String CIRCLE_JSON = "{\"a\":\"thing\"}";
@@ -438,12 +440,18 @@ public class SerializationTest {
     }
 
     @Test
-    public void testNullableEnum() throws JsonProcessingException {
+    public void testNullableEnumWhenNull() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableEnum.NULL_);
         assertEquals("null", json);
         assertEquals(NullableEnum.NULL_, m.readValue(json, NullableEnum.class));
     }
-
+    
+    @Test
+    public void testNullableEnumWhenNotNull() throws JsonProcessingException {
+        String json = m.writeValueAsString(NullableEnum.HELLO);
+        assertEquals(NullableEnum.HELLO, m.readValue(json, NullableEnum.class));
+    }
+    
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
     public static final class ListOfMap {
@@ -568,11 +576,13 @@ public class SerializationTest {
         }
 
     }
-
+    
     @JsonDeserialize(using = NullableEnum.Deserializer.class)
     public enum NullableEnum {
 
-        HELLO(JsonNullable.of("hello")), THERE(JsonNullable.of("there")), NULL_(JsonNullable.of(null));
+        HELLO(JsonNullable.of("hello")), //
+        THERE(JsonNullable.of("there")), //
+        NULL_(JsonNullable.of(null));
 
         @JsonValue
         private final JsonNullable<String> value;
@@ -595,10 +605,9 @@ public class SerializationTest {
             throw new IllegalArgumentException("unexpected enum value: '" + value + "'");
         }
 
-        @SuppressWarnings("serial")
         public static class Deserializer extends NullEnumDeserializer<NullableEnum> {
-            Deserializer() {
-                super(NullableEnum.class, NULL_);
+            protected Deserializer() {
+                super(NullableEnum.class, String.class, NULL_);
             }
         }
     }

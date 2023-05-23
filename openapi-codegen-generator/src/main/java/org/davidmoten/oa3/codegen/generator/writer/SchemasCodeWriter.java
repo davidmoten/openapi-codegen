@@ -175,7 +175,7 @@ public final class SchemasCodeWriter {
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
             out.line("public static class Deserializer extends %s<%s> {", NullEnumDeserializer.class, cls.simpleName());
-            out.line("public Deserializer() {");
+            out.line("protected Deserializer() {");
             out.line("super(%s.class, %s);", cls.simpleName(), nullValueMemberName);
             out.closeParen();
             out.closeParen();
@@ -215,7 +215,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeEnumNullValueDeserializerAnnotation(CodePrintWriter out, Cls cls) {
-        out.line("@s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
+        out.line("@%s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
     }
 
     private static void writeJsonIncludeAnnotation(CodePrintWriter out) {
