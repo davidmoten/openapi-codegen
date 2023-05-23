@@ -550,9 +550,23 @@ public final class SchemasCodeWriter {
                     .forEach(x -> {
                         if (x.mapType.isPresent()) {
                             if (x.isArray) {
-                                out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+                                if (x.nullable) {
+                                    out.line("this.%s = %s.of(new %s<>());", x.fieldName(cls), JsonNullable.class,
+                                            ArrayList.class);
+                                } else {
+                                    out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+                                }
                             } else {
-                                out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                if (x.nullable) {
+                                    if (x.required) {
+                                        out.line("this.%s = %s.of(%s.orElse(null));", x.fieldName(cls),
+                                                JsonNullable.class, x.fieldName(cls));
+                                    } else {
+                                        out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                    }
+                                } else {
+                                    out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                }
                             }
                             return;
                         }
