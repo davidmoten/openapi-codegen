@@ -557,7 +557,7 @@ public final class SchemasCodeWriter {
                                     out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
                                 }
                             } else {
-                                if (x.nullable && !x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+                                if (x.nullable) {
                                     if (x.required) {
                                         out.line("this.%s = %s.of(%s.orElse(null));", x.fieldName(cls),
                                                 JsonNullable.class, x.fieldName(cls));

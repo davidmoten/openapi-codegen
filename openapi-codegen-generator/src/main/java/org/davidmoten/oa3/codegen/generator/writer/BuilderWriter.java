@@ -198,8 +198,7 @@ public class BuilderWriter {
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
 
-        if (!field.mandatory() && !(field.isMapType(MapType.ADDITIONAL_PROPERTIES)
-                || field.mapType.isPresent() && field.nullable && !field.required)) {
+        if (!field.mandatory() && !(field.mapType.isPresent() && field.nullable && !field.required)) {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
@@ -240,36 +239,16 @@ public class BuilderWriter {
             } else {
                 return listMapType(f, imports);
             }
-        } else if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-            if (f.required) {
-                return mapType(f, imports);
-            } else {
-                return jsonNullableMap(f, imports);
-            }
         } else {
-            return mapType(f, imports);
-        }
-    }
-
-    private static String mapImportedTypePublic(Field f, Imports imports) {
-        if (f.isArray) {
             if (f.nullable) {
                 if (f.required) {
-                    return optionalListMapType(f, imports);
+                    return mapType(f, imports);
                 } else {
-                    return jsonNullableListMapType(f, imports);
+                    return jsonNullableMap(f, imports);
                 }
             } else {
-                return listMapType(f, imports);
+                return mapType(f, imports);
             }
-        } else if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-            if (f.required) {
-                return optionalMapType(f, imports);
-            } else {
-                return jsonNullableMap(f, imports);
-            }
-        } else {
-            return mapType(f, imports);
         }
     }
 
@@ -289,12 +268,31 @@ public class BuilderWriter {
     }
 
     private static String mapType(Field f, Imports imports) {
-        if (f.isMapType(MapType.ADDITIONAL_PROPERTIES) && f.nullable) {
-            return String.format("%s<%s, %s<%s>>", imports.add(Map.class), imports.add(String.class),
-                    imports.add(JsonNullable.class), imports.add(f.fullClassName));
+        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                imports.add(f.fullClassName));
+    }
+
+    private static String mapImportedTypePublic(Field f, Imports imports) {
+        if (f.isArray) {
+            if (f.nullable) {
+                if (f.required) {
+                    return optionalListMapType(f, imports);
+                } else {
+                    return jsonNullableListMapType(f, imports);
+                }
+            } else {
+                return listMapType(f, imports);
+            }
         } else {
-            return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
-                    imports.add(f.fullClassName));
+            if (f.nullable) {
+                if (f.required) {
+                    return optionalMapType(f, imports);
+                } else {
+                    return jsonNullableMap(f, imports);
+                }
+            } else {
+                return mapType(f, imports);
+            }
         }
     }
 
