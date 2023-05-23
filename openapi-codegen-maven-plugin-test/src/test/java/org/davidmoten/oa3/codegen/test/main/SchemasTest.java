@@ -1011,68 +1011,6 @@ public class SchemasTest {
         assertTrue(b.thing().isPresent());
         assertTrue(b.thing().get().isEmpty());
     }
-    
-    @Test
-    public void testNullableMapNotEmpty() throws JsonMappingException, JsonProcessingException {
-        NullableMapProperty a = NullableMapProperty.thing(Optional.of(Maps.hashMap().put("hello", (Object) "there").build()));
-        assertTrue(a.thing().isPresent());
-        assertTrue(!a.thing().get().isEmpty());
-        String json = m.writeValueAsString(a);
-        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
-        assertTrue(b.thing().isPresent());
-        assertTrue(!b.thing().get().isEmpty());
-    }
-    
-    @Test
-    public void testNullableMapRequiredNull() throws JsonMappingException, JsonProcessingException {
-        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Optional.empty());
-        assertFalse(a.thing().isPresent());
-        String json = m.writeValueAsString(a);
-        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
-        assertFalse(b.thing().isPresent());
-    }
-    
-    @Test
-    public void testNullableMapRequiredIsEmpty() throws JsonMappingException, JsonProcessingException {
-        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Collections.emptyMap());
-        assertTrue(a.thing().isPresent());
-        assertTrue(a.thing().get().isEmpty());
-        String json = m.writeValueAsString(a);
-        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
-        assertTrue(b.thing().isPresent());
-        assertTrue(b.thing().get().isEmpty());
-    }
-    
-    @Test
-    public void testNullableMapRequiredNotEmpty() throws JsonMappingException, JsonProcessingException {
-        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Optional.of(Maps.hashMap().put("hello", (Object) "there").build()));
-        assertTrue(a.thing().isPresent());
-        assertTrue(!a.thing().get().isEmpty());
-        String json = m.writeValueAsString(a);
-        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
-        assertTrue(b.thing().isPresent());
-        assertTrue(!b.thing().get().isEmpty());
-    }
-
-    @Test
-    public void testNullableMapNull() throws JsonMappingException, JsonProcessingException {
-        NullableMapProperty a = NullableMapProperty.thing(Optional.empty());
-        assertFalse(a.thing().isPresent());
-        String json = m.writeValueAsString(a);
-        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
-        assertFalse(b.thing().isPresent());
-    }
-
-    @Test
-    public void testNullableMapIsEmpty() throws JsonMappingException, JsonProcessingException {
-        NullableMapProperty a = NullableMapProperty.thing(Collections.emptyMap());
-        assertTrue(a.thing().isPresent());
-        assertTrue(a.thing().get().isEmpty());
-        String json = m.writeValueAsString(a);
-        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
-        assertTrue(b.thing().isPresent());
-        assertTrue(b.thing().get().isEmpty());
-    }
 
     @Test
     public void testNullableMapNotEmpty() throws JsonMappingException, JsonProcessingException {

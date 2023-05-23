@@ -1885,5 +1885,11 @@ components:
           type: array
           items:
             nullable: true
+            
+    AdditionalPropertiesNullable:
+      type: object            
+      additionalProperties:
+        type: string
+        nullable: true
       
            

@@ -240,16 +240,14 @@ public class BuilderWriter {
             } else {
                 return listMapType(f, imports);
             }
-        } else {
-            if (f.nullable) {
-                if (f.required) {
-                    return mapType(f, imports);
-                } else {
-                    return jsonNullableMap(f, imports);
-                }
-            } else {
+        } else if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+            if (f.required) {
                 return mapType(f, imports);
+            } else {
+                return jsonNullableMap(f, imports);
             }
+        } else {
+            return mapType(f, imports);
         }
     }
 
@@ -264,16 +262,14 @@ public class BuilderWriter {
             } else {
                 return listMapType(f, imports);
             }
-        } else {
-            if (f.nullable) {
-                if (f.required) {
-                    return optionalMapType(f, imports);
-                } else {
-                    return jsonNullableMap(f, imports);
-                }
+        } else if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+            if (f.required) {
+                return optionalMapType(f, imports);
             } else {
-                return mapType(f, imports);
+                return jsonNullableMap(f, imports);
             }
+        } else {
+            return mapType(f, imports);
         }
     }
 
@@ -293,8 +289,13 @@ public class BuilderWriter {
     }
 
     private static String mapType(Field f, Imports imports) {
-        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
-                imports.add(f.fullClassName));
+        if (f.isMapType(MapType.ADDITIONAL_PROPERTIES) && f.nullable) {
+            return String.format("%s<%s, %s<%s>>", imports.add(Map.class), imports.add(String.class),
+                    imports.add(JsonNullable.class), imports.add(f.fullClassName));
+        } else {
+            return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                    imports.add(f.fullClassName));
+        }
     }
 
     private static String optionalMapType(Field f, Imports imports) {
