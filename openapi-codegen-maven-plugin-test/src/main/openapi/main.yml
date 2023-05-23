@@ -1855,3 +1855,9 @@ components:
       format: int32
       enum: [1, 2, null, 3]
       nullable: true
+      
+    NullableProperty:
+      type: object
+      properties:
+        thing:
+          nullable: true

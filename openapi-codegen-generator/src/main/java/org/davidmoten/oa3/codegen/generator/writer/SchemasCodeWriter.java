@@ -173,10 +173,10 @@ public final class SchemasCodeWriter {
             String nullValueMemberName = cls.enumMembers.stream().filter(x -> x.parameter == null).map(x -> x.name)
                     .findFirst().get();
             out.println();
-            out.line("@%s(\"serial\")", SuppressWarnings.class);
             out.line("public static class Deserializer extends %s<%s> {", NullEnumDeserializer.class, cls.simpleName());
             out.line("protected Deserializer() {");
-            out.line("super(%s.class, %s.class, %s);", cls.simpleName(), out.add(cls.enumValueFullType), nullValueMemberName);
+            out.line("super(%s.class, %s.class, %s);", cls.simpleName(), out.add(cls.enumValueFullType),
+                    nullValueMemberName);
             out.closeParen();
             out.closeParen();
         }
@@ -478,7 +478,8 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable);
+        boolean hasOptional = cls.fields.stream()
+                .anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable && !f.mapType.isPresent());
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters and a public constructor with Optional parameters
