@@ -478,8 +478,7 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable
-                || f.required && f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES));
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable);
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters and a public constructor with Optional parameters
@@ -766,18 +765,7 @@ public final class SchemasCodeWriter {
                     writeJsonAnySetter(out, cls, f);
                 }
                 out.println();
-                final String expression;
-                if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-                    if (f.required) {
-                        expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
-                                f.fieldName(cls));
-                    } else {
-                        expression = f.fieldName(cls);
-                    }
-                } else {
-                    expression = f.fieldName(cls);
-                }
-                writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), expression);
+                writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), f.fieldName(cls));
             } else {
                 out.println();
                 final String value;
