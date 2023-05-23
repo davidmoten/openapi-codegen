@@ -89,8 +89,13 @@ class Apis {
         pathItem = resolveRefs(api, pathItem);
         if (pathItem.readOperationsMap() != null) {
             pathItem.readOperationsMap().forEach((httpMethod, operation) -> {
-                visitSchemas(category, names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH))),
-                        operation, visitor, api);
+                final ImmutableList<String> names2;
+                if (operation.getOperationId() != null) {
+                    names2 = ImmutableList.of(operation.getOperationId());
+                } else {
+                    names2 = names.add(Names.upperFirst(httpMethod.toString().toLowerCase(Locale.ENGLISH)));
+                }
+                visitSchemas(category, names2, operation, visitor, api);
             });
         }
         if (pathItem.getParameters() != null) {

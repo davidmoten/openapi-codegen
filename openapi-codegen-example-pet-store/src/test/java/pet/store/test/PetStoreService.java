@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.github.davidmoten.guavamini.Lists;
 
-import pet.store.path.PetsGet200Response;
+import pet.store.path.FindPets200Response;
 import pet.store.schema.Error;
 import pet.store.schema.NewPet;
 import pet.store.schema.Pet;
@@ -27,8 +27,8 @@ public class PetStoreService implements Service {
                     PetId.id(321L)));
 
     @Override
-    public PetsGet200Response findPets(Optional<List<String>> tags, int limit) throws ServiceException {
-        return PetsGet200Response.value(pets);
+    public FindPets200Response findPets(Optional<List<String>> tags, int limit) throws ServiceException {
+        return FindPets200Response.value(pets);
     }
 
     @Override

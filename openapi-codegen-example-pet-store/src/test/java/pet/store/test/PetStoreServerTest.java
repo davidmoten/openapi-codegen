@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import pet.store.client.Client;
-import pet.store.path.PetsGet200Response;
+import pet.store.path.FindPets200Response;
 
 @SpringBootTest(classes = { PetStoreApplication.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
@@ -30,7 +30,7 @@ public class PetStoreServerTest {
 
     @Test
     public void testFindPets() {
-        PetsGet200Response r = client().findPets(Optional.empty(), 10);
+        FindPets200Response r = client().findPets(Optional.empty(), 10);
         assertEquals(1, r.value().size());
         assertEquals("fido", r.value().get(0).newPet().name());
     }
