@@ -57,6 +57,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableIntegerEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
@@ -977,6 +978,18 @@ public class SchemasTest {
         NullableStringEnumObject a = NullableStringEnumObject.thing(NullableStringEnum.NULL_);
         String json = m.writeValueAsString(a);
         assertEquals(NullableStringEnum.NULL_, m.readValue(json, NullableStringEnumObject.class).thing());
+    }
+    
+    @Test
+    public void testNullableIntegerEnumNotNull() throws JsonProcessingException {
+        String json = m.writeValueAsString(NullableIntegerEnum._2);
+        assertEquals(NullableIntegerEnum._2, m.readValue(json, NullableIntegerEnum.class));
+    }
+    
+    @Test
+    public void testNullableIntegerEnumNull() throws JsonProcessingException {
+        String json = m.writeValueAsString(NullableIntegerEnum.NULL_);
+        assertEquals(NullableIntegerEnum.NULL_, m.readValue(json, NullableIntegerEnum.class));
     }
 
     private static void onePublicConstructor(Class<?> c) {
