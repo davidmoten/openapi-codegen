@@ -988,11 +988,25 @@ public class SchemasTest {
         String json = m.writeValueAsString(NullableIntegerEnum.NULL_);
         assertEquals(NullableIntegerEnum.NULL_, m.readValue(json, NullableIntegerEnum.class));
     }
-    
+
     @Test
-    public void testNullableMap() throws JsonMappingException, JsonProcessingException {
-        String json = "{\"thing\":null}";
-        m.readValue(json, NullableMapProperty.class);
+    public void testNullableMapNull() throws JsonMappingException, JsonProcessingException {
+        NullableMapProperty a = NullableMapProperty.thing(Optional.empty());
+        assertFalse(a.thing().isPresent());
+        String json = m.writeValueAsString(a);
+        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
+        assertFalse(b.thing().isPresent());
+    }
+
+    @Test
+    public void testNullableMapIsEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapProperty a = NullableMapProperty.thing(Collections.emptyMap());
+        assertTrue(a.thing().isPresent());
+        assertTrue(a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(b.thing().get().isEmpty());
     }
 
     private static void onePublicConstructor(Class<?> c) {

@@ -765,7 +765,18 @@ public final class SchemasCodeWriter {
                     writeJsonAnySetter(out, cls, f);
                 }
                 out.println();
-                writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), f.fieldName(cls));
+                final String expression;
+                if (f.nullable) {
+                    if (f.required) {
+                        expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
+                                f.fieldName(cls));
+                    } else {
+                        expression = f.fieldName(cls);
+                    }
+                } else {
+                    expression = f.fieldName(cls);
+                }
+                writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), expression);
             } else {
                 out.println();
                 final String value;
