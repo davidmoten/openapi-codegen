@@ -1867,4 +1867,23 @@ components:
       properties:
         thing:
           nullable: true
-      required: [thing]          
+      required: [thing]     
+      
+    NullableMapPropertyArrayReq:
+      type: object
+      properties:
+        thing:
+          type: array
+          items:
+            nullable: true
+      required: [thing]   
+      
+    NullableMapPropertyArrayNotReq:
+      type: object
+      properties:
+        thing:
+          type: array
+          items:
+            nullable: true
+      
+           
