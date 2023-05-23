@@ -176,7 +176,7 @@ public final class SchemasCodeWriter {
             out.line("@%s(\"serial\")", SuppressWarnings.class);
             out.line("public static class Deserializer extends %s<%s> {", NullEnumDeserializer.class, cls.simpleName());
             out.line("protected Deserializer() {");
-            out.line("super(%s.class, %s);", cls.simpleName(), nullValueMemberName);
+            out.line("super(%s.class, %s.class, %s);", cls.simpleName(), out.add(cls.enumValueFullType), nullValueMemberName);
             out.closeParen();
             out.closeParen();
         }

@@ -1849,3 +1849,9 @@ components:
         thing: 
           $ref: '#/components/schemas/NullableStringEnum'
       required: [thing]
+    
+    NullableIntegerEnum:
+      type: integer
+      format: int32
+      enum: [1, 2, null, 3]
+      nullable: true

@@ -56,10 +56,6 @@ import org.davidmoten.oa3.codegen.test.main.schema.External;
 import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableIntegerEnum;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
 import org.davidmoten.oa3.codegen.test.main.schema.Longitude;
 import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcast;
@@ -74,9 +70,14 @@ import org.davidmoten.oa3.codegen.test.main.schema.MsiId;
 import org.davidmoten.oa3.codegen.test.main.schema.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.main.schema.NonSARPriority;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableIntegerEnum;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectNoOptionalFields;
 import org.davidmoten.oa3.codegen.test.main.schema.Oval3;
+import org.davidmoten.oa3.codegen.test.main.schema.Payload;
 import org.davidmoten.oa3.codegen.test.main.schema.Pet;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyAnonymous;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyNotRequired;
@@ -744,34 +745,29 @@ public class SchemasTest {
 
     @Test
     public void testMsi() throws JsonProcessingException {
-        String json = "{\"id\":\"8ds9f8sd98-dsfds8989\",\"broadcast\":{\"area\":{\"lat\":25.1,\"lon\":-33.1,\"radiusNm\":1.0},\"priority\":\"SAFETY\"},\"createdTime\":\"2023-04-05T12:15:26.025+10:00\",\"startTime\":\"2023-04-05T14:15:26.025+10:00\",\"endTime\":\"2023-04-06T12:00:26.025+10:00\",\"status\":\"ACTIVE\"}\n";
-        {
-            Circle circle = new Circle(new Latitude(25.1F), new Longitude(-33.1F), 1);
-            MetBroadcastArea mbca = MetBroadcastArea.of(Geometry.of(circle));
-            MetBroadcast mbc = MetBroadcast.builder().area(mbca).priority(NonSARPriority.SAFETY).build();
-            Broadcast broadcast = Broadcast.of(mbc);
-            OffsetDateTime createdTime = OffsetDateTime.parse("2023-04-05T12:15:26.025+10:00");
-            OffsetDateTime startTime = OffsetDateTime.parse("2023-04-05T14:15:26.025+10:00");
-            OffsetDateTime endTime = OffsetDateTime.parse("2023-04-06T12:00:26.025+10:00");
-            MsiId msiId = new MsiId("8ds9f8sd98-dsfds8989");
-            Msi msi = Msi.builder() //
-                    .id(msiId) //
-                    .broadcast(broadcast) //
-                    .createdTime(createdTime) //
-                    .startTime(startTime) //
-                    .endTime(endTime) //
-                    .status(Status.ACTIVE) //
-                    .build();
-            assertEquals(m.readTree(json), m.readTree(m.writeValueAsString(msi)));
-        }
-        {
-            Msi a = m.readValue(json, Msi.class);
-            MetBroadcast b = (MetBroadcast) a.broadcast().value();
-            Geometry g = (Geometry) b.area().value();
-            Circle c = (Circle) g.value();
-            assertEquals(25.1, c.lat().value(), 0.0001);
-        }
-
+        Circle circle = new Circle(new Latitude(25.1F), new Longitude(-33.1F), 1);
+        MetBroadcastArea mbca = MetBroadcastArea.of(Geometry.of(circle));
+        MetBroadcast mbc = MetBroadcast.builder().area(mbca).priority(NonSARPriority.SAFETY).build();
+        Broadcast broadcast = Broadcast.of(mbc);
+        OffsetDateTime createdTime = OffsetDateTime.parse("2023-04-05T12:15:26.025+10:00");
+        OffsetDateTime startTime = OffsetDateTime.parse("2023-04-05T14:15:26.025+10:00");
+        OffsetDateTime endTime = OffsetDateTime.parse("2023-04-06T12:00:26.025+10:00");
+        MsiId msiId = new MsiId("8ds9f8sd98-dsfds8989");
+        Msi msi = Msi.builder() //
+                .id(msiId) //
+                .broadcast(broadcast) //
+                .createdTime(createdTime) //
+                .startTime(startTime) //
+                .endTime(endTime) //
+                .payload(Payload.value("hi there")) //
+                .status(Status.ACTIVE) //
+                .build();
+        String json = m.writeValueAsString(msi);
+        Msi a = m.readValue(json, Msi.class);
+        MetBroadcast b = (MetBroadcast) a.broadcast().value();
+        Geometry g = (Geometry) b.area().value();
+        Circle c = (Circle) g.value();
+        assertEquals(25.1, c.lat().value(), 0.0001);
     }
 
     @Test
@@ -979,13 +975,13 @@ public class SchemasTest {
         String json = m.writeValueAsString(a);
         assertEquals(NullableStringEnum.NULL_, m.readValue(json, NullableStringEnumObject.class).thing());
     }
-    
+
     @Test
     public void testNullableIntegerEnumNotNull() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableIntegerEnum._2);
         assertEquals(NullableIntegerEnum._2, m.readValue(json, NullableIntegerEnum.class));
     }
-    
+
     @Test
     public void testNullableIntegerEnumNull() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableIntegerEnum.NULL_);

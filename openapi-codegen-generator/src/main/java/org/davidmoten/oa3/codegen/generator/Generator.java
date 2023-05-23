@@ -87,7 +87,7 @@ public class Generator {
         public List<EnumMember> enumMembers = new ArrayList<>();
         public List<Cls> classes = new ArrayList<>();
         public Discriminator discriminator = null;
-        public String enumFullType;
+        public String enumValueFullType;
         public boolean topLevel = false;
         public boolean hasProperties = false;
         public PolymorphicType polymorphicType;
@@ -680,7 +680,7 @@ public class Generator {
         cls.classType = ClassType.ENUM;
         Class<?> valueCls = Util.toClass(schema.getType(), schema.getFormat(), schema.getExtensions(),
                 names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
-        cls.enumFullType = valueCls.getCanonicalName();
+        cls.enumValueFullType = valueCls.getCanonicalName();
         Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
         Set<String> used = new HashSet<>();
         for (Object o : schema.getEnum()) {
@@ -689,7 +689,7 @@ public class Generator {
                 used.add(String.valueOf(o));
             }
         }
-        cls.addField(cls.enumFullType, "value", "value", true, false, mapType(schemaPath), isNullable(schema));
+        cls.addField(cls.enumValueFullType, "value", "value", true, false, mapType(schemaPath), isNullable(schema));
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required,
                 isArray, mapType(schemaPath), isNullable(schema)));
