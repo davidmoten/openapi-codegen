@@ -434,7 +434,7 @@ public final class SchemasCodeWriter {
             }
             final String fieldType;
             if (f.mapType.isPresent()) {
-                fieldType = f.resolvedTypeMap(out.imports(), f.isArray);
+                fieldType = f.resolvedTypeMapPrivate(out.imports());
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
             } else {
@@ -478,8 +478,8 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream()
-                .anyMatch(f -> !f.required && !f.nullable || f.required && f.nullable && !f.mapType.isPresent());
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable
+                || f.required && f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES));
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters and a public constructor with Optional parameters
@@ -503,7 +503,7 @@ public final class SchemasCodeWriter {
 
         // assign
         cls.fields.stream().forEach(x -> {
-            if (x.mapTypeIs(MapType.ADDITIONAL_PROPERTIES)) {
+            if (x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                 if (x.isArray) {
                     out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
                 } else {
@@ -524,8 +524,8 @@ public final class SchemasCodeWriter {
                     .filter(x -> !isDiscriminator(interfaces, x)) //
                     .filter(x -> !x.isAdditionalProperties() || !x.isArray) //
                     .map(x -> {
-                        String t = x.mapType.isPresent() ? x.resolvedTypeMap(out.imports(), x.isArray)
-                                : x.resolvedType(out.imports());
+                        String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
+                                : x.resolvedTypePublicConstructor(out.imports());
                         return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
                     }) //
                     .collect(Collectors.joining(","));
@@ -551,9 +551,23 @@ public final class SchemasCodeWriter {
                     .forEach(x -> {
                         if (x.mapType.isPresent()) {
                             if (x.isArray) {
-                                out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+                                if (x.nullable) {
+                                    out.line("this.%s = %s.of(new %s<>());", x.fieldName(cls), JsonNullable.class,
+                                            ArrayList.class);
+                                } else {
+                                    out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+                                }
                             } else {
-                                out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                if (x.nullable && !x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+                                    if (x.required) {
+                                        out.line("this.%s = %s.of(%s.orElse(null));", x.fieldName(cls),
+                                                JsonNullable.class, x.fieldName(cls));
+                                    } else {
+                                        out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                    }
+                                } else {
+                                    out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                }
                             }
                             return;
                         }
@@ -752,7 +766,18 @@ public final class SchemasCodeWriter {
                     writeJsonAnySetter(out, cls, f);
                 }
                 out.println();
-                writeGetter(out, f.resolvedTypeMap(out.imports(), f.isArray), f.fieldName(cls), f.fieldName(cls));
+                final String expression;
+                if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+                    if (f.required) {
+                        expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
+                                f.fieldName(cls));
+                    } else {
+                        expression = f.fieldName(cls);
+                    }
+                } else {
+                    expression = f.fieldName(cls);
+                }
+                writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), expression);
             } else {
                 out.println();
                 final String value;
@@ -769,7 +794,7 @@ public final class SchemasCodeWriter {
                 } else {
                     value = f.fieldName(cls);
                 }
-                writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), value);
+                writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls), value);
             }
         });
     }
@@ -784,8 +809,8 @@ public final class SchemasCodeWriter {
             return;
         }
         fields.forEach(x -> {
-            String t = x.mapType.isPresent() ? x.resolvedTypeMap(out.imports(), x.isArray)
-                    : x.resolvedType(out.imports());
+            String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
+                    : x.resolvedTypePublicConstructor(out.imports());
             out.println();
             out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
                     x.fieldName(cls));
@@ -820,7 +845,11 @@ public final class SchemasCodeWriter {
     private static void writeJsonAnySetter(CodePrintWriter out, Cls cls, Field f) {
         out.println();
         out.line("@%s", JsonAnySetter.class);
-        out.line("private void put(%s key, %s value) {", String.class, out.add(f.fullClassName));
+        if (f.nullable) {
+            out.line("private void put(%s key, %s<%s> value) {", String.class, JsonNullable.class, out.add(f.fullClassName));
+        } else {
+            out.line("private void put(%s key, %s value) {", String.class, out.add(f.fullClassName));
+        }
         out.line("this.%s.put(key, value);", f.fieldName(cls));
         out.closeParen();
     }

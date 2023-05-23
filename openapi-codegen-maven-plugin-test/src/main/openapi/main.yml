@@ -1856,8 +1856,40 @@ components:
       enum: [1, 2, null, 3]
       nullable: true
       
-    NullableProperty:
+    NullableMapProperty:
       type: object
       properties:
         thing:
           nullable: true
+          
+    NullableMapPropertyReq:
+      type: object
+      properties:
+        thing:
+          nullable: true
+      required: [thing]     
+      
+    NullableMapPropertyArrayReq:
+      type: object
+      properties:
+        thing:
+          type: array
+          items:
+            nullable: true
+      required: [thing]   
+      
+    NullableMapPropertyArrayNotReq:
+      type: object
+      properties:
+        thing:
+          type: array
+          items:
+            nullable: true
+            
+    AdditionalPropertiesNullable:
+      type: object            
+      additionalProperties:
+        type: string
+        nullable: true
+      
+           

@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.test.main;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -27,6 +28,7 @@ import java.util.stream.IntStream;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalProperties;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNested;
+import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNullable;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
@@ -72,6 +74,8 @@ import org.davidmoten.oa3.codegen.test.main.schema.NonSARPriority;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableIntegerEnum;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableMapProperty;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableMapPropertyReq;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
@@ -986,6 +990,93 @@ public class SchemasTest {
     public void testNullableIntegerEnumNull() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableIntegerEnum.NULL_);
         assertEquals(NullableIntegerEnum.NULL_, m.readValue(json, NullableIntegerEnum.class));
+    }
+
+    @Test
+    public void testNullableMapNull() throws JsonMappingException, JsonProcessingException {
+        NullableMapProperty a = NullableMapProperty.thing(Optional.empty());
+        assertFalse(a.thing().isPresent());
+        String json = m.writeValueAsString(a);
+        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
+        assertFalse(b.thing().isPresent());
+    }
+
+    @Test
+    public void testNullableMapIsEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapProperty a = NullableMapProperty.thing(Collections.emptyMap());
+        assertTrue(a.thing().isPresent());
+        assertTrue(a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(b.thing().get().isEmpty());
+    }
+
+    @Test
+    public void testNullableMapNotEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapProperty a = NullableMapProperty
+                .thing(Optional.of(Maps.hashMap().put("hello", (Object) "there").build()));
+        assertTrue(a.thing().isPresent());
+        assertTrue(!a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(!b.thing().get().isEmpty());
+    }
+
+    @Test
+    public void testNullableMapRequiredNull() throws JsonMappingException, JsonProcessingException {
+        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Optional.empty());
+        assertFalse(a.thing().isPresent());
+        String json = m.writeValueAsString(a);
+        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
+        assertFalse(b.thing().isPresent());
+    }
+
+    @Test
+    public void testNullableMapRequiredIsEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Collections.emptyMap());
+        assertTrue(a.thing().isPresent());
+        assertTrue(a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(b.thing().get().isEmpty());
+    }
+
+    @Test
+    public void testNullableMapRequiredNotEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapPropertyReq a = NullableMapPropertyReq
+                .thing(Optional.of(Maps.hashMap().put("hello", (Object) "there").build()));
+        assertTrue(a.thing().isPresent());
+        assertTrue(!a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(!b.thing().get().isEmpty());
+    }
+
+    @Test
+    public void testAdditionalPropertiesNullableWithEmptyMap() throws JsonMappingException, JsonProcessingException {
+        AdditionalPropertiesNullable a = AdditionalPropertiesNullable.properties(Collections.emptyMap());
+        assertTrue(a.properties().isEmpty());
+        String json = m.writeValueAsString(a);
+        AdditionalPropertiesNullable b = m.readValue(json, AdditionalPropertiesNullable.class);
+        assertTrue(b.properties().isEmpty());
+    }
+
+    @Test
+    public void testAdditionalPropertiesNullableMapHasNullAndNonNullValues()
+            throws JsonMappingException, JsonProcessingException {
+        Map<String, JsonNullable<String>> map = Maps.hashMap().put("hello", JsonNullable.of("there"))
+                .put("bingo", JsonNullable.of(null)).build();
+        AdditionalPropertiesNullable a = AdditionalPropertiesNullable.properties(map);
+        assertEquals(2, a.properties().size());
+        String json = m.writeValueAsString(a);
+        AdditionalPropertiesNullable b = m.readValue(json, AdditionalPropertiesNullable.class);
+        assertEquals(2, b.properties().size());
+        assertEquals("there", b.properties().get("hello").get());
+        assertNull(b.properties().get("bingo").get());
     }
 
     private static void onePublicConstructor(Class<?> c) {
