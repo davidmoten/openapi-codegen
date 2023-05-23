@@ -73,6 +73,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.NullableExample;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableIntegerEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableMapProperty;
+import org.davidmoten.oa3.codegen.test.main.schema.NullableMapPropertyReq;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
@@ -1007,6 +1008,48 @@ public class SchemasTest {
         NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
         assertTrue(b.thing().isPresent());
         assertTrue(b.thing().get().isEmpty());
+    }
+    
+    @Test
+    public void testNullableMapNotEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapProperty a = NullableMapProperty.thing(Optional.of(Maps.hashMap().put("hello", (Object) "there").build()));
+        assertTrue(a.thing().isPresent());
+        assertTrue(!a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(!b.thing().get().isEmpty());
+    }
+    
+    @Test
+    public void testNullableMapRequiredNull() throws JsonMappingException, JsonProcessingException {
+        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Optional.empty());
+        assertFalse(a.thing().isPresent());
+        String json = m.writeValueAsString(a);
+        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
+        assertFalse(b.thing().isPresent());
+    }
+    
+    @Test
+    public void testNullableMapRequiredIsEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Collections.emptyMap());
+        assertTrue(a.thing().isPresent());
+        assertTrue(a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(b.thing().get().isEmpty());
+    }
+    
+    @Test
+    public void testNullableMapRequiredNotEmpty() throws JsonMappingException, JsonProcessingException {
+        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Optional.of(Maps.hashMap().put("hello", (Object) "there").build()));
+        assertTrue(a.thing().isPresent());
+        assertTrue(!a.thing().get().isEmpty());
+        String json = m.writeValueAsString(a);
+        NullableMapPropertyReq b = m.readValue(json, NullableMapPropertyReq.class);
+        assertTrue(b.thing().isPresent());
+        assertTrue(!b.thing().get().isEmpty());
     }
 
     private static void onePublicConstructor(Class<?> c) {
