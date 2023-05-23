@@ -6,14 +6,12 @@ import java.lang.reflect.Method;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class NullEnumDeserializer<T> extends JsonDeserializer<T> {
 
-    private static final long serialVersionUID = 689714537246694439L;
     private final Class<T> enumCls;
     private final Class<?> valueCls;
     private final T nullValue;

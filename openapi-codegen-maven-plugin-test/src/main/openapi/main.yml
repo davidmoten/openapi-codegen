@@ -192,6 +192,7 @@ paths:
     ## Authenticate
     ###############################################   
     post:
+      operationId: getToken
       summary: Authenticate
       description: |
         Obtains a token that will be passed in a request header to calls
@@ -225,6 +226,7 @@ paths:
     ## Create an MSI
     ###############################################      
     post:
+      operationId: createMsi
       summary: Create MSI
       description: |
         Submits message content and returns a unique id (across all 
@@ -264,6 +266,7 @@ paths:
     ## List MSIs
     ###############################################      
     get:
+      operationId: getMsis
       summary: List MSIs
       description: |
         Returns Maritime Safety Information broadcasts requested to
@@ -471,6 +474,7 @@ paths:
     ## Get an MSI
     ############################################### 
     get:
+      operationId: getMsi
       summary: Get MSI
       description: |
         Returns the details of an MSI broadcast using the unique MSI identifier.
@@ -499,6 +503,7 @@ paths:
     ## Send an MSI
     ###############################################      
     put:
+      operationId: sendMsi
       summary: Send MSI
       description: |
         Requests that an existing unsent MSI be sent. If the MSI 
@@ -524,6 +529,7 @@ paths:
     ## Cancel an MSI
     ############################################### 
     delete:
+      operationId: cancelMsi
       summary: Cancel MSI 
       description: |
         This is a logical delete of a broadcast in that it
@@ -546,7 +552,40 @@ paths:
           $ref: '#/components/responses/ServerError'       
       security: 
       - bearer: []
-                                         
+
+  /msi/{id}/status:
+    
+    parameters:
+      - $ref: '#/components/parameters/MsiId'
+    
+    ###############################################
+    ## Get the status of an MSI
+    ############################################### 
+    get:
+      operationId: getMsiStatus
+      summary: Get status of an MSI
+      description: |
+        Returns the status of an MSI broadcast using the unique MSI identifier.
+      responses:
+        '200':    
+          description: OK
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Status'
+        '400':    
+          $ref: '#/components/responses/BadRequest'
+        '401': 
+          $ref: '#/components/responses/Unauthorized'
+        '403': 
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'          
+        '500':    
+          $ref: '#/components/responses/ServerError'
+      security: 
+      - bearer: []
+                                     
 components:
   securitySchemes:
     bearer:
@@ -606,6 +645,11 @@ components:
       type: object
       properties:
         ## all properties optional
+        statusCode: 
+          type: integer
+          format: int32
+          minimum: 100
+          maximum: 599
         errorMessage: 
           type: string
           example: an error occurred
@@ -644,7 +688,8 @@ components:
             server default will be applied. Either way the response
             from this method supplies the expiry time for the
             token. The token should be refreshed before the expiry 
-            time to avoid auth related failures.
+            time to avoid auth related failures. Note that this field
+            is only a suggestion to the service and may be ignored.
           type: integer
           format: int32
           minimum: 1
@@ -731,6 +776,7 @@ components:
         radiusNm:
           type: number
           format: float
+          minimum: 0
       required: [lat, lon, radiusNm]
       
     Rectangle:
@@ -895,7 +941,7 @@ components:
           type: boolean
           example: false 
       ## repetition is optional
-      required: [id, broadcast, createdTime, startTime, endTime, status]
+      required: [id, broadcast, payload, createdTime, startTime, endTime, status]
         
     SARBroadcast:
       type: object
@@ -1065,7 +1111,7 @@ components:
         of results. The token is not expected to be anywhere near as
         long as 4096 characters but good to put an upper bound on it. 
       example: 10
-
+      
 ##########################################
 ### End of egc-api, start of unit tests
 ##########################################      
