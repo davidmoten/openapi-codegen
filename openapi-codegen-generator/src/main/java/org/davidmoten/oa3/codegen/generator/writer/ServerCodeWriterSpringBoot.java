@@ -251,15 +251,19 @@ public final class ServerCodeWriterSpringBoot {
     static void writeMethodJavadoc(CodePrintWriter out, Method m, Optional<String> returns) {
         Map<String, String> parameterDescriptions = m.parameters //
                 .stream() //
-                .collect(Collectors.toMap(x -> x.identifier, x -> x.description.orElse(x.identifier)
-                        .replace("\\n\\s*", " ").replace("/", "&#47;").replace("<", "&lt;").replace(">", "&gt;")));
+                .collect(Collectors.toMap(x -> x.identifier,
+                        x -> x.description.orElse(x.identifier).replace("\\n\\s*", " ").replace("&", "&amp;")
+                                .replace("/", "&#47;").replace("<", "&lt;").replace(">", "&gt;")));
 
         String html = m.description.map(x -> WriterUtil.markdownToHtml(x))
                 .orElse("<p>Returns response from call to path <i>%s</i>.</p>");
         String more = m.responseDescriptors.stream() //
-                .map(rd -> String.format("\n<p>[status=%s, %s] --&gt; {@link %s}</p>", rd.statusCode(), rd.mediaType(),
-                        out.add(rd.fullClassName())))
-                .collect(Collectors.joining());
+                .map(rd -> {
+                    String full = rd.fullClassName();
+                    String link = Util.isPrimitiveFullClassName(full) || full.equals("byte[]") ? full
+                            : String.format("{@link %s}", out.add(full));
+                    return String.format("\n<p>[status=%s, %s] --&gt; %s</p>", rd.statusCode(), rd.mediaType(), link);
+                }).collect(Collectors.joining());
         if (!Javadoc.printJavadoc(out, Optional.of(html + more), Collections.emptyList(), Optional.empty(), returns,
                 parameterDescriptions, true)) {
             out.println();

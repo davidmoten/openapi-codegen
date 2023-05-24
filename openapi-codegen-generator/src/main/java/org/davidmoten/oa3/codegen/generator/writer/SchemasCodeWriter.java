@@ -189,7 +189,7 @@ public final class SchemasCodeWriter {
         String implementsClause = implementsClause(out.imports(), interfaces);
         final boolean javadocExists;
         if (cls.description.isPresent()) {
-            javadocExists = Javadoc.printJavadoc(out, out.indent(), cls.description.get(), true);
+            javadocExists = Javadoc.printJavadoc(out, out.indent(), cls.description.get(), false);
         } else {
             javadocExists = false;
         }

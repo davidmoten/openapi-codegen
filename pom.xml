@@ -130,6 +130,7 @@
                         <configuration>
                             <source>8</source>
                             <additionalJOption>-Xdoclint:none</additionalJOption>
+                            <quiet>true</quiet>
                         </configuration>
                     </execution>
                 </executions>

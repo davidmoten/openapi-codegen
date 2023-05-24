@@ -1891,5 +1891,9 @@ components:
       additionalProperties:
         type: string
         nullable: true
+        
+    DescriptionEscaping:
+      type: string
+      description: value < 5 chars & an arrow like -->
       
            
