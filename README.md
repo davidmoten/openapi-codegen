@@ -208,6 +208,25 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * *import mapping* is very poor, doesn't handle related objects and doesn't update service classes (non-model classes)
 * a LOT of bugs (3,500 open issues is an indicator)
 
+## Testing
+Lots of unit tests happening, always room for more.
+
+Most of the code generation tests happen in *openapi-codegen-maven-plugin-test* module. Path related stuff goes into `src/main/openapi/paths.yml` and schema related stuff goes in to `src/main/openapi/main.yml`. Unit tests of generated classes form those yaml files are in `src/test/java`.
+
+In addition to unit tests, openapi-codegen appears to generate valid classes for the following apis:
+* EBay
+* Marqueta
+* OpenFlow
+* Spotify
+* Google Chat
+* Federal Electoral Commission
+* BitBucket
+* MailChimp
+* GitHub
+* OpenAI
+* Atlassian JIRA
+* Twitter
+
 ## TODO
 * ~~`additionalProperties` (Dictionary) support~~, done
 * generate javadoc for fields
@@ -215,6 +234,7 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * delegate constructors using `this(`
 * workaround JsonCreator not being able to pass `5` into a double argument, must be `5.0` (https://github.com/FasterXML/jackson-core/issues/532)
 * document limited support for parameter style with spring-boot rest
+* support objects with more than 255 fields (max parameter number in Java gets exceeded in object constructor)
 * support form-style request bodies
 * support more parameter styles
 * support xml
