@@ -55,8 +55,8 @@ public class ClientCodeWriter {
 
         // write builder
         out.println();
-        out.line("public static %s<%s> basePath(%s basePath) {", ClientBuilder.class,
-                out.simpleClassName(), String.class);
+        out.line("public static %s<%s> basePath(%s basePath) {", ClientBuilder.class, out.simpleClassName(),
+                String.class);
         out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptors(), b.basePath()), %s.config(), basePath);",
                 ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
         out.closeParen();
@@ -80,8 +80,13 @@ public class ClientCodeWriter {
                 importedReturnType = out.add(m.returnFullClassName.get());
             }
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
-                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
-                        m.primaryStatusCode.map(x -> "primary response with status code " + x));
+                final Optional<String> returns;
+                if (m.returnFullClassName.isPresent()) {
+                    returns = m.primaryStatusCode.map(x -> "primary response with status code " + x);
+                } else {
+                    returns = Optional.empty();
+                }
+                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m, returns);
                 out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 final String paramIdentifiers;
                 if (m.parameters.size() <= 3) {

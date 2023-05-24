@@ -154,7 +154,13 @@ public final class ServerCodeWriterSpringBoot {
     private static void writeServiceMethods(CodePrintWriter out, List<Method> methods, boolean isController,
             Names names) {
         methods.forEach(m -> {
-            writeMethodJavadoc(out, m, m.primaryStatusCode.map(x -> "primary response status code " + x));
+            final Optional<String> returns;
+            if (m.returnFullClassName.isPresent()) {
+                returns = m.primaryStatusCode.map(x -> "primary response status code " + x);
+            } else {
+                returns = Optional.empty();
+            }
+            writeMethodJavadoc(out, m, returns);
             out.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
@@ -245,8 +251,8 @@ public final class ServerCodeWriterSpringBoot {
     static void writeMethodJavadoc(CodePrintWriter out, Method m, Optional<String> returns) {
         Map<String, String> parameterDescriptions = m.parameters //
                 .stream() //
-                .collect(Collectors.toMap(x -> x.identifier,
-                        x -> x.description.orElse(x.identifier).replaceAll("\\n\\s*", " ").replaceAll("/", "&#47;")));
+                .collect(Collectors.toMap(x -> x.identifier, x -> x.description.orElse(x.identifier)
+                        .replace("\\n\\s*", " ").replace("/", "&#47;").replace("<", "&lt;").replace(">", "&gt;")));
 
         String html = m.description.map(x -> WriterUtil.markdownToHtml(x))
                 .orElse("<p>Returns response from call to path <i>%s</i>.</p>");
