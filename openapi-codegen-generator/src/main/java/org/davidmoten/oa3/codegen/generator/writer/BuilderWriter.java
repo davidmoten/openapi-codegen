@@ -94,8 +94,20 @@ public class BuilderWriter {
                             first = false;
                         }
                         if (fld.mapType.isPresent()) {
-                            out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
-                                    out.add(fld.fullClassName), fld.fieldName, HashMap.class);
+                            // TODO support arrays of map?
+                            if (fld.nullable) {
+                                if (fld.required) {
+                                    out.line("private %s<%s<%s, %s>> %s = %s.empty();", Optional.class, Map.class,
+                                            String.class, out.add(fld.fullClassName), fld.fieldName, Optional.class);
+                                } else {
+                                    out.line("private %s<%s<%s, %s>> %s = %s.undefined();", JsonNullable.class,
+                                            Map.class, String.class, out.add(fld.fullClassName), fld.fieldName,
+                                            JsonNullable.class);
+                                }
+                            } else {
+                                out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
+                                        out.add(fld.fullClassName), fld.fieldName, HashMap.class);
+                            }
                         } else if (fld.nullable) {
                             if (fld.required) {
                                 out.line("private %s<%s> %s = %s.empty();", Optional.class, out.add(fld.fullClassName),
@@ -140,7 +152,17 @@ public class BuilderWriter {
             }
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
-            if (f.mandatory() || f.mapType.isPresent()) {
+            if (f.mapType.isPresent()) {
+                if (f.nullable) {
+                    if (f.required) {
+                        out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
+                    } else {
+                        out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, JsonNullable.class, f.fieldName);
+                    }
+                } else {
+                    out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
+                }
+            } else if (f.mandatory()) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else if (f.nullable && !f.required) {
                 out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, JsonNullable.class, f.fieldName);
