@@ -478,8 +478,16 @@ public final class SchemasCodeWriter {
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required && !f.nullable
-                || f.required && f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES));
+        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required //
+                && (!f.nullable || f.isArray) //
+                && !f.isMapType(MapType.FIELD) //
+                || //
+                f.required //
+                        && f.nullable //
+                        && !f.isMapType(MapType.ADDITIONAL_PROPERTIES) //
+                        && !f.isArray //
+                || //
+                !f.nullable && !f.required && f.isMapType(MapType.FIELD));
         boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
         // if has optional or other criteria then write a private constructor with
         // nullable parameters and a public constructor with Optional parameters
@@ -566,7 +574,11 @@ public final class SchemasCodeWriter {
                                         out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
                                     }
                                 } else {
-                                    out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                    if (x.required) {
+                                        out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                                    } else {
+                                        out.line("this.%s = %s.orElse(null);", x.fieldName(cls), x.fieldName(cls));
+                                    }
                                 }
                             }
                             return;
@@ -767,8 +779,27 @@ public final class SchemasCodeWriter {
                 }
                 out.println();
                 final String expression;
-                if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-                    if (f.required) {
+                if (f.isMapType(MapType.FIELD)) {
+                    if (f.nullable) {
+                        if (f.required) {
+                            if (f.isArray) {
+                                expression = f.fieldName(cls);
+                            } else {
+                                expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
+                                        f.fieldName(cls));
+                            }
+                        } else {
+                            expression = f.fieldName(cls);
+                        }
+                    } else {
+                        if (f.required) {
+                            expression = f.fieldName(cls);
+                        } else {
+                            expression = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
+                        }
+                    }
+                } else if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+                    if (!f.isArray && f.required) {
                         expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
                                 f.fieldName(cls));
                     } else {
@@ -782,7 +813,9 @@ public final class SchemasCodeWriter {
                 out.println();
                 final String value;
                 if (f.nullable) {
-                    if (f.required) {
+                    if (f.isArray) {
+                        value = f.fieldName(cls);
+                    } else if (f.required) {
                         value = String.format("%s.ofNullable(%s.get())", out.add(Optional.class), f.fieldName(cls));
                     } else {
                         value = f.fieldName(cls);
@@ -797,6 +830,7 @@ public final class SchemasCodeWriter {
                 writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls), value);
             }
         });
+
     }
 
     private static void writeMutators(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
@@ -846,7 +880,8 @@ public final class SchemasCodeWriter {
         out.println();
         out.line("@%s", JsonAnySetter.class);
         if (f.nullable) {
-            out.line("private void put(%s key, %s<%s> value) {", String.class, JsonNullable.class, out.add(f.fullClassName));
+            out.line("private void put(%s key, %s<%s> value) {", String.class, JsonNullable.class,
+                    out.add(f.fullClassName));
         } else {
             out.line("private void put(%s key, %s value) {", String.class, out.add(f.fullClassName));
         }

@@ -1856,11 +1856,20 @@ components:
       enum: [1, 2, null, 3]
       nullable: true
       
+    ## this means that {thing: null} is possible (not that the Map can have null values) 
     NullableMapProperty:
       type: object
       properties:
         thing:
           nullable: true
+          
+    NullableMapPropertyNotAlone:
+      type: object
+      properties:
+        thing:
+          nullable: true
+        other:
+          type: string          
           
     NullableMapPropertyReq:
       type: object
@@ -1885,6 +1894,18 @@ components:
           type: array
           items:
             nullable: true
+            
+    ArrayNullableItems:
+      type: array
+      items: 
+        type: object
+        properties:
+          start:
+            type: string
+          finish:
+            type: string
+        required: [start, finish]
+        nullable: true
             
     AdditionalPropertiesNullable:
       type: object            

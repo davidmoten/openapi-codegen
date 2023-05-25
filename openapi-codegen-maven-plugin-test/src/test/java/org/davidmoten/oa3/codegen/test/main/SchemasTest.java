@@ -893,7 +893,7 @@ public class SchemasTest {
         AnyObjectProperty a = AnyObjectProperty.stuff(map);
         String json = m.writeValueAsString(a);
         AnyObjectProperty b = m.readValue(json, AnyObjectProperty.class);
-        assertEquals(map, b.stuff());
+        assertEquals(map, b.stuff().get());
     }
 
     @Test
@@ -915,8 +915,8 @@ public class SchemasTest {
         TwoMaps a = TwoMaps.builder().stuff(map1).other(map2).build();
         String json = m.writeValueAsString(a);
         TwoMaps b = m.readValue(json, TwoMaps.class);
-        assertEquals(map1, b.stuff());
-        assertEquals(map2, b.other());
+        assertEquals(map1, b.stuff().get());
+        assertEquals(map2, b.other().get());
     }
 
     @Test
@@ -970,14 +970,13 @@ public class SchemasTest {
     public void testNullableStringEnum() throws JsonProcessingException {
         String json = m.writeValueAsString(NullableStringEnum.HELLO);
         assertEquals(NullableStringEnum.HELLO, m.readValue(json, NullableStringEnum.class));
-        // TODO cannot read from serialized NullableStringEnum.NULL_
     }
 
     @Test
     public void testNullableStringEnumObject() throws JsonProcessingException {
-        NullableStringEnumObject a = NullableStringEnumObject.thing(NullableStringEnum.NULL_);
+        NullableStringEnumObject a = NullableStringEnumObject.thing(NullableStringEnum.NULL);
         String json = m.writeValueAsString(a);
-        assertEquals(NullableStringEnum.NULL_, m.readValue(json, NullableStringEnumObject.class).thing());
+        assertEquals(NullableStringEnum.NULL, m.readValue(json, NullableStringEnumObject.class).thing());
     }
 
     @Test
@@ -988,22 +987,22 @@ public class SchemasTest {
 
     @Test
     public void testNullableIntegerEnumNull() throws JsonProcessingException {
-        String json = m.writeValueAsString(NullableIntegerEnum.NULL_);
-        assertEquals(NullableIntegerEnum.NULL_, m.readValue(json, NullableIntegerEnum.class));
+        String json = m.writeValueAsString(NullableIntegerEnum.NULL);
+        assertEquals(NullableIntegerEnum.NULL, m.readValue(json, NullableIntegerEnum.class));
     }
 
     @Test
     public void testNullableMapNull() throws JsonMappingException, JsonProcessingException {
-        NullableMapProperty a = NullableMapProperty.thing(Optional.empty());
-        assertFalse(a.thing().isPresent());
+        NullableMapProperty a = NullableMapProperty.thing(JsonNullable.of(null));
+        assertNull(a.thing().get());
         String json = m.writeValueAsString(a);
         NullableMapProperty b = m.readValue(json, NullableMapProperty.class);
-        assertFalse(b.thing().isPresent());
+        assertNull(b.thing().get());
     }
 
     @Test
     public void testNullableMapIsEmpty() throws JsonMappingException, JsonProcessingException {
-        NullableMapProperty a = NullableMapProperty.thing(Collections.emptyMap());
+        NullableMapProperty a = NullableMapProperty.thing(JsonNullable.of(Collections.emptyMap()));
         assertTrue(a.thing().isPresent());
         assertTrue(a.thing().get().isEmpty());
         String json = m.writeValueAsString(a);
@@ -1015,7 +1014,7 @@ public class SchemasTest {
     @Test
     public void testNullableMapNotEmpty() throws JsonMappingException, JsonProcessingException {
         NullableMapProperty a = NullableMapProperty
-                .thing(Optional.of(Maps.hashMap().put("hello", (Object) "there").build()));
+                .thing(JsonNullable.of(Maps.hashMap().put("hello", (Object) "there").build()));
         assertTrue(a.thing().isPresent());
         assertTrue(!a.thing().get().isEmpty());
         String json = m.writeValueAsString(a);
@@ -1035,7 +1034,7 @@ public class SchemasTest {
 
     @Test
     public void testNullableMapRequiredIsEmpty() throws JsonMappingException, JsonProcessingException {
-        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Collections.emptyMap());
+        NullableMapPropertyReq a = NullableMapPropertyReq.thing(Optional.of(Collections.emptyMap()));
         assertTrue(a.thing().isPresent());
         assertTrue(a.thing().get().isEmpty());
         String json = m.writeValueAsString(a);

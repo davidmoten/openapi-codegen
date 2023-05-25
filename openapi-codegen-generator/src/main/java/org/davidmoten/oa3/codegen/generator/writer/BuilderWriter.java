@@ -94,16 +94,18 @@ public class BuilderWriter {
                             first = false;
                         }
                         if (fld.mapType.isPresent()) {
-                            // TODO support arrays of map?
-                            if (fld.nullable) {
-                                if (fld.required) {
-                                    out.line("private %s<%s<%s, %s>> %s = %s.empty();", Optional.class, Map.class,
-                                            String.class, out.add(fld.fullClassName), fld.fieldName, Optional.class);
+                            if (fld.isArray) {
+                                if (fld.nullable) {
+                                    out.line("private %s<%s<%s<%s, %s> %s = new %s<>();", List.class,
+                                            JsonNullable.class, Map.class, String.class, out.add(fld.fullClassName),
+                                            fld.fieldName, ArrayList.class);
                                 } else {
-                                    out.line("private %s<%s<%s, %s>> %s = %s.undefined();", JsonNullable.class,
-                                            Map.class, String.class, out.add(fld.fullClassName), fld.fieldName,
-                                            JsonNullable.class);
+                                    out.line("private %s<%s<%s, %s>> %s = new %s<>();", List.class, Map.class,
+                                            String.class, out.add(fld.fullClassName), fld.fieldName, ArrayList.class);
                                 }
+                            } else if (fld.nullable) {
+                                out.line("private %s<%s<%s, %s>> %s = %s.undefined();", JsonNullable.class, Map.class,
+                                        String.class, out.add(fld.fullClassName), fld.fieldName, JsonNullable.class);
                             } else {
                                 out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
                                         out.add(fld.fullClassName), fld.fieldName, HashMap.class);
@@ -153,15 +155,7 @@ public class BuilderWriter {
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
             if (f.mapType.isPresent()) {
-                if (f.nullable) {
-                    if (f.required) {
-                        out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
-                    } else {
-                        out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, JsonNullable.class, f.fieldName);
-                    }
-                } else {
-                    out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
-                }
+                out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else if (f.mandatory()) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else if (f.nullable && !f.required) {
@@ -220,8 +214,8 @@ public class BuilderWriter {
         out.line("return new %s(%s);", importedBuiltType, field.fieldName);
         out.closeParen();
 
-        if (!field.mandatory() && !(field.isMapType(MapType.ADDITIONAL_PROPERTIES)
-                || field.mapType.isPresent() && field.nullable && !field.required)) {
+        if (!field.mandatory() //
+                && !field.mapType.isPresent() && !field.isArray) {
             out.println();
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
@@ -276,11 +270,7 @@ public class BuilderWriter {
     private static String mapImportedTypePublic(Field f, Imports imports) {
         if (f.isArray) {
             if (f.nullable) {
-                if (f.required) {
-                    return optionalListMapType(f, imports);
-                } else {
-                    return jsonNullableListMapType(f, imports);
-                }
+                return listJsonNullableMap(f, imports);
             } else {
                 return listMapType(f, imports);
             }
@@ -293,6 +283,11 @@ public class BuilderWriter {
         } else {
             return mapType(f, imports);
         }
+    }
+
+    private static String listJsonNullableMap(Field f, Imports imports) {
+        return String.format("%s<%s<%s<%s, %s>>>", imports.add(List.class), imports.add(JsonNullable.class),
+                imports.add(Map.class), imports.add(String.class), imports.add(f.fullClassName));
     }
 
     private static String jsonNullableListMapType(Field f, Imports imports) {
@@ -311,7 +306,7 @@ public class BuilderWriter {
     }
 
     private static String mapType(Field f, Imports imports) {
-        if (f.isMapType(MapType.ADDITIONAL_PROPERTIES) && f.nullable) {
+        if (f.nullable) {
             return String.format("%s<%s, %s<%s>>", imports.add(Map.class), imports.add(String.class),
                     imports.add(JsonNullable.class), imports.add(f.fullClassName));
         } else {
@@ -325,16 +320,14 @@ public class BuilderWriter {
                 imports.add(String.class), imports.add(f.fullClassName));
     }
 
-    private static String optionalListMapType(Field f, Imports imports) {
-        return String.format("%s<%s<%s<%s, %s>>>", imports.add(Optional.class), imports.add(List.class),
-                imports.add(Map.class), imports.add(String.class), imports.add(f.fullClassName));
-    }
-
     private static String enhancedImportedType(Field f, Imports imports) {
         if (f.mapType.isPresent()) {
             return mapImportedTypePublic(f, imports);
         } else if (f.isArray) {
-            if (f.required) {
+            if (f.nullable) {
+                return String.format("%s<%s<%s>>", imports.add(List.class), imports.add(JsonNullable.class),
+                        imports.add(f.fullClassName));
+            } else if (f.required) {
                 return String.format("%s<%s>", imports.add(List.class), imports.add(f.fullClassName));
             } else {
                 return String.format("%s<%s<%s>>", imports.add(Optional.class), imports.add(List.class),

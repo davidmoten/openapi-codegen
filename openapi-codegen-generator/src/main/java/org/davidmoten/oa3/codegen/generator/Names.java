@@ -137,6 +137,28 @@ public final class Names {
     }
 
     public static String toIdentifier(String s) {
+        String candidate = lowerFirst(identifierCandidate(s));
+        return adjustIfReservedWord(candidate);
+    }
+
+    private static String adjustIfReservedWord(String candidate) {
+        if (javaReservedWords.contains(candidate)) {
+            return candidate + "_";
+        } else {
+            return candidate;
+        }
+    }
+    
+    public static String toEnumIdentifier(String s) {
+        String candidate = identifierCandidate(s);
+        if (javaReservedWords.contains(candidate.toUpperCase(Locale.ENGLISH))) {
+            return candidate + "_";
+        } else {
+            return candidate;
+        }
+    }
+
+    private static String identifierCandidate(String s) {
         StringBuilder b = new StringBuilder();
         char lastCh = ' ';
         for (int i = 0; i < s.length(); i++) {
@@ -154,12 +176,8 @@ public final class Names {
             }
             lastCh = ch;
         }
-        String candidate = lowerFirst(b.toString());
-        if (javaReservedWords.contains(candidate)) {
-            return candidate + "_";
-        } else {
-            return candidate;
-        }
+        String candidate = b.toString();
+        return candidate;
     }
 
     public static String propertyNameToClassSimpleName(String propertyName) {
@@ -249,7 +267,7 @@ public final class Names {
         if (s.isEmpty()) {
             return "BLANK";
         } else {
-            return camelToUpper(toIdentifier(s));
+            return camelToUpper(toEnumIdentifier(s));
         }
     }
 

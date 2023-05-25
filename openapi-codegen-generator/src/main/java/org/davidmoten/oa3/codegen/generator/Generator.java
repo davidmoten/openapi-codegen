@@ -236,6 +236,9 @@ public class Generator {
         public final String fullClassName;
         public final String name;
         public final String fieldName;
+
+        // note that when isArray is true, required does not apply to the arrray item
+        // but rather to the array itself (as an object property for example)
         public final boolean required;
         public final Optional<Integer> minLength;
         public final Optional<Integer> maxLength;
@@ -249,6 +252,8 @@ public class Generator {
         public final Optional<Integer> minItems;
         public final Optional<Integer> maxItems;
         public final Optional<MapType> mapType;
+
+        // note that when isArray is true, nullable refers to the array item
         public final boolean nullable;
 
         Field(String fullClassName, String name, String fieldName, boolean required, boolean isArray,
@@ -283,7 +288,12 @@ public class Generator {
             if (isOctets()) {
                 return "byte[]";
             } else if (isArray) {
-                return toList(fullClassName, imports, !required);
+                if (nullable) {
+                    return String.format("%s<%s<%s>>", imports.add(List.class), imports.add(JsonNullable.class),
+                            imports.add(fullClassName));
+                } else {
+                    return toList(fullClassName, imports, !required);
+                }
             } else if (nullable) {
                 if (required) {
                     return String.format("%s<%s>", imports.add(Optional.class), imports.add(fullClassName));
@@ -303,8 +313,8 @@ public class Generator {
             } else if (mapType.isPresent()) {
                 if (isArray) {
                     if (nullable) {
-                        return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class),
-                                imports.add(List.class), imports.add(Map.class), imports.add(String.class),
+                        return String.format("%s<%s<%s<%s, %s>>>", imports.add(List.class),
+                                imports.add(JsonNullable.class), imports.add(Map.class), imports.add(String.class),
                                 imports.add(fullClassName));
                     } else {
                         return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
@@ -318,7 +328,12 @@ public class Generator {
                             imports.add(fullClassName));
                 }
             } else if (isArray) {
-                return toList(fullClassName, imports, false);
+                if (nullable) {
+                    return String.format("%s<%s<%s>>", imports.add(List.class), imports.add(JsonNullable.class),
+                            imports.add(fullClassName));
+                } else {
+                    return toList(fullClassName, imports, false);
+                }
             } else if (nullable) {
                 return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
             } else if (required) {
@@ -338,13 +353,7 @@ public class Generator {
                 t = imports.add(fullClassName);
             }
             if (isArray) {
-                if (nullable) {
-                    return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class), imports.add(List.class),
-                            imports.add(Map.class), imports.add(String.class), t);
-                } else {
-                    return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
-                            imports.add(String.class), t);
-                }
+                return resolvedTypeMapIsArray(imports, t);
             } else {
                 if (nullable && !isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                     return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
@@ -352,6 +361,16 @@ public class Generator {
                 } else {
                     return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
                 }
+            }
+        }
+
+        private String resolvedTypeMapIsArray(Imports imports, final String t) {
+            if (nullable) {
+                return String.format("%s<%s<%s<%s, %s>>>", imports.add(List.class), imports.add(JsonNullable.class),
+                        imports.add(Map.class), imports.add(String.class), t);
+            } else {
+                return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
+                        imports.add(String.class), t);
             }
         }
 
@@ -367,18 +386,7 @@ public class Generator {
                 }
             }
             if (isArray) {
-                if (nullable) {
-                    if (required) {
-                        return String.format("%s<%s<%s<%s, %s>>>", imports.add(Optional.class), imports.add(List.class),
-                                imports.add(Map.class), imports.add(String.class), t);
-                    } else {
-                        return String.format("%s<%s<%s<%s, %s>>>", imports.add(JsonNullable.class),
-                                imports.add(List.class), imports.add(Map.class), imports.add(String.class), t);
-                    }
-                } else {
-                    return String.format("%s<%s<%s, %s>>", imports.add(List.class), imports.add(Map.class),
-                            imports.add(String.class), t);
-                }
+                return resolvedTypeMapIsArray(imports, t);
             } else {
                 if (nullable && !isMapType(MapType.ADDITIONAL_PROPERTIES)) {
                     if (required) {
@@ -389,7 +397,12 @@ public class Generator {
                                 imports.add(String.class), t);
                     }
                 } else {
-                    return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
+                    if (required) {
+                        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
+                    } else {
+                        return String.format("%s<%s<%s, %s>>", imports.add(Optional.class), imports.add(Map.class),
+                                imports.add(String.class), t);
+                    }
                 }
             }
         }
@@ -417,41 +430,23 @@ public class Generator {
 
         @Override
         public String toString() {
-            StringBuilder b = new StringBuilder();
-            b.append("Field [fullClassName=");
-            b.append(fullClassName);
-            b.append(", name=");
-            b.append(name);
-            b.append(", fieldName=");
-            b.append(fieldName);
-            b.append(", required=");
-            b.append(required);
-            b.append(", minLength=");
-            b.append(minLength);
-            b.append(", maxLength=");
-            b.append(maxLength);
-            b.append(", pattern=");
-            b.append(pattern);
-            b.append(", min=");
-            b.append(min);
-            b.append(", max=");
-            b.append(max);
-            b.append(", isArray=");
-            b.append(isArray);
-            b.append(", encoding=");
-            b.append(encoding);
-            b.append(", exclusiveMin=");
-            b.append(exclusiveMin);
-            b.append(", exclusiveMax=");
-            b.append(exclusiveMax);
-            b.append(", minItems=");
-            b.append(minItems);
-            b.append(", maxItems=");
-            b.append(maxItems);
-            b.append(", mapType=");
-            b.append(mapType);
-            b.append("]");
-            return b.toString();
+            StringBuilder builder = new StringBuilder();
+            builder.append("Field [fullClassName=");
+            builder.append(fullClassName);
+            builder.append(", name=");
+            builder.append(name);
+            builder.append(", fieldName=");
+            builder.append(fieldName);
+            builder.append(", required=");
+            builder.append(required);
+            builder.append(", isArray=");
+            builder.append(isArray);
+            builder.append(", mapType=");
+            builder.append(mapType);
+            builder.append(", nullable=");
+            builder.append(nullable);
+            builder.append("]");
+            return builder.toString();
         }
 
     }
@@ -578,7 +573,8 @@ public class Generator {
                 } else {
                     // any object
                     String fieldName = current.nextFieldName(last.name);
-                    current.addField(Object.class.getCanonicalName(), last.name, fieldName, true, isArray,
+                    boolean required = fieldIsRequired(schemaPath);
+                    current.addField(Object.class.getCanonicalName(), last.name, fieldName, required, isArray,
                             mapType(schemaPath), isNullable(schema));
                 }
             }
