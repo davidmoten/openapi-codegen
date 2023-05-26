@@ -104,11 +104,22 @@ public class BuilderWriter {
                                             String.class, out.add(fld.fullClassName), fld.fieldName, ArrayList.class);
                                 }
                             } else if (fld.nullable) {
-                                out.line("private %s<%s<%s, %s>> %s = %s.undefined();", JsonNullable.class, Map.class,
-                                        String.class, out.add(fld.fullClassName), fld.fieldName, JsonNullable.class);
+                                if (fld.required && fld.isMapType(MapType.FIELD)) {
+                                    out.line("private %s<%s<%s, %s>> %s = %s.empty();", Optional.class, Map.class,
+                                            String.class, out.add(fld.fullClassName), fld.fieldName, Optional.class);
+                                } else {
+                                    out.line("private %s<%s<%s, %s>> %s = %s.undefined();", JsonNullable.class,
+                                            Map.class, String.class, out.add(fld.fullClassName), fld.fieldName,
+                                            JsonNullable.class);
+                                }
                             } else {
-                                out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
-                                        out.add(fld.fullClassName), fld.fieldName, HashMap.class);
+                                if (fld.required || fld.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+                                    out.line("private %s<%s, %s> %s = new %s<>();", Map.class, String.class,
+                                            out.add(fld.fullClassName), fld.fieldName, HashMap.class);
+                                } else {
+                                    out.line("private %s<%s<%s, %s>> %s = %s.empty();", Optional.class, Map.class,
+                                            String.class, out.add(fld.fullClassName), fld.fieldName, Optional.class);
+                                }
                             }
                         } else if (fld.nullable) {
                             if (fld.required) {
@@ -155,7 +166,12 @@ public class BuilderWriter {
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
             if (f.mapType.isPresent()) {
-                out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
+                if (f.isMapType(MapType.FIELD) && !f.required && !f.nullable) {
+                    out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
+//                    out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
+                } else {
+                    out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
+                }
             } else if (f.mandatory()) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else if (f.nullable && !f.required) {
@@ -274,7 +290,9 @@ public class BuilderWriter {
             } else {
                 return listMapType(f, imports);
             }
-        } else if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+        } else if (f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+            return mapType(f, imports);
+        } else if (f.nullable) {
             if (f.required) {
                 return optionalMapType(f, imports);
             } else {
@@ -306,12 +324,28 @@ public class BuilderWriter {
     }
 
     private static String mapType(Field f, Imports imports) {
-        if (f.nullable) {
-            return String.format("%s<%s, %s<%s>>", imports.add(Map.class), imports.add(String.class),
-                    imports.add(JsonNullable.class), imports.add(f.fullClassName));
+        if (f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+            if (f.nullable) {
+                return String.format("%s<%s, %s<%s>>", imports.add(Map.class), imports.add(String.class),
+                        imports.add(JsonNullable.class), imports.add(f.fullClassName));
+            } else {
+                return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                        imports.add(f.fullClassName));
+            }
+        } else if (f.nullable) {
+            if (f.required && f.isMapType(MapType.FIELD)) {
+                return optionalMapType(f, imports);
+            } else {
+                return jsonNullableMap(f, imports);
+            }
         } else {
-            return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
-                    imports.add(f.fullClassName));
+            if (f.required) {
+                return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class),
+                        imports.add(f.fullClassName));
+            } else {
+                return String.format("%s<%s<%s, %s>>", imports.add(Optional.class), imports.add(Map.class),
+                        imports.add(String.class), imports.add(f.fullClassName));
+            }
         }
     }
 

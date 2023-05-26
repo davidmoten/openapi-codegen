@@ -890,7 +890,7 @@ public class SchemasTest {
     public void testAnyObjectProperty() throws JsonProcessingException {
         // use of {} type translates to a Map (normally a LinkedHashMap)
         Map<String, Object> map = Maps.hashMap().<String, Object>put("hello", "there").build();
-        AnyObjectProperty a = AnyObjectProperty.stuff(map);
+        AnyObjectProperty a = AnyObjectProperty.stuff(Optional.of(map));
         String json = m.writeValueAsString(a);
         AnyObjectProperty b = m.readValue(json, AnyObjectProperty.class);
         assertEquals(map, b.stuff().get());
@@ -912,7 +912,7 @@ public class SchemasTest {
         map1.put("hello", "there");
         Map<String, Object> map2 = new HashMap<>();
         map2.put("buy", "nothing");
-        TwoMaps a = TwoMaps.builder().stuff(map1).other(map2).build();
+        TwoMaps a = TwoMaps.builder().stuff(Optional.of(map1)).other(Optional.of(map2)).build();
         String json = m.writeValueAsString(a);
         TwoMaps b = m.readValue(json, TwoMaps.class);
         assertEquals(map1, b.stuff().get());

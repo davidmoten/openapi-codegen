@@ -1917,84 +1917,39 @@ components:
       type: string
       description: value < 5 chars & an arrow like -->
       
-    ## copied from Github api and edited down a bit
-    ## contains poorly described fields that are nullable and 
-    ## thus is an unusual untested case till now
-    ## TODO cut this down a bit
-    Webhook:
+    MapPropertyNotReqNotAlone:
       type: object
       properties:
-        alert:
-          description: The code scanning alert involved in the event.
-          properties:
-            created_at:
-              description: "The time that the alert was created in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ.`"
-              format: date-time
-              nullable: true
-              type: string
-            dismissed_at:
-              description: "The time that the alert was dismissed in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`."
-              nullable: true
-            dismissed_by:
-              nullable: true
-            dismissed_reason:
-              description: "The reason for dismissing or closing the alert. Can be one of: `false positive`, `won't fix`, and `used in tests`."
-              nullable: true
-            fixed_at:
-              nullable: true
-            html_url:
-              description: The GitHub URL of the alert resource.
-              format: uri
-              type: string
-            instances_url:
-              type: string
-            most_recent_instance:
-              nullable: true
-              properties:
-                analysis_key:
-                  description: Identifies the configuration under which the analysis was executed. For example, in GitHub Actions this includes the workflow filename and job name.
-                  type: string
-                classifications:
-                  items:
-                    type: string
-                  type: array
-                commit_sha:
-                  type: string
-                environment:
-                  description: Identifies the variable values associated with the environment in which the analysis that generated this alert instance was performed, such as the language that was analyzed.
-                  type: string
-                location:
-                  properties:
-                    end_column:
-                      type: integer
-                    end_line:
-                      type: integer
-                    path:
-                      type: string
-                    start_column:
-                      type: integer
-                    start_line:
-                      type: integer
-                  type: object
-                message:
-                  properties:
-                    text:
-                      type: string
-                  type: object
-                ref:
-                  description: The full Git reference, formatted as `refs/heads/<branch name>`.
-                  type: string
-                state:
-                  description: State of a code scanning alert.
-                  enum:
-                    - open
-                    - dismissed
-                    - fixed
-                  type: string
-              required:
-                - ref
-                - analysis_key
-                - environment
-                - state
-              title: Alert Instance
-              type: object           
+        first: 
+          type: string
+        second:
+          description: something here
+
+    InputTransform:
+      oneOf:
+        - $ref: "#/components/schemas/StaticTransform"
+      discriminator:
+        propertyName: type
+        mapping:
+          static: "#/components/schemas/StaticTransform"
+          
+    StaticTransform:
+      type: object
+      properties:
+        value: {}
+        type:
+          type: string
+          enum: [javascript]
+      required: [type]  
+      
+    NullableAdditionalProperties:
+      type: object
+      properties: 
+        files:
+          additionalProperties:
+            nullable: true
+            properties:
+              content:
+                type: string 
+      required: [files]      
+    
