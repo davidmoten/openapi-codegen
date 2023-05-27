@@ -139,9 +139,9 @@ public class ClientServerGenerator {
         }
         if (operation.getRequestBody() != null) {
             RequestBody b = resolveRefs(operation.getRequestBody());
-            MediaType mediaType = b.getContent().get("application/json");
+            MediaType mediaType = mediaType(b.getContent(),"application/json");
             if (mediaType == null) {
-                mediaType = b.getContent().get("application/xml");
+                mediaType = mediaType(b.getContent(),"application/xml");
             }
             if (mediaType != null) {
                 Schema<?> schema = mediaType.getSchema();
@@ -170,10 +170,10 @@ public class ClientServerGenerator {
             // if content is null then their is no response body
             if (content != null) {
                 primaryMimeType.value = "application/json";
-                MediaType mediaType = content.get(primaryMimeType.value);
+                MediaType mediaType = mediaType(content, "application/json");
                 if (mediaType == null) {
                     primaryMimeType.value = "application/xml";
-                    mediaType = content.get(primaryMimeType.value);
+                    mediaType = mediaType(content, primaryMimeType.value);
                 }
                 if (mediaType != null) {
                     if (mediaType.getSchema() == null) {
@@ -223,6 +223,14 @@ public class ClientServerGenerator {
                 Optional.ofNullable(operation.getDescription()), primaryStatusCode,
                 Optional.ofNullable(primaryMimeType.value), responseDescriptors);
         methods.add(m);
+    }
+
+    private MediaType mediaType(Content content, String mimeType) {
+        return content.entrySet().stream()
+                .filter(x -> x.getKey().replaceAll(";.*", "").equalsIgnoreCase(mimeType))
+                .map(x -> x.getValue()) //
+                .findFirst() //
+                .orElse(null);
     }
 
     private List<ResponseDescriptor> responseDescriptors(Operation operation) {

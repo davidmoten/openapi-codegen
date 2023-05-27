@@ -1300,6 +1300,27 @@ components:
       type: string
       format: binary
       
+    PropertyBytesRequired:
+      type: object
+      properties:
+        one: 
+          type: string
+          format: byte
+        two:
+          type: string
+          format: binary
+      required: [one, two]      
+
+    PropertyBytesNotRequired:
+      type: object
+      properties:
+        one: 
+          type: string
+          format: byte
+        two:
+          type: string
+          format: binary
+      
     SimpleIntegerArray:
       type: array
       items: 

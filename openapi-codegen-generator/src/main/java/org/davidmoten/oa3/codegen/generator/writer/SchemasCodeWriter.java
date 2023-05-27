@@ -873,7 +873,11 @@ public final class SchemasCodeWriter {
                         } else if (y.required) {
                             return y.fieldName(cls);
                         } else {
-                            return String.format("%s.ofNullable(%s)", out.add(Optional.class), y.fieldName(cls));
+                            if (y.isOctets()) {
+                                return String.format("%s.ofNullable(%s.decodeOctets(%s))", out.add(Optional.class), out.add(Util.class), y.fieldName(cls));   
+                            } else {
+                                return String.format("%s.ofNullable(%s)", out.add(Optional.class), y.fieldName(cls));
+                            }
                         }
                     }).collect(Collectors.joining(", "));
             out.line("return new %s(%s);", cls.simpleName(), params);
