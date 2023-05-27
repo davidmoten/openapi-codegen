@@ -10,5 +10,7 @@ mvn clean install -B -pl *test -P mailchimp
 rm -rf /tmp/mc && cp -pr *test/target /tmp/mc
 mvn clean install -B -pl *test -P github
 rm -rf /tmp/gh && cp -pr *test/target /tmp/gh
+mvn clean install -B -pl *test -P zuora 
+rm -rf /tmp/zuora && cp -pr *test/target /tmp/zuora
 mvn clean install -B -pl *test -P docusign
 rm -rf /tmp/ds && cp -pr *test/target /tmp/ds
