@@ -423,7 +423,7 @@ public class ClientServerGenerator {
             this.pattern = pattern;
         }
 
-        public static final Constraints empty() {
+        public static Constraints empty() {
             return new Constraints(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
                     Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
         }
