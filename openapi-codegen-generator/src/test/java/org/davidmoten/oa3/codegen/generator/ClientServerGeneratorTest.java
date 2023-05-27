@@ -13,6 +13,17 @@ public class ClientServerGeneratorTest {
     public void test() throws MalformedURLException {
         String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml").toURI().toURL()
                 .toExternalForm();
+        generate(definition);
+    }
+    
+    @Test
+    public void testCached() throws MalformedURLException {
+        String definition = new File("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/zuora.yml").toURI().toURL()
+                .toExternalForm();
+        generate(definition);
+    }
+
+    private void generate(String definition) {
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
                 Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty());

@@ -597,14 +597,14 @@ public final class SchemasCodeWriter {
                             } else {
                                 assignField(out, cls, x);
                             }
-                        } else if (!x.isPrimitive() && !x.isByteArray()) {
+                        } else if (x.isOctets()) {
+                            assignEncodedOctets(out, cls, x);
+                        } else if (!x.isPrimitive()) {
                             if (x.required) {
                                 assignField(out, cls, x);
                             } else {
                                 assignOptionalField(out, cls, x);
                             }
-                        } else if (x.isOctets()) {
-                            assignEncodedOctets(out, cls, x);
                         } else {
                             assignField(out, cls, x);
                         }
@@ -655,15 +655,15 @@ public final class SchemasCodeWriter {
 
     private static void validateMore(CodePrintWriter out, Cls cls, Field x) {
         String raw = x.fieldName(cls);
-        if (x.minLength.isPresent()) {
+        if (x.minLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(),
                     x.fieldName(cls));
         }
-        if (x.maxLength.isPresent()) {
+        if (x.maxLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMaxLength(%s, %s, \"%s\");", Preconditions.class, raw, x.maxLength.get(),
                     x.fieldName(cls));
         }
-        if (x.pattern.isPresent()) {
+        if (x.pattern.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
                     WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
         }
@@ -823,7 +823,12 @@ public final class SchemasCodeWriter {
                 } else if (!f.isOctets() && !f.required) {
                     value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
                 } else if (f.isOctets()) {
-                    value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
+                    if (f.required) {
+                        value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
+                    } else {
+                        value = String.format("%s.ofNullable(%s.decodeOctets(%s))", out.add(Optional.class),
+                                out.add(Util.class), f.fieldName(cls));
+                    }
                 } else {
                     value = f.fieldName(cls);
                 }

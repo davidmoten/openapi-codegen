@@ -3,6 +3,8 @@ package org.davidmoten.oa3.codegen.generator;
 import static org.davidmoten.oa3.codegen.util.Util.orElse;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -286,7 +288,11 @@ public class Generator {
 
         public String resolvedTypePublicConstructor(Imports imports) {
             if (isOctets()) {
-                return "byte[]";
+                if (required) {
+                    return "byte[]";
+                } else {
+                    return String.format("%s<byte[]>", imports.add(Optional.class));
+                }
             } else if (isArray) {
                 if (nullable) {
                     return String.format("%s<%s<%s>>", imports.add(List.class), imports.add(JsonNullable.class),
@@ -447,6 +453,11 @@ public class Generator {
             builder.append(nullable);
             builder.append("]");
             return builder.toString();
+        }
+
+        public boolean isDateOrTime() {
+            return fullClassName.equals(LocalDate.class.getCanonicalName())
+                    || fullClassName.equals(OffsetDateTime.class.getCanonicalName());
         }
 
     }

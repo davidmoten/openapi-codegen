@@ -43,6 +43,16 @@ public class BuilderWriter {
         public boolean isMapType(MapType mt) {
             return mapType.orElse(null) == mt;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("Field [fieldName=").append(fieldName).append(", fullClassName=").append(fullClassName)
+                    .append(", required=").append(required).append(", isArray=").append(isArray).append(", mapType=")
+                    .append(mapType).append(", nullable=").append(nullable).append("]");
+            return builder.toString();
+        }
+        
     }
 
     public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
@@ -50,7 +60,7 @@ public class BuilderWriter {
             return;
         }
         if (fields.size() == 1) {
-            writeSimple(out, fields.get(0), importedBuiltType);
+            writeSingleValueStaticFactoryMethods(out, fields.get(0), importedBuiltType);
             return;
         }
         List<Field> sortedFields = new ArrayList<>(fields);
@@ -223,7 +233,7 @@ public class BuilderWriter {
 
     }
 
-    private static void writeSimple(CodePrintWriter out, Field field, String importedBuiltType) {
+    private static void writeSingleValueStaticFactoryMethods(CodePrintWriter out, Field field, String importedBuiltType) {
         out.println();
         out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                 enhancedImportedType(field, out.imports()), field.fieldName);

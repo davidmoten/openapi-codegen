@@ -93,6 +93,25 @@ paths:
                 format: binary
         default:    
           $ref: '#/components/responses/Error'
+          
+  /upload:
+    post:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  description: |
+                    The PDF file to upload for the credit memo.
+                  format: binary
+                  type: string
+              type: object
+      responses:
+        200:
+          description: ok
+          content:
+            application/json: {}
 
   /defaultError:
     get:

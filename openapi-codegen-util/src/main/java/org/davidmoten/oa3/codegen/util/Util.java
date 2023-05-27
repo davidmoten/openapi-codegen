@@ -4,13 +4,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.Optional;
 
 import com.github.davidmoten.guavamini.Preconditions;
 
 public final class Util {
 
     public static String encodeOctets(byte[] a) {
-        return new BigInteger(a).toString(16);
+        if (a == null) {
+            return "";
+        } else {
+            return new BigInteger(a).toString(16);
+        }
+    }
+    
+    public static String encodeOctets(Optional<byte[]> a) {
+        return a.map(Util::encodeOctets).orElse("");
     }
 
     public static byte[] decodeOctets(String s) {

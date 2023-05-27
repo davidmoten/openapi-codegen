@@ -150,7 +150,7 @@ public class ClientServerGenerator {
                         String fullClassName = resolveRefsFullClassName(schema);
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()),
-                                org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), false), fullClassName,
+                                org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName,
                                 false, true, constraints(schema), ParamType.BODY, false,
                                 Optional.ofNullable(schema.getDescription())));
                     } else {
@@ -176,7 +176,12 @@ public class ClientServerGenerator {
                     mediaType = content.get(primaryMimeType.value);
                 }
                 if (mediaType != null) {
-                    returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
+                    if (mediaType.getSchema() == null) {
+                        // Any schema
+                        returnFullClassName = Optional.of(Object.class.getCanonicalName());
+                    } else {
+                        returnFullClassName = Optional.of(resolveRefsFullClassName(mediaType.getSchema()));
+                    }
                 } else {
                     // loop through all mime-types and pick first non-default to infer return class
                     // name

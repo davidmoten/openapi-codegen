@@ -170,6 +170,7 @@ public final class ServerCodeWriterSpringBoot {
                     } else {
                         annotations = "";
                     }
+                    System.out.println(m.methodName + " requestBody required=" + p.required);
                     return String.format("\n%s%s%s %s", out.indent(), annotations, toImportedType(p, out.imports()),
                             "requestBody");
                 } else {
