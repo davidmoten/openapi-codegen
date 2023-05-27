@@ -28,6 +28,7 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 using Jacks
 ## Limitations
 * `allOf` only with object schemas
 * parameter types like explode, label, deepObject not implemented yet
+* multipart, url form encoded requests not implemented yet
 * json only (xml not supported)
 
 ## Getting started
