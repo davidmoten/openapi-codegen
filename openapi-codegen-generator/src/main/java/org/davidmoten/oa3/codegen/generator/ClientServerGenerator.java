@@ -139,9 +139,9 @@ public class ClientServerGenerator {
         }
         if (operation.getRequestBody() != null) {
             RequestBody b = resolveRefs(operation.getRequestBody());
-            MediaType mediaType = mediaType(b.getContent(),"application/json");
+            MediaType mediaType = mediaType(b.getContent(), "application/json");
             if (mediaType == null) {
-                mediaType = mediaType(b.getContent(),"application/xml");
+                mediaType = mediaType(b.getContent(), "application/xml");
             }
             if (mediaType != null) {
                 Schema<?> schema = mediaType.getSchema();
@@ -156,6 +156,13 @@ public class ClientServerGenerator {
                     } else {
                         throw new RuntimeException("unexpected");
                     }
+                } else {
+                    // if no schema specified then is octet-stream
+                    String fullClassName = byte[].class.getCanonicalName();
+                    params.add(new Param("requestBody", "requestBody", Optional.empty(),
+                            org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName, false,
+                            true, Constraints.empty(), ParamType.BODY, false,
+                            Optional.empty()));
                 }
             } else {
                 System.out.println("TODO handle request body with media types " + b.getContent().keySet());
@@ -226,8 +233,7 @@ public class ClientServerGenerator {
     }
 
     private MediaType mediaType(Content content, String mimeType) {
-        return content.entrySet().stream()
-                .filter(x -> x.getKey().replaceAll(";.*", "").equalsIgnoreCase(mimeType))
+        return content.entrySet().stream().filter(x -> x.getKey().replaceAll(";.*", "").equalsIgnoreCase(mimeType))
                 .map(x -> x.getValue()) //
                 .findFirst() //
                 .orElse(null);
@@ -415,6 +421,11 @@ public class ClientServerGenerator {
             this.minItems = minItems;
             this.maxItems = maxItems;
             this.pattern = pattern;
+        }
+
+        public static final Constraints empty() {
+            return new Constraints(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                    Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
         }
 
         public boolean atLeastOnePresent() {

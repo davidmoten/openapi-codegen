@@ -113,6 +113,17 @@ paths:
           content:
             application/json: {}
 
+  /uploadImage:
+    post:
+      requestBody:
+        content:
+          image/png: {}
+      responses:
+        200:
+          description: ok
+          content:
+            application/json: {}
+
   /defaultError:
     get:
       responses:
