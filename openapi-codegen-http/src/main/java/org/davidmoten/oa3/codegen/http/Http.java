@@ -15,8 +15,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -134,6 +136,10 @@ public final class Http {
             return this;
         }
 
+        public BuilderWithForm form(String name, Object value) {
+            return new BuilderWithForm(this, name, value);
+        }
+
         public BuilderWithBody body(Object value) {
             return new BuilderWithBody(this, value);
         }
@@ -147,6 +153,29 @@ public final class Http {
                     allowPatch);
         }
 
+    }
+
+    public static final class BuilderWithForm {
+
+        private final Builder b;
+        private final Map<String, Object> params = new HashMap<>();
+
+        public BuilderWithForm(Builder b, String name, Object value) {
+            this.b = b;
+            params.put(name, value);
+        }
+
+        public BuilderWithForm formParam(String name, Object value) {
+            params.put(name, value);
+            return this;
+        }
+
+        public Builder buildBody() {
+            String body = params.entrySet().stream() //
+                    .map(a -> encodeFormEntry(a.getKey(), a.getValue())) //
+                    .collect(Collectors.joining("&"));
+            return b.body(body).contentType("application/x-www-form-urlencoded");
+        }
     }
 
     public static final class BuilderWithBasePath {
@@ -248,6 +277,14 @@ public final class Http {
             List<ResponseDescriptor> descriptors, boolean allowPatch) {
         return call(method, basePath, pathTemplate, serializer, interceptors, requestHeaders, parameters,
                 (statusCode, contentType) -> match(descriptors, statusCode, contentType), allowPatch);
+    }
+
+    public static String encodeFormEntry(String key, Object value) {
+        try {
+            return URLEncoder.encode(key, "UTF-8") + "=" + URLEncoder.encode(value.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static Optional<Class<?>> match(List<ResponseDescriptor> descriptors, Integer statusCode,
