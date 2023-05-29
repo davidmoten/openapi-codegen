@@ -320,7 +320,7 @@ public final class Http {
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
         Optional<String> urlEncodedBody = urlEncodedBody(parameters);
-        Optional<String> multipartBody = multipartBody(parameters);
+        Optional<byte[]> multipartBody = multipartBody(parameters);
 //      return b.body(body).contentType("application/x-www-form-urlencoded");
         try {
             Headers headers = new Headers(requestHeaders);
@@ -344,7 +344,7 @@ public final class Http {
         }
     }
 
-    private static Optional<String> multipartBody(List<ParameterValue> parameters) {
+    private static Optional<byte[]> multipartBody(List<ParameterValue> parameters) {
         String s = parameters.stream() //
                 .filter(x -> x.type() == ParameterType.FORM_MULTIPART) //
                 .map(x -> {
@@ -361,7 +361,7 @@ public final class Http {
         if (s.isEmpty()) {
             return Optional.empty();
         } else {
-            return Optional.of(s);
+            return Optional.of(s.getBytes());
         }
     }
 
