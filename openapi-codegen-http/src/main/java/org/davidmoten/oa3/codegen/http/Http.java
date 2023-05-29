@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -144,13 +145,23 @@ public final class Http {
             return this;
         }
 
-        public Builder multipart(String name, Optional<String> contentType) {
+        public Builder multipart(String value, Optional<String> contentType) {
             if (!values.stream()
                     .anyMatch(x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.BODY)) {
                 throw new IllegalArgumentException(
                         "cannot set multipart parameter because body already set by urlEncoded or directly");
             }
-            values.add(ParameterValue.multipart(name, contentType));
+            values.add(ParameterValue.multipart(value, contentType));
+            return this;
+        }
+
+        public Builder multipart(String name, Object value, Optional<String> contentType) {
+            if (!values.stream()
+                    .anyMatch(x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.BODY)) {
+                throw new IllegalArgumentException(
+                        "cannot set multipart parameter because body already set by urlEncoded or directly");
+            }
+            values.add(ParameterValue.multipart(name, value, contentType));
             return this;
         }
 
@@ -174,12 +185,6 @@ public final class Http {
 
     }
 
-    
-//            String body = params.entrySet().stream() //
-//                    .map(a -> encodeFormEntry(a.getKey(), a.getValue())) //
-//                    .collect(Collectors.joining("&"));
-//            return b.body(body).contentType("application/x-www-form-urlencoded");
-    
     public static final class BuilderWithBasePath {
 
         private final Builder b;
@@ -314,6 +319,9 @@ public final class Http {
         String url = buildUrl(basePath, pathTemplate, parameters);
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
+        Optional<String> urlEncodedBody = urlEncodedBody(parameters);
+        Optional<String> multipartBody = multipartBody(parameters);
+//      return b.body(body).contentType("application/x-www-form-urlencoded");
         try {
             Headers headers = new Headers(requestHeaders);
             final HttpMethod requestMethod;
@@ -333,6 +341,49 @@ public final class Http {
                     r.method());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    private static Optional<String> multipartBody(List<ParameterValue> parameters) {
+        String s = parameters.stream() //
+                .filter(x -> x.type() == ParameterType.FORM_MULTIPART) //
+                .map(x -> {
+                    StringBuilder b = new StringBuilder();
+                    b.append(createRandomBoundary());
+                    b.append("\r\n");
+                    b.append("Content-Type: " + x.contentType().orElse("text/plain"));
+                    b.append("\r\n");
+                    b.append("\r\n");
+                    b.append(x.value().map(y -> y == null? "": y.toString()).orElse(""));
+                    b.append("\r\n");
+                    return b.toString();
+                }).collect(Collectors.joining("\r\n"));
+        if (s.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(s);
+        }
+    }
+
+    private static final Random RANDOM = new Random();
+
+    private static String createRandomBoundary() {
+        char[] a = new char[32];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = (char) ('0' + RANDOM.nextInt() % 10);
+        }
+        return "--------" + new String(a);
+    }
+
+    private static Optional<String> urlEncodedBody(List<ParameterValue> parameters) {
+        String s = parameters.stream() //
+                .filter(a -> a.type() == ParameterType.FORM_URLENCODED) //
+                .map(a -> encodeFormEntry(a.name(), a.value().get())) //
+                .collect(Collectors.joining("&"));
+        if (s.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(s);
         }
     }
 
