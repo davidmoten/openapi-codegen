@@ -71,4 +71,12 @@ public final class ParameterValue {
     public Optional<String> contentType() {
         return contentType;
     }
+
+    public static ParameterValue urlEncoded(String name, String value) {
+        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.FORM_URLENCODED, Optional.empty());
+    }
+    
+    public static ParameterValue multipart(String value, Optional<String> contentType) {
+        return new ParameterValue("multipart", Optional.ofNullable(value), ParameterType.FORM_MULTIPART, contentType);
+    }
 }

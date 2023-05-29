@@ -15,10 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -136,11 +134,32 @@ public final class Http {
             return this;
         }
 
-        public BuilderWithForm form(String name, Object value) {
-            return new BuilderWithForm(this, name, value);
+        public Builder urlEncoded(String name, Object value) {
+            if (!values.stream()
+                    .anyMatch(x -> x.type() == ParameterType.FORM_MULTIPART || x.type() == ParameterType.BODY)) {
+                throw new IllegalArgumentException(
+                        "cannot set url encoded parameter because body already set by multipart or directly");
+            }
+            values.add(ParameterValue.urlEncoded(name, String.valueOf(value)));
+            return this;
+        }
+
+        public Builder multipart(String name, Optional<String> contentType) {
+            if (!values.stream()
+                    .anyMatch(x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.BODY)) {
+                throw new IllegalArgumentException(
+                        "cannot set multipart parameter because body already set by urlEncoded or directly");
+            }
+            values.add(ParameterValue.multipart(name, contentType));
+            return this;
         }
 
         public BuilderWithBody body(Object value) {
+            if (!values.stream().anyMatch(
+                    x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.FORM_MULTIPART)) {
+                throw new IllegalArgumentException(
+                        "cannot set body parameter because body already set by urlEncoded or multipart");
+            }
             return new BuilderWithBody(this, value);
         }
 
@@ -155,29 +174,12 @@ public final class Http {
 
     }
 
-    public static final class BuilderWithForm {
-
-        private final Builder b;
-        private final Map<String, Object> params = new HashMap<>();
-
-        public BuilderWithForm(Builder b, String name, Object value) {
-            this.b = b;
-            params.put(name, value);
-        }
-
-        public BuilderWithForm formParam(String name, Object value) {
-            params.put(name, value);
-            return this;
-        }
-
-        public Builder buildBody() {
-            String body = params.entrySet().stream() //
-                    .map(a -> encodeFormEntry(a.getKey(), a.getValue())) //
-                    .collect(Collectors.joining("&"));
-            return b.body(body).contentType("application/x-www-form-urlencoded");
-        }
-    }
-
+    
+//            String body = params.entrySet().stream() //
+//                    .map(a -> encodeFormEntry(a.getKey(), a.getValue())) //
+//                    .collect(Collectors.joining("&"));
+//            return b.body(body).contentType("application/x-www-form-urlencoded");
+    
     public static final class BuilderWithBasePath {
 
         private final Builder b;
