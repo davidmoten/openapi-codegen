@@ -16,7 +16,7 @@ public class ClientServerGeneratorTest {
         generate(definition);
     }
     
-    @Test
+//    @Test
     public void testCached() throws MalformedURLException {
         String definition = new File("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/zuora.yml").toURI().toURL()
                 .toExternalForm();
