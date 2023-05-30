@@ -228,7 +228,7 @@ In addition to unit tests, openapi-codegen appears to generate valid classes for
 * Atlassian JIRA
 * Twitter
 
-Docusign api needs to work because has more than 255 fields in an object which exceeds Java contructor limits.
+Docusign api needs work here because has more than 255 fields in an object which exceeds Java contructor limits.
 
 To run tests on the above apis call this:
 ```bash
