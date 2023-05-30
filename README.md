@@ -134,7 +134,7 @@ Note that discriminators are constants that the user does not set (in fact, cann
 ### Immutability
 All generated classes are immutable though List and Map implementations are up to the user (you can use mutable java platform implementations or another library's immutable implementations).
 
-To modify one field (or more) of a generated schema object, use the `with*` methods. But remember, these are immutable classes, you must assign the result. For example:
+To modify one field (or more) of a generated schema object, use the `with*` methods. But remember, these are immutable classes, you **must** assign the result. For example:
 
 ```java
 Circle circle = Circle
