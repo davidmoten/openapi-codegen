@@ -76,11 +76,11 @@ public final class ParameterValue {
         return new ParameterValue(name, Optional.ofNullable(value), ParameterType.FORM_URLENCODED, Optional.empty());
     }
     
-    public static ParameterValue multipart(String value, Optional<String> contentType) {
+    public static ParameterValue multipart(byte[] value, Optional<String> contentType) {
         return new ParameterValue("", Optional.ofNullable(value), ParameterType.FORM_MULTIPART, contentType);
     }
 
-    public static ParameterValue multipart(String name, Object value, Optional<String> contentType) {
+    public static ParameterValue multipart(String name, byte[] value, Optional<String> contentType) {
         return new ParameterValue(name, Optional.ofNullable(value), ParameterType.FORM_URLENCODED, contentType);
     }
 }

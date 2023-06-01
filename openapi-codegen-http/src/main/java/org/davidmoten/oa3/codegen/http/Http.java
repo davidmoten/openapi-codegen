@@ -145,7 +145,7 @@ public final class Http {
             return this;
         }
 
-        public Builder multipart(String value, Optional<String> contentType) {
+        public Builder multipart(byte[] value, Optional<String> contentType) {
             if (!values.stream()
                     .anyMatch(x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.BODY)) {
                 throw new IllegalArgumentException(
@@ -155,7 +155,7 @@ public final class Http {
             return this;
         }
 
-        public Builder multipart(String name, Object value, Optional<String> contentType) {
+        public Builder multipart(String name, byte[] value, Optional<String> contentType) {
             if (!values.stream()
                     .anyMatch(x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.BODY)) {
                 throw new IllegalArgumentException(
@@ -352,38 +352,37 @@ public final class Http {
                 .filter(x -> x.type() == ParameterType.FORM_MULTIPART) //
                 .forEach(x -> {
                     try {
-                    String contentType = x.contentType().orElse("text/plain");
-                    b.write(boundary);
-                    b.write("\r\n");
-                    b.write("Content-Type: " + contentType);
-                    b.write("Content-Disposition: form-data; name=\"" + x.name() + "\"");
-                    b.write("\r\n");
-                    b.write("\r\n");
-                    // TODO get string or bytes
-                    if (contentType.equals("application/octet-stream")) {
-                        b.write(
-                                x.value().map(y -> y == null ? new byte[0] : (byte[]) y)
-                                        .orElse(new byte[0]));    
-                    } else {
-                        b.write(x.value().map(y -> y.toString()).orElse(""));
-                    }
-                    
+                        String contentType = x.contentType().orElse("text/plain");
+                        b.write(boundary);
+                        b.write("\r\n");
+                        b.write("Content-Type: " + contentType);
+                        b.write("Content-Disposition: form-data; name=\"" + x.name() + "\"");
+                        b.write("\r\n");
+                        b.write("\r\n");
+                        b.write(x.value().map(y -> (byte[]) y).orElse(new byte[0]));
                         b.write("\r\n");
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
                 });
         try {
-        if (b.size() > 0) {
-            b.write(boundary + "--");
+            if (b.size() > 0) {
+                b.write(boundary + "--");
+            } else {
+                return Optional.empty();
+            }
             StringBuilder all = new StringBuilder();
             all.append("Content-Type: multipart/form-data; boundary=" + boundary + "\r\n");
             all.append("Content-Length: " + b.size());
-        } else {
-            
+
+            Utf8ByteArrayOutputStream b2 = new Utf8ByteArrayOutputStream();
+            b2.write(all.toString());
+            b2.writeCrLf();
+            b.writeTo(b2);
+            return Optional.of(b2.toByteArray());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        }
-        
     }
 
     private static final Random RANDOM = new Random();
