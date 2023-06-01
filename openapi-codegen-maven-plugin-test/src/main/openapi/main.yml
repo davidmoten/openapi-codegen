@@ -1974,3 +1974,14 @@ components:
                 type: string 
       required: [files]      
     
+    MixRequiredAndNotRequiredWithConstraint:
+      type: object
+      properties:
+        a: 
+          type: string
+          minLength: 3
+        b: 
+          type: integer
+          format: int32
+          minimum: 10
+      required: [a]

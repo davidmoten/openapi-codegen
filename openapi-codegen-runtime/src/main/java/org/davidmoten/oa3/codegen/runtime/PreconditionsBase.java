@@ -48,12 +48,18 @@ public final class PreconditionsBase {
     }
 
     public void checkMinimum(Collection<? extends Number> list, String min, String name, boolean exclusive) {
+        if (list == null) {
+            return;
+        }
         for (Number x : list) {
             checkMinimum(x, min, name, exclusive);
         }
     }
 
     public void checkMinimum(Number x, String min, String name, boolean exclusive) {
+        if (x == null) {
+            return;
+        }
         int compare = new BigDecimal(min).compareTo(BigDecimal.valueOf(x.doubleValue()));
         if (!exclusive && compare > 0) {
             throw factory.apply(name + " must be >= " + min);
@@ -84,6 +90,9 @@ public final class PreconditionsBase {
     }
 
     public void checkMaximum(Collection<? extends Number> list, String max, String name, boolean exclusive) {
+        if (list == null) {
+            return;
+        }
         for (Number x : list) {
             checkMaximum(x, max, name, exclusive);
         }
@@ -106,6 +115,9 @@ public final class PreconditionsBase {
     }
 
     public void checkMaximum(Number x, String max, String name, boolean exclusive) {
+        if (x == null) {
+            return;
+        }
         int compare = new BigDecimal(max).compareTo(BigDecimal.valueOf(x.doubleValue()));
         if (!exclusive && compare < 0) {
             throw factory.apply(name + " must be <= " + max);
@@ -132,7 +144,7 @@ public final class PreconditionsBase {
     ////////////////////////////////
 
     public void checkMinLength(String s, int minLength, String name) {
-        if (s.length() < minLength) {
+        if (s != null && s.length() < minLength) {
             throw factory.apply(name + " must have a length of at least " + minLength);
         }
     }
@@ -160,7 +172,7 @@ public final class PreconditionsBase {
     }
 
     public void checkMinLength(Collection<String> list, int minLength, String name) {
-        if (list.stream().filter(x -> x.length() < minLength).findAny().isPresent()) {
+        if (list != null && list.stream().filter(x -> x.length() < minLength).findAny().isPresent()) {
             throw factory.apply(name + " elements must have a length of at least " + minLength);
         }
     }
@@ -170,13 +182,13 @@ public final class PreconditionsBase {
     ////////////////////////////////
 
     public void checkMaxLength(String s, int maxLength, String name) {
-        if (s.length() > maxLength) {
+        if (s != null && s.length() > maxLength) {
             throw factory.apply(name + " must have a length of at most " + maxLength);
         }
     }
 
     public void checkMaxLength(Collection<String> list, int maxLength, String name) {
-        if (list.stream().filter(x -> x.length() > maxLength).findAny().isPresent()) {
+        if (list != null && list.stream().filter(x -> x.length() > maxLength).findAny().isPresent()) {
             throw factory.apply(name + " elements must have a length of at most " + maxLength);
         }
     }
@@ -208,7 +220,7 @@ public final class PreconditionsBase {
     ////////////////////////////////
 
     public void checkMinSize(Collection<?> collection, int min, String name) {
-        if (collection.size() < min) {
+        if (collection != null && collection.size() < min) {
             throw factory.apply("collection must be have at least " + min + " elements");
         }
     }

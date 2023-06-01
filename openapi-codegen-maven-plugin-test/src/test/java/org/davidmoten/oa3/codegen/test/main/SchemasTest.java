@@ -67,6 +67,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.MinMaxInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.MinMaxItems;
 import org.davidmoten.oa3.codegen.test.main.schema.MinMaxItemsObjectRef;
 import org.davidmoten.oa3.codegen.test.main.schema.MinMaxLength;
+import org.davidmoten.oa3.codegen.test.main.schema.MixRequiredAndNotRequiredWithConstraint;
 import org.davidmoten.oa3.codegen.test.main.schema.Msi;
 import org.davidmoten.oa3.codegen.test.main.schema.MsiId;
 import org.davidmoten.oa3.codegen.test.main.schema.NamesWithSpaces;
@@ -1076,6 +1077,13 @@ public class SchemasTest {
         assertEquals(2, b.properties().size());
         assertEquals("there", b.properties().get("hello").get());
         assertNull(b.properties().get("bingo").get());
+    }
+    
+    @Test
+    public void testMixRequiredNotRequired() throws JsonProcessingException {
+        MixRequiredAndNotRequiredWithConstraint a = MixRequiredAndNotRequiredWithConstraint.builder().a("hello").build();
+        String json = m.writeValueAsString(a);
+        MixRequiredAndNotRequiredWithConstraint b = m.readValue(json, MixRequiredAndNotRequiredWithConstraint.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {
