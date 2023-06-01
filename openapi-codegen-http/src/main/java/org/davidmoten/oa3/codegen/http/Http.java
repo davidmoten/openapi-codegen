@@ -345,24 +345,45 @@ public final class Http {
     }
 
     private static Optional<byte[]> multipartBody(List<ParameterValue> parameters) {
-        String s = parameters.stream() //
+        String boundary = createRandomBoundary();
+
+        Utf8ByteArrayOutputStream b = new Utf8ByteArrayOutputStream();
+        parameters.stream() //
                 .filter(x -> x.type() == ParameterType.FORM_MULTIPART) //
-                .map(x -> {
-                    StringBuilder b = new StringBuilder();
-                    b.append(createRandomBoundary());
-                    b.append("\r\n");
-                    b.append("Content-Type: " + x.contentType().orElse("text/plain"));
-                    b.append("\r\n");
-                    b.append("\r\n");
-                    b.append(x.value().map(y -> y == null? "": y.toString()).orElse(""));
-                    b.append("\r\n");
-                    return b.toString();
-                }).collect(Collectors.joining("\r\n"));
-        if (s.isEmpty()) {
-            return Optional.empty();
+                .forEach(x -> {
+                    try {
+                    String contentType = x.contentType().orElse("text/plain");
+                    b.write(boundary);
+                    b.write("\r\n");
+                    b.write("Content-Type: " + contentType);
+                    b.write("Content-Disposition: form-data; name=\"" + x.name() + "\"");
+                    b.write("\r\n");
+                    b.write("\r\n");
+                    // TODO get string or bytes
+                    if (contentType.equals("application/octet-stream")) {
+                        b.write(
+                                x.value().map(y -> y == null ? new byte[0] : (byte[]) y)
+                                        .orElse(new byte[0]));    
+                    } else {
+                        b.write(x.value().map(y -> y.toString()).orElse(""));
+                    }
+                    
+                        b.write("\r\n");
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+        try {
+        if (b.size() > 0) {
+            b.write(boundary + "--");
+            StringBuilder all = new StringBuilder();
+            all.append("Content-Type: multipart/form-data; boundary=" + boundary + "\r\n");
+            all.append("Content-Length: " + b.size());
         } else {
-            return Optional.of(s.getBytes());
+            
         }
+        }
+        
     }
 
     private static final Random RANDOM = new Random();
