@@ -374,7 +374,7 @@ public final class Http {
                         String contentType = x.contentType().orElse("text/plain");
                         b.write(boundary);
                         b.write("\r\n");
-                        b.write("Content-Type: " + contentType);
+                        b.write("Content-Type: " + contentType + "\r\n");
                         b.write("Content-Disposition: form-data; name=\"" + x.name() + "\"");
                         b.write("\r\n");
                         b.write("\r\n");
@@ -390,7 +390,7 @@ public final class Http {
             } else {
                 return Optional.empty();
             }
-            headers.put("Content-Type", "multipart/form-data; boundary=" + boundary + "\r\n");
+            headers.put("Content-Type", "multipart/form-data; boundary=" + boundary);
             headers.put("Content-Length", Integer.toString(b.size()));
 
             return Optional.of(new Multipart(headers, b.toByteArray()));
@@ -404,7 +404,7 @@ public final class Http {
     private static String createRandomBoundary() {
         char[] a = new char[32];
         for (int i = 0; i < a.length; i++) {
-            a[i] = (char) ('0' + RANDOM.nextInt() % 10);
+            a[i] = (char) (48 + Math.abs(RANDOM.nextInt() % 10));
         }
         return "--------" + new String(a);
     }
@@ -438,12 +438,12 @@ public final class Http {
         // add request body content type (should just be one)
         parameters.stream().filter(p -> p.contentType().isPresent() && p.type() == ParameterType.BODY)
                 .forEach(p -> headers.put("Content-Type", p.contentType().get()));
-        headers.forEach((key, list) -> {
-            con.setRequestProperty(key, list.stream().collect(Collectors.joining(", ")));
-        });
-        con.setDoInput(true);
+        writeHeaders(headers, con);
+        
         if (requestBody.isPresent()) {
+            writeHeaders(headers, con);
             con.setDoOutput(true);
+            con.setDoInput(true);
             Optional<?> body = requestBody.get().value();
             if (body.isPresent()) {
                 try (OutputStream out = con.getOutputStream()) {
@@ -452,15 +452,22 @@ public final class Http {
             }
         } else if (multipartBody.isPresent()) {
             headers.putAll(multipartBody.get().headers);
+            writeHeaders(headers, con);
             con.setDoOutput(true);
+            con.setDoInput(true);
             try (OutputStream out = con.getOutputStream()) {
                 out.write(multipartBody.get().content);
             }
         } else if (urlEncodedBody.isPresent()) {
+            writeHeaders(headers, con);
             con.setDoOutput(true);
+            con.setDoInput(true);
             try (OutputStream out = con.getOutputStream()) {
                 out.write(urlEncodedBody.get().getBytes(StandardCharsets.UTF_8));
             }
+        } else {
+            writeHeaders(headers, con);
+            con.setDoInput(true);
         }
         int statusCode = con.getResponseCode();
         Headers responseHeaders = Headers.create(con.getHeaderFields());
@@ -476,6 +483,12 @@ public final class Http {
             }
         }
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
+    }
+
+    private static void writeHeaders(Headers headers, HttpURLConnection con) {
+        headers.forEach((key, list) -> {
+            con.setRequestProperty(key, list.stream().collect(Collectors.joining(", ")));
+        });
     }
 
     private static InputStream log(InputStream inputStream) {
@@ -562,5 +575,5 @@ public final class Http {
     private static String insertParameter(String s, String name, Object object) {
         return s.replace("{" + name + "}", urlEncode(object.toString()));
     }
-
+    
 }
