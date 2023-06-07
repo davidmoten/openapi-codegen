@@ -372,24 +372,27 @@ public final class Http {
                 .forEach(x -> {
                     try {
                         String contentType = x.contentType().orElse("text/plain");
+                        b.crLf();
                         b.write(boundary);
-                        b.write("\r\n");
-                        b.write("Content-Type: " + contentType + "\r\n");
+                        b.crLf();
+                        b.write("Content-Type: " + contentType);
+                        b.crLf();
                         b.write("Content-Disposition: form-data; name=\"" + x.name() + "\"");
-                        b.write("\r\n");
-                        b.write("\r\n");
+                        b.crLf();
+                        b.crLf();
                         b.write(x.value().map(y -> (byte[]) y).orElse(new byte[0]));
-                        b.write("\r\n");
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
                 });
         try {
             if (b.size() > 0) {
-                b.write(boundary + "--\r\n");
+                b.write(boundary + "--");
+                b.crLf();
             } else {
                 return Optional.empty();
             }
+            b.flush();
             headers.put("Content-Type", "multipart/form-data; boundary=" + boundary);
             headers.put("Content-Length", Integer.toString(b.size()));
 

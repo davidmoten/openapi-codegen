@@ -10,7 +10,7 @@ public class Utf8ByteArrayOutputStream extends ByteArrayOutputStream {
         write(s.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void writeCrLf() throws IOException {
+    public void crLf() throws IOException {
         write("\r\n");
     }
 
