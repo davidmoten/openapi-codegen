@@ -386,7 +386,7 @@ public final class Http {
                 });
         try {
             if (b.size() > 0) {
-                b.write(boundary + "--");
+                b.write(boundary + "--\r\n");
             } else {
                 return Optional.empty();
             }

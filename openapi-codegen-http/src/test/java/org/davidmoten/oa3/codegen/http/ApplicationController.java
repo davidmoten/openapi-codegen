@@ -32,9 +32,11 @@ public class ApplicationController {
         }
 
     }
-    
-    @RequestMapping(method = RequestMethod.POST, value = "/multipart", produces = { "application/json" })
-    public ResponseEntity<?> multipartPost(@RequestPart(name="first",required = true) Thing first, @RequestPart(name="second",required = true) Thing second) {
+
+    @RequestMapping(method = RequestMethod.POST, value = "/multipart", produces = { "application/json" }, consumes = {
+            org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<?> multipartPost(@RequestPart(name = "first", required = true) Thing first,
+            @RequestPart(name = "second", required = true) Thing second) {
         if (first.age == 20) {
             return ResponseEntity.ok().body(new Thing("sum", first.age + second.age));
         } else {
