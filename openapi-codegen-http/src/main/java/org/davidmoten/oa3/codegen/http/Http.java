@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.davidmoten.oa3.codegen.util.Util;
 import org.slf4j.Logger;
@@ -337,8 +338,8 @@ public final class Http {
                 r = interceptor.intercept(r);
             }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
-            return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(),
-                    r.method());
+            return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, urlEncodedBody,
+                    multipartBody, r.headers(), r.method());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -409,8 +410,12 @@ public final class Http {
 
     private static HttpResponse connectAndProcess(Serializer serializer, List<ParameterValue> parameters,
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, String url,
-            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method)
+            Optional<ParameterValue> requestBody, Optional<String> urlEncodedBody, Optional<byte[]> multipartBody,
+            Headers headers, final HttpMethod method)
             throws IOException, MalformedURLException, ProtocolException, StreamReadException, DatabindException {
+        Preconditions.checkArgument(
+                Stream.of(requestBody, urlEncodedBody, multipartBody).filter(Optional::isPresent).count() <= 1,
+                "a maximum of one of requestBody, urlEncodedBody, multipartBody can be present");
         log.debug("Http.headers={}", headers);
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
         con.setRequestMethod(method.name());
@@ -431,6 +436,14 @@ public final class Http {
                 try (OutputStream out = con.getOutputStream()) {
                     serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
                 }
+            }
+        } else if (multipartBody.isPresent()) {
+            try (OutputStream out = con.getOutputStream()) {
+                out.write(multipartBody.get());
+            }
+        } else if (urlEncodedBody.isPresent()) {
+            try (OutputStream out = con.getOutputStream()) {
+                out.write(urlEncodedBody.get().getBytes(StandardCharsets.UTF_8));
             }
         }
         int statusCode = con.getResponseCode();
