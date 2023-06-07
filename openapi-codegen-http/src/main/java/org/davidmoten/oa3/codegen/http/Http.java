@@ -167,9 +167,13 @@ public final class Http {
         }
 
         public Builder multipart(String name, Object o) {
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            serializer.serialize(o, "application/json", bytes);
-            return multipart(name, bytes.toByteArray(), Optional.of("application/json"));
+            if (o instanceof String) {
+                return multipart(name, ((String) o).getBytes(StandardCharsets.UTF_8));
+            } else {
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                serializer.serialize(o, "application/json", bytes);
+                return multipart(name, bytes.toByteArray(), Optional.of("application/json"));
+            }
         }
 
         public BuilderWithBody body(Object value) {
@@ -372,7 +376,6 @@ public final class Http {
                 .forEach(x -> {
                     try {
                         String contentType = x.contentType().orElse("text/plain");
-                        b.crLf();
                         b.write(boundary);
                         b.crLf();
                         b.write("Content-Type: " + contentType);
@@ -381,6 +384,7 @@ public final class Http {
                         b.crLf();
                         b.crLf();
                         b.write(x.value().map(y -> (byte[]) y).orElse(new byte[0]));
+                        b.crLf();
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
@@ -442,7 +446,7 @@ public final class Http {
         parameters.stream().filter(p -> p.contentType().isPresent() && p.type() == ParameterType.BODY)
                 .forEach(p -> headers.put("Content-Type", p.contentType().get()));
         writeHeaders(headers, con);
-        
+
         if (requestBody.isPresent()) {
             writeHeaders(headers, con);
             con.setDoOutput(true);
@@ -578,5 +582,5 @@ public final class Http {
     private static String insertParameter(String s, String name, Object object) {
         return s.replace("{" + name + "}", urlEncode(object.toString()));
     }
-    
+
 }

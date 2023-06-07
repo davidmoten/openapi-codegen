@@ -30,11 +30,10 @@ public class ApplicationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Problem("bad age", HttpStatus.BAD_REQUEST.value()));
         }
-
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/multipart", produces = { "application/json" }, consumes = {
-            org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
+            org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE, org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> multipartPost(@RequestPart(name = "first", required = true) Thing first,
             @RequestPart(name = "second", required = true) Thing second) {
         if (first.age == 20) {
