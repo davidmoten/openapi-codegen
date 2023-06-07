@@ -54,6 +54,10 @@ public final class Headers {
         return this;
     }
 
+    public void putAll(Headers headers) {
+        headers.forEach((key, list) -> list.forEach(v -> put(key, v)));
+    }
+
     public Headers remove(String key) {
         map.remove(key.toUpperCase(Locale.ENGLISH));
         return this;

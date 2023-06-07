@@ -165,10 +165,10 @@ public final class Http {
             values.add(ParameterValue.multipart(name, value, contentType));
             return this;
         }
-        
+
         public Builder multipart(String name, Object o) {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            serializer.serialize(o,"application/json", bytes);
+            serializer.serialize(o, "application/json", bytes);
             return multipart(name, bytes.toByteArray(), Optional.of("application/json"));
         }
 
@@ -327,7 +327,7 @@ public final class Http {
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
         Optional<String> urlEncodedBody = urlEncodedBody(parameters);
-        Optional<byte[]> multipartBody = multipartBody(parameters);
+        Optional<Multipart> multipartBody = multipartBody(parameters);
 //      return b.body(body).contentType("application/x-www-form-urlencoded");
         try {
             Headers headers = new Headers(requestHeaders);
@@ -351,7 +351,19 @@ public final class Http {
         }
     }
 
-    private static Optional<byte[]> multipartBody(List<ParameterValue> parameters) {
+    private static final class Multipart {
+        final Headers headers;
+        final byte[] content;
+
+        Multipart(Headers headers, byte[] content) {
+            this.headers = headers;
+            this.content = content;
+        }
+    }
+
+    private static Optional<Multipart> multipartBody(List<ParameterValue> parameters) {
+        Headers headers = new Headers();
+
         String boundary = createRandomBoundary();
 
         Utf8ByteArrayOutputStream b = new Utf8ByteArrayOutputStream();
@@ -378,15 +390,10 @@ public final class Http {
             } else {
                 return Optional.empty();
             }
-            StringBuilder all = new StringBuilder();
-            all.append("Content-Type: multipart/form-data; boundary=" + boundary + "\r\n");
-            all.append("Content-Length: " + b.size());
+            headers.put("Content-Type", "multipart/form-data; boundary=" + boundary + "\r\n");
+            headers.put("Content-Length", Integer.toString(b.size()));
 
-            Utf8ByteArrayOutputStream b2 = new Utf8ByteArrayOutputStream();
-            b2.write(all.toString());
-            b2.writeCrLf();
-            b.writeTo(b2);
-            return Optional.of(b2.toByteArray());
+            return Optional.of(new Multipart(headers, b.toByteArray()));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -416,7 +423,7 @@ public final class Http {
 
     private static HttpResponse connectAndProcess(Serializer serializer, List<ParameterValue> parameters,
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, String url,
-            Optional<ParameterValue> requestBody, Optional<String> urlEncodedBody, Optional<byte[]> multipartBody,
+            Optional<ParameterValue> requestBody, Optional<String> urlEncodedBody, Optional<Multipart> multipartBody,
             Headers headers, final HttpMethod method)
             throws IOException, MalformedURLException, ProtocolException, StreamReadException, DatabindException {
         Preconditions.checkArgument(
@@ -444,9 +451,10 @@ public final class Http {
                 }
             }
         } else if (multipartBody.isPresent()) {
+            headers.putAll(multipartBody.get().headers);
             con.setDoOutput(true);
             try (OutputStream out = con.getOutputStream()) {
-                out.write(multipartBody.get());
+                out.write(multipartBody.get().content);
             }
         } else if (urlEncodedBody.isPresent()) {
             con.setDoOutput(true);
