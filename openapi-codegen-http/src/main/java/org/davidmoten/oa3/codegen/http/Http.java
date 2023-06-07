@@ -137,7 +137,7 @@ public final class Http {
         }
 
         public Builder urlEncoded(String name, Object value) {
-            if (!values.stream()
+            if (values.stream()
                     .anyMatch(x -> x.type() == ParameterType.FORM_MULTIPART || x.type() == ParameterType.BODY)) {
                 throw new IllegalArgumentException(
                         "cannot set url encoded parameter because body already set by multipart or directly");
@@ -147,7 +147,7 @@ public final class Http {
         }
 
         public Builder multipart(byte[] value, Optional<String> contentType) {
-            if (!values.stream()
+            if (values.stream()
                     .anyMatch(x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.BODY)) {
                 throw new IllegalArgumentException(
                         "cannot set multipart parameter because body already set by urlEncoded or directly");
@@ -157,7 +157,7 @@ public final class Http {
         }
 
         public Builder multipart(String name, byte[] value, Optional<String> contentType) {
-            if (!values.stream()
+            if (values.stream()
                     .anyMatch(x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.BODY)) {
                 throw new IllegalArgumentException(
                         "cannot set multipart parameter because body already set by urlEncoded or directly");
@@ -165,9 +165,15 @@ public final class Http {
             values.add(ParameterValue.multipart(name, value, contentType));
             return this;
         }
+        
+        public Builder multipart(String name, Object o) {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            serializer.serialize(o,"application/json", bytes);
+            return multipart(name, bytes.toByteArray(), Optional.of("application/json"));
+        }
 
         public BuilderWithBody body(Object value) {
-            if (!values.stream().anyMatch(
+            if (values.stream().anyMatch(
                     x -> x.type() == ParameterType.FORM_URLENCODED || x.type() == ParameterType.FORM_MULTIPART)) {
                 throw new IllegalArgumentException(
                         "cannot set body parameter because body already set by urlEncoded or multipart");
@@ -438,10 +444,12 @@ public final class Http {
                 }
             }
         } else if (multipartBody.isPresent()) {
+            con.setDoOutput(true);
             try (OutputStream out = con.getOutputStream()) {
                 out.write(multipartBody.get());
             }
         } else if (urlEncodedBody.isPresent()) {
+            con.setDoOutput(true);
             try (OutputStream out = con.getOutputStream()) {
                 out.write(urlEncodedBody.get().getBytes(StandardCharsets.UTF_8));
             }

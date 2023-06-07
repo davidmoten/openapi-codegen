@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,5 +31,15 @@ public class ApplicationController {
                     .body(new Problem("bad age", HttpStatus.BAD_REQUEST.value()));
         }
 
+    }
+    
+    @RequestMapping(method = RequestMethod.POST, value = "/multipart", produces = { "application/json" })
+    public ResponseEntity<?> multipartPost(@RequestPart(name="first",required = true) Thing first, @RequestPart(name="second",required = true) Thing second) {
+        if (first.age == 20) {
+            return ResponseEntity.ok().body(new Thing("sum", first.age + second.age));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Problem("bad age", HttpStatus.BAD_REQUEST.value()));
+        }
     }
 }

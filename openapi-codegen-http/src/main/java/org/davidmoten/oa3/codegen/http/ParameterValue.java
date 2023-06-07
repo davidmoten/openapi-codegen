@@ -81,6 +81,6 @@ public final class ParameterValue {
     }
 
     public static ParameterValue multipart(String name, byte[] value, Optional<String> contentType) {
-        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.FORM_URLENCODED, contentType);
+        return new ParameterValue(name, Optional.ofNullable(value), ParameterType.FORM_MULTIPART, contentType);
     }
 }

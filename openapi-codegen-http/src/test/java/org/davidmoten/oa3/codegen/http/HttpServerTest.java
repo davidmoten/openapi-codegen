@@ -48,6 +48,16 @@ public class HttpServerTest {
         Thing a = (Thing) r.data().get();
         assertEquals("dave", a.name);
     }
+    
+    @Test
+    void testPostWithMultipart() {
+        HttpResponse r = getResponsePostWithMultipart();
+        assertEquals(200, r.statusCode());
+        assertTrue(r.data().isPresent());
+        Thing a = (Thing) r.data().get();
+        assertEquals("sum", a.name);
+        assertEquals(80, a.age);
+    }
 
     private HttpResponse getResponseGet(String id) {
         return Http //
@@ -75,6 +85,24 @@ public class HttpServerTest {
                 .acceptApplicationJson() //
                 .body(new Thing("dave", 20)) //
                 .contentTypeApplicationJson()//
+                .responseAs(Thing.class) //
+                .whenStatusCodeMatches("2XX") //
+                .whenContentTypeMatches("application/json") //
+                .responseAs(Problem.class) //
+                .whenStatusCodeDefault() //
+                .whenContentTypeMatches("application/json") //
+                .call();
+    }
+    
+    private HttpResponse getResponsePostWithMultipart() {
+        return Http //
+                .method(HttpMethod.POST) //
+                .basePath("http://localhost:" + serverPort) //
+                .path("/multipart") //
+                .serializer(serializer) //
+                .acceptApplicationJson() //
+                .multipart("first", new Thing("dave", 20)) //
+                .multipart("second", new Thing("fred", 60)) //
                 .responseAs(Thing.class) //
                 .whenStatusCodeMatches("2XX") //
                 .whenContentTypeMatches("application/json") //
