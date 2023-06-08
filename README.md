@@ -244,7 +244,7 @@ This script ensures that the code generated from the above large test apis compi
 * workaround JsonCreator not being able to pass `5` into a double argument, must be `5.0` (https://github.com/FasterXML/jackson-core/issues/532)
 * document limited support for parameter style with spring-boot rest
 * support objects with more than 255 fields (max parameter number in Java gets exceeded in object constructor)
-* support form-style request bodies
+* support form-style request bodies (multipart, urlencoded)
 * support more parameter styles
 * support xml
 * write docs
