@@ -9,19 +9,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.annotation.Generated;
 
+import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Objects;
 
+import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.1-alpha-7-SNAPSHOT")
-public final class Bike implements HasWheels, Vehicle {
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.2-SNAPSHOT")
+public final class Bike implements Vehicle, HasWheels {
 
     @JsonProperty("vehicleType")
     private final String vehicleType;
@@ -48,8 +50,8 @@ public final class Bike implements HasWheels, Vehicle {
         if (Globals.config().validateInConstructor().test(Bike.class)) {
             Preconditions.checkNotNull(colour, "colour");
         }
-        this.vehicleType = "bike";
-        this.wheelsType = "two";
+        this.vehicleType = DiscriminatorHelper.value(String.class, "bike");
+        this.wheelsType = DiscriminatorHelper.value(String.class, "two");
         this.colour = colour;
     }
 
@@ -59,12 +61,12 @@ public final class Bike implements HasWheels, Vehicle {
 
     @Override
     public String vehicleType() {
-        return vehicleType;
+        return DiscriminatorHelper.value(vehicleType);
     }
 
     @Override
     public String wheelsType() {
-        return wheelsType;
+        return DiscriminatorHelper.value(wheelsType);
     }
 
     public String colour() {

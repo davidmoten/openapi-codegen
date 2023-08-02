@@ -14,7 +14,7 @@ import java.lang.String;
 @JsonSubTypes({
         @Type(value = Car.class, name = "car"), 
         @Type(value = Bike.class, name = "bike")})
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.1-alpha-7-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.2-SNAPSHOT")
 public interface Vehicle {
 
     String vehicleType();

@@ -23,8 +23,8 @@ import org.davidmoten.oa3.codegen.util.Util;
 
 @JsonDeserialize(using = Geometry.Deserializer.class)
 @JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.1-alpha-7-SNAPSHOT")
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.2-SNAPSHOT")
 public final class Geometry {
 
     @JsonValue

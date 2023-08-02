@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.annotation.Generated;
 
-import java.lang.Float;
+import java.lang.Object;
 import java.lang.Override;
 import java.util.Objects;
 
@@ -19,8 +19,8 @@ import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.1-alpha-7-SNAPSHOT")
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.2-SNAPSHOT")
 public final class Circle {
 
     @JsonProperty("lat")
@@ -41,6 +41,7 @@ public final class Circle {
         if (Globals.config().validateInConstructor().test(Circle.class)) {
             Preconditions.checkNotNull(lat, "lat");
             Preconditions.checkNotNull(lon, "lon");
+            Preconditions.checkMinimum(radiusNm, "0", "radiusNm", false);
         }
         this.lat = lat;
         this.lon = lon;
@@ -55,7 +56,7 @@ public final class Circle {
 
         private Latitude lat;
         private Longitude lon;
-        private Float radiusNm;
+        private float radiusNm;
 
         Builder() {
         }
@@ -117,6 +118,18 @@ public final class Circle {
 
     public float radiusNm() {
         return radiusNm;
+    }
+
+    public Circle withLat(Latitude lat) {
+        return new Circle(lat, lon, radiusNm);
+    }
+
+    public Circle withLon(Longitude lon) {
+        return new Circle(lat, lon, radiusNm);
+    }
+
+    public Circle withRadiusNm(float radiusNm) {
+        return new Circle(lat, lon, radiusNm);
     }
 
     @Override

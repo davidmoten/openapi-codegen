@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.annotation.Generated;
 
-import java.lang.Float;
+import java.lang.Object;
 import java.lang.Override;
 import java.util.Objects;
 
@@ -19,8 +19,8 @@ import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.1-alpha-7-SNAPSHOT")
+@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime0.2-SNAPSHOT")
 public final class Rectangle {
 
     @JsonProperty("minLat")
@@ -64,8 +64,8 @@ public final class Rectangle {
 
         private Latitude minLat;
         private Longitude leftLon;
-        private Float heightDegrees;
-        private Float widthDegrees;
+        private float heightDegrees;
+        private float widthDegrees;
 
         Builder() {
         }
@@ -145,6 +145,22 @@ public final class Rectangle {
 
     public float widthDegrees() {
         return widthDegrees;
+    }
+
+    public Rectangle withMinLat(Latitude minLat) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
+    }
+
+    public Rectangle withLeftLon(Longitude leftLon) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
+    }
+
+    public Rectangle withHeightDegrees(float heightDegrees) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
+    }
+
+    public Rectangle withWidthDegrees(float widthDegrees) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 
     @Override

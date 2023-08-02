@@ -131,6 +131,10 @@ Note that discriminators are constants that the user does not set (in fact, cann
 ### *oneOf* without discriminator
 [Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
 
+### Generated client
+Here's an example of the generated client class (the entry point for interactions with the API). Note the conciseness and reliance on type-safe builders from a non-generated dependency.
+
+[Client.java](src/docs/Client.java).  
 ### Immutability
 All generated classes are immutable though List and Map implementations are up to the user (you can use mutable java platform implementations or another library's immutable implementations).
 
