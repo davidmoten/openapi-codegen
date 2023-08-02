@@ -109,7 +109,7 @@ Here's an example showing more configuration options:
 ```
 
 ## General advice
-* As much as possible make sure you put your types in the `#/components/schemas` section of your openapi yaml/json file (use $ref!). The same goes for responses, pathItems, and anything else that can be referred to with a ref. Don't use anonymous types, it makes for an ugly experience with generated code.
+* As much as possible make sure you put your types in the `#/components/schemas` section of your openapi yaml/json file (use `$ref`!). The same goes for responses, pathItems, and anything else that can be referred to with a `$ref`. Don't use anonymous types, it makes for an ugly experience with generated code.
 * Specify `format: int32` on integers to ensure you end up with `int/integer` types in generated code
 * Be sure to specify required properties
 
@@ -117,7 +117,7 @@ Here's an example showing more configuration options:
 Some examples follow. Note the following:
 
 * really clean code, formatted, sensible whitespacing, no long code lines 
-* minimal generated code (for example toString, hashCode, and oneOf Deserializer are one statement methods that pass off to non-generated runtime dependencies)
+* minimal generated code (for example `toString`, `hashCode`, and oneOf Deserializer are one statement methods that pass off to non-generated runtime dependencies)
 * type safety
 * concise builders
 * constructor validation that can be configured off on a class by class basis
@@ -201,7 +201,7 @@ This project *openapi-codegen* is born out of the insufficiences of [openapi-gen
 
 So what's missing and what can we do about it? Quite understandably there is a simplified approach in *openapi-generator* code to minimize the work across many languages with varying capabilities. For Java this means a lot of hassles:
 * Mutable classes mean that validation cannot be performed at construction time and have to use validation-api annotations. Errors raised at serialization time not at object creation time so finding the cause of the error is problematic.
-* Mutable classes not good 
+* Mutable classes not good (google for benefits of immutability)
 * No support for oneOf, anyOf when no discriminator specified
 * when discriminator mappings specified two sets of conflicting mapping annotations are generated
 * SimpleRef case has no type safety (Ref is passed in as Object in constructor)
