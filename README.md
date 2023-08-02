@@ -23,7 +23,7 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 using Jacks
 * Partial use of schema generated classes possible with generated server and client of *openapi-generator-plugin*
 * Constructor validation of schema objects means fail-fast which helps with diagnosis
 
-**Status**: in development, alpha release on Maven Central
+**Status**: released to Maven Central
 
 ## Limitations
 * `allOf` only with object schemas
