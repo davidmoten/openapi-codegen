@@ -200,7 +200,7 @@ See [this](https://github.com/davidmoten/openapi-codegen/wiki/openapi-generator#
 This project *openapi-codegen* is born out of the insufficiences of [openapi-generator](https://github.com/OpenAPITools/openapi-generator). Great work by that team but VERY ambitious. That team is up against it, 37 target languages, 46 server frameworks, 200K lines of java code, 30K lines of templates. April 2023 there were 3,500 open issues (whew!).
 
 So what's missing and what can we do about it? Quite understandably there is a simplified approach in *openapi-generator* code to minimize the work across many languages with varying capabilities. For Java this means a lot of hassles:
-* Mutable classes mean that validation cannot be performed at construction time and have to use validation-api annotations
+* Mutable classes mean that validation cannot be performed at construction time and have to use validation-api annotations. Errors raised at serialization time not at object creation time so finding the cause of the error is problematic.
 * Mutable classes not good 
 * No support for oneOf, anyOf when no discriminator specified
 * when discriminator mappings specified two sets of conflicting mapping annotations are generated
