@@ -9,3 +9,4 @@ cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Rec
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/client/Client.java ../src/docs/Client.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/Service.java ../src/docs/Service.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/ServiceController.java ../src/docs/ServiceController.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/schema/Book.java ../src/docs/Book.java

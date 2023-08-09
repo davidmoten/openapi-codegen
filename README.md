@@ -123,6 +123,10 @@ Some examples follow. Note the following:
 * constructor validation that can be configured off on a class by class basis
 * Optional should be used, not null values, in all public interactions  
 
+### Schema class
+
+[Book.java](src/docs/Book.java)
+
 ### *oneOf* with discriminator
 [Vehicle.java](src/docs/Vehicle.java), [Car.java](src/docs/Car.java), [Bike.java](src/docs/Bike.java)
 
