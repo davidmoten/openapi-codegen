@@ -201,7 +201,7 @@ This project *openapi-codegen* is born out of the insufficiences of [openapi-gen
 
 So what's missing and what can we do about it? Quite understandably there is a simplified approach in *openapi-generator* code to minimize the work across many languages with varying capabilities. For Java this means a lot of hassles:
 * Mutable classes mean that validation cannot be performed at construction time and have to use validation-api annotations. Errors raised at serialization time not at object creation time so finding the cause of the error is problematic.
-* Mutable classes not good (google for benefits of immutability)
+* Missing out on the many benefits of immutability (google for benefits of immutability)
 * No support for oneOf, anyOf when no discriminator specified
 * when discriminator mappings specified two sets of conflicting mapping annotations are generated
 * SimpleRef case has no type safety (Ref is passed in as Object in constructor)
