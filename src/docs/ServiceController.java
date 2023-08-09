@@ -53,8 +53,6 @@ public class ServiceController implements ControllerExceptionHandler {
         try {
             if (Globals.config().validateInControllerMethod().test("getUsers")) {
                 RequestPreconditions.checkMinLength(search, 2, "search");
-            }
-            if (Globals.config().validateInControllerMethod().test("getUsers")) {
                 RequestPreconditions.checkMinLength(continuationToken, 1, "continuationToken");
                 RequestPreconditions.checkMaxLength(continuationToken, 1500, "continuationToken");
             }
