@@ -7,3 +7,5 @@ cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Geo
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Circle.java ../src/docs/Circle.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Rectangle.java ../src/docs/Rectangle.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/client/Client.java ../src/docs/Client.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/Service.java ../src/docs/Service.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/ServiceController.java ../src/docs/ServiceController.java
