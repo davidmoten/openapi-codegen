@@ -31,7 +31,7 @@ public final class WriterUtil {
         Properties p = new Properties();
         try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
             p.load(in);
-            return p.get("groupId") + ":" + p.get("artifactId") + p.get("version");
+            return p.get("groupId") + ":" + p.get("artifactId") + ":" + p.get("version");
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
