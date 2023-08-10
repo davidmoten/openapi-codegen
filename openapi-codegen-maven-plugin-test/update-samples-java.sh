@@ -10,3 +10,5 @@ cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/client/
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/Service.java ../src/docs/Service.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/ServiceController.java ../src/docs/ServiceController.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/schema/Book.java ../src/docs/Book.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/schema/User.java ../src/docs/User.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/schema/Language.java ../src/docs/Language.java

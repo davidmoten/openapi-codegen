@@ -126,6 +126,8 @@ Some examples follow. Note the following:
 ### Schema class
 
 [Book.java](src/docs/Book.java)
+[User.java](src/docs/User.java) (string validations)
+[Language.java](src/docs/Language.java) (enum)
 
 ### *oneOf* with discriminator
 [Vehicle.java](src/docs/Vehicle.java), [Car.java](src/docs/Car.java), [Bike.java](src/docs/Bike.java)
