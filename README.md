@@ -68,7 +68,9 @@ Add this to your pom.xml in the `build/plugins` section:
         </execution>
     </executions>
 </plugin>
-``` 
+```
+The example above generates java code from `*.yml, *.yaml` files in `src/main/openapi` directory.
+
 We include *build-helper-maven-plugin* to help IDEs be aware that source generation is part of a Maven refresh in the IDE (for example in Eclipse **Maven - Update project** will run the codegen plugin and display the generated sources on the build path).  
 
 Here's an example showing more configuration options:
