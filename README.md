@@ -124,9 +124,10 @@ Some examples follow. Note the following:
 * Optional should be used, not null values, in all public interactions  
 
 ### Schema class
+Note validations in constructors, private constructors for use with Jackson that wants nulls, public constructors that disallow nulls (use java.util.Optional), mandatory/optional fields, chained builder for maximal type-safety and readability, generated hashCode, equals, toString methods.
 
 * [Book.java](src/docs/Book.java)
-* [User.java](src/docs/User.java) (string validations)
+* [User.java](src/docs/User.java) 
 * [Language.java](src/docs/Language.java) (enum)
 
 ### *oneOf* with discriminator
