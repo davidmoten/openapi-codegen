@@ -123,8 +123,8 @@ Some examples follow. Note the following:
 * constructor validation that can be configured off on a class by class basis
 * Optional should be used, not null values, in all public interactions  
 
-### Schema class
-Note validations in constructors, private constructors for use with Jackson that wants nulls, public constructors that disallow nulls (use java.util.Optional), mandatory/optional fields, chained builder for maximal type-safety and readability, generated hashCode, equals, toString methods.
+### Schema classes
+Note validations in constructors, private constructors for use with Jackson that wants nulls, public constructors that disallow nulls (use java.util.Optional), mandatory/optional fields, chained builder for maximal type-safety and readability,  immutable mutator methods, generated hashCode, equals, toString methods.
 
 * [Book.java](src/docs/Book.java)
 * [User.java](src/docs/User.java) 
