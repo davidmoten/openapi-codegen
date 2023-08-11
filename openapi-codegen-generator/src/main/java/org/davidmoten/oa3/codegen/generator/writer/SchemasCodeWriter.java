@@ -854,6 +854,7 @@ public final class SchemasCodeWriter {
             out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
                     x.fieldName(cls));
             String params = fields.stream() //
+                    // ignore discriminators because they are effectively constant
                     .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
                     .map(y -> {
                         if (y.fieldName(cls).equals(x.fieldName(cls))) {
