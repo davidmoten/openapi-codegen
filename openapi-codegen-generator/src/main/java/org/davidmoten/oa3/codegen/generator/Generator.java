@@ -300,7 +300,7 @@ public class Generator {
             } else if (required) {
                 return Optional.empty();
             } else {
-                return Optional.of(imports.add(fullClassName));
+                return Optional.of(imports.add(Util.toPrimitive(fullClassName)));
             }
         }
         
