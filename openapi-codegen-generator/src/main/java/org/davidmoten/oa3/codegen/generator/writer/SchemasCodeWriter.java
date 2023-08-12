@@ -853,37 +853,70 @@ public final class SchemasCodeWriter {
             out.println();
             out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
                     x.fieldName(cls));
-            String params = fields.stream() //
-                    // ignore discriminators because they are effectively constant
-                    .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
-                    .map(y -> {
-                        if (y.fieldName(cls).equals(x.fieldName(cls))) {
-                            if (y.nullable && !y.required) {
-                                return String.format("%s.of(%s.orElse(null))", out.add(JsonNullable.class),
-                                        y.fieldName(cls));
-                            } else {
-                                return y.fieldName(cls);
-                            }
-                        } else if (y.nullable) {
-                            if (y.required) {
-                                return String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
-                                        y.fieldName(cls));
-                            } else {
-                                return y.fieldName(cls);
-                            }
-                        } else if (y.required) {
-                            return y.fieldName(cls);
-                        } else {
-                            if (y.isOctets()) {
-                                return String.format("%s.ofNullable(%s.decodeOctets(%s))", out.add(Optional.class), out.add(Util.class), y.fieldName(cls));   
-                            } else {
-                                return String.format("%s.ofNullable(%s)", out.add(Optional.class), y.fieldName(cls));
-                            }
-                        }
-                    }).collect(Collectors.joining(", "));
-            out.line("return new %s(%s);", cls.simpleName(), params);
-            out.closeParen();
+            {
+                String params = fields.stream() //
+                        // ignore discriminators because they are effectively constant
+                        .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
+                        .map(y -> {
+                            if (y.fieldName(cls).equals(x.fieldName(cls))) {
+                                if (y.nullable && !y.required) {
+                                    return String.format("%s.of(%s.orElse(null))", out.add(JsonNullable.class),
+                                            y.fieldName(cls));
+                                } else {
+                                    return y.fieldName(cls);
+                                }
+                            } else
+                                return nonMutatedFieldAsParameter(out, cls, y);
+                        }).collect(Collectors.joining(", "));
+                out.line("return new %s(%s);", cls.simpleName(), params);
+                out.closeParen();
+            }
+            if (!x.mapType.isPresent()) {
+                Optional<String> tNonOptional = x.resolvedTypePublicConstructorNonOptional(out.imports());
+                if (tNonOptional.isPresent() && !tNonOptional.get().equals(t)) {
+                    out.println();
+                    out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)),
+                            tNonOptional.get(), x.fieldName(cls));
+                    String params = fields.stream() //
+                            // ignore discriminators because they are effectively constant
+                            .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
+                            .map(y -> {
+                                if (y.fieldName(cls).equals(x.fieldName(cls))) {
+                                    if (y.nullable && !y.required) {
+                                        return String.format("%s.of(%s)", out.add(JsonNullable.class),
+                                                y.fieldName(cls));
+                                    } else {
+                                        return String.format("%s.of(%s)", out.add(Optional.class), y.fieldName(cls));
+                                    }
+                                } else
+                                    return nonMutatedFieldAsParameter(out, cls, y);
+                            }).collect(Collectors.joining(", "));
+                    out.line("return new %s(%s);", cls.simpleName(), params);
+                    out.closeParen();
+                }
+            }
         });
+    }
+
+    private static String nonMutatedFieldAsParameter(CodePrintWriter out, Cls cls, Field y) {
+        if (y.nullable) {
+            if (y.required) {
+                return String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
+                        y.fieldName(cls));
+            } else {
+                return y.fieldName(cls);
+            }
+        } else if (y.required) {
+            return y.fieldName(cls);
+        } else {
+            if (y.isOctets()) {
+                return String.format("%s.ofNullable(%s.decodeOctets(%s))", out.add(Optional.class),
+                        out.add(Util.class), y.fieldName(cls));
+            } else {
+                return String.format("%s.ofNullable(%s)", out.add(Optional.class),
+                        y.fieldName(cls));
+            }
+        }
     }
 
     private static void writeJsonAnySetter(CodePrintWriter out, Cls cls, Field f) {

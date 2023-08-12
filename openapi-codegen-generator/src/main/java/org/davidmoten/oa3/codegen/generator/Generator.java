@@ -286,6 +286,24 @@ public class Generator {
             return cls.fieldName(this);
         }
 
+        public Optional<String> resolvedTypePublicConstructorNonOptional(Imports imports) {
+            if (isOctets()) {
+                if (required) {
+                    return Optional.empty();
+                } else {
+                    return Optional.of("byte[]");
+                }
+            } else if (isArray) {
+                return Optional.empty();
+            } else if (nullable) {
+                return Optional.of(imports.add(fullClassName));
+            } else if (required) {
+                return Optional.empty();
+            } else {
+                return Optional.of(imports.add(Util.toPrimitive(fullClassName)));
+            }
+        }
+        
         public String resolvedTypePublicConstructor(Imports imports) {
             if (isOctets()) {
                 if (required) {
