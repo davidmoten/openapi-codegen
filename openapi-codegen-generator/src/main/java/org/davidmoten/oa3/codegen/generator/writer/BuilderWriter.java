@@ -11,6 +11,7 @@ import org.davidmoten.oa3.codegen.generator.Generator.MapType;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
+import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.runtime.MapBuilder;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
@@ -72,6 +73,7 @@ public class BuilderWriter {
         boolean previousWasMandatory = true;
         boolean inFirstBuilder = true;
         Field last = sortedFields.get(sortedFields.size() - 1);
+        Optional<String> firstFieldStaticMethod = Optional.empty();
         for (Field f : sortedFields) {
             final String nextBuilderName;
             if (f.mandatory()) {
@@ -209,6 +211,19 @@ public class BuilderWriter {
                     writeBuildMethod(out, fields, importedBuiltType, builderField);
                 }
             }
+            if (!firstFieldStaticMethod.isPresent()) {
+                // only do this if field is mandatory
+                if (f.mandatory()) {
+                    Indent indent = out.indent().copy().left();
+                    String s = String.format("%spublic static %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName,
+                            baseImportedType(f, out.imports()), f.fieldName) //
+                            + String.format("%sreturn builder().%s(%s);\n", indent.right(), f.fieldName, f.fieldName) //
+                            + String.format("%s}\n", indent.left());
+                    firstFieldStaticMethod = Optional.of(s);
+                } else {
+                    firstFieldStaticMethod = Optional.of("");
+                }
+            }
             if (f.mapType.isPresent() && f == last) {
                 writeBuildMethod(out, fields, importedBuiltType, builderField);
             }
@@ -232,7 +247,10 @@ public class BuilderWriter {
             previousWasMandatory = f.mandatory();
             out.flush();
         }
-
+        if (firstFieldStaticMethod.isPresent() && !firstFieldStaticMethod.get().isEmpty()) {
+            out.println();
+            out.print(firstFieldStaticMethod.get());
+        }
     }
 
     private static void writeSingleValueStaticFactoryMethods(CodePrintWriter out, Field field, String importedBuiltType) {
