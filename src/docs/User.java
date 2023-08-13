@@ -180,6 +180,10 @@ public final class User {
         return new User(firstName, lastName, email, mobile);
     }
 
+    public User withMobile(String mobile) {
+        return new User(firstName, lastName, email, Optional.of(mobile));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

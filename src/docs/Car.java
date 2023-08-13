@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
 @Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2-SNAPSHOT")
-public final class Car implements HasWheels, Vehicle {
+public final class Car implements Vehicle, HasWheels {
 
     @JsonProperty("vehicleType")
     private final String vehicleType;

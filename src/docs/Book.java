@@ -274,6 +274,10 @@ public final class Book {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
+    public Book withAbstract_(Abstract abstract_) {
+        return new Book(title, author, Optional.of(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
     public Book withPublishedYear(Year publishedYear) {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
