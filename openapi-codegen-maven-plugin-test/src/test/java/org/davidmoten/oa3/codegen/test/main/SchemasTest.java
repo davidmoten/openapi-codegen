@@ -913,7 +913,7 @@ public class SchemasTest {
         map1.put("hello", "there");
         Map<String, Object> map2 = new HashMap<>();
         map2.put("buy", "nothing");
-        TwoMaps a = TwoMaps.stuff(Optional.of(map1)).other(Optional.of(map2)).build();
+        TwoMaps a = TwoMaps.builder().stuff(Optional.of(map1)).other(Optional.of(map2)).build();
         String json = m.writeValueAsString(a);
         TwoMaps b = m.readValue(json, TwoMaps.class);
         assertEquals(map1, b.stuff().get());
@@ -1083,7 +1083,7 @@ public class SchemasTest {
     public void testMixRequiredNotRequired() throws JsonProcessingException {
         MixRequiredAndNotRequiredWithConstraint a = MixRequiredAndNotRequiredWithConstraint.a("hello").build();
         String json = m.writeValueAsString(a);
-        MixRequiredAndNotRequiredWithConstraint b = m.readValue(json, MixRequiredAndNotRequiredWithConstraint.class);
+        m.readValue(json, MixRequiredAndNotRequiredWithConstraint.class);
     }
 
     private static void onePublicConstructor(Class<?> c) {

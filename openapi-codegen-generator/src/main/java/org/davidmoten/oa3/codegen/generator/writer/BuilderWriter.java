@@ -214,11 +214,11 @@ public class BuilderWriter {
             if (!firstFieldStaticMethod.isPresent()) {
                 // only do this if field is mandatory
                 if (f.mandatory()) {
-                Indent indent = out.indent().copy().left();
-                String s = String.format("%spublic static %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
-                        f.fieldName) //
-                        + String.format("%sreturn builder().%s(%s);\n", indent.right(), f.fieldName, f.fieldName) //
-                        + String.format("%s}\n", indent.left());
+                    Indent indent = out.indent().copy().left();
+                    String s = String.format("%spublic static %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName,
+                            baseImportedType(f, out.imports()), f.fieldName) //
+                            + String.format("%sreturn builder().%s(%s);\n", indent.right(), f.fieldName, f.fieldName) //
+                            + String.format("%s}\n", indent.left());
                     firstFieldStaticMethod = Optional.of(s);
                 } else {
                     firstFieldStaticMethod = Optional.of("");
