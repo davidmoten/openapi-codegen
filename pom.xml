@@ -214,6 +214,7 @@
                     <aggregate>true</aggregate>
                     <additionalJOption>-Xdoclint:none</additionalJOption>
                     <excludePackageNames>odata.msgraph.client.beta.*:odata.msgraph.client.*:microsoft.dynamics.crm.*:microsoft.vs.analytics.*</excludePackageNames>
+                    <skippedModules>openapi-codegen-maven-plugin-test,openapi-codegen-example-pet-store</skippedModules>
                 </configuration>
             </plugin>
         </plugins>
@@ -226,4 +227,17 @@
             </modules>
         </profile>
     </profiles>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <name>Maven Central</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <name>Maven Central</name>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+                </repository>
+            </distributionManagement>
+
 </project>
