@@ -167,7 +167,7 @@ Circle circle2 = circle.withRadiusNm(250);
 ```
 
 ## Builders
-All generated schema classes have useful static builder methods. Note that mandatory fields are modelled using chained builders so that you get you get compile-time confirmation 
+All generated schema classes have useful static builder methods. Note that mandatory fields are modelled using chained builders so that you get compile-time confirmation 
 that they have been set (and you don't need to set the optional fields). Public constructors are also available if you prefer.
 
 Here's an example (creating an instance of `Geometry` which was defined as `oneOf`:
