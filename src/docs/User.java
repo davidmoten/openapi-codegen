@@ -148,6 +148,10 @@ public final class User {
         }
     }
 
+    public static BuilderWithFirstName firstName(String firstName) {
+        return builder().firstName(firstName);
+    }
+
     public String firstName() {
         return firstName;
     }

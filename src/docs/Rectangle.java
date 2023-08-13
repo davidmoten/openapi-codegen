@@ -131,6 +131,10 @@ public final class Rectangle {
         }
     }
 
+    public static BuilderWithMinLat minLat(Latitude minLat) {
+        return builder().minLat(minLat);
+    }
+
     public Latitude minLat() {
         return minLat;
     }

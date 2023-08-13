@@ -230,6 +230,10 @@ public final class Book {
         }
     }
 
+    public static BuilderWithTitle title(String title) {
+        return builder().title(title);
+    }
+
     public String title() {
         return title;
     }

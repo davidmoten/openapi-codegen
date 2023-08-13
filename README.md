@@ -159,7 +159,6 @@ To modify one field (or more) of a generated schema object, use the `with*` meth
 
 ```java
 Circle circle = Circle
-    .builder()
     .latitude(Latitude.value(-10))
     .longitude(Longitude.value(140))
     .radiusNm(200)
@@ -173,7 +172,16 @@ that they have been set (and you don't need to set the optional fields). Public 
 
 Here's an example (creating an instance of `Geometry` which was defined as `oneOf`:
 ```java
-Geometry g = Geometry.of(Circle.builder() 
+Geometry g = Geometry.of(Circle
+    .builder() 
+    .lat(Latitude.value(-35f))
+    .lon(Longitude.value(142f))
+    .radiusNm(20)
+    .build());
+```
+Note that if the first field is mandatory you can omit the `builder()` method call:
+```java
+Geometry g = Geometry.of(Circle
     .lat(Latitude.value(-35f))
     .lon(Longitude.value(142f))
     .radiusNm(20)

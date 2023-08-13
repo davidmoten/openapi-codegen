@@ -108,6 +108,10 @@ public final class Circle {
         }
     }
 
+    public static BuilderWithLat lat(Latitude lat) {
+        return builder().lat(lat);
+    }
+
     public Latitude lat() {
         return lat;
     }
