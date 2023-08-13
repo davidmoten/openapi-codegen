@@ -247,8 +247,8 @@ public class BuilderWriter {
             previousWasMandatory = f.mandatory();
             out.flush();
         }
-        out.println();
         if (firstFieldStaticMethod.isPresent() && !firstFieldStaticMethod.get().isEmpty()) {
+            out.println();
             out.print(firstFieldStaticMethod.get());
         }
     }
