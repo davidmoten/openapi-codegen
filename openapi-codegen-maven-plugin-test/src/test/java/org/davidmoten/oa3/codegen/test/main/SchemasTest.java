@@ -680,7 +680,7 @@ public class SchemasTest {
         Dog a = m.readValue(json, Dog.class);
         assertEquals("brown and curly", a.pet().description());
         assertEquals(Breed.CROSS, a.object1().breed().get());
-        Dog b = Dog.builder() //
+        Dog b = Dog
                 .pet(Pet.description("brown and curly")) //
                 .object1(Dog.Object1.breed(Breed.CROSS)) //
                 .build();
@@ -693,7 +693,7 @@ public class SchemasTest {
         Dog2 a = m.readValue(json, Dog2.class);
         assertEquals("brown and curly", a.pet().description());
         assertEquals(DogBreed.CROSS, a.breeding().breed());
-        Dog2 b = Dog2.builder() //
+        Dog2 b = Dog2 //
                 .pet(Pet.description("brown and curly")) //
                 .breeding(Breeding.builder() //
                         .breeder("Jane's Kennels") //
@@ -752,13 +752,13 @@ public class SchemasTest {
     public void testMsi() throws JsonProcessingException {
         Circle circle = new Circle(new Latitude(25.1F), new Longitude(-33.1F), 1);
         MetBroadcastArea mbca = MetBroadcastArea.of(Geometry.of(circle));
-        MetBroadcast mbc = MetBroadcast.builder().area(mbca).priority(NonSARPriority.SAFETY).build();
+        MetBroadcast mbc = MetBroadcast.area(mbca).priority(NonSARPriority.SAFETY).build();
         Broadcast broadcast = Broadcast.of(mbc);
         OffsetDateTime createdTime = OffsetDateTime.parse("2023-04-05T12:15:26.025+10:00");
         OffsetDateTime startTime = OffsetDateTime.parse("2023-04-05T14:15:26.025+10:00");
         OffsetDateTime endTime = OffsetDateTime.parse("2023-04-06T12:00:26.025+10:00");
         MsiId msiId = new MsiId("8ds9f8sd98-dsfds8989");
-        Msi msi = Msi.builder() //
+        Msi msi = Msi //
                 .id(msiId) //
                 .broadcast(broadcast) //
                 .createdTime(createdTime) //
@@ -821,7 +821,7 @@ public class SchemasTest {
         assertEquals(1L, b.properties().get("hello"));
         assertEquals(23L, b.properties().get("there"));
         @SuppressWarnings("unused")
-        Geometry g = Geometry.of(Circle.builder() //
+        Geometry g = Geometry.of(Circle //
                 .lat(Latitude.value(-35f)) //
                 .lon(Longitude.value(142f)) //
                 .radiusNm(20) //
@@ -830,7 +830,7 @@ public class SchemasTest {
 
     @Test
     public void testAdditionalPropertiesTrue() throws JsonProcessingException {
-        Circle c = Circle.builder().lat(Latitude.value(11f)).lon(Longitude.value(123f)).radiusNm(123).build();
+        Circle c = Circle.lat(Latitude.value(11f)).lon(Longitude.value(123f)).radiusNm(123).build();
         AdditionalPropertiesTrue a = AdditionalPropertiesTrue.builder() //
                 .addToProperties("hello", 1L) //
                 .add("there", c) //
@@ -900,7 +900,7 @@ public class SchemasTest {
     @Test
     public void testAnyObjectProperty2() throws JsonProcessingException {
         // use of {} type translates to a Map (normally a LinkedHashMap)
-        AnyObjectProperty2 a = AnyObjectProperty2.builder().stuff(Collections.emptyMap()).other("abc").build();
+        AnyObjectProperty2 a = AnyObjectProperty2.stuff(Collections.emptyMap()).other("abc").build();
         String json = m.writeValueAsString(a);
         AnyObjectProperty2 b = m.readValue(json, AnyObjectProperty2.class);
         assertTrue(b.stuff().isEmpty());
@@ -913,7 +913,7 @@ public class SchemasTest {
         map1.put("hello", "there");
         Map<String, Object> map2 = new HashMap<>();
         map2.put("buy", "nothing");
-        TwoMaps a = TwoMaps.builder().stuff(Optional.of(map1)).other(Optional.of(map2)).build();
+        TwoMaps a = TwoMaps.stuff(Optional.of(map1)).other(Optional.of(map2)).build();
         String json = m.writeValueAsString(a);
         TwoMaps b = m.readValue(json, TwoMaps.class);
         assertEquals(map1, b.stuff().get());
@@ -958,7 +958,7 @@ public class SchemasTest {
 
     @Test
     public void testNullable() throws JsonProcessingException {
-        NullableExample a = NullableExample.builder().a(123).b(B.HELLO).notReq(JsonNullable.of(null)).build();
+        NullableExample a = NullableExample.a(123).b(B.HELLO).notReq(JsonNullable.of(null)).build();
         String json = m.writeValueAsString(a);
         assertTrue(json.contains("\"req\":null"));
         assertTrue(json.contains("\"notReq\":null"));
@@ -1081,7 +1081,7 @@ public class SchemasTest {
     
     @Test
     public void testMixRequiredNotRequired() throws JsonProcessingException {
-        MixRequiredAndNotRequiredWithConstraint a = MixRequiredAndNotRequiredWithConstraint.builder().a("hello").build();
+        MixRequiredAndNotRequiredWithConstraint a = MixRequiredAndNotRequiredWithConstraint.a("hello").build();
         String json = m.writeValueAsString(a);
         MixRequiredAndNotRequiredWithConstraint b = m.readValue(json, MixRequiredAndNotRequiredWithConstraint.class);
     }
