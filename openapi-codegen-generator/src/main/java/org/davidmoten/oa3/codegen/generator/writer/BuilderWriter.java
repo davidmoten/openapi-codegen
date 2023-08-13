@@ -97,6 +97,8 @@ public class BuilderWriter {
                     out.closeParen();
                     inFirstBuilder = false;
                 } else {
+                    // we are in the first Builder
+                    // write the field declarations
                     boolean first = true;
                     for (Field fld : sortedFields) {
                         if (first) {
