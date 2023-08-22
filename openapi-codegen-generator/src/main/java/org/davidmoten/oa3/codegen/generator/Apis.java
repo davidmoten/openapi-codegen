@@ -1,12 +1,17 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Lists;
+import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 
 import io.swagger.v3.oas.models.OpenAPI;
@@ -16,6 +21,7 @@ import io.swagger.v3.oas.models.headers.Header;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.Encoding;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
@@ -59,7 +65,7 @@ class Apis {
             Visitor visitor, OpenAPI api) {
         if (header != null) {
             header = resolveRefs(api, header);
-            visitSchemas(category, names, header.getSchema(), visitor);
+            visitSchemas(category, names, header.getSchema(), Maps.empty(),  visitor);
         }
     }
 
@@ -72,8 +78,8 @@ class Apis {
 
     private static void visitSchemas(String name, Schema<?> schema, Visitor visitor) {
         Preconditions.checkArgument(name != null);
-        visitSchemas(SchemaCategory.SCHEMA, ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)),
-                visitor);
+        visitSchemas(SchemaCategory.SCHEMA, ImmutableList.of(new SchemaWithName(stripLeadingSlash(name), schema)), 
+                Maps.empty(), visitor);
     }
 
     private static String stripLeadingSlash(String name) {
@@ -171,7 +177,7 @@ class Apis {
 
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, MediaType mediaType,
             Visitor visitor) {
-        visitSchemas(category, list, mediaType.getSchema(), visitor);
+        visitSchemas(category, list, mediaType.getSchema(), mediaType.getEncoding(), visitor);
     }
 
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Parameter parameter,
@@ -179,7 +185,7 @@ class Apis {
         if (parameter != null) {
             parameter = resolveRefs(api, parameter);
             if (parameter.getSchema() != null && !Util.isPrimitive(parameter.getSchema())) {
-                visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getSchema(), visitor);
+                visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getSchema(), Maps.empty(), visitor);
             }
             visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getContent(), visitor);
         }
@@ -193,15 +199,15 @@ class Apis {
     }
 
     private static void visitSchemas(SchemaCategory category, ImmutableList<String> list, Schema<?> schema,
-            Visitor visitor) {
+            Map<String, Encoding> propertyEncoding, Visitor visitor) {
         if (schema != null) {
             ImmutableList<SchemaWithName> schemaPath = ImmutableList
                     .of(new SchemaWithName(Names.toIdentifier(list), schema));
-            visitSchemas(category, schemaPath, visitor);
+            visitSchemas(category, schemaPath, propertyEncoding, visitor);
         }
     }
 
-    static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Visitor visitor) {
+    static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Map<String, Encoding> propertyEncoding, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
         visitor.startSchema(category, schemaPath);
         if (schema instanceof ObjectSchema && schema.getProperties() == null
@@ -213,36 +219,73 @@ class Apis {
         }
         if (schema.getAdditionalProperties() instanceof Schema) {
             visitSchemas(category,
-                    schemaPath.add(new SchemaWithName("properties", (Schema<?>) schema.getAdditionalProperties())),
+                    schemaPath.add(new SchemaWithName("properties", (Schema<?>) schema.getAdditionalProperties())), Maps.empty(),
                     visitor);
         } else if (schema.getNot() != null) {
-            visitSchemas(category, schemaPath.add(new SchemaWithName("not", schema.getNot())), visitor);
+            visitSchemas(category, schemaPath.add(new SchemaWithName("not", schema.getNot())), Maps.empty(), visitor);
         }
         if (schema.getProperties() != null) {
             schema.getProperties().entrySet().forEach(
-                    x -> visitSchemas(category, schemaPath.add(new SchemaWithName(x.getKey(), x.getValue())), visitor));
+                    x -> {
+                        final Schema<?> sch;
+                        if (propertyEncoding != null && propertyEncoding.containsKey(x.getKey())) {
+                            Encoding encoding = propertyEncoding.get(x.getKey());
+                            if (encoding.getContentType() != null) {
+                                List<String> contentTypes = Arrays.stream(encoding.getContentType() //
+                                        .split(",")) //
+                                        .map(y -> y.trim()) //
+                                        .collect(Collectors.toList());
+                                Schema<String> contentTypeSchema = enumSchema(contentTypes);
+                                if (contentTypes.size() == 1) {
+                                    contentTypeSchema.setDefault(contentTypes.get(0));
+                                }
+                                contentTypeSchema.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
+                                ObjectSchema combined = new ObjectSchema();
+                                combined.setProperties(new LinkedHashMap<>());
+                                combined.getProperties().put("contentType", contentTypeSchema);
+                                combined.getProperties().put("value", x.getValue());
+                                combined.setRequired(Lists.newArrayList("value", "contentType"));
+                                combined.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
+                                
+                                sch = combined;
+                            } else {
+                                sch = x.getValue();
+                            }
+                        } else {
+                            sch = x.getValue();
+                        }
+                        visitSchemas(category, schemaPath.add(new SchemaWithName(x.getKey(), sch)),
+                                Maps.empty(), visitor);
+                    });
         }
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
             if (a.getItems() != null) {
                 visitSchemas(category,
-                        schemaPath.add(new SchemaWithName(schemaPath.last().name + "Item", a.getItems())), visitor);
+                        schemaPath.add(new SchemaWithName(schemaPath.last().name + "Item", a.getItems())), Maps.empty(), visitor);
             }
         } else if (schema instanceof ComposedSchema) {
             ComposedSchema a = (ComposedSchema) schema;
             if (a.getAllOf() != null) {
-                a.getAllOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), visitor));
+                a.getAllOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), Maps.empty(), visitor));
             }
             if (a.getOneOf() != null) {
-                a.getOneOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), visitor));
+                a.getOneOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), Maps.empty(), visitor));
             }
             if (a.getAnyOf() != null) {
-                a.getAnyOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), visitor));
+                a.getAnyOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), Maps.empty(), visitor));
             }
         }
         // MapSchema and ObjectSchema have nothing to add
 
         visitor.finishSchema(category, schemaPath);
+    }
+
+    private static Schema<String> enumSchema(List<String> values) {
+        Schema<String> schema = new Schema<>();
+        schema.setType("string");
+        schema.setEnum(values);
+        return schema;
     }
 
     static final boolean isComplexSchema(Schema<?> schema) {

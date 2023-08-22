@@ -10,6 +10,10 @@ import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.davidmoten.oa3.codegen.test.paths.client.Client;
+import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData;
+import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document;
+import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document.ContentType;
+import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
 import org.junit.jupiter.api.Test;
@@ -21,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @SpringBootTest(classes = { PathsApplication.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
@@ -141,17 +146,30 @@ public class PathsServerTest {
         assertEquals("hello there", new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
         assertTrue(r.headers().contains("content-type", "application/octet-stream"));
     }
-    
+
     @Test
     public void testDefaultErrorReturned() {
         HttpResponse r = client().defaultErrorGetFullResponse();
         org.davidmoten.oa3.codegen.test.paths.schema.Error e = r.dataUnwrapped();
         assertEquals("not found eh", e.errorMessage().orElse(""));
     }
-    
+
     @Test
     public void testSimpleStringJsonResponse() {
         assertEquals("hello", client().jsonStringGet().value());
+    }
+
+    @Test
+    public void testMultipartFormData() {
+        Object o = client().uploadPost(UploadPostRequestMultipartFormData //
+                .point(Point.lat(-23).lon(135).build()).description("theDescription") //
+                .document(Document //
+                        .contentType(ContentType.APPLICATION_PDF) //
+                        .value(new byte[] { 1, 2, 3 }) //
+                        .build()) //
+                .build());
+        assertTrue(o instanceof ObjectNode);
+        assertTrue(((ObjectNode) o).isEmpty());
     }
 
 }

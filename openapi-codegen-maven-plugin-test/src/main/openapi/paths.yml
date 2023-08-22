@@ -96,17 +96,24 @@ paths:
           
   /upload:
     post:
+      x-openapi-codegen-include-for-server-generation: false
       requestBody:
         content:
           multipart/form-data:
             schema:
-              properties:
-                file:
-                  description: |
-                    The PDF file to upload for the credit memo.
-                  format: binary
-                  type: string
               type: object
+              properties:
+                point:
+                  $ref: '#/components/schemas/Point'
+                description:
+                  type: string
+                document:
+                  type: string
+                  format: binary  
+              required: [point, description, document]
+            encoding:
+              document:
+                contentType: application/pdf
       responses:
         200:
           description: ok

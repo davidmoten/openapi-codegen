@@ -125,44 +125,52 @@ public class ClientServerGenerator {
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
                                     c.getCanonicalName(), isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false,
-                                    Optional.ofNullable(p.getDescription()));
+                                    Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
                         } else {
                             // is complex schema
                             Cls cls = schemaCls.get(s);
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
                                     cls.fullClassName, isArray, false, constraints(s),
                                     ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true,
-                                    Optional.ofNullable(p.getDescription()));
+                                    Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
                         }
                         params.add(param);
                     });
         }
         if (operation.getRequestBody() != null) {
             RequestBody b = resolveRefs(operation.getRequestBody());
-            MediaType mediaType = mediaType(b.getContent(), "application/json");
+            MediaType mediaType = mediaType(b.getContent(), "application/json").map(Entry::getValue).orElse(null);
             if (mediaType == null) {
-                mediaType = mediaType(b.getContent(), "application/xml");
+                mediaType = mediaType(b.getContent(), "application/xml").map(Entry::getValue).orElse(null);
+            }
+            final boolean isMultipartFormData;
+            if (mediaType == null) {
+                mediaType = mediaType(b.getContent(), "multipart/form-data").map(Entry::getValue).orElse(null);
+                isMultipartFormData = true;
+            } else {
+                isMultipartFormData = false;
             }
             if (mediaType != null) {
                 Schema<?> schema = mediaType.getSchema();
                 if (schema != null) {
                     if (schemaCls.get(schema) != null) {
                         String fullClassName = resolveRefsFullClassName(schema);
+                        ParamType paramType;
+                        if (isMultipartFormData) {
+                            paramType = ParamType.MULTIPART_FORM_DATA;
+                        } else {
+                            paramType = ParamType.BODY;
+                        }
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()),
                                 org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName,
-                                false, true, constraints(schema), ParamType.BODY, false,
-                                Optional.ofNullable(schema.getDescription())));
+                                false, true, constraints(schema), paramType, false,
+                                Optional.ofNullable(schema.getDescription()), Optional.empty(), Optional.empty()));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
                 } else {
-                    // if no schema specified then is octet-stream
-                    String fullClassName = byte[].class.getCanonicalName();
-                    params.add(new Param("requestBody", "requestBody", Optional.empty(),
-                            org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName, false,
-                            true, Constraints.empty(), ParamType.BODY, false,
-                            Optional.empty()));
+                    addRequestBodyOctetStreamParameter(params, b, Optional.empty());
                 }
             } else {
                 System.out.println("TODO handle request body with media types " + b.getContent().keySet());
@@ -177,10 +185,10 @@ public class ClientServerGenerator {
             // if content is null then their is no response body
             if (content != null) {
                 primaryMimeType.value = "application/json";
-                MediaType mediaType = mediaType(content, "application/json");
+                MediaType mediaType = mediaType(content, "application/json").map(Entry::getValue).orElse(null);
                 if (mediaType == null) {
                     primaryMimeType.value = "application/xml";
-                    mediaType = mediaType(content, primaryMimeType.value);
+                    mediaType = mediaType(content, primaryMimeType.value).map(Entry::getValue).orElse(null);
                 }
                 if (mediaType != null) {
                     if (mediaType.getSchema() == null) {
@@ -225,18 +233,33 @@ public class ClientServerGenerator {
         }
 
         List<ResponseDescriptor> responseDescriptors = responseDescriptors(operation);
-
+        boolean includeForServerGeneration;
+        if (operation.getExtensions() != null) {
+            includeForServerGeneration = Boolean.TRUE.equals(
+                    operation.getExtensions().getOrDefault(ExtensionKeys.INCLUDE_FOR_SERVER_GENERATION, ""));
+        } else {
+            includeForServerGeneration = true;
+        }
         Method m = new Method(methodName, statusCode, params, returnFullClassName, pathName, method, consumes, produces,
                 Optional.ofNullable(operation.getDescription()), primaryStatusCode,
-                Optional.ofNullable(primaryMimeType.value), responseDescriptors);
+                Optional.ofNullable(primaryMimeType.value), responseDescriptors, includeForServerGeneration);
         methods.add(m);
     }
 
-    private MediaType mediaType(Content content, String mimeType) {
-        return content.entrySet().stream().filter(x -> x.getKey().replaceAll(";.*", "").equalsIgnoreCase(mimeType))
-                .map(x -> x.getValue()) //
-                .findFirst() //
-                .orElse(null);
+    private void addRequestBodyOctetStreamParameter(List<Param> params, RequestBody b, Optional<String> contentType) {
+        // if no schema specified then is octet-stream
+        String fullClassName = byte[].class.getCanonicalName();
+        params.add(new Param("requestBody", "requestBody", Optional.empty(),
+                org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName, false,
+                true, Constraints.empty(), ParamType.BODY, false,
+                Optional.empty(), contentType, Optional.empty()));
+    }
+
+    private Optional<Entry<String, MediaType>> mediaType(Content content, String mimeType) {
+        return content.entrySet() //
+                .stream() //
+                .filter(x -> x.getKey().replaceAll(";.*", "").equalsIgnoreCase(mimeType))
+                .findFirst();
     }
 
     private List<ResponseDescriptor> responseDescriptors(Operation operation) {
@@ -344,11 +367,12 @@ public class ClientServerGenerator {
         public final Optional<Integer> primaryStatusCode;
         public final Optional<String> primaryMediaType;
         public final List<ResponseDescriptor> responseDescriptors;
+        public final boolean includeForServerGeneration;
 
         Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
                 Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
                 List<String> produces, Optional<String> description, Optional<Integer> primaryStatusCode,
-                Optional<String> primaryMediaType, List<ResponseDescriptor> responseDescriptors) {
+                Optional<String> primaryMediaType, List<ResponseDescriptor> responseDescriptors, boolean ignoreForServerGeneration) {
             this.methodName = methodName;
             this.statusCode = statusCode;
             this.parameters = parameters;
@@ -361,6 +385,7 @@ public class ClientServerGenerator {
             this.primaryStatusCode = primaryStatusCode;
             this.primaryMediaType = primaryMediaType;
             this.responseDescriptors = responseDescriptors;
+            this.includeForServerGeneration = ignoreForServerGeneration;
         }
 
         @Override
@@ -368,7 +393,7 @@ public class ClientServerGenerator {
             return "Method [path=" + path + ", httpMethod=" + httpMethod + ", methodName=" + methodName + ", returnCls="
                     + returnFullClassName.orElse("") + ", parameters="
                     + parameters.stream().map(Object::toString).map(x -> "\n    " + x).collect(Collectors.joining())
-                    + "]";
+                    + ", ignoreForServerGeneration=" + includeForServerGeneration;
         }
 
     }
@@ -448,10 +473,12 @@ public class ClientServerGenerator {
         public final ParamType type;
         public final boolean isComplexQueryParameter;
         public final Optional<String> description;
+        public final Optional<String> contentType;
+        public final Optional<String> filename;
 
         public Param(String name, String identifier, Optional<Object> defaultValue, boolean required,
                 String fullClassName, boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
-                boolean isComplexQueryParameter, Optional<String> description) {
+                boolean isComplexQueryParameter, Optional<String> description, Optional<String> contentType, Optional<String> filename) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
@@ -463,12 +490,15 @@ public class ClientServerGenerator {
             this.type = type;
             this.isComplexQueryParameter = isComplexQueryParameter;
             this.description = description;
+            this.contentType = contentType;
+            this.filename = filename;
         }
 
         @Override
         public String toString() {
-            return "Param [" + identifier + ", name=" + name + ", defaultValue=" + defaultValue + ", required="
-                    + required + ", cls=" + fullClassName + ", isArray=" + isArray + "]";
+            return "Param [" + identifier + ", name=" + name + ", defaultValue=" + defaultValue.orElse("") + ", required="
+                    + required + ", cls=" + fullClassName + ", isArray=" + isArray + ", contentType="
+                    + contentType.orElse("") + ", filename=" + filename.orElse("") + "]";
         }
     }
 

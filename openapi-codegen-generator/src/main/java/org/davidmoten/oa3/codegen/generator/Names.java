@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 
+import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
@@ -317,7 +318,7 @@ public final class Names {
     private static List<Schema<?>> findSchemas(SchemaCategory category, String name, Schema<?> schema,
             Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
-        Apis.visitSchemas(category, ImmutableList.of(new SchemaWithName(name, schema)), (c, schemaPath) -> {
+        Apis.visitSchemas(category, ImmutableList.of(new SchemaWithName(name, schema)), Maps.empty(), (c, schemaPath) -> {
             if (predicate.test(schemaPath.last().schema)) {
                 list.add(schemaPath.last().schema);
             }

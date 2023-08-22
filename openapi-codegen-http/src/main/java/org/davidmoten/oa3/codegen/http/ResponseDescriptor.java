@@ -46,7 +46,7 @@ public final class ResponseDescriptor {
     }
 
     public static boolean matchesMediaType(String mediaTypePattern, String mediaType) {
-        return Pattern.matches(mediaTypePattern.replace("*", ".*"), mediaType);
+        return Pattern.matches(mediaTypePattern.replace("*", ".*") + "(;.*)?", mediaType);
     }
 
     public boolean matches(int statusCode, String mediaType) {

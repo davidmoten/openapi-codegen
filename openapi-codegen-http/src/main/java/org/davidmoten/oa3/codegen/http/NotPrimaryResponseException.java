@@ -6,7 +6,7 @@ public final class NotPrimaryResponseException extends RuntimeException {
     private final HttpResponse response;
 
     public NotPrimaryResponseException(HttpResponse response) {
-        super();
+        super(response.statusCode() + ", headers="+ response.headers());
         this.response = response;
     }
 
