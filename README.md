@@ -268,9 +268,22 @@ paths:
           content:
             application/json: {}
 ```
-Here's the generated type for the multipart/form-data submission object:
+Below is the generated type for the multipart/form-data submission object. Note that the user is forced to set the 
 
 * [UploadPostRequestMultipartFormData.java](src/docs/UploadPostRequestMultipartFormData.java)
+
+Here's the client code that uses it:
+```java
+UploadPostRequestMultipartFormData upload = UploadPostRequestMultipartFormData
+  .point(Point.lat(-23).lon(135).build()) 
+  .description("theDescription") 
+  .document(Document 
+     .contentType(ContentType.APPLICATION_PDF) 
+     .value(new byte[] { 1, 2, 3 }) 
+     .build()) 
+  .build();
+client.uploadPost(upload);
+```
 
 ## Server side generation
 ### Ignoring paths for server side generation
