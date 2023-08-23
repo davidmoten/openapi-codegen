@@ -12,3 +12,4 @@ cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/schema/Book.java ../src/docs/Book.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/schema/User.java ../src/docs/User.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/schema/Language.java ../src/docs/Language.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/paths/path/UploadPostRequestMultipartFormData.java ../src/docs/UploadPostRequestMultipartFormData.java

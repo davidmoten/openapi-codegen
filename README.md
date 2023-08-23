@@ -24,13 +24,14 @@ I suspect the future of this project will be to generate Java clients for APIs r
 * Simple server-side and client-side implementation for primary and general response handling
 * Partial use of schema generated classes possible with generated server and client of *openapi-generator-plugin*
 * Constructor validation of schema objects means fail-fast which helps with diagnosis
+* `multipart/form-data` client support
 
 **Status**: released to Maven Central
 
 ## Limitations
 * `allOf` only with object schemas
 * parameter types like explode, label, deepObject not implemented yet
-* multipart, url form encoded requests not implemented yet (I'd like to get this sorted soon)
+* url form encoded requests not implemented yet (I'd like to get this sorted soon)
 * json only (xml not supported)
 
 ## Getting started
@@ -236,7 +237,12 @@ Set an interceptor in the client builder to an instance of `BearerAuthenticator`
 ### HTTP Patch 
 Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. This library makes PATCH calls as POST calls with the header `X-HTTP-Method-Override: PATCH` which is understood by most web servers. If you'd like to use the PATCH verb then call `.allowPatch()` on the Client builder.
 
-### Mixed usage with *openapi-generator*
+## Multipart requests
+Client code is generated for multipart/form-data requests specified in the openapi definition, including setting custom content types per part. Here's an example:
+
+* [UploadPostRequestMultipartFormData.java](src/docs/UploadPostRequestMultipartFormData.java)
+
+## Mixed usage with *openapi-generator*
 See [this](https://github.com/davidmoten/openapi-codegen/wiki/openapi-generator#mixed-usage-with-openapi-generator).
 
 ## What about openapi-generator project?

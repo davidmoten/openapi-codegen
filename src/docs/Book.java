@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
 
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -22,7 +24,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.2-SNAPSHOT")
 public final class Book {
 
     @JsonProperty("title")
@@ -264,6 +266,19 @@ public final class Book {
 
     public Language language() {
         return language;
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("title", (Object) title)
+                .put("author", (Object) author)
+                .put("abstract", (Object) abstract_)
+                .put("publishedYear", (Object) publishedYear)
+                .put("authorId", (Object) authorId)
+                .put("isbn", (Object) isbn)
+                .put("itemId", (Object) itemId)
+                .put("language", (Object) language)
+                .build();
     }
 
     public Book withTitle(String title) {

@@ -2,15 +2,17 @@ package org.davidmoten.oa3.codegen.test.library.schema;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
 
 import java.lang.IllegalArgumentException;
 import java.lang.Object;
 import java.lang.String;
+import java.util.Map;
 import java.util.Objects;
 
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.2-SNAPSHOT")
 public enum Language {
 
     CHINESE("Chinese"),
@@ -41,6 +43,12 @@ public enum Language {
 
     public String value() {
         return value;
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("value", (Object) value)
+                .build();
     }
 
     @JsonCreator

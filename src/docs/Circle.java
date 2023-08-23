@@ -6,11 +6,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
 
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.String;
+import java.util.Map;
 import java.util.Objects;
 
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
@@ -20,7 +23,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.2-SNAPSHOT")
 public final class Circle {
 
     @JsonProperty("lat")
@@ -122,6 +125,14 @@ public final class Circle {
 
     public float radiusNm() {
         return radiusNm;
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("lat", (Object) lat)
+                .put("lon", (Object) lon)
+                .put("radiusNm", (Object) radiusNm)
+                .build();
     }
 
     public Circle withLat(Latitude lat) {
