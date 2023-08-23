@@ -240,7 +240,49 @@ Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH v
 ## Multipart requests
 Client code is generated for multipart/form-data requests specified in the openapi definition, including setting custom content types per part. Here's an example:
 
+OpenAPI fragment:
+```yaml
+paths:
+  /upload:
+    post:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                point:
+                  $ref: '#/components/schemas/Point'
+                description:
+                  type: string
+                document:
+                  type: string
+                  format: binary  
+              required: [point, description, document]
+            encoding:
+              document:
+                contentType: application/pdf
+      responses:
+        200:
+          description: ok
+          content:
+            application/json: {}
+```
+Here's the generated type for the multipart/form-data submission object:
+
 * [UploadPostRequestMultipartFormData.java](src/docs/UploadPostRequestMultipartFormData.java)
+
+## Server side generation
+### Ignoring paths for server side generation
+Just add an extension to the OpenAPI file to indicate to the generator not to generate a server side method for a path:
+
+```yaml
+paths:
+  /upload:
+    post:
+      x-openapi-codegen-include-for-server-generation: false
+      ...
+```
 
 ## Mixed usage with *openapi-generator*
 See [this](https://github.com/davidmoten/openapi-codegen/wiki/openapi-generator#mixed-usage-with-openapi-generator).
