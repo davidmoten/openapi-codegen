@@ -162,7 +162,8 @@ public class PathsServerTest {
     @Test
     public void testMultipartFormData() {
         Object o = client().uploadPost(UploadPostRequestMultipartFormData //
-                .point(Point.lat(-23).lon(135).build()).description("theDescription") //
+                .point(Point.lat(-23).lon(135).build()) //
+                .description("theDescription") //
                 .document(Document //
                         .contentType(ContentType.APPLICATION_PDF) //
                         .value(new byte[] { 1, 2, 3 }) //
