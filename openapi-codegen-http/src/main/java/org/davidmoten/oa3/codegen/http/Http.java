@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -17,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -27,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
+import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
@@ -104,8 +108,13 @@ public final class Http {
             return header("Accept", "*/*");
         }
 
-        public Builder param(String name, Optional<Object> value, ParameterType type, Optional<String> contentType) {
-            values.add(new ParameterValue(name, value, type, contentType));
+        public Builder param(String name, Optional<?> value, ParameterType type, Optional<String> contentType) {
+            return param(name, value, type, contentType, Optional.empty());
+        }
+
+        public Builder param(String name, Optional<?> value, ParameterType type, Optional<String> contentType,
+                Optional<String> filename) {
+            values.add(new ParameterValue(name, value, type, contentType, filename));
             return this;
         }
 
@@ -136,6 +145,10 @@ public final class Http {
 
         public BuilderWithBody body(Object value) {
             return new BuilderWithBody(this, value);
+        }
+
+        public Builder multipartFormData(Object formData) {
+            return new BuilderWithBody(this, formData).contentTypeMultipartFormData();
         }
 
         public BuilderWithReponseDescriptor responseAs(Class<?> cls) {
@@ -196,6 +209,9 @@ public final class Http {
             return contentType("application/json");
         }
 
+        public Builder contentTypeMultipartFormData() {
+            return contentType("multipart/form-data");
+        }
     }
 
     public static final class BuilderWithReponseDescriptor {
@@ -315,11 +331,41 @@ public final class Http {
         });
         con.setDoInput(true);
         if (requestBody.isPresent()) {
-            con.setDoOutput(true);
             Optional<?> body = requestBody.get().value();
             if (body.isPresent()) {
-                try (OutputStream out = con.getOutputStream()) {
-                    serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
+                boolean isMultipartFormData = MediaType.isMultipartFormData(requestBody.get().contentType().orElse(""));
+                if (isMultipartFormData) {
+                    String boundary = Multipart.randomBoundary();
+                    con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+                    Map<String, Object> map = properties(body.get());
+                    Multipart.Builder b = Multipart.builder();
+                    map.forEach((name, value) -> {
+                        if (value != null) {
+                            final String contentType;
+                            final Object v;
+                            if (value instanceof HasEncoding) {
+                                contentType = ((HasStringValue) ((HasEncoding) value).contentType()).value();
+                                v = ((HasEncoding) value).value();
+                            } else {
+                                contentType = "application/json";
+                                v = value;
+                            }
+                            b.addFormEntry(name, serializer.serialize(v, contentType), Optional.empty(),
+                                    Optional.of(contentType));
+                        }
+                    });
+                    byte[] multipartContent = b.multipartContent(boundary);
+                    // we add 2 to length because HttpURLConnection will add \r\n after headers
+                    con.setRequestProperty("Content-Length", String.valueOf(multipartContent.length + 2));
+                    con.setDoOutput(true);
+                    try (OutputStream out = con.getOutputStream()) {
+                        serializer.serialize(multipartContent, "application/octet-stream", out);
+                    }
+                } else {
+                    con.setDoOutput(true);
+                    try (OutputStream out = con.getOutputStream()) {
+                        serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
+                    }
                 }
             }
         }
@@ -337,6 +383,19 @@ public final class Http {
             }
         }
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> properties(Object o) {
+        try {
+            Method method = o.getClass().getDeclaredMethod("_internal_properties");
+            method.setAccessible(true);
+            return (Map<String, Object>) method.invoke(o);
+        } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            return Maps.empty();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static InputStream log(InputStream inputStream) {

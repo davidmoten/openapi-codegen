@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.util.Util;
 
@@ -43,7 +46,11 @@ public class DefaultSerializer implements Serializer {
     public <T> T deserialize(Class<T> cls, String contentType, InputStream in) {
         try {
             if (MediaType.isJson(contentType)) {
-                return m.readValue(in, cls);
+                if (cls.equals(byte[].class)) {
+                    return (T) m.readTree(in);
+                } else {
+                    return m.readValue(in, cls);
+                }
             } else if (cls.equals(String.class) && MediaType.isText(contentType)) {
                 try (InputStream is = in) {
                     return (T) new String(Util.read(is), StandardCharsets.UTF_8);
@@ -58,6 +65,20 @@ public class DefaultSerializer implements Serializer {
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> properties(Object o, String contentType) {
+        if (MediaType.isJson(contentType)) {
+            try {
+                return m.valueToTree(o).properties().stream()
+                        .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+            } catch (IllegalArgumentException e) {
+                return Collections.emptyMap();
+            }
+        } else {
+            return Collections.emptyMap();
         }
     }
 

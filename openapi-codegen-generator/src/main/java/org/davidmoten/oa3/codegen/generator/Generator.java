@@ -194,6 +194,12 @@ public class Generator {
         public boolean hasEnumNullValue() {
             return enumMembers.stream().anyMatch(x -> x.parameter == null);
         }
+        
+        public boolean hasEncoding() {
+            return schema.isPresent() //
+                    && schema.get().getExtensions() != null //
+                    && Boolean.TRUE.equals(schema.get().getExtensions().get(ExtensionKeys.HAS_ENCODING));
+        }
     }
 
     public static class EnumMember {
@@ -660,6 +666,10 @@ public class Generator {
             final Cls cls, boolean isArray, Optional<Cls> previous, final Optional<String> fieldName) {
         cls.classType = ClassType.CLASS;
         cls.hasProperties = Util.isObject(schema);
+        if (!cls.schema.isPresent()) {
+            // make sure that cls.schema.extensions is available for inspection
+            cls.schema = Optional.of(schema);
+        }
         boolean required = fieldIsRequired(schemaPath);
         Optional<MapType> mt = mapType(schemaPath);
         if (mt.isPresent() && mt.get() == MapType.FIELD) {
@@ -776,6 +786,10 @@ public class Generator {
             boolean isArray, Optional<String> fieldName, Names names) {
         Schema<?> schema = schemaPath.last().schema;
         cls.classType = ClassType.ENUM;
+        if (!cls.schema.isPresent()) {
+            // ensure schema extensions visible
+            cls.schema = Optional.of(schema);
+        }
         Class<?> valueCls = Util.toClass(schema.getType(), schema.getFormat(), schema.getExtensions(),
                 names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
         cls.enumValueFullType = valueCls.getCanonicalName();

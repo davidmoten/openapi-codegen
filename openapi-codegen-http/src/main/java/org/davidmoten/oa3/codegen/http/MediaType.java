@@ -15,7 +15,20 @@ public final class MediaType {
             "image/png");
 
     public static boolean isJson(String mediaType) {
-        return lc(mediaType).endsWith("/json") || lc(mediaType).endsWith("+json");
+        return lc(stripExtras(mediaType)).endsWith("/json") || lc(mediaType).endsWith("+json");
+    }
+    
+    private static String stripExtras(String mediaType) {
+        int i= mediaType.indexOf(";");
+        if ( i == -1) {
+            return mediaType.trim();
+        } else {
+            return mediaType.substring(0, i).trim();
+        }
+    }
+
+    public static boolean isMultipartFormData(String mediaType) {
+        return lc(mediaType).equals("multipart/form-data");
     }
 
     public static boolean isText(String mediaType) {

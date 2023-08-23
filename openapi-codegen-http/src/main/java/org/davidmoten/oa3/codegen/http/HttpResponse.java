@@ -1,6 +1,7 @@
 package org.davidmoten.oa3.codegen.http;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public final class HttpResponse {
@@ -35,7 +36,8 @@ public final class HttpResponse {
     }
 
     public HttpResponse assertContentTypeMatches(String expectedContentType) {
-        String contentType = headers.get("Content-Type").orElse(Collections.emptyList()).stream().findFirst()
+        Optional<List<String>> header = headers.get("Content-Type");
+        String contentType = header.orElse(Collections.emptyList()).stream().findFirst()
                 .orElse("");
         if (!ResponseDescriptor.matchesMediaType(expectedContentType, contentType)) {
             throw new NotPrimaryResponseException(this);

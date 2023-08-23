@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.davidmoten.oa3.codegen.generator.Generator.ClassType;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
@@ -27,9 +28,12 @@ import org.davidmoten.oa3.codegen.generator.SchemaCategory;
 import org.davidmoten.oa3.codegen.generator.ServerGeneratorType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
+import org.davidmoten.oa3.codegen.generator.internal.Indent;
 import org.davidmoten.oa3.codegen.generator.internal.Javadoc;
 import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
+import org.davidmoten.oa3.codegen.http.HasEncoding;
+import org.davidmoten.oa3.codegen.http.HasStringValue;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
@@ -56,6 +60,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.github.davidmoten.guavamini.Maps;
 
 public final class SchemasCodeWriter {
 
@@ -104,7 +109,7 @@ public final class SchemasCodeWriter {
             out.line("package %s;", cls.pkg());
             out.println();
             out.format("%s", IMPORTS_HERE);
-        }
+        } 
         // reserve class names in Imports for member classes
         reserveMemberClassNamesInImports(out.imports(), cls);
         writeClassDeclaration(out, cls, fullClassNameInterfaces);
@@ -116,6 +121,7 @@ public final class SchemasCodeWriter {
             writeConstructor(out, cls, fullClassNameInterfaces, names);
             writeBuilder(out, cls, fullClassNameInterfaces);
             writeGetters(out, cls, fullClassNameInterfaces);
+            writePropertiesMapGetter(out, cls);
             writeMutators(out, cls, fullClassNameInterfaces);
         }
         writeEnumCreator(out, cls);
@@ -186,7 +192,9 @@ public final class SchemasCodeWriter {
             Map<String, Set<Cls>> fullClassNameInterfaces) {
         String modifier = classModifier(cls);
         Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
-        String implementsClause = implementsClause(out.imports(), interfaces);
+        String implementsClause = implementsClause(out.imports(), interfaces, cls);
+        //TODO ensure contentType() and value() methods of HasEncoding are annotated with @Override
+        
         final boolean javadocExists;
         if (cls.description.isPresent()) {
             javadocExists = Javadoc.printJavadoc(out, out.indent(), cls.description.get(), false);
@@ -232,13 +240,23 @@ public final class SchemasCodeWriter {
         return modifier;
     }
 
-    private static String implementsClause(Imports imports, Set<Cls> interfaces) {
+    private static String implementsClause(Imports imports, Set<Cls> interfaces, Cls cls) {
+        interfaces = Util.orElse(interfaces, Collections.emptySet());
         final String implemented;
-        if (interfaces == null || interfaces.isEmpty()) {
+        if (interfaces.isEmpty() && !cls.hasEncoding()) {
             implemented = "";
         } else {
-            implemented = " implements "
-                    + interfaces.stream().map(x -> imports.add(x.fullClassName)).collect(Collectors.joining(", "));
+            Stream<String> a = interfaces //
+                    .stream() //
+                    .map(x -> x.fullClassName);
+            Stream<String> b = Stream.of(HasEncoding.class.getCanonicalName()) //
+                    .filter(x -> cls.hasEncoding() && cls.classType != ClassType.ENUM);
+            // for use with ContentType class
+            Stream<String> c = Stream.of(HasStringValue.class.getCanonicalName()) //
+                    .filter(x -> cls.hasEncoding() && cls.classType == ClassType.ENUM);
+            implemented = " implements " + Stream.concat(a, Stream.concat(b, c)) //
+                    .map(x -> imports.add(x)) //
+                    .collect(Collectors.joining(", "));
         }
         return implemented;
     }
@@ -836,6 +854,18 @@ public final class SchemasCodeWriter {
             }
         });
 
+    }
+    
+    private static void writePropertiesMapGetter(CodePrintWriter out, Cls cls) {
+        if (cls.fields.isEmpty()) {
+            return;
+        }
+        Indent indent = out.indent().copy().right().right().right();
+        String puts = cls.fields.stream().map(f -> String.format("\n%s.put(\"%s\", (%s) %s)", indent, f.name, out.add(Object.class), cls.fieldName(f))).collect(Collectors.joining());
+        out.println();
+        out.line("%s<%s, %s> _internal_properties() {", Map.class, String.class, Object.class);
+        out.line("return %s%s\n%s.build();", Maps.class, puts, indent);
+        out.closeParen();
     }
 
     private static void writeMutators(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {

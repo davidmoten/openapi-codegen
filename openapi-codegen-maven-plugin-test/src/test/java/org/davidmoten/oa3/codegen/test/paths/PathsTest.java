@@ -1,6 +1,7 @@
 package org.davidmoten.oa3.codegen.test.paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -129,6 +130,11 @@ public class PathsTest {
     @Test
     public void testParameterRefs() throws ServiceException {
         Response2 response = service.paramRefGet("abc", OffsetDateTime.now());
+    }
+    
+    @Test
+    public void testServiceExcludesMethod() {
+        assertFalse(Arrays.stream(Service.class.getMethods()).anyMatch(m -> m.getName().equals("uploadPost")));
     }
 
     private static void hasParameterAnnotation(Class<?> c, Class<? extends Annotation> annotation, String methodName,

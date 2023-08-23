@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -65,6 +67,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- multipart processing -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.5</version>
+            <scope>test</scope>
+        </dependency>
+        
     </dependencies>
 
     <build>
@@ -177,7 +187,8 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${project.build.directory}/generated-sources/java</source>
+                                <source>
+                                    ${project.build.directory}/generated-sources/java</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -211,7 +222,8 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.cts</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.cts</basePackage>
                                     <sources>
                                         <includes>
                                             <include>cts.yml</include>
@@ -225,7 +237,8 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.ebay</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.ebay</basePackage>
                                     <sources>
                                         <includes>
                                             <include>ebay.yml</include>
@@ -241,7 +254,8 @@
                                 <configuration>
                                     <skip>${skip}</skip>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.marqueta</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.marqueta</basePackage>
                                     <sources>
                                         <includes>
                                             <include>marqueta.yml</include>
@@ -256,7 +270,8 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.openflow</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.openflow</basePackage>
                                     <sources>
                                         <includes>
                                             <include>openflow.yml</include>
@@ -271,7 +286,8 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.jira</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.jira</basePackage>
                                     <sources>
                                         <includes>
                                             <include>jira.yml</include>
@@ -287,7 +303,8 @@
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.spotify</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.spotify</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -303,7 +320,8 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.fec</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.fec</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -319,7 +337,8 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.chat</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.chat</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -335,7 +354,8 @@
                                 </goals>
                                 <configuration>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.twitter</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.twitter</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -366,7 +386,8 @@
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.github</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.github</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -397,7 +418,8 @@
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.mailchimp</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.mailchimp</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -428,7 +450,8 @@
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.docusign</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.docusign</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -459,7 +482,8 @@
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -489,10 +513,12 @@
                                 </goals>
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
-                                    <!-- has some dodgy default values in schemas -->
+                                    <!-- has some dodgy default values in
+                                    schemas -->
                                     <failOnParseErrors>false</failOnParseErrors>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.openai</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.openai</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>
@@ -522,10 +548,12 @@
                                 </goals>
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
-                                    <!-- has some dodgy default values in schemas -->
+                                    <!-- has some dodgy default values in
+                                    schemas -->
                                     <failOnParseErrors>false</failOnParseErrors>
                                     <generator>spring2</generator>
-                                    <basePackage>org.davidmoten.oa3.codegen.test.zuora</basePackage>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.zuora</basePackage>
                                     <sources>
                                         <directory>${cache}</directory>
                                         <includes>

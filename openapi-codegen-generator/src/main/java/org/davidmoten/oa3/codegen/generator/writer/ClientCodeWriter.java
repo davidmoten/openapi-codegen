@@ -129,6 +129,8 @@ public class ClientCodeWriter {
                     out.line(".cookie(\"%s\", %s)", p.name, p.identifier);
                 } else if (p.type == ParamType.HEADER) {
                     out.line(".header(\"%s\", %s)", p.name, p.identifier);
+                } else if (p.type == ParamType.MULTIPART_FORM_DATA) {
+                    out.line(".multipartFormData(%s)", p.identifier);
                 }
             });
             m.responseDescriptors.forEach(r -> {

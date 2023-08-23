@@ -47,8 +47,12 @@ public final class ServerCodeWriterSpringBoot {
     public static void writeServiceClasses(Names names, List<Method> methods) {
         writeApplicationClass(names);
         writeJacksonConfigurationClass(names);
-        writeServiceControllerClass(names, methods);
-        writeServiceInterfaceClass(names, methods);
+        List<Method> includedMethods = methods //
+                .stream() //
+                .filter(x-> x.includeForServerGeneration) //
+                .collect(Collectors.toList());
+        writeServiceControllerClass(names, includedMethods);
+        writeServiceInterfaceClass(names, includedMethods);
     }
 
     private static void writeApplicationClass(Names names) {
