@@ -268,7 +268,7 @@ paths:
           content:
             application/json: {}
 ```
-Below is the generated type for the multipart/form-data submission object. Note that the user is forced to set the 
+Below is the generated type for the multipart/form-data submission object. 
 
 * [UploadPostRequestMultipartFormData.java](src/docs/UploadPostRequestMultipartFormData.java)
 
