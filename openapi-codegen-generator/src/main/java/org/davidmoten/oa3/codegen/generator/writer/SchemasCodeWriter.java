@@ -895,8 +895,9 @@ public final class SchemasCodeWriter {
                                 } else {
                                     return y.fieldName(cls);
                                 }
-                            } else
+                            } else {
                                 return nonMutatedFieldAsParameter(out, cls, y);
+                            }
                         }).collect(Collectors.joining(", "));
                 out.line("return new %s(%s);", cls.simpleName(), params);
                 out.closeParen();
@@ -937,7 +938,11 @@ public final class SchemasCodeWriter {
                 return y.fieldName(cls);
             }
         } else if (y.required) {
-            return y.fieldName(cls);
+            if (y.isOctets()) {
+                return String.format("%s.decodeOctets(%s)", out.add(Util.class), y.fieldName(cls));
+            } else {
+                return y.fieldName(cls);
+            }
         } else {
             if (y.isOctets()) {
                 return String.format("%s.ofNullable(%s.decodeOctets(%s))", out.add(Optional.class),
