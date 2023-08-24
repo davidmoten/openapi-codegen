@@ -117,6 +117,7 @@ Here's an example showing more configuration options:
 * As much as possible make sure you put your types in the `#/components/schemas` section of your openapi yaml/json file (use `$ref`!). The same goes for responses, pathItems, and anything else that can be referred to with a `$ref`. Don't use anonymous types, it makes for an ugly experience with generated code.
 * Specify `format: int32` on integers to ensure you end up with `int/integer` types in generated code
 * Be sure to specify required properties
+* Set an `operationId` field for every path entry to ensure you get sensible generated method names (in client and server)
 
 ## Generated code examples
 Some examples follow. Note the following:
