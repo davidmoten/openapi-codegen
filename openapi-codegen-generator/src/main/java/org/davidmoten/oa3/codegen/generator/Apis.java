@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
@@ -215,6 +216,7 @@ class Apis {
             schema.setAdditionalProperties(Boolean.TRUE);
         }
         if (Boolean.TRUE.equals(schema.getAdditionalProperties())) {
+            // TODO use getAdditionalItem ?
             schema.setAdditionalProperties(new Schema<>());
         }
         if (schema.getAdditionalProperties() instanceof Schema) {
@@ -240,10 +242,13 @@ class Apis {
                                     contentTypeSchema.setDefault(contentTypes.get(0));
                                 }
                                 contentTypeSchema.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
+                                Schema<?> headersSchema = new ObjectSchema();
+                                headersSchema.setAdditionalProperties(new StringSchema());
                                 ObjectSchema combined = new ObjectSchema();
                                 combined.setProperties(new LinkedHashMap<>());
                                 combined.getProperties().put("contentType", contentTypeSchema);
                                 combined.getProperties().put("value", x.getValue());
+                                combined.getProperties().put("headers", headersSchema);
                                 combined.setRequired(Lists.newArrayList("value", "contentType"));
                                 combined.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
                                 
