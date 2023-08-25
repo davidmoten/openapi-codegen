@@ -10,6 +10,7 @@ import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.davidmoten.oa3.codegen.test.paths.client.Client;
+import org.davidmoten.oa3.codegen.test.paths.path.SubmitPostRequestApplicationXWwwFormUrlencoded;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document.ContentType;
@@ -175,7 +176,9 @@ public class PathsServerTest {
     
     @Test
     public void testUrlEncodedFormData() {
-        Object o = client().submitPost();
+        SubmitPostRequestApplicationXWwwFormUrlencoded request = //
+                SubmitPostRequestApplicationXWwwFormUrlencoded.name("Fred").count(23).build();
+        Object o = client().submitPost(request);
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
     }
