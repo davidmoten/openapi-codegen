@@ -32,7 +32,7 @@ public final class MediaType {
     }
     
     public static boolean isWwwFormUrlEncoded(String mediaType) {
-        return lc(stripExtras(mediaType)).equals("x-www-form-urlencoded");
+        return lc(stripExtras(mediaType)).equals("application/x-www-form-urlencoded");
     }
 
     public static boolean isText(String mediaType) {
