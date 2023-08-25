@@ -300,6 +300,7 @@ paths:
 
 An example of supplementing generated spring server with an HttpServlet is in these classes:
 * [PathsApplication.java](https://github.com/davidmoten/openapi-codegen/blob/master/openapi-codegen-maven-plugin-test/src/test/java/org/davidmoten/oa3/codegen/test/paths/PathsApplication.java)
+* [FormServlet.java](https://github.com/davidmoten/openapi-codegen/blob/master/openapi-codegen-maven-plugin-test/src/test/java/org/davidmoten/oa3/codegen/test/paths/FormServlet.java)
 * [MultipartServlet.java](https://github.com/davidmoten/openapi-codegen/blob/master/openapi-codegen-maven-plugin-test/src/test/java/org/davidmoten/oa3/codegen/test/paths/MultipartServlet.java)
 
 ## Mixed usage with *openapi-generator*
