@@ -381,7 +381,7 @@ public final class Http {
     private static String wwwFormUrlEncodedContent(Serializer serializer, Optional<?> body) {
         Map<String, Object> map = properties(body.get());
         String encoded = map.entrySet().stream().map(entry -> {
-            String json = new String(serializer.serialize(entry.getValue(), "application/json"));
+            String json = new String(serializer.serialize(entry.getValue(), "application/json"), StandardCharsets.UTF_8);
             ObjectMapper m = new ObjectMapper();
             try {
                 JsonNode tree = m.readTree(json);
