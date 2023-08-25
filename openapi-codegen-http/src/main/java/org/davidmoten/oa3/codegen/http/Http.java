@@ -335,26 +335,7 @@ public final class Http {
             if (body.isPresent()) {
                 boolean isMultipartFormData = MediaType.isMultipartFormData(requestBody.get().contentType().orElse(""));
                 if (isMultipartFormData) {
-                    String boundary = Multipart.randomBoundary();
-                    con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-                    Map<String, Object> map = properties(body.get());
-                    Multipart.Builder b = Multipart.builder();
-                    map.forEach((name, value) -> {
-                        if (value != null) {
-                            final String contentType;
-                            final Object v;
-                            if (value instanceof HasEncoding) {
-                                contentType = ((HasStringValue) ((HasEncoding) value).contentType()).value();
-                                v = ((HasEncoding) value).value();
-                            } else {
-                                contentType = "application/json";
-                                v = value;
-                            }
-                            b.addFormEntry(name, serializer.serialize(v, contentType), Optional.empty(),
-                                    Optional.of(contentType));
-                        }
-                    });
-                    byte[] multipartContent = b.multipartContent(boundary);
+                    byte[] multipartContent = multipartContent(serializer, con, body);
                     // we add 2 to length because HttpURLConnection will add \r\n after headers
                     con.setRequestProperty("Content-Length", String.valueOf(multipartContent.length + 2));
                     con.setDoOutput(true);
@@ -383,6 +364,30 @@ public final class Http {
             }
         }
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
+    }
+
+    private static byte[] multipartContent(Serializer serializer, HttpURLConnection con, Optional<?> body) {
+        String boundary = Multipart.randomBoundary();
+        con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        Map<String, Object> map = properties(body.get());
+        Multipart.Builder b = Multipart.builder();
+        map.forEach((name, value) -> {
+            if (value != null) {
+                final String contentType;
+                final Object v;
+                if (value instanceof HasEncoding) {
+                    contentType = ((HasStringValue) ((HasEncoding) value).contentType()).value();
+                    v = ((HasEncoding) value).value();
+                } else {
+                    contentType = "application/json";
+                    v = value;
+                }
+                b.addFormEntry(name, serializer.serialize(v, contentType), Optional.empty(),
+                        Optional.of(contentType));
+            }
+        });
+        byte[] multipartContent = b.multipartContent(boundary);
+        return multipartContent;
     }
 
     @SuppressWarnings("unchecked")
