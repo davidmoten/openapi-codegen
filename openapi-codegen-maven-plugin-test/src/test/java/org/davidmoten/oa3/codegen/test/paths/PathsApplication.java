@@ -16,6 +16,11 @@ public class PathsApplication {
         return new ServletRegistrationBean<>(new MultipartServlet(),"/upload");
     }
     
+    @Bean
+    public ServletRegistrationBean<FormServlet> servletRegistrationBean2(){
+        return new ServletRegistrationBean<>(new FormServlet(),"/submit");
+    }
+    
     @Bean(name = "multipartResolver")
     public CommonsMultipartResolver multipartResolver() {
         CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();

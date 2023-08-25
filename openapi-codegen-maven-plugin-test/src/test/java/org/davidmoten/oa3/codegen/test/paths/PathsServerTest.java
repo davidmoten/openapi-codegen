@@ -172,5 +172,12 @@ public class PathsServerTest {
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
     }
+    
+    @Test
+    public void testUrlEncodedFormData() {
+        Object o = client().submitPost();
+        assertTrue(o instanceof ObjectNode);
+        assertTrue(((ObjectNode) o).isEmpty());
+    }
 
 }

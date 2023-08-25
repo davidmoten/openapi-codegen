@@ -153,6 +153,10 @@ public final class Http {
         public Builder multipartFormData(Object formData) {
             return new BuilderWithBody(this, formData).contentTypeMultipartFormData();
         }
+        
+        public Builder formUrlEncoded(Object formData) {
+            return new BuilderWithBody(this, formData).contentTypeFormUrlEncoded();
+        }
 
         public BuilderWithReponseDescriptor responseAs(Class<?> cls) {
             return new BuilderWithReponseDescriptor(this, cls);
@@ -201,6 +205,10 @@ public final class Http {
         BuilderWithBody(Builder b, Object body) {
             this.b = b;
             this.body = body;
+        }
+
+        public Builder contentTypeFormUrlEncoded() {
+            return contentType("application/x-www-form-urlencoded");
         }
 
         public Builder contentType(String value) {

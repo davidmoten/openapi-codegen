@@ -150,6 +150,13 @@ public class ClientServerGenerator {
             } else {
                 isMultipartFormData = false;
             }
+            final boolean isFormUrlEncoded;
+            if (mediaType == null) {
+                mediaType = mediaType(b.getContent(), "application/x-www-form-urlencoded").map(Entry::getValue).orElse(null);
+                isFormUrlEncoded = true;
+            } else {
+                isFormUrlEncoded = false;
+            }
             if (mediaType != null) {
                 Schema<?> schema = mediaType.getSchema();
                 if (schema != null) {
@@ -158,6 +165,8 @@ public class ClientServerGenerator {
                         ParamType paramType;
                         if (isMultipartFormData) {
                             paramType = ParamType.MULTIPART_FORM_DATA;
+                        } else if (isFormUrlEncoded){
+                            paramType = ParamType.FORM_URLENCODED;
                         } else {
                             paramType = ParamType.BODY;
                         }
