@@ -131,6 +131,8 @@ public class ClientCodeWriter {
                     out.line(".header(\"%s\", %s)", p.name, p.identifier);
                 } else if (p.type == ParamType.MULTIPART_FORM_DATA) {
                     out.line(".multipartFormData(%s)", p.identifier);
+                } else if (p.type == ParamType.FORM_URLENCODED) {
+                    out.line(".formUrlEncoded(%s)", p.identifier);
                 }
             });
             m.responseDescriptors.forEach(r -> {

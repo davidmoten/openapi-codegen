@@ -139,6 +139,8 @@ public class ClientServerGenerator {
         }
         if (operation.getRequestBody() != null) {
             RequestBody b = resolveRefs(operation.getRequestBody());
+            System.out.println(pathName);
+            System.out.println(b.getContent());
             MediaType mediaType = mediaType(b.getContent(), "application/json").map(Entry::getValue).orElse(null);
             if (mediaType == null) {
                 mediaType = mediaType(b.getContent(), "application/xml").map(Entry::getValue).orElse(null);
@@ -146,9 +148,16 @@ public class ClientServerGenerator {
             final boolean isMultipartFormData;
             if (mediaType == null) {
                 mediaType = mediaType(b.getContent(), "multipart/form-data").map(Entry::getValue).orElse(null);
-                isMultipartFormData = true;
+                isMultipartFormData = mediaType != null;
             } else {
                 isMultipartFormData = false;
+            }
+            final boolean isFormUrlEncoded;
+            if (mediaType == null) {
+                mediaType = mediaType(b.getContent(), "application/x-www-form-urlencoded").map(Entry::getValue).orElse(null);
+                isFormUrlEncoded = mediaType != null;
+            } else {
+                isFormUrlEncoded = false;
             }
             if (mediaType != null) {
                 Schema<?> schema = mediaType.getSchema();
@@ -158,6 +167,8 @@ public class ClientServerGenerator {
                         ParamType paramType;
                         if (isMultipartFormData) {
                             paramType = ParamType.MULTIPART_FORM_DATA;
+                        } else if (isFormUrlEncoded){
+                            paramType = ParamType.FORM_URLENCODED;
                         } else {
                             paramType = ParamType.BODY;
                         }

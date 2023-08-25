@@ -44,6 +44,9 @@ public final class GeneratorTest {
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
                 Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty());
         new Generator(d).generate();
+        ClientServerGenerator g = new ClientServerGenerator(d);
+        g.generateClient();
+        g.generateServer();
     }
 
     private static void generateLocal(String name) throws MalformedURLException {

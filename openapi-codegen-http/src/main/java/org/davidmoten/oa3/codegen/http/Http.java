@@ -28,8 +28,11 @@ import org.davidmoten.oa3.codegen.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
@@ -150,6 +153,10 @@ public final class Http {
         public Builder multipartFormData(Object formData) {
             return new BuilderWithBody(this, formData).contentTypeMultipartFormData();
         }
+        
+        public Builder formUrlEncoded(Object formData) {
+            return new BuilderWithBody(this, formData).contentTypeFormUrlEncoded();
+        }
 
         public BuilderWithReponseDescriptor responseAs(Class<?> cls) {
             return new BuilderWithReponseDescriptor(this, cls);
@@ -198,6 +205,10 @@ public final class Http {
         BuilderWithBody(Builder b, Object body) {
             this.b = b;
             this.body = body;
+        }
+
+        public Builder contentTypeFormUrlEncoded() {
+            return contentType("application/x-www-form-urlencoded");
         }
 
         public Builder contentType(String value) {
@@ -333,14 +344,23 @@ public final class Http {
         if (requestBody.isPresent()) {
             Optional<?> body = requestBody.get().value();
             if (body.isPresent()) {
-                boolean isMultipartFormData = MediaType.isMultipartFormData(requestBody.get().contentType().orElse(""));
-                if (isMultipartFormData) {
+                String contentType = requestBody.get().contentType().orElse("");
+                if (MediaType.isMultipartFormData(contentType)) {
                     byte[] multipartContent = multipartContent(serializer, con, body);
                     // we add 2 to length because HttpURLConnection will add \r\n after headers
                     con.setRequestProperty("Content-Length", String.valueOf(multipartContent.length + 2));
                     con.setDoOutput(true);
                     try (OutputStream out = con.getOutputStream()) {
                         serializer.serialize(multipartContent, "application/octet-stream", out);
+                    }
+                } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
+                    String encoded = wwwFormUrlEncodedContent(serializer, body);
+                    int length = encoded.getBytes(StandardCharsets.UTF_8).length;
+                    con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    con.setRequestProperty("Content-Length", String.valueOf(length));
+                    con.setDoOutput(true);
+                    try (OutputStream out = con.getOutputStream()) {
+                        serializer.serialize(encoded, "text/plain", out);
                     }
                 } else {
                     con.setDoOutput(true);
@@ -364,6 +384,22 @@ public final class Http {
             }
         }
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
+    }
+
+    private static String wwwFormUrlEncodedContent(Serializer serializer, Optional<?> body) {
+        Map<String, Object> map = properties(body.get());
+        String encoded = map.entrySet().stream().map(entry -> {
+            String json = new String(serializer.serialize(entry.getValue(), "application/json"), StandardCharsets.UTF_8);
+            ObjectMapper m = new ObjectMapper();
+            try {
+                JsonNode tree = m.readTree(json);
+                String v = tree.asText();
+                return URLEncoder.encode(entry.getKey(), "UTF-8")+"="+ URLEncoder.encode(v, "UTF-8");
+            } catch (JsonProcessingException | UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.joining("&"));
+        return encoded;
     }
 
     private static byte[] multipartContent(Serializer serializer, HttpURLConnection con, Optional<?> body) {

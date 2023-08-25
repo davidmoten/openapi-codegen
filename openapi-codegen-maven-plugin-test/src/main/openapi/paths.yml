@@ -119,6 +119,27 @@ paths:
           description: ok
           content:
             application/json: {}
+            
+  /submit:
+    post:
+      x-openapi-codegen-include-for-server-generation: false
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                count:
+                  type: integer
+                  format: int32
+              required: [name, count]
+      responses:
+        200:
+          description: ok
+          content:
+            application/json: {}            
 
   /uploadImage:
     post:
