@@ -28,7 +28,11 @@ public final class MediaType {
     }
 
     public static boolean isMultipartFormData(String mediaType) {
-        return lc(mediaType).equals("multipart/form-data");
+        return lc(stripExtras(mediaType)).equals("multipart/form-data");
+    }
+    
+    public static boolean isWwwFormUrlEncoded(String mediaType) {
+        return lc(stripExtras(mediaType)).equals("x-www-form-urlencoded");
     }
 
     public static boolean isText(String mediaType) {
