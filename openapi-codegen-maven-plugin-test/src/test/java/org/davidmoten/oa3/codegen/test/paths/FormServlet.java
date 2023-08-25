@@ -12,8 +12,12 @@ public class FormServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println(req.getParameter("name"));
-        System.out.println(req.getParameter("count"));
+        if (req.getParameter("name") == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
+        if (req.getParameter("count") == null) {
+            throw new IllegalArgumentException("count cannot be null");
+        }
         resp.setStatus(200);
         // must do this other wise get ISO-88951
         resp.setCharacterEncoding("UTF-8");
