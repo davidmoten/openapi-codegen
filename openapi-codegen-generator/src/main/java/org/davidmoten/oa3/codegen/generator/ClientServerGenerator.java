@@ -139,8 +139,6 @@ public class ClientServerGenerator {
         }
         if (operation.getRequestBody() != null) {
             RequestBody b = resolveRefs(operation.getRequestBody());
-            System.out.println(pathName);
-            System.out.println(b.getContent());
             MediaType mediaType = mediaType(b.getContent(), "application/json").map(Entry::getValue).orElse(null);
             if (mediaType == null) {
                 mediaType = mediaType(b.getContent(), "application/xml").map(Entry::getValue).orElse(null);
