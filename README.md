@@ -31,7 +31,7 @@ I suspect the future of this project will be to generate Java clients for APIs r
 ## Limitations
 * `allOf` only with object schemas
 * parameter types like explode, label, deepObject not implemented yet
-* url form encoded requests not implemented yet (I'd like to get this sorted soon)
+* multipart and form url encoded request bodied implemented on client, not server yet.
 * json only (xml not supported)
 
 ## Getting started
