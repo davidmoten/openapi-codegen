@@ -22,10 +22,12 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
 import org.davidmoten.oa3.codegen.http.service.HttpConnection;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
-import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
+import org.davidmoten.oa3.codegen.http.service.Option;
 import org.davidmoten.oa3.codegen.http.service.Response;
+import org.davidmoten.oa3.codegen.http.service.StandardOption;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -306,21 +308,21 @@ public final class Http {
                 .findFirst();
         try {
             Headers headers = new Headers(requestHeaders);
-            final HttpMethod requestMethod;
-            if (!allowPatch && method.equals(HttpMethod.PATCH)) {
-                headers.put("X-HTTP-Method-Override", HttpMethod.PATCH.name());
-                requestMethod = HttpMethod.POST;
-            } else {
-                requestMethod = method;
-            }
+            
             // modify request metadata (like insert auth related headers)
-            RequestBase r = new RequestBase(requestMethod, url, headers);
+            RequestBase r = new RequestBase(method, url, headers);
             for (Interceptor interceptor : interceptors) {
                 r = interceptor.intercept(r);
             }
+            final Option[] options;
+            if (allowPatch) {
+                options = new Option[] {};
+            } else {
+                options = new Option[] { StandardOption.DISALLOW_PATCH };
+            }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(),
-                    r.method(), DefaultHttpService.INSTANCE);
+                    r.method(), DefaultHttpService.INSTANCE, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -328,10 +330,10 @@ public final class Http {
     
     private static HttpResponse connectAndProcess(Serializer serializer, List<ParameterValue> parameters,
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, String url,
-            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method, HttpService httpService)
+            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method, HttpService httpService, Option... options)
             throws IOException, MalformedURLException, ProtocolException, StreamReadException, DatabindException {
         log.debug("Http.headers={}", headers);
-        HttpConnection con = httpService.connection(url, method);
+        HttpConnection con = httpService.connection(url, method, options);
         parameters.stream() //
                 .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
                 .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
