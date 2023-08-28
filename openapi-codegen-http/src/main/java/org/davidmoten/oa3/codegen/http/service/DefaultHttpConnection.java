@@ -6,12 +6,12 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
-public final class HttpConnectionDefault implements HttpConnection {
+public final class DefaultHttpConnection implements HttpConnection {
 
     final HttpURLConnection con;
     private boolean once = false;
 
-    public HttpConnectionDefault(HttpURLConnection con) {
+    public DefaultHttpConnection(HttpURLConnection con) {
         this.con = con;
     }
 

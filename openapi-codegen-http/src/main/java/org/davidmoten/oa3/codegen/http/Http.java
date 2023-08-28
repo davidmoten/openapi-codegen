@@ -8,10 +8,8 @@ import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -24,6 +22,10 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.http.service.HttpConnection;
+import org.davidmoten.oa3.codegen.http.service.HttpService;
+import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
+import org.davidmoten.oa3.codegen.http.service.Response;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,19 +320,18 @@ public final class Http {
             }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(),
-                    r.method());
+                    r.method(), DefaultHttpService.INSTANCE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
-
+    
     private static HttpResponse connectAndProcess(Serializer serializer, List<ParameterValue> parameters,
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, String url,
-            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method)
+            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method, HttpService httpService)
             throws IOException, MalformedURLException, ProtocolException, StreamReadException, DatabindException {
         log.debug("Http.headers={}", headers);
-        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
-        con.setRequestMethod(method.name());
+        HttpConnection con = httpService.connection(url, method);
         parameters.stream() //
                 .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
                 .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
@@ -338,10 +339,8 @@ public final class Http {
         parameters.stream().filter(p -> p.contentType().isPresent())
                 .forEach(p -> headers.put("Content-Type", p.contentType().get()));
         headers.forEach((key, list) -> {
-            con.setRequestProperty(key, list.stream().collect(Collectors.joining(", ")));
+            con.header(key, list.stream().collect(Collectors.joining(", ")));
         });
-        con.setDoInput(true);
-        con.setAllowUserInteraction(true);
         if (requestBody.isPresent()) {
             Optional<?> body = requestBody.get().value();
             if (body.isPresent()) {
@@ -349,44 +348,46 @@ public final class Http {
                 if (MediaType.isMultipartFormData(contentType)) {
                     byte[] multipartContent = multipartContent(serializer, con, body);
                     // we add 2 to length because HttpURLConnection will add \r\n after headers
-                    con.setRequestProperty("Content-Length", String.valueOf(multipartContent.length + 2));
-                    con.setDoOutput(true);
-                    try (OutputStream out = con.getOutputStream()) {
+                    con.header("Content-Length", String.valueOf(multipartContent.length + 2));
+                    try (OutputStream out = con.outputStream()) {
                         serializer.serialize(multipartContent, "application/octet-stream", out);
                     }
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
                     String encoded = wwwFormUrlEncodedContent(serializer, body);
                     int length = encoded.getBytes(StandardCharsets.UTF_8).length;
-                    con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                    con.setRequestProperty("Content-Length", String.valueOf(length));
-                    con.setDoOutput(true);
-                    try (OutputStream out = con.getOutputStream()) {
+                    con.header("Content-Type", "application/x-www-form-urlencoded");
+                    con.header("Content-Length", String.valueOf(length));
+                    try (OutputStream out = con.outputStream()) {
                         serializer.serialize(encoded, "text/plain", out);
                     }
                 } else {
-                    con.setDoOutput(true);
-                    try (OutputStream out = con.getOutputStream()) {
+                    try (OutputStream out = con.outputStream()) {
                         serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
                     }
                 }
             }
         }
-        int statusCode = con.getResponseCode();
-        Headers responseHeaders = Headers.create(con.getHeaderFields());
-        String responseContentType = Optional.ofNullable(con.getHeaderField("Content-Type"))
+        Response response = con.response();
+        int statusCode = response.statusCode();
+        Headers responseHeaders = Headers.create(response.headers());
+        String responseContentType = last(response.headers().get("Content-Type"))
                 .orElse("application/octet-stream");
         Object data;
         Optional<Class<?>> responseClass = responseCls.apply(statusCode, responseContentType);
-        try (InputStream in = log(con.getInputStream())) {
+        try (InputStream in = log(response.inputStream())) {
             data = readResponse(serializer, responseClass, responseContentType, in);
-        } catch (IOException e) {
-            try (InputStream err = log(con.getErrorStream())) {
-                data = readResponse(serializer, responseClass, responseContentType, err);
-            }
-        }
+        } 
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
     }
-    
+
+    private static <T> Optional<T> last(List<T> list) {
+        if (list.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(list.get(list.size() - 1));
+        }
+    }
+
     private static String wwwFormUrlEncodedContent(Serializer serializer, Optional<?> body) {
         Map<String, Object> map = properties(body.get());
         String encoded = map.entrySet().stream().map(entry -> {
@@ -403,9 +404,9 @@ public final class Http {
         return encoded;
     }
 
-    private static byte[] multipartContent(Serializer serializer, HttpURLConnection con, Optional<?> body) {
+    private static byte[] multipartContent(Serializer serializer, HttpConnection con, Optional<?> body) {
         String boundary = Multipart.randomBoundary();
-        con.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        con.header("Content-Type", "multipart/form-data; boundary=" + boundary);
         Map<String, Object> map = properties(body.get());
         Multipart.Builder b = Multipart.builder();
         map.forEach((name, value) -> {

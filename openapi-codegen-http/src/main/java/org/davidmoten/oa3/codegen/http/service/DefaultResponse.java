@@ -6,13 +6,13 @@ import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultResponse implements Response {
+public final class DefaultResponse implements Response {
 
     private final int statusCode;
     private final Map<String, List<String>> headers;
-    private final HttpConnectionDefault connection;
+    private final DefaultHttpConnection connection;
 
-    public DefaultResponse(int statusCode, Map<String, List<String>> headers, HttpConnectionDefault connection) {
+    public DefaultResponse(int statusCode, Map<String, List<String>> headers, DefaultHttpConnection connection) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.connection = connection;
