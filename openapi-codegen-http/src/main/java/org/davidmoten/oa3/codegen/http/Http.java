@@ -341,6 +341,7 @@ public final class Http {
             con.setRequestProperty(key, list.stream().collect(Collectors.joining(", ")));
         });
         con.setDoInput(true);
+        con.setAllowUserInteraction(true);
         if (requestBody.isPresent()) {
             Optional<?> body = requestBody.get().value();
             if (body.isPresent()) {
@@ -385,7 +386,7 @@ public final class Http {
         }
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
     }
-
+    
     private static String wwwFormUrlEncodedContent(Serializer serializer, Optional<?> body) {
         Map<String, Object> map = properties(body.get());
         String encoded = map.entrySet().stream().map(entry -> {
