@@ -156,7 +156,7 @@ public final class Http {
         public Builder multipartFormData(Object formData) {
             return new BuilderWithBody(this, formData).contentTypeMultipartFormData();
         }
-        
+
         public Builder formUrlEncoded(Object formData) {
             return new BuilderWithBody(this, formData).contentTypeFormUrlEncoded();
         }
@@ -307,7 +307,7 @@ public final class Http {
                 .findFirst();
         try {
             Headers headers = new Headers(requestHeaders);
-            
+
             // modify request metadata (like insert auth related headers)
             RequestBase r = new RequestBase(method, url, headers);
             for (Interceptor interceptor : interceptors) {
@@ -320,25 +320,26 @@ public final class Http {
                 options = new Option[] { StandardOption.DISALLOW_PATCH };
             }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
-            return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(),
-                    r.method(), DefaultHttpService.INSTANCE, options);
+            return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(), r.method(),
+                    DefaultHttpService.INSTANCE, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     private static HttpResponse connectAndProcess(Serializer serializer, List<ParameterValue> parameters,
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, String url,
-            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method, HttpService httpService, Option... options)
+            Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method, HttpService httpService,
+            Option... options)
             throws IOException, MalformedURLException, ProtocolException, StreamReadException, DatabindException {
         log.debug("Http.headers={}", headers);
         HttpConnection con = httpService.connection(url, method, options);
         parameters.stream() //
                 .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
                 .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
-        // add request body content type (should just be one)
-        parameters.stream().filter(p -> p.contentType().isPresent())
-                .forEach(p -> headers.put("Content-Type", p.contentType().get()));
+//        // add request body content type (should just be one)
+//        parameters.stream().filter(p -> p.contentType().isPresent())
+//                .forEach(p -> headers.put("Content-Type", p.contentType().get()));
         headers.forEach((key, list) -> {
             con.header(key, list.stream().collect(Collectors.joining(", ")));
         });
@@ -350,31 +351,28 @@ public final class Http {
                     byte[] multipartContent = multipartContent(serializer, con, body);
                     // we add 2 to length because HttpURLConnection will add \r\n after headers
                     con.header("Content-Length", String.valueOf(multipartContent.length + 2));
-                    con.output(out -> 
-                        serializer.serialize(multipartContent, "application/octet-stream", out));
+                    con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), "application/octet-stream", Optional.empty());
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
                     String encoded = wwwFormUrlEncodedContent(serializer, body);
                     int length = encoded.getBytes(StandardCharsets.UTF_8).length;
                     con.header("Content-Type", "application/x-www-form-urlencoded");
                     con.header("Content-Length", String.valueOf(length));
-                    con.output(out -> 
-                        serializer.serialize(encoded, "text/plain", out));
+                    con.output(out -> serializer.serialize(encoded, "text/plain", out), "text/plain", Optional.empty());
                 } else {
-                    con.output(out -> 
-                        serializer.serialize(body.get(), requestBody.get().contentType().get(), out));
+                    con.output(out -> serializer.serialize(body.get(), requestBody.get().contentType().get(), out),
+                            requestBody.get().contentType().get(), Optional.empty());
                 }
             }
         }
         Response response = con.response();
         int statusCode = response.statusCode();
         Headers responseHeaders = Headers.create(response.headers());
-        String responseContentType = last(response.headers().get("Content-Type"))
-                .orElse("application/octet-stream");
+        String responseContentType = last(response.headers().get("Content-Type")).orElse("application/octet-stream");
         Object data;
         Optional<Class<?>> responseClass = responseCls.apply(statusCode, responseContentType);
         try (InputStream in = log(response.inputStream())) {
             data = readResponse(serializer, responseClass, responseContentType, in);
-        } 
+        }
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
     }
 
@@ -389,12 +387,13 @@ public final class Http {
     private static String wwwFormUrlEncodedContent(Serializer serializer, Optional<?> body) {
         Map<String, Object> map = properties(body.get());
         String encoded = map.entrySet().stream().map(entry -> {
-            String json = new String(serializer.serialize(entry.getValue(), "application/json"), StandardCharsets.UTF_8);
+            String json = new String(serializer.serialize(entry.getValue(), "application/json"),
+                    StandardCharsets.UTF_8);
             ObjectMapper m = new ObjectMapper();
             try {
                 JsonNode tree = m.readTree(json);
                 String v = tree.asText();
-                return URLEncoder.encode(entry.getKey(), "UTF-8")+"="+ URLEncoder.encode(v, "UTF-8");
+                return URLEncoder.encode(entry.getKey(), "UTF-8") + "=" + URLEncoder.encode(v, "UTF-8");
             } catch (JsonProcessingException | UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
@@ -418,8 +417,7 @@ public final class Http {
                     contentType = "application/json";
                     v = value;
                 }
-                b.addFormEntry(name, serializer.serialize(v, contentType), Optional.empty(),
-                        Optional.of(contentType));
+                b.addFormEntry(name, serializer.serialize(v, contentType), Optional.empty(), Optional.of(contentType));
             }
         });
         byte[] multipartContent = b.multipartContent(boundary);

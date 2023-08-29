@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public final class DefaultHttpConnection implements HttpConnection {
@@ -12,6 +13,7 @@ public final class DefaultHttpConnection implements HttpConnection {
     final HttpURLConnection con;
     private boolean once = false;
     private Consumer<? super OutputStream> consumer;
+    private Optional<String> outputContentType = Optional.empty();
 
     public DefaultHttpConnection(HttpURLConnection con) {
         this.con = con;
@@ -23,12 +25,16 @@ public final class DefaultHttpConnection implements HttpConnection {
     }
 
     @Override
-    public void output(Consumer<? super OutputStream> consumer) {
+    public void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding) {
         this.consumer = consumer;
+        this.outputContentType = Optional.of(contentType);
     }
 
     @Override
     public Response response() throws IOException {
+        if (consumer != null) {
+            con.setRequestProperty("Content-Type", outputContentType.get());
+        }
         if (!once) {
             con.setDoInput(true);
         }
@@ -47,4 +53,5 @@ public final class DefaultHttpConnection implements HttpConnection {
     public void close() throws IOException {
         con.disconnect();
     }
+
 }
