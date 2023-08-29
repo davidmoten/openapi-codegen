@@ -353,15 +353,15 @@ public final class Http {
                     // TODO stream content rather than build in memory? 
                     byte[] multipartContent = multipartContent(serializer, body, boundary);
                     con.header("Content-Length", String.valueOf(multipartContent.length));
-                    con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), ct, Optional.empty());
+                    con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), ct, Optional.empty(), false);
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
                     String encoded = wwwFormUrlEncodedContent(serializer, body);
                     int length = encoded.getBytes(StandardCharsets.UTF_8).length;
                     con.header("Content-Length", String.valueOf(length));
-                    con.output(out -> serializer.serialize(encoded, "text/plain", out), contentType, Optional.empty());
+                    con.output(out -> serializer.serialize(encoded, "text/plain", out), contentType, Optional.empty(), false);
                 } else {
                     con.output(out -> serializer.serialize(body.get(), contentType, out),
-                            requestBody.get().contentType().get(), Optional.empty());
+                            requestBody.get().contentType().get(), Optional.empty(), false);
                 }
             }
         }

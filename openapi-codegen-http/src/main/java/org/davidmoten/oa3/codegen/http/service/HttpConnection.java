@@ -13,13 +13,23 @@ import java.util.function.Consumer;
  * </pre>
  */
 public interface HttpConnection {
-    
+
     void header(String key, String value);
 
-    void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding);
-    
+    /**
+     * When a consumer is defined (when this method is called), this class is
+     * expected to set the Content-Type and Content-Length fields (and support
+     * chunking if requested).
+     * 
+     * @param consumer action to be performed on the OutputStream
+     * @param contentType Content-Type header value
+     * @param contentEncoding if present is appended to the Content-Type value
+     */
+    void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding,
+            boolean chunked);
+
     Response response() throws IOException;
-    
+
     void close() throws IOException;
-    
+
 }

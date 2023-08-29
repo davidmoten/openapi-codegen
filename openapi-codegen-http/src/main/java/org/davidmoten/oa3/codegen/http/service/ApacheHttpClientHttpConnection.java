@@ -21,7 +21,7 @@ public class ApacheHttpClientHttpConnection implements HttpConnection {
     }
     
     @Override
-    public void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding) {
+    public void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding, boolean chunked) {
     }
 
     @Override

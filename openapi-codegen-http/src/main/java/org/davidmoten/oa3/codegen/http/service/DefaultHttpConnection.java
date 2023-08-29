@@ -25,7 +25,7 @@ public final class DefaultHttpConnection implements HttpConnection {
     }
 
     @Override
-    public void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding) {
+    public void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding, boolean chunked) {
         this.consumer = consumer;
         this.outputContentType = Optional.of(contentType);
     }
