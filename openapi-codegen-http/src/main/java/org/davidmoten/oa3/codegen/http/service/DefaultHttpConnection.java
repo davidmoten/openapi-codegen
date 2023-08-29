@@ -33,6 +33,7 @@ public final class DefaultHttpConnection implements HttpConnection {
             con.setDoInput(true);
         }
         if (consumer != null) {
+            con.setDoOutput(true);
             try (OutputStream out = con.getOutputStream()) {
                 consumer.accept(out);
             }
