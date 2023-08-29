@@ -352,8 +352,7 @@ public final class Http {
                     String ct = "multipart/form-data; boundary=" + boundary;
                     // TODO stream content rather than build in memory? 
                     byte[] multipartContent = multipartContent(serializer, body, boundary);
-                    // we add 2 to length because HttpURLConnection will add \r\n after headers
-                    con.header("Content-Length", String.valueOf(multipartContent.length + 2));
+                    con.header("Content-Length", String.valueOf(multipartContent.length));
                     con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), ct, Optional.empty());
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
                     String encoded = wwwFormUrlEncodedContent(serializer, body);
@@ -420,8 +419,7 @@ public final class Http {
                 b.addFormEntry(name, serializer.serialize(v, contentType), Optional.empty(), Optional.of(contentType));
             }
         });
-        byte[] multipartContent = b.multipartContent(boundary);
-        return multipartContent;
+        return b.multipartContent(boundary);
     }
 
     @SuppressWarnings("unchecked")
