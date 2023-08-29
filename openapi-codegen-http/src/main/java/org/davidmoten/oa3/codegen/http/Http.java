@@ -350,7 +350,8 @@ public final class Http {
                 if (MediaType.isMultipartFormData(contentType)) {
                     String boundary = Multipart.randomBoundary();
                     String ct = "multipart/form-data; boundary=" + boundary;
-                    byte[] multipartContent = multipartContent(serializer, con, body, boundary);
+                    // TODO stream content rather than build in memory? 
+                    byte[] multipartContent = multipartContent(serializer, body, boundary);
                     // we add 2 to length because HttpURLConnection will add \r\n after headers
                     con.header("Content-Length", String.valueOf(multipartContent.length + 2));
                     con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), ct, Optional.empty());
@@ -402,7 +403,7 @@ public final class Http {
         return encoded;
     }
 
-    private static byte[] multipartContent(Serializer serializer, HttpConnection con, Optional<?> body, String boundary) {
+    private static byte[] multipartContent(Serializer serializer, Optional<?> body, String boundary) {
         Map<String, Object> map = properties(body.get());
         Multipart.Builder b = Multipart.builder();
         map.forEach((name, value) -> {
