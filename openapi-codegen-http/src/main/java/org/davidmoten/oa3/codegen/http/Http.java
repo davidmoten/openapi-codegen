@@ -348,18 +348,19 @@ public final class Http {
             if (body.isPresent()) {
                 String contentType = requestBody.get().contentType().orElse("");
                 if (MediaType.isMultipartFormData(contentType)) {
-                    byte[] multipartContent = multipartContent(serializer, con, body);
+                    String boundary = Multipart.randomBoundary();
+                    String ct = "multipart/form-data; boundary=" + boundary;
+                    byte[] multipartContent = multipartContent(serializer, con, body, boundary);
                     // we add 2 to length because HttpURLConnection will add \r\n after headers
                     con.header("Content-Length", String.valueOf(multipartContent.length + 2));
-                    con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), "application/octet-stream", Optional.empty());
+                    con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), ct, Optional.empty());
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
                     String encoded = wwwFormUrlEncodedContent(serializer, body);
                     int length = encoded.getBytes(StandardCharsets.UTF_8).length;
-                    con.header("Content-Type", "application/x-www-form-urlencoded");
                     con.header("Content-Length", String.valueOf(length));
-                    con.output(out -> serializer.serialize(encoded, "text/plain", out), "text/plain", Optional.empty());
+                    con.output(out -> serializer.serialize(encoded, "text/plain", out), contentType, Optional.empty());
                 } else {
-                    con.output(out -> serializer.serialize(body.get(), requestBody.get().contentType().get(), out),
+                    con.output(out -> serializer.serialize(body.get(), contentType, out),
                             requestBody.get().contentType().get(), Optional.empty());
                 }
             }
@@ -401,9 +402,7 @@ public final class Http {
         return encoded;
     }
 
-    private static byte[] multipartContent(Serializer serializer, HttpConnection con, Optional<?> body) {
-        String boundary = Multipart.randomBoundary();
-        con.header("Content-Type", "multipart/form-data; boundary=" + boundary);
+    private static byte[] multipartContent(Serializer serializer, HttpConnection con, Optional<?> body, String boundary) {
         Map<String, Object> map = properties(body.get());
         Multipart.Builder b = Multipart.builder();
         map.forEach((name, value) -> {
