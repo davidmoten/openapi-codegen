@@ -3,7 +3,6 @@ package org.davidmoten.oa3.codegen.http;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -351,21 +350,18 @@ public final class Http {
                     byte[] multipartContent = multipartContent(serializer, con, body);
                     // we add 2 to length because HttpURLConnection will add \r\n after headers
                     con.header("Content-Length", String.valueOf(multipartContent.length + 2));
-                    try (OutputStream out = con.outputStream()) {
-                        serializer.serialize(multipartContent, "application/octet-stream", out);
-                    }
+                    con.output(out -> 
+                        serializer.serialize(multipartContent, "application/octet-stream", out));
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
                     String encoded = wwwFormUrlEncodedContent(serializer, body);
                     int length = encoded.getBytes(StandardCharsets.UTF_8).length;
                     con.header("Content-Type", "application/x-www-form-urlencoded");
                     con.header("Content-Length", String.valueOf(length));
-                    try (OutputStream out = con.outputStream()) {
-                        serializer.serialize(encoded, "text/plain", out);
-                    }
+                    con.output(out -> 
+                        serializer.serialize(encoded, "text/plain", out));
                 } else {
-                    try (OutputStream out = con.outputStream()) {
-                        serializer.serialize(body.get(), requestBody.get().contentType().get(), out);
-                    }
+                    con.output(out -> 
+                        serializer.serialize(body.get(), requestBody.get().contentType().get(), out));
                 }
             }
         }

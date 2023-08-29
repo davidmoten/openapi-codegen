@@ -5,11 +5,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public final class DefaultHttpConnection implements HttpConnection {
 
     final HttpURLConnection con;
     private boolean once = false;
+    private Consumer<? super OutputStream> consumer;
 
     public DefaultHttpConnection(HttpURLConnection con) {
         this.con = con;
@@ -21,16 +23,8 @@ public final class DefaultHttpConnection implements HttpConnection {
     }
 
     @Override
-    public OutputStream outputStream() throws IOException {
-        con.setDoInput(true);
-        con.setDoOutput(true);
-        once = true;
-        return con.getOutputStream();
-    }
-
-    @Override
-    public void close() throws IOException {
-        con.disconnect();
+    public void output(Consumer<? super OutputStream> consumer) {
+        this.consumer = consumer;
     }
 
     @Override
@@ -38,9 +32,18 @@ public final class DefaultHttpConnection implements HttpConnection {
         if (!once) {
             con.setDoInput(true);
         }
+        if (consumer != null) {
+            try (OutputStream out = con.getOutputStream()) {
+                consumer.accept(out);
+            }
+        }
         int statusCode = con.getResponseCode();
         Map<String, List<String>> map = con.getHeaderFields();
         return new DefaultResponse(statusCode, map, this);
     }
 
+    @Override
+    public void close() throws IOException {
+        con.disconnect();
+    }
 }
