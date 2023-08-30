@@ -6,6 +6,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityTemplate;
 
 public class ApacheHttpClientHttpConnection implements HttpConnection {
 
@@ -19,56 +25,28 @@ public class ApacheHttpClientHttpConnection implements HttpConnection {
     public void header(String key, String value) {
         request.addHeader(key, value);
     }
-    
+
     @Override
-    public void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding, boolean chunked) {
+    public void output(Consumer<? super OutputStream> consumer, String contentType, Optional<String> contentEncoding,
+            boolean chunked) {
+        NoCopyByteArrayOutputStream bytes = new NoCopyByteArrayOutputStream(256);
+        consumer.accept(bytes);
+        request.setEntity(new EntityTemplate(bytes.size(), ContentType.create(contentType),
+                contentEncoding.orElse(null), out -> consumer.accept(out)));
     }
 
     @Override
     public Response response() throws IOException {
-        return null;
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpClientResponseHandler<ClassicHttpResponse> handler = r -> r;
+            ClassicHttpResponse r = client.execute(request, handler);
+            return new ApacheHttpClientResponse(r);
+        }
     }
-
 
     @Override
     public void close() throws IOException {
-        
+
     }
-    
-//    private static final class OutputStreamConsumerEntity extends AbstractHttpEntity {
-//
-//        protected OutputStreamConsumerEntity(ContentType contentType, String contentEncoding) {
-//            super(contentType, contentEncoding);
-//        }
-//
-//        @Override
-//        public void writeTo(OutputStream outStream) throws IOException {
-//        }
-//
-//        @Override
-//        public InputStream getContent() throws IOException, UnsupportedOperationException {
-//            // TODO Auto-generated method stub
-//            return null;
-//        }
-//
-//        @Override
-//        public boolean isStreaming() {
-//            // TODO Auto-generated method stub
-//            return false;
-//        }
-//
-//        @Override
-//        public long getContentLength() {
-//            // TODO Auto-generated method stub
-//            return 0;
-//        }
-//
-//        @Override
-//        public void close() throws IOException {
-//            // TODO Auto-generated method stub
-//            
-//        }
-//        
-//    }
 
 }

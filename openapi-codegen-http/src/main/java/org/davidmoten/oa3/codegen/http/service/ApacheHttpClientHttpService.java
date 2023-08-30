@@ -7,7 +7,9 @@ import java.net.URISyntaxException;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 
-public class ApacheHttpClientHttpService implements HttpService {
+public final class ApacheHttpClientHttpService implements HttpService {
+    
+    public static final ApacheHttpClientHttpService INSTANCE = new ApacheHttpClientHttpService();
 
     @Override
     public HttpConnection connection(String url, HttpMethod method, Option... options) throws IOException {
