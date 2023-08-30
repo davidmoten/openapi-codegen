@@ -338,9 +338,6 @@ public final class Http {
         parameters.stream() //
                 .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
                 .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
-//        // add request body content type (should just be one)
-//        parameters.stream().filter(p -> p.contentType().isPresent())
-//                .forEach(p -> headers.put("Content-Type", p.contentType().get()));
         headers.forEach((key, list) -> {
             con.header(key, list.stream().collect(Collectors.joining(", ")));
         });
