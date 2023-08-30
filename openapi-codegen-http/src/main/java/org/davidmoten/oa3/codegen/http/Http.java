@@ -350,11 +350,9 @@ public final class Http {
                     String ct = "multipart/form-data; boundary=" + boundary;
                     // TODO stream content rather than build in memory?
                     byte[] multipartContent = multipartContent(serializer, body, boundary);
-                    con.header("Content-Length", String.valueOf(multipartContent.length));
                     con.output(out -> write(out, multipartContent), ct, Optional.empty(), false);
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
                     byte[] encoded = wwwFormUrlEncodedContent(serializer, body).getBytes(StandardCharsets.UTF_8);
-                    con.header("Content-Length", String.valueOf(encoded.length));
                     con.output(out -> write(out, encoded), contentType, Optional.empty(), false);
                 } else {
                     con.output(out -> serializer.serialize(body.get(), contentType, out),

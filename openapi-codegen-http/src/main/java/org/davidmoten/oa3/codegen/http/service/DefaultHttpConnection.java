@@ -39,9 +39,15 @@ public final class DefaultHttpConnection implements HttpConnection {
             con.setDoInput(true);
         }
         if (consumer != null) {
+            
+            // buffer request to measure length
+            NoCopyByteArrayOutputStream bytes = new NoCopyByteArrayOutputStream(256);
+            consumer.accept(bytes);
+            
+            con.setRequestProperty("Content-Length", String.valueOf(bytes.size()));
             con.setDoOutput(true);
             try (OutputStream out = con.getOutputStream()) {
-                consumer.accept(out);
+                out.write(bytes.buffer(), 0, bytes.size());
             }
         }
         int statusCode = con.getResponseCode();
