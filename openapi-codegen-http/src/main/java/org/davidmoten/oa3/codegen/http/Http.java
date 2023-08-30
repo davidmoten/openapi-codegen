@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.http;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -350,15 +351,14 @@ public final class Http {
                 if (MediaType.isMultipartFormData(contentType)) {
                     String boundary = Multipart.randomBoundary();
                     String ct = "multipart/form-data; boundary=" + boundary;
-                    // TODO stream content rather than build in memory? 
+                    // TODO stream content rather than build in memory?
                     byte[] multipartContent = multipartContent(serializer, body, boundary);
                     con.header("Content-Length", String.valueOf(multipartContent.length));
-                    con.output(out -> serializer.serialize(multipartContent, "application/octet-stream", out), ct, Optional.empty(), false);
+                    con.output(out -> write(out, multipartContent), ct, Optional.empty(), false);
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
-                    String encoded = wwwFormUrlEncodedContent(serializer, body);
-                    int length = encoded.getBytes(StandardCharsets.UTF_8).length;
-                    con.header("Content-Length", String.valueOf(length));
-                    con.output(out -> serializer.serialize(encoded, "text/plain", out), contentType, Optional.empty(), false);
+                    byte[] encoded = wwwFormUrlEncodedContent(serializer, body).getBytes(StandardCharsets.UTF_8);
+                    con.header("Content-Length", String.valueOf(encoded.length));
+                    con.output(out -> write(out, encoded), contentType, Optional.empty(), false);
                 } else {
                     con.output(out -> serializer.serialize(body.get(), contentType, out),
                             requestBody.get().contentType().get(), Optional.empty(), false);
@@ -375,6 +375,14 @@ public final class Http {
             data = readResponse(serializer, responseClass, responseContentType, in);
         }
         return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
+    }
+
+    private static void write(OutputStream out, byte[] bytes) {
+        try {
+            out.write(bytes);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private static <T> Optional<T> last(List<T> list) {
