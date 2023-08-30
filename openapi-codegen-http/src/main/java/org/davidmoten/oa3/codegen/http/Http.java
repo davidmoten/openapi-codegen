@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
+import org.davidmoten.oa3.codegen.http.service.ApacheHttpClientHttpService;
 import org.davidmoten.oa3.codegen.http.service.HttpConnection;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.http.service.Option;
@@ -322,7 +322,7 @@ public final class Http {
             }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(), r.method(),
-                    DefaultHttpService.INSTANCE, options);
+                    ApacheHttpClientHttpService.INSTANCE, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -347,7 +347,7 @@ public final class Http {
                 String contentType = requestBody.get().contentType().orElse("");
                 if (MediaType.isMultipartFormData(contentType)) {
                     String boundary = Multipart.randomBoundary();
-                    String ct = "multipart/form-data; boundary=" + boundary;
+                    String ct = "multipart/form-data; boundary="+ boundary;
                     // TODO stream content rather than build in memory?
                     byte[] multipartContent = multipartContent(serializer, body, boundary);
                     con.output(out -> write(out, multipartContent), ct, Optional.empty(), false);
