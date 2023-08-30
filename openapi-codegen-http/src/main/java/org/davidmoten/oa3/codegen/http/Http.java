@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.http.service.ApacheHttpClientHttpService;
+import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
 import org.davidmoten.oa3.codegen.http.service.HttpConnection;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.http.service.Option;
@@ -60,6 +60,7 @@ public final class Http {
         private Serializer serializer;
         private List<Interceptor> interceptors = new ArrayList<>();
         private boolean allowPatch = false;
+        private HttpService httpService = DefaultHttpService.INSTANCE;
 
         Builder(HttpMethod method) {
             this.method = method;
@@ -69,7 +70,12 @@ public final class Http {
             this.basePath = basePath;
             return new BuilderWithBasePath(this);
         }
-
+        
+        public Builder httpService(HttpService httpService) {
+            this.httpService = httpService;
+            return this;
+        }
+        
         public Builder header(String key, Object value) {
             if ("CONTENT-TYPE".equals(key.toUpperCase(Locale.ENGLISH))) {
                 throw new IllegalArgumentException("set content type in the builder just after setting the body");
@@ -167,7 +173,7 @@ public final class Http {
         }
 
         public HttpResponse call() {
-            return Http.call(method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
+            return Http.call(httpService, method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
                     allowPatch);
         }
 
@@ -268,6 +274,7 @@ public final class Http {
     }
 
     public static HttpResponse call(//
+            HttpService httpService, //
             HttpMethod method, //
             String basePath, //
             String pathTemplate, //
@@ -277,7 +284,7 @@ public final class Http {
             List<ParameterValue> parameters, //
             // (statusCode, contentType, class)
             List<ResponseDescriptor> descriptors, boolean allowPatch) {
-        return call(method, basePath, pathTemplate, serializer, interceptors, requestHeaders, parameters,
+        return call(httpService, method, basePath, pathTemplate, serializer, interceptors, requestHeaders, parameters,
                 (statusCode, contentType) -> match(descriptors, statusCode, contentType), allowPatch);
     }
 
@@ -294,6 +301,7 @@ public final class Http {
     }
 
     private static HttpResponse call(//
+            HttpService httpService, //
             HttpMethod method, //
             String basePath, //
             String pathTemplate, //
@@ -322,7 +330,7 @@ public final class Http {
             }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(), r.method(),
-                    ApacheHttpClientHttpService.INSTANCE, options);
+                    httpService, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
