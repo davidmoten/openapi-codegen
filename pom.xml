@@ -225,6 +225,7 @@
             <id>demo</id>
             <modules>
                 <module>openapi-generator-demo</module>
+                <module>swagger-codegen-demo</module>
             </modules>
         </profile>
     </profiles>
