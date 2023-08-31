@@ -13,6 +13,7 @@ import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+import org.davidmoten.oa3.codegen.test.Helper;
 import org.davidmoten.oa3.codegen.test.paths.client.Client;
 import org.davidmoten.oa3.codegen.test.paths.path.SubmitPostRequestApplicationXWwwFormUrlencoded;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData;
@@ -189,10 +190,6 @@ public class PathsServerTest {
         assertTrue(((ObjectNode) o).isEmpty());
     }
     
-    static List<HttpService> httpServices() {
-        return Lists.newArrayList(DefaultHttpService.INSTANCE, ApacheHttpClientHttpService.INSTANCE);
-    }
-    
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testUrlEncodedFormData(HttpService httpService) {
@@ -201,6 +198,10 @@ public class PathsServerTest {
         Object o = client(httpService).submitPost(request);
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
+    }
+    
+    static List<HttpService> httpServices() {
+        return Helper.httpServices();
     }
 
 }

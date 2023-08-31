@@ -42,7 +42,7 @@ public class ApacheHttpClientHttpConnection implements HttpConnection {
         consumer.accept(bytes);
         
         request.setEntity(new EntityTemplate(bytes.size(), ContentType.parse(contentType),
-                contentEncoding.orElse(null), out -> consumer.accept(out)));
+                contentEncoding.orElse(null), out -> out.write(bytes.buffer(), 0, bytes.size())));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ApacheHttpClientHttpConnection implements HttpConnection {
 
     @Override
     public void close() throws IOException {
-
+        // TODO what here?
     }
 
 }
