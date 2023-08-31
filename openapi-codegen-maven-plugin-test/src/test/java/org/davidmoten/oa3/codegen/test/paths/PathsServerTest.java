@@ -5,10 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 import org.davidmoten.oa3.codegen.http.HttpResponse;
+import org.davidmoten.oa3.codegen.http.service.ApacheHttpClientHttpService;
+import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
+import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+import org.davidmoten.oa3.codegen.test.Helper;
 import org.davidmoten.oa3.codegen.test.paths.client.Client;
 import org.davidmoten.oa3.codegen.test.paths.path.SubmitPostRequestApplicationXWwwFormUrlencoded;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData;
@@ -18,6 +23,8 @@ import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -27,6 +34,7 @@ import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.davidmoten.guavamini.Lists;
 
 @SpringBootTest(classes = { PathsApplication.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
@@ -41,8 +49,8 @@ public class PathsServerTest {
         return "http://localhost:" + serverPort;
     }
 
-    private Client client() {
-        return Client.basePath(basePath()).build();
+    private Client client(HttpService httpService) {
+        return Client.basePath(basePath()).httpService(httpService).build();
     }
 
     @Test
@@ -118,51 +126,59 @@ public class PathsServerTest {
         assertEquals("example text", Http.readString(basePath() + "/text", HttpMethod.GET, "text/plain"));
     }
 
-    @Test
-    public void testClientNoArgs() throws ServiceException {
-        HttpResponse r = client().itemGetFullResponse();
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testClientNoArgs(HttpService httpService) throws ServiceException {
+        HttpResponse r = client(httpService).itemGetFullResponse();
         assertEquals(200, r.statusCode());
         assertTrue(r.data().isPresent());
         Response2 a = (Response2) r.data().get();
         assertEquals("abcToken", a.token());
     }
 
-    @Test
-    public void testClientFullResponseMultiTypeWithAcceptHeaderJson() {
-        HttpResponse r = client().responseMultiTypeGetFullResponse("application/json", "jason");
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testClientFullResponseMultiTypeWithAcceptHeaderJson(HttpService httpService) {
+        HttpResponse r = client(httpService).responseMultiTypeGetFullResponse("application/json", "jason");
         assertEquals(200, r.statusCode());
         assertEquals("jason", ((Response1) r.data().get()).thing());
     }
 
-    @Test
-    public void testClientPrimaryResponseMultiTypeWithAcceptHeaderJson() {
-        Response1 r = client().responseMultiTypeGet("application/json", "jason");
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testClientPrimaryResponseMultiTypeWithAcceptHeaderJson(HttpService httpService) {
+        Response1 r = client(httpService).responseMultiTypeGet("application/json", "jason");
         assertEquals("jason", r.thing());
     }
 
-    @Test
-    public void testClientResponseMultiTypeWithAcceptHeaderOctetStream() {
-        HttpResponse r = client().responseMultiTypeGetFullResponse("application/octet-stream", "jason");
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testClientResponseMultiTypeWithAcceptHeaderOctetStream(HttpService httpService) {
+        HttpResponse r = client(httpService).responseMultiTypeGetFullResponse("application/octet-stream", "jason");
         assertEquals(200, r.statusCode());
         assertEquals("hello there", new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
         assertTrue(r.headers().contains("content-type", "application/octet-stream"));
     }
 
-    @Test
-    public void testDefaultErrorReturned() {
-        HttpResponse r = client().defaultErrorGetFullResponse();
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testDefaultErrorReturned(HttpService httpService) {
+        HttpResponse r = client(httpService).defaultErrorGetFullResponse();
         org.davidmoten.oa3.codegen.test.paths.schema.Error e = r.dataUnwrapped();
         assertEquals("not found eh", e.errorMessage().orElse(""));
     }
 
-    @Test
-    public void testSimpleStringJsonResponse() {
-        assertEquals("hello", client().jsonStringGet().value());
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testSimpleStringJsonResponse(HttpService httpService) {
+        assertEquals("hello", client(httpService).jsonStringGet().value());
     }
 
-    @Test
-    public void testMultipartFormData() {
-        Object o = client().uploadPost(UploadPostRequestMultipartFormData //
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testMultipartFormData(HttpService httpService) {
+        Object o = client(httpService) //
+                .uploadPost(UploadPostRequestMultipartFormData //
                 .point(Point.lat(-23).lon(135).build()) //
                 .description("theDescription") //
                 .document(Document //
@@ -174,13 +190,18 @@ public class PathsServerTest {
         assertTrue(((ObjectNode) o).isEmpty());
     }
     
-    @Test
-    public void testUrlEncodedFormData() {
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testUrlEncodedFormData(HttpService httpService) {
         SubmitPostRequestApplicationXWwwFormUrlencoded request = //
                 SubmitPostRequestApplicationXWwwFormUrlencoded.name("Fred").count(23).build();
-        Object o = client().submitPost(request);
+        Object o = client(httpService).submitPost(request);
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
+    }
+    
+    static List<HttpService> httpServices() {
+        return Helper.httpServices();
     }
 
 }

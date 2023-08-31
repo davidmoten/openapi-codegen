@@ -7,6 +7,8 @@ import java.util.function.Function;
 import org.davidmoten.oa3.codegen.http.DefaultSerializer;
 import org.davidmoten.oa3.codegen.http.Interceptor;
 import org.davidmoten.oa3.codegen.http.Serializer;
+import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
+import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.runtime.Config;
 
 public final class ClientBuilder<T> {
@@ -15,12 +17,14 @@ public final class ClientBuilder<T> {
     private final String basePath;
     private final List<Interceptor> interceptors;
     private Serializer serializer;
+    private HttpService httpService;
 
     public ClientBuilder(Function<ClientBuilder<T>, T> creator, Config config, String basePath) {
         this.creator = creator;
         this.serializer = new DefaultSerializer(config.mapper());
         this.interceptors = new ArrayList<>();
         this.basePath = trimAndRemoveFinalSlash(basePath);
+        this.httpService = DefaultHttpService.INSTANCE;
     }
 
     public ClientBuilder<T> serializer(Serializer serializer) {
@@ -45,6 +49,11 @@ public final class ClientBuilder<T> {
         list.forEach(x -> interceptor(x));
         return this;
     }
+    
+    public ClientBuilder<T> httpService(HttpService httpService) {
+        this.httpService = httpService;
+        return this;
+    }
 
     public Serializer serializer() {
         return serializer;
@@ -56,6 +65,10 @@ public final class ClientBuilder<T> {
 
     public String basePath() {
         return basePath;
+    }
+    
+    public HttpService httpService() {
+        return httpService;
     }
 
     public T build() {
