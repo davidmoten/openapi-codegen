@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.http.service;
+package org.davidmoten.oa3.codegen.http.service.internal;
 
 import java.io.ByteArrayOutputStream;
 

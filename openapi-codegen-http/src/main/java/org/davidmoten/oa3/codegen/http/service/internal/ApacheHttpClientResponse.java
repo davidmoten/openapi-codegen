@@ -1,9 +1,11 @@
-package org.davidmoten.oa3.codegen.http.service;
+package org.davidmoten.oa3.codegen.http.service.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+
+import org.davidmoten.oa3.codegen.http.service.Response;
 
 public final class ApacheHttpClientResponse implements Response {
 

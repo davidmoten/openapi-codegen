@@ -1,4 +1,4 @@
-package org.davidmoten.oa3.codegen.http.service;
+package org.davidmoten.oa3.codegen.http.service.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,6 +18,8 @@ import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityTemplate;
+import org.davidmoten.oa3.codegen.http.service.HttpConnection;
+import org.davidmoten.oa3.codegen.http.service.Response;
 import org.davidmoten.oa3.codegen.util.Util;
 
 public class ApacheHttpClientHttpConnection implements HttpConnection {

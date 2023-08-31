@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
+import org.davidmoten.oa3.codegen.http.service.internal.ApacheHttpClientHttpConnection;
 
 public final class ApacheHttpClientHttpService implements HttpService {
     

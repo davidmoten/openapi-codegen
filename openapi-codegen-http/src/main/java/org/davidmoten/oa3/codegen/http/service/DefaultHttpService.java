@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.davidmoten.oa3.codegen.http.HttpMethod;
+import org.davidmoten.oa3.codegen.http.service.internal.DefaultHttpConnection;
 
 public final class DefaultHttpService implements HttpService {
     
@@ -14,7 +15,7 @@ public final class DefaultHttpService implements HttpService {
     public HttpConnection connection(String url, HttpMethod method, Option... options) throws IOException {
         HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
         HttpMethod requestMethod;
-        if (contains(options, StandardOption.DISALLOW_PATCH) && method.equals(HttpMethod.PATCH)) {
+        if (contains(options, StandardOption.PATCH_USING_HEADER) && method.equals(HttpMethod.PATCH)) {
             con.setRequestProperty("X-HTTP-Method-Override", HttpMethod.PATCH.name());
             requestMethod = HttpMethod.POST;
         } else {

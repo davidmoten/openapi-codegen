@@ -326,7 +326,7 @@ public final class Http {
             if (allowPatch) {
                 options = new Option[] {};
             } else {
-                options = new Option[] { StandardOption.DISALLOW_PATCH };
+                options = new Option[] { StandardOption.PATCH_USING_HEADER };
             }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(), r.method(),
@@ -357,6 +357,7 @@ public final class Http {
                     String boundary = Multipart.randomBoundary();
                     String ct = "multipart/form-data; boundary="+ boundary;
                     // TODO stream content rather than build in memory?
+                    // TODO support parts without names?
                     byte[] multipartContent = multipartContent(serializer, body, boundary);
                     con.output(out -> write(out, multipartContent), ct, Optional.empty(), false);
                 } else if (MediaType.isWwwFormUrlEncoded(contentType)) {
