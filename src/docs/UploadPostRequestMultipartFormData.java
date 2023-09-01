@@ -28,7 +28,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.2-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.4")
 public final class UploadPostRequestMultipartFormData {
 
     @JsonProperty("point")
@@ -247,7 +247,7 @@ public final class UploadPostRequestMultipartFormData {
         }
 
         public Document withContentType(ContentType contentType) {
-            return new Document(contentType, value);
+            return new Document(contentType, Util.decodeOctets(value));
         }
 
         public Document withValue(byte[] value) {

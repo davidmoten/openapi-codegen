@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.2-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.4")
 public class ServiceController implements ControllerExceptionHandler {
 
     private final Service service;
