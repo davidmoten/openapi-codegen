@@ -37,6 +37,9 @@ I suspect the future of this project will be to generate Java clients for APIs r
 * json only (xml not supported)
 
 ## Getting started
+
+Working examples are at [openapi-codegen-example-pet-store](https://github.com/davidmoten/openapi-codegen/tree/master/openapi-codegen-example-pet-store) (client and server) and [openapi-codegen-example-pet-store](https://github.com/davidmoten/openapi-codegen/tree/master/openapi-codegen-example-pet-store-client) (client only).
+
 Add this to your pom.xml in the `build/plugins` section:
 ```xml
 <plugin>
