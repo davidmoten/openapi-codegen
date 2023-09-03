@@ -40,6 +40,9 @@
                         <configuration>
                             <basePackage>pet.store</basePackage>
                             <generateService>false</generateService> 
+                            <sources>
+                                 <directory>${project.basedir}/../openapi-codegen-example-pet-store/src/main/openapi</directory>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>
