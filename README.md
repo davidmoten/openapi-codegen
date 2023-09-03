@@ -26,7 +26,7 @@ I suspect the future of this project will be to generate Java clients for APIs r
 * Constructor validation of schema objects means fail-fast which helps with diagnosis
 * `multipart/form-data` request body support (client)
 * `form-urlencoded` request body support (client)
-* use Java HttpsURLConnection for HTTP interactions or use Apache Httpclient 5.x
+* use Java HttpsURLConnection for HTTP interactions or use Apache Httpclient 5.x (raise an issue to add another Http library)
 
 **Status**: released to Maven Central
 
