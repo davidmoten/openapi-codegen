@@ -369,3 +369,4 @@ This script ensures that the code generated from the above large test apis compi
 * support more parameter styles
 * support xml
 * write docs
+* support 3.1 features (type arrays, null instead of nullable, contentMediaType and contentEncoding for file payloads)
