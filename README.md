@@ -15,7 +15,7 @@ I suspect the future of this project will be to generate Java clients for APIs r
 * Supports Spring Boot 2.x, 3.x server-side
 * Supports polymorphism `oneOf`, `anyOf`, `allOf` with or without discriminators
 * Nesting in openapi definition reflected in nested Java classes
-* Generates chained builders (chaining occurs when mandatory fields are present). This makes checking setting of mandatory fields a compile-time check.
+* Generates [chained builders](https://github.com/davidmoten/java-builder-pattern-tricks#trick-3-enforce-mandatory-fields-at-compile-time-with-builder-chaining) (chaining occurs when mandatory fields are present). This makes checking setting of mandatory fields a compile-time check.
 * Strong typing (primitives are used for mandatory simple types, chained builders)
 * Java 8 Optional and DateTime types used
 * Generates `equals`, `hashCode`, `toString` methods
