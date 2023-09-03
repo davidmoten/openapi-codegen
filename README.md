@@ -238,7 +238,7 @@ add a Bearer token to every request.
 Set an interceptor in the client builder to an instance of `BearerAuthenticator` or `BasicAuthenticator` or do your own thing entirely.
 
 ### HttpService
-The HttpService can be set in the Client builder and encapsulates all HTTP interactions. The default HttpService is `DefaultHttpService.INSTANCE` which is based on HttpURLConnection class. Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. The default HttpService makes PATCH calls as POST calls with the header `X-HTTP-Method-Override: PATCH` which is understood by most web servers. If you'd like to use the PATCH verb then call `.allowPatch()` on the Client builder (for instance if you've modified HttpURLConnection static field using reflection to support PATCH).
+The [HttpService](https://github.com/davidmoten/openapi-codegen/blob/master/openapi-codegen-http/src/main/java/org/davidmoten/oa3/codegen/http/service/HttpService.java) can be set in the Client builder and encapsulates all HTTP interactions. The default HttpService is `DefaultHttpService.INSTANCE` which is based on HttpURLConnection class. Funnily enough the java HttpURLConnection classes don't support the HTTP PATCH verb. The default HttpService makes PATCH calls as POST calls with the header `X-HTTP-Method-Override: PATCH` which is understood by most web servers. If you'd like to use the PATCH verb then call `.allowPatch()` on the Client builder (for instance if you've modified HttpURLConnection static field using reflection to support PATCH).
 
 The alternative to the default HttpService is `ApacheHttpClientHttpService.INSTANCE` which is based on Apache Httpclient 5.x (and has full support for the PATCH verb).
 
