@@ -452,5 +452,9 @@ public final class Names {
     public boolean mapNumberToBigDecimal() {
         return definition.mapNumberToBigDecimal();
     }
+    
+    public boolean generateService() {
+        return definition.generateService();
+    }
 
 }

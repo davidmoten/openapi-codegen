@@ -38,7 +38,7 @@ public class Generator {
         this.definition = definition;
     }
 
-    public void generate() {
+    public void generate(boolean generateService) {
 
         // Names object for each Packages object
         Names names = new Names(definition);

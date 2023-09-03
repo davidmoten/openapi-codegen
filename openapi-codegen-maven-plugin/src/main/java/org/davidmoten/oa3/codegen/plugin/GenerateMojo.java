@@ -109,8 +109,8 @@ public final class GenerateMojo extends AbstractMojo {
                 Definition d = new Definition(definition, packages, outputDirectory, x -> x,
                         Sets.newHashSet(orElse(includeSchemas, Collections.emptyList())),
                         Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
-                        mapNumberToBigDecimal, failOnParseErrors, Optional.ofNullable(generator));
-                new Generator(d).generate();
+                        mapNumberToBigDecimal, failOnParseErrors, Optional.ofNullable(generator), generateService);
+                new Generator(d).generate(generateService);
                 if (generateService || generateClient) {
                     ClientServerGenerator g = new ClientServerGenerator(d);
                     if (generateService) {

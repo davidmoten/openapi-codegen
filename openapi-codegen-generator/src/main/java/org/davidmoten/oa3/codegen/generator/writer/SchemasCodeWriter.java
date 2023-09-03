@@ -281,11 +281,13 @@ public final class SchemasCodeWriter {
     }
 
     private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
-        if (names.generatorType() == ServerGeneratorType.SPRING3) {
-            out.line("@%s", out
-                    .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
-        } else {
-            out.line("@%s", ConstructorBinding.class);
+        if (names.generateService()) {
+            if (names.generatorType() == ServerGeneratorType.SPRING3) {
+                out.line("@%s", out
+                        .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
+            } else {
+                out.line("@%s", ConstructorBinding.class);
+            }
         }
     }
 
