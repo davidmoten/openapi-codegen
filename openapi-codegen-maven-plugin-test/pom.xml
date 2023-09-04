@@ -571,6 +571,41 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>unifiedto</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.davidmoten</groupId>
+                        <artifactId>openapi-codegen-maven-plugin</artifactId>
+                        <version>${project.parent.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unifiedto</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <downloadList>${downloadList}</downloadList>
+                                    <!-- has some dodgy default values in
+                                    schemas -->
+                                    <failOnParseErrors>false</failOnParseErrors>
+                                    <generator>spring2</generator>
+                                    <basePackage>
+                                        org.davidmoten.oa3.codegen.test.unifiedto</basePackage>
+                                    <sources>
+                                        <directory>${cache}</directory>
+                                        <includes>
+                                            <include>unifiedto.json</include>
+                                        </includes>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>
