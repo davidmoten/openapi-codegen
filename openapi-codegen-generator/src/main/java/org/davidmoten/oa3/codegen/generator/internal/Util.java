@@ -48,6 +48,10 @@ public final class Util {
     }
 
     public static boolean isOneOf(Schema<?> schema) {
+        //TODO support OAS 3.1
+//        if (schema.getTypes().contains("null") && schema.getTypes().size() > 2) {
+//            return true;
+//        }
         if (!(schema instanceof ComposedSchema)) {
             return false;
         }
