@@ -152,7 +152,8 @@ public class ClientCodeWriter {
     }
     
     private static void writeCustomMethod(CodePrintWriter out) {
-        out.line("\npublic %s _custom(%s method, %s path) {" , Http.Builder.class, HttpMethod.class, String.class);
+        out.println();
+        out.line("public %s _custom(%s method, %s path) {" , Http.Builder.class, HttpMethod.class, String.class);
         out.line("return %s", Http.class);
         out.right().right();
         out.line(".method(method)");
