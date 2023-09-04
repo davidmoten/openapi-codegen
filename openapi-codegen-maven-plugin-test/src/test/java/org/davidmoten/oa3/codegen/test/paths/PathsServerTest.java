@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.davidmoten.oa3.codegen.http.HttpResponse;
-import org.davidmoten.oa3.codegen.http.service.ApacheHttpClientHttpService;
-import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
@@ -35,7 +33,6 @@ import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.davidmoten.guavamini.Lists;
 
 @SpringBootTest(classes = { PathsApplication.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
