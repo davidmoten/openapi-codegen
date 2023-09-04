@@ -28,7 +28,11 @@ import io.swagger.v3.oas.models.PathItem.HttpMethod;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.CookieParameter;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -123,15 +127,14 @@ public class ClientServerGenerator {
                             Class<?> c = Util.toClass(s.getType(), s.getFormat(), s.getExtensions(),
                                     names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
-                                    c.getCanonicalName(), isArray, false, constraints(s),
-                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), false,
+                                    c.getCanonicalName(), isArray, false, constraints(s), toParamType(p), false,
                                     Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
                         } else {
                             // is complex schema
                             Cls cls = schemaCls.get(s);
+                            logIfNull(s, cls);
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
-                                    cls.fullClassName, isArray, false, constraints(s),
-                                    ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH)), true,
+                                    cls.fullClassName, isArray, false, constraints(s), toParamType(p), true,
                                     Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
                         }
                         params.add(param);
@@ -253,6 +256,24 @@ public class ClientServerGenerator {
                 Optional.ofNullable(operation.getDescription()), primaryStatusCode,
                 Optional.ofNullable(primaryMimeType.value), responseDescriptors, includeForServerGeneration);
         methods.add(m);
+    }
+
+    private void logIfNull(Schema<?> s, Cls cls) {
+        if (cls == null) System.out.println(s);
+    }
+
+    private static ParamType toParamType(Parameter p) {
+        if (p instanceof QueryParameter) {
+            return ParamType.QUERY;
+        } else if (p instanceof PathParameter) {
+            return ParamType.PATH;
+        } else if (p instanceof HeaderParameter) {
+            return ParamType.HEADER;
+        } else if (p instanceof CookieParameter) {
+            return ParamType.COOKIE;
+        } else {
+            return ParamType.valueOf(p.getIn().toUpperCase(Locale.ENGLISH));
+        }
     }
 
     private void addRequestBodyOctetStreamParameter(List<Param> params, RequestBody b, Optional<String> contentType) {

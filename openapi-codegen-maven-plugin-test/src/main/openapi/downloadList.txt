@@ -11,3 +11,4 @@ https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/twitter.
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/openai.com/1.2.0/openapi.yaml,openai.yml
 https://raw.githubusercontent.com/APIs-guru/openapi-directory/main/APIs/zuora.com/2021-08-20/openapi.yaml,zuora.yml
 https://api.unified.to/openapi.json,unifiedto.json
+https://raw.githubusercontent.com/stripe/openapi/v503/openapi/spec3.yaml,stripe.yml
