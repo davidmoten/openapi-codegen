@@ -35,6 +35,7 @@ public class ClientCodeWriter {
         out.line("public class %s {", out.simpleClassName());
         writeClientClassFieldsConstructorAndBuilder(out, names);
         writeClientClassMethods(out, methods);
+        writeCustomMethod(out);
         out.closeParen();
     }
 
@@ -148,6 +149,19 @@ public class ClientCodeWriter {
             out.left().left();
             out.closeParen();
         });
+    }
+    
+    private static void writeCustomMethod(CodePrintWriter out) {
+        out.line("\npublic %s _custom(%s method, %s path) {" , Http.Builder.class, HttpMethod.class, String.class);
+        out.line("return %s", Http.class);
+        out.right().right();
+        out.line(".method(method)");
+        out.line(".basePath(this.basePath)");
+        out.line(".path(path)");
+        out.line(".serializer(this.serializer)");
+        out.line(".httpService(this.httpService);");
+        out.left().left();
+        out.closeParen();
     }
 
 }
