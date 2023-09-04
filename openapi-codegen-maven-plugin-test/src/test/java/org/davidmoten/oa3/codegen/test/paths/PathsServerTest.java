@@ -19,6 +19,7 @@ import org.davidmoten.oa3.codegen.test.paths.path.SubmitPostRequestApplicationXW
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document.ContentType;
+import org.davidmoten.oa3.codegen.test.paths.schema.Error;
 import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
@@ -89,7 +90,26 @@ public class PathsServerTest {
         Response1 r = Http.readError(basePath() + "/responseRef", HttpMethod.GET, Response1.class, m);
         assertEquals("beehive", r.thing());
     }
-
+    
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testClientCustomCall(HttpService httpService) throws ServiceException {
+        HttpResponse r = client(httpService) //
+                ._custom(org.davidmoten.oa3.codegen.http.HttpMethod.GET, "/item") //
+                .acceptApplicationJson()
+                .responseAs(Response2.class)
+                .whenStatusCodeMatches("200")
+                .whenContentTypeMatches("application/json")
+                .responseAs(Error.class)
+                .whenStatusCodeMatches("default")
+                .whenContentTypeMatches("application/json")
+                .call();
+        assertEquals(200, r.statusCode());
+        assertTrue(r.data().isPresent());
+        Response2 a = (Response2) r.data().get();
+        assertEquals("abcToken", a.token());
+    }
+    
     @Test
     public void testQueryObjectModelAttribute() {
         assertEquals(200, Http.readStatusCodeOnly(basePath() + "/query-object?first=abc&second=12", HttpMethod.GET));
