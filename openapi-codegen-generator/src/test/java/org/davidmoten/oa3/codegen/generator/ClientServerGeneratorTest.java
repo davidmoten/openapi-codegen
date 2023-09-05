@@ -16,11 +16,13 @@ public class ClientServerGeneratorTest {
         generate(definition);
     }
     
-//    @Test
+    @Test
     public void testCached() throws MalformedURLException {
-        String definition = new File("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/zuora.yml").toURI().toURL()
-                .toExternalForm();
-        generate(definition);
+        File f = new File("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/stripe.yml");
+        if (f.exists()) {
+            String definition = f.toURI().toURL().toExternalForm();
+            generate(definition);
+        }
     }
 
     private void generate(String definition) {
