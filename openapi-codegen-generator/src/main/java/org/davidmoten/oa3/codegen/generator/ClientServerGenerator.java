@@ -531,8 +531,8 @@ public class ClientServerGenerator {
         public final Optional<String> description;
         public final Optional<String> contentType;
         public final Optional<String> filename;
-        private final ParamStyle style;
-        private final boolean explode;
+        public final ParamStyle style;
+        public final boolean explode;
 
         public Param(String name, String identifier, Optional<Object> defaultValue, boolean required,
                 String fullClassName, boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
