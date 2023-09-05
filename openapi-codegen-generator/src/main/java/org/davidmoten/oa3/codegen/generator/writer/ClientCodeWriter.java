@@ -14,7 +14,7 @@ import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.http.Interceptor;
-import org.davidmoten.oa3.codegen.http.ParameterType;
+import org.davidmoten.oa3.codegen.http.ParameterStyle;
 import org.davidmoten.oa3.codegen.http.Serializer;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 
@@ -125,7 +125,7 @@ public class ClientCodeWriter {
             out.line(".acceptApplicationJson()");
             m.parameters.forEach(p -> {
                 if (p.type == ParamType.QUERY) {
-                    out.line(".queryParam(\"%s\", %s, %s.%s, %s)", p.name, p.identifier, ParameterType.class,
+                    out.line(".queryParam(\"%s\", %s, %s.%s, %s)", p.name, p.identifier, ParameterStyle.class,
                             p.style.name(), p.explode);
                 } else if (p.type == ParamType.PATH) {
                     out.line(".pathParam(\"%s\", %s)", p.name, p.identifier);

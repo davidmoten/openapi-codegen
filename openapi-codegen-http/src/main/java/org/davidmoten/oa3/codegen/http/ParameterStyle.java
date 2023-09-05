@@ -1,6 +1,6 @@
-package org.davidmoten.oa3.codegen.generator;
+package org.davidmoten.oa3.codegen.http;
 
-public enum ParamStyle {
+public enum ParameterStyle {
     FORM("form"), //
     SPACE_DELIMITED("spaceDelimited"), //
     PIPE_DELIMITED("pipeDelimited"), //
@@ -11,7 +11,7 @@ public enum ParamStyle {
 
     private final String value;
 
-    ParamStyle(String value) {
+    ParameterStyle(String value) {
         this.value = value;
     }
 

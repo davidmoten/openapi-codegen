@@ -178,7 +178,7 @@ public class ClientServerGenerator {
                         }
                         params.add(new Param("requestBody", "requestBody",
                                 Optional.ofNullable((Object) schema.getDefault()),
-                                org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName,
+                                orElse(b.getRequired(), true), fullClassName,
                                 false, true, constraints(schema), paramType, false,
                                 Optional.ofNullable(schema.getDescription()), Optional.empty(), Optional.empty(),
                                 ParamStyle.FORM, true));
@@ -306,7 +306,7 @@ public class ClientServerGenerator {
         // if no schema specified then is octet-stream
         String fullClassName = byte[].class.getCanonicalName();
         params.add(new Param("requestBody", "requestBody", Optional.empty(),
-                org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName, false,
+                orElse(b.getRequired(), true), fullClassName, false,
                 true, Constraints.empty(), ParamType.BODY, false,
                 Optional.empty(), contentType, Optional.empty(), ParamStyle.FORM, true));
     }
