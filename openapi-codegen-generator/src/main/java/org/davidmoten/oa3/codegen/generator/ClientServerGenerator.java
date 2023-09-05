@@ -108,10 +108,11 @@ public class ClientServerGenerator {
                         p = resolveParameterRefs(p);
                         boolean isArray = false;
                         Schema<?> s = p.getSchema();
+                        final Schema<?> resolvedOriginal = resolveRefs(s);
                         if (Util.isArray(s)) {
                             isArray = true;
                             s = s.getItems();
-                        }
+                        } 
                         s = resolveRefs(s);
                         Optional<Object> defaultValue = Optional.ofNullable(s.getDefault());
                         String parameterName = Names.toIdentifier(p.getName());
@@ -131,7 +132,7 @@ public class ClientServerGenerator {
                                     Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
                         } else {
                             // is complex schema
-                            Cls cls = schemaCls.get(s);
+                            Cls cls = schemaCls.get(resolvedOriginal);
                             logIfNull(s, cls);
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
                                     cls.fullClassName, isArray, false, constraints(s), toParamType(p), true,
