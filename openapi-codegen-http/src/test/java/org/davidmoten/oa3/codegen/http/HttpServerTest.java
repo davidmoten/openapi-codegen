@@ -56,7 +56,7 @@ public class HttpServerTest {
                 .path("/thing") //
                 .serializer(serializer) //
                 .acceptApplicationJson() //
-                .queryParam("id", id) //
+                .queryParam("id", id, ParameterStyle.FORM, true) //
                 .responseAs(Problem.class) //
                 .whenStatusCodeDefault() //
                 .whenContentTypeMatches("application/json") //

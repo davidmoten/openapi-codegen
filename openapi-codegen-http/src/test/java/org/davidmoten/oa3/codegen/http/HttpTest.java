@@ -22,8 +22,8 @@ public class HttpTest {
 
     @Test
     public void testBuildUrlWithQueryParameters() {
-        String url = Http.buildUrl("/map", "/msi/hello", Arrays.asList(ParameterValue.query("thing", 1),
-                ParameterValue.query("stuff", OffsetDateTime.of(2023, 5, 24, 14, 55, 33, 0, ZoneOffset.UTC))));
+        String url = Http.buildUrl("/map", "/msi/hello", Arrays.asList(ParameterValue.query("thing", 1, ParameterStyle.FORM, true),
+                ParameterValue.query("stuff", OffsetDateTime.of(2023, 5, 24, 14, 55, 33, 0, ZoneOffset.UTC), ParameterStyle.FORM, true)));
         assertEquals("/map/msi/hello?thing=1&stuff=2023-05-24T14%3A55%3A33Z", url);
     }
 
@@ -74,7 +74,7 @@ public class HttpTest {
                     .path("/msi") //
                     .serializer(serializer) //
                     .header("Accept", "application/json") //
-                    .queryParam("id", "abc1") //
+                    .queryParam("id", "abc1", ParameterStyle.FORM, true) //
                     .responseAs(Thing.class) //
                     .whenStatusCodeMatches(statusCode + "") //
                     .whenContentTypeMatches("application/json") //

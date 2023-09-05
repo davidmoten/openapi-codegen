@@ -127,17 +127,17 @@ public final class Http {
 
         public Builder param(String name, Optional<?> value, ParameterType type, Optional<String> contentType,
                 Optional<String> filename) {
-            values.add(new ParameterValue(name, value, type, contentType, filename));
+            values.add(new ParameterValue(name, value, type, contentType, filename, Optional.empty(), true));
             return this;
         }
 
-        public Builder queryParam(String name, Optional<?> value) {
-            values.add(ParameterValue.query(name, value));
+        public Builder queryParam(String name, Optional<?> value, ParameterStyle style, boolean explode) {
+            values.add(ParameterValue.query(name, value, style, explode));
             return this;
         }
 
-        public Builder queryParam(String name, Object value) {
-            values.add(ParameterValue.query(name, value));
+        public Builder queryParam(String name, Object value, ParameterStyle style, boolean explode) {
+            values.add(ParameterValue.query(name, value, style, explode));
             return this;
         }
 
