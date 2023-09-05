@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.generator;
 
+import static org.davidmoten.oa3.codegen.util.Util.orElse;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.Parameter.StyleEnum;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -129,13 +132,13 @@ public class ClientServerGenerator {
                                     names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
                                     c.getCanonicalName(), isArray, false, constraints(s), toParamType(p), false,
-                                    Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
+                                    Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty(), toParamStyle(p.getStyle()),  orElse(p.getExplode(), true));
                         } else {
                             // is complex schema
                             Cls cls = schemaCls.get(resolvedOriginal);
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
                                     cls.fullClassName, isArray, false, constraints(s), toParamType(p), true,
-                                    Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
+                                    Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty(), toParamStyle(p.getStyle()), orElse(p.getExplode(), true));
                         }
                         params.add(param);
                     });
@@ -177,7 +180,8 @@ public class ClientServerGenerator {
                                 Optional.ofNullable((Object) schema.getDefault()),
                                 org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName,
                                 false, true, constraints(schema), paramType, false,
-                                Optional.ofNullable(schema.getDescription()), Optional.empty(), Optional.empty()));
+                                Optional.ofNullable(schema.getDescription()), Optional.empty(), Optional.empty(),
+                                ParamStyle.FORM, true));
                     } else {
                         throw new RuntimeException("unexpected");
                     }
@@ -258,6 +262,32 @@ public class ClientServerGenerator {
         methods.add(m);
     }
 
+    private ParamStyle toParamStyle(StyleEnum style) {
+        if (style == StyleEnum.FORM ) {
+            return ParamStyle.FORM;
+        }
+        else if (style == StyleEnum.LABEL ) {
+            return ParamStyle.LABEL;
+        }
+        else if (style == StyleEnum.MATRIX) {
+            return ParamStyle.MATRIX;
+        }
+        else if (style == StyleEnum.SPACEDELIMITED) {
+            return ParamStyle.SPACE_DELIMITED;
+        }
+        else if (style == StyleEnum.PIPEDELIMITED ) {
+            return ParamStyle.PIPE_DELIMITED;
+        }
+        else if (style == StyleEnum.DEEPOBJECT ) {
+            return ParamStyle.DEEP_OBJECT;
+        }
+        else if (style == StyleEnum.SIMPLE ) {
+            return ParamStyle.SIMPLE;
+        } else {
+            return ParamStyle.FORM;
+        }
+    }
+
     private static ParamType toParamType(Parameter p) {
         if (p instanceof QueryParameter) {
             return ParamType.QUERY;
@@ -278,7 +308,7 @@ public class ClientServerGenerator {
         params.add(new Param("requestBody", "requestBody", Optional.empty(),
                 org.davidmoten.oa3.codegen.util.Util.orElse(b.getRequired(), true), fullClassName, false,
                 true, Constraints.empty(), ParamType.BODY, false,
-                Optional.empty(), contentType, Optional.empty()));
+                Optional.empty(), contentType, Optional.empty(), ParamStyle.FORM, true));
     }
 
     private Optional<Entry<String, MediaType>> mediaType(Content content, String mimeType) {
@@ -501,10 +531,12 @@ public class ClientServerGenerator {
         public final Optional<String> description;
         public final Optional<String> contentType;
         public final Optional<String> filename;
+        private final ParamStyle style;
+        private final boolean explode;
 
         public Param(String name, String identifier, Optional<Object> defaultValue, boolean required,
                 String fullClassName, boolean isArray, boolean isRequestBody, Constraints constraints, ParamType type,
-                boolean isComplexQueryParameter, Optional<String> description, Optional<String> contentType, Optional<String> filename) {
+                boolean isComplexQueryParameter, Optional<String> description, Optional<String> contentType, Optional<String> filename, ParamStyle style, boolean explode) {
             this.name = name;
             this.identifier = identifier;
             this.defaultValue = defaultValue;
@@ -518,6 +550,8 @@ public class ClientServerGenerator {
             this.description = description;
             this.contentType = contentType;
             this.filename = filename;
+            this.style = style;
+            this.explode = explode;
         }
 
         @Override
