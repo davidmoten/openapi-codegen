@@ -133,7 +133,6 @@ public class ClientServerGenerator {
                         } else {
                             // is complex schema
                             Cls cls = schemaCls.get(resolvedOriginal);
-                            logIfNull(s, cls);
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
                                     cls.fullClassName, isArray, false, constraints(s), toParamType(p), true,
                                     Optional.ofNullable(p.getDescription()), Optional.empty(), Optional.empty());
@@ -257,10 +256,6 @@ public class ClientServerGenerator {
                 Optional.ofNullable(operation.getDescription()), primaryStatusCode,
                 Optional.ofNullable(primaryMimeType.value), responseDescriptors, includeForServerGeneration);
         methods.add(m);
-    }
-
-    private void logIfNull(Schema<?> s, Cls cls) {
-        if (cls == null) System.out.println(s);
     }
 
     private static ParamType toParamType(Parameter p) {
