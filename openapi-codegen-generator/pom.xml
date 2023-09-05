@@ -88,6 +88,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>au.gov.amsa.er</groupId>
+            <artifactId>aussar</artifactId>
+            <version>6.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
