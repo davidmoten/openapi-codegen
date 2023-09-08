@@ -1,5 +1,6 @@
 package org.davidmoten.oa3.codegen.generator.internal;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Optional;
 
 import org.davidmoten.text.utils.WordWrap;
 
+import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 
 public final class Javadoc {
@@ -17,11 +19,11 @@ public final class Javadoc {
     public static boolean printJavadoc(CodePrintWriter out, Indent indent, String text, boolean isHtml) {
         Preconditions.checkNotNull(text);
         return printJavadoc(out, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
-                Collections.emptyMap(), isHtml);
+                Collections.emptyMap(), isHtml, Maps.empty());
     }
 
     public static boolean printJavadoc(CodePrintWriter p, Optional<String> text, List<Annotation> annotations,
-            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml) {
+            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml, Map<String, String> throwing) {
         boolean hasText = text.isPresent() || !annotations.isEmpty() || returns.isPresent();
         boolean addParagraph = false;
         if (hasText) {
@@ -62,13 +64,26 @@ public final class Javadoc {
                     first = false;
                 }
                 p.line(" * @param %s", entry.getKey());
-                p.line(" *            %s", entry.getValue());
+                Arrays.stream(entry.getValue().split("\n")) //
+                        .forEach(line -> p.line(" *            %s", line));
             }
             if (returns.isPresent()) {
                 if (first) {
                     p.line(" * ");
                 }
                 p.line(" * @return %s", returns.get());
+            }
+            if (!throwing.isEmpty()) {
+                if (first) {
+                    p.line(" * ");
+                }
+                throwing //
+                        .entrySet() //
+                        .stream() //
+                        .forEach(entry -> {
+                            p.line(" * @throws %s", entry.getKey());
+                            p.line(" *             %s", entry.getValue()); 
+                        });
             }
             p.line(" */");
         }

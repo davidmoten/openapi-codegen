@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.davidmoten.guavamini.Maps;
 
 public final class ServerCodeWriterSpringBoot {
 
@@ -164,7 +165,7 @@ public final class ServerCodeWriterSpringBoot {
             } else {
                 returns = Optional.empty();
             }
-            writeMethodJavadoc(out, m, returns);
+            writeMethodJavadoc(out, m, returns, Maps.empty());
             out.right().right();
             String params = m.parameters.stream().map(p -> {
                 if (p.isRequestBody) {
@@ -252,7 +253,7 @@ public final class ServerCodeWriterSpringBoot {
         });
     }
 
-    static void writeMethodJavadoc(CodePrintWriter out, Method m, Optional<String> returns) {
+    static void writeMethodJavadoc(CodePrintWriter out, Method m, Optional<String> returns, Map<String, String> throwing) {
         Map<String, String> parameterDescriptions = m.parameters //
                 .stream() //
                 .collect(Collectors.toMap(x -> x.identifier,
@@ -269,7 +270,7 @@ public final class ServerCodeWriterSpringBoot {
                     return String.format("\n<p>[status=%s, %s] --&gt; %s</p>", rd.statusCode(), rd.mediaType(), link);
                 }).collect(Collectors.joining());
         if (!Javadoc.printJavadoc(out, Optional.of(html + more), Collections.emptyList(), Optional.empty(), returns,
-                parameterDescriptions, true)) {
+                parameterDescriptions, true, throwing)) {
             out.println();
         }
     }
