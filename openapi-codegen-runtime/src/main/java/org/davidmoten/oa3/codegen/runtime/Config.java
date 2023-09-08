@@ -43,6 +43,7 @@ public final class Config {
                     .registerModule(new JavaTimeModule()) //
                     .registerModule(new Jdk8Module()) //
                     .registerModule(new JsonNullableModule());
+            // in Jackson 2.15 a 5MB limit on streams was introduced. Configure this off
             StreamReadConstraints streamReadConstraints = StreamReadConstraints.builder()
                     .maxStringLength(Integer.MAX_VALUE).build();
             mapper.getFactory().setStreamReadConstraints(streamReadConstraints);
