@@ -81,6 +81,11 @@ public final class Javadoc {
                         .entrySet() //
                         .stream() //
                         .forEach(entry -> p.line(" * @throws %s %s", simpleClassName(entry.getKey()), entry.getValue()));
+                throwing //
+                        .entrySet() //
+                        .stream() //
+                        .forEach(
+                                entry -> p.line(" * @see %s", entry.getKey()));
             }
             p.line(" */");
         }
