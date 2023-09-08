@@ -12,7 +12,7 @@ import java.lang.String;
 import java.util.Map;
 import java.util.Objects;
 
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.4")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.6")
 public enum Language {
 
     CHINESE("Chinese"),
