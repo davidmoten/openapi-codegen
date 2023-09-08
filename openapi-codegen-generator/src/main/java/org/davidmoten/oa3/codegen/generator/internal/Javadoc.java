@@ -80,25 +80,14 @@ public final class Javadoc {
                 throwing //
                         .entrySet() //
                         .stream() //
-                        .forEach(entry -> p.line(" * @throws %s %s", simpleClassName(entry.getKey()), entry.getValue()));
-                throwing //
-                        .entrySet() //
-                        .stream() //
-                        .forEach(
-                                entry -> p.line(" * @see %s", entry.getKey()));
+                        .forEach(entry -> {
+                            p.line(" * @throws %s", entry.getKey());
+                            p.line(" *             %s", entry.getValue()); 
+                        });
             }
             p.line(" */");
         }
         return hasText;
-    }
-
-    private static String simpleClassName(String name) {
-        int i = name.lastIndexOf(".");
-        if (i == -1) {
-            return name;
-        } else {
-            return name.substring(i + 1);
-        }
     }
 
     private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {
