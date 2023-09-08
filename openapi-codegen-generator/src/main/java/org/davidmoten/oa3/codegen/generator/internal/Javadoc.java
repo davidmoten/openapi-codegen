@@ -1,5 +1,6 @@
 package org.davidmoten.oa3.codegen.generator.internal;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,8 @@ public final class Javadoc {
                     first = false;
                 }
                 p.line(" * @param %s", entry.getKey());
-                p.line(" *            %s", entry.getValue());
+                Arrays.stream(entry.getValue().split("\n")) //
+                        .forEach(line -> p.line(" *            %s", line));
             }
             if (returns.isPresent()) {
                 if (first) {
