@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import org.openapitools.jackson.nullable.JsonNullableModule;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -31,14 +32,23 @@ public final class Config {
 
     public static final class Builder {
 
-        private ObjectMapper mapper = JsonMapper //
-                .builder() //
-                .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS) //
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) //
-                .build() //
-                .registerModule(new JavaTimeModule()) //
-                .registerModule(new Jdk8Module()) //
-                .registerModule(new JsonNullableModule());
+        private ObjectMapper mapper = createObjectMapper();
+
+        private static ObjectMapper createObjectMapper() {
+            ObjectMapper mapper = JsonMapper //
+                    .builder() //
+                    .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS) //
+                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) //
+                    .build() //
+                    .registerModule(new JavaTimeModule()) //
+                    .registerModule(new Jdk8Module()) //
+                    .registerModule(new JsonNullableModule());
+            // in Jackson 2.15 a 5MB limit on streams was introduced. Configure this off
+            StreamReadConstraints streamReadConstraints = StreamReadConstraints.builder()
+                    .maxStringLength(Integer.MAX_VALUE).build();
+            mapper.getFactory().setStreamReadConstraints(streamReadConstraints);
+            return mapper;
+        }
 
         private Predicate<? super Class<?>> validateInConstructor = x -> true;
         private Predicate<? super String> validateInControllerMethod = x -> true;
