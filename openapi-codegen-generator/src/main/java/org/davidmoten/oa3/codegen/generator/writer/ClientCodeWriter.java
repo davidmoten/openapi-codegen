@@ -1,6 +1,8 @@
 package org.davidmoten.oa3.codegen.generator.writer;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,8 +16,11 @@ import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.http.Interceptor;
+import org.davidmoten.oa3.codegen.http.NotPrimaryResponseException;
 import org.davidmoten.oa3.codegen.http.Serializer;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
+
+import com.github.davidmoten.guavamini.Maps;
 
 public class ClientCodeWriter {
 
@@ -90,7 +95,9 @@ public class ClientCodeWriter {
                 } else {
                     returns = Optional.empty();
                 }
-                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m, returns);
+                Map<String, String> throwing = new HashMap<>();
+                throwing.put(NotPrimaryResponseException.class.getCanonicalName(), " if an unexpected HTTP status code or Content-Type is returned");
+                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m, returns, throwing);
                 out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 final String paramIdentifiers;
                 if (m.parameters.size() <= 3) {
@@ -111,7 +118,7 @@ public class ClientCodeWriter {
                 out.closeParen();
             }
             ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
-                    Optional.of("full response with status code, body and headers"));
+                    Optional.of("full response with status code, body and headers"), Maps.empty());
             out.line("public %s %s%s(%s) {", HttpResponse.class, m.methodName, FULL_RESPONSE_SUFFIX, params);
             out.line("return %s", Http.class);
             out.right().right();

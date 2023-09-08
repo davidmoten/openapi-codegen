@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.davidmoten.text.utils.WordWrap;
 
+import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 
 public final class Javadoc {
@@ -18,11 +19,11 @@ public final class Javadoc {
     public static boolean printJavadoc(CodePrintWriter out, Indent indent, String text, boolean isHtml) {
         Preconditions.checkNotNull(text);
         return printJavadoc(out, Optional.of(text), Collections.emptyList(), Optional.empty(), Optional.empty(),
-                Collections.emptyMap(), isHtml);
+                Collections.emptyMap(), isHtml, Maps.empty());
     }
 
     public static boolean printJavadoc(CodePrintWriter p, Optional<String> text, List<Annotation> annotations,
-            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml) {
+            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml, Map<String, String> throwing) {
         boolean hasText = text.isPresent() || !annotations.isEmpty() || returns.isPresent();
         boolean addParagraph = false;
         if (hasText) {
@@ -72,9 +73,27 @@ public final class Javadoc {
                 }
                 p.line(" * @return %s", returns.get());
             }
+            if (!throwing.isEmpty()) {
+                if (first) {
+                    p.line(" * ");
+                }
+                throwing //
+                        .entrySet() //
+                        .stream() //
+                        .forEach(entry -> p.line(" * @throws %s %s", simpleClassName(entry.getKey()), entry.getValue()));
+            }
             p.line(" */");
         }
         return hasText;
+    }
+
+    private static String simpleClassName(String name) {
+        int i = name.lastIndexOf(".");
+        if (i == -1) {
+            return name;
+        } else {
+            return name.substring(i + 1);
+        }
     }
 
     private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {
