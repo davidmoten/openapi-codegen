@@ -260,6 +260,7 @@ paths:
     parameters:
      - in: query
        name: id
+       description: here's a long identifier description that is more of an essay and is expected to be wrapped at generation time when appearing in javadoc
        required: true
        schema:
          type: string

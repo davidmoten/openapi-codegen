@@ -1,6 +1,5 @@
 package org.davidmoten.oa3.codegen.generator.internal;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,8 @@ public final class Javadoc {
     }
 
     public static boolean printJavadoc(CodePrintWriter p, Optional<String> text, List<Annotation> annotations,
-            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml, Map<String, String> throwing) {
+            Optional<String> preamble, Optional<String> returns, Map<String, String> parameterDoc, boolean isHtml,
+            Map<String, String> throwing) {
         boolean hasText = text.isPresent() || !annotations.isEmpty() || returns.isPresent();
         boolean addParagraph = false;
         if (hasText) {
@@ -64,8 +64,7 @@ public final class Javadoc {
                     first = false;
                 }
                 p.line(" * @param %s", entry.getKey());
-                Arrays.stream(entry.getValue().split("\n")) //
-                        .forEach(line -> p.line(" *            %s", line));
+                encodeAndWrapForJavadoc(entry.getValue(), isHtml, String.format("%s *            ", p.indent()));
             }
             if (returns.isPresent()) {
                 if (first) {
@@ -82,7 +81,7 @@ public final class Javadoc {
                         .stream() //
                         .forEach(entry -> {
                             p.line(" * @throws %s", entry.getKey());
-                            p.line(" *             %s", entry.getValue()); 
+                            p.line(" *             %s", entry.getValue());
                         });
             }
             p.line(" */");
@@ -91,12 +90,16 @@ public final class Javadoc {
     }
 
     private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {
+        return encodeAndWrapForJavadoc(s, isHtml, String.format("\n%s * ", indent));
+    }
+
+    private static String encodeAndWrapForJavadoc(String s, boolean isHtml, String linePrefix) {
         s = s.trim().replace("{@", "zxxz");
         if (!isHtml) {
             s = wrap(s);
         }
         return encodeJavadoc(s, isHtml) //
-                .replace("\n", String.format("\n%s * ", indent)) //
+                .replace("\n", linePrefix) //
                 .replace("zxxz", "{@");
     }
 
