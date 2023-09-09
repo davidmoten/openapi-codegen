@@ -64,7 +64,7 @@ public final class Javadoc {
                     first = false;
                 }
                 p.line(" * @param %s", entry.getKey());
-                encodeAndWrapForJavadoc(entry.getValue(), isHtml, String.format("%s *            ", p.indent()));
+                p.line(" *            %s", encodeAndWrapForJavadoc(entry.getValue(), false, String.format("\n%s *            ", p.indent())));
             }
             if (returns.isPresent()) {
                 if (first) {

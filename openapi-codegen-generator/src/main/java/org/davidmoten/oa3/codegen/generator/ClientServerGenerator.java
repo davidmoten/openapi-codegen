@@ -524,7 +524,8 @@ public class ClientServerGenerator {
         public String toString() {
             return "Param [" + identifier + ", name=" + name + ", defaultValue=" + defaultValue.orElse("") + ", required="
                     + required + ", cls=" + fullClassName + ", isArray=" + isArray + ", contentType="
-                    + contentType.orElse("") + ", filename=" + filename.orElse("") + "]";
+                    + contentType.orElse("") + ", filename=" + filename.orElse("") + ", desc='" + description.orElse("") + "']";
+                            
         }
     }
 
