@@ -267,6 +267,14 @@ paths:
          Here's a long identifier description that is *more* of an **essay** 
          written in `markdown` and is expected to be converted to html at generation time
          when appearing in javadoc and is > 80 chars with an illegal javadoc char
+         
+         And a *table*
+         
+         | Item Type  | Description                    |
+         | ---        | ---                            |
+         | vehicle    | car, truck, bike, motorbike    |
+         | aircraft   | monoplane, biplane, helicopter |
+         
        required: true
        schema:
          type: string
