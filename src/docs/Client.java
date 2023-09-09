@@ -52,6 +52,8 @@ public class Client {
      * @param continuationToken
      *            continuationToken
      * @return primary response with status code 200
+     * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
+     *              if an unexpected HTTP status code or Content-Type is returned
      */
     public UsersPage getUsers(
             Optional<String> search, 
@@ -122,6 +124,8 @@ public class Client {
      * @param id
      *            id
      * @return primary response with status code 200
+     * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
+     *              if an unexpected HTTP status code or Content-Type is returned
      */
     public User getUser(
             String id) {
@@ -212,6 +216,8 @@ public class Client {
      * @param itemId
      *            itemId
      * @return primary response with status code 200
+     * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
+     *              if an unexpected HTTP status code or Content-Type is returned
      */
     public Item getItem(
             String itemId) {
