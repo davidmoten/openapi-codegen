@@ -91,17 +91,6 @@ public final class Javadoc {
         return hasText;
     }
 
-    private static String simplifyParameterHtml(String html) {
-        if (!html.startsWith("<p>")) {
-            return html;
-        } else if (html.substring(3).contains("<")) {
-            // has html tags other than <p>
-            return html;
-        } else {
-            return html.substring(3);
-        }
-    }
-
     private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {
         return encodeAndWrapForJavadoc(s, isHtml, String.format("\n%s * ", indent));
     }
