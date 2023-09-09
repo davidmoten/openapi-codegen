@@ -64,7 +64,9 @@ public final class Javadoc {
                     first = false;
                 }
                 p.line(" * @param %s", entry.getKey());
-                p.line(" *            %s", encodeAndWrapForJavadoc(entry.getValue(), false, String.format("\n%s *            ", p.indent())));
+                String encoded = encodeAndWrapForJavadoc(entry.getValue(), true,
+                        String.format("\n%s *            ", p.indent()));
+                p.line(" *            %s", encoded);
             }
             if (returns.isPresent()) {
                 if (first) {
@@ -87,6 +89,17 @@ public final class Javadoc {
             p.line(" */");
         }
         return hasText;
+    }
+
+    private static String simplifyParameterHtml(String html) {
+        if (!html.startsWith("<p>")) {
+            return html;
+        } else if (html.substring(3).contains("<")) {
+            // has html tags other than <p>
+            return html;
+        } else {
+            return html.substring(3);
+        }
     }
 
     private static String encodeAndWrapForJavadoc(String s, Indent indent, boolean isHtml) {

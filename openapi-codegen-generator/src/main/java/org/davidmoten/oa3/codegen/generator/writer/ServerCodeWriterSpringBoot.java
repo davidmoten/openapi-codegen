@@ -257,7 +257,7 @@ public final class ServerCodeWriterSpringBoot {
         Map<String, String> parameterDescriptions = m.parameters //
                 .stream() //
                 .collect(Collectors.toMap(x -> x.identifier,
-                        x -> x.description.orElse(x.identifier)));
+                        x -> WriterUtil.markdownToHtml(x.description.orElse(x.identifier))));
         String html = m.description.map(x -> WriterUtil.markdownToHtml(x))
                 .orElse("<p>Returns response from call to path <i>%s</i>.</p>");
         String more = m.responseDescriptors.stream() //
