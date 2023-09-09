@@ -348,6 +348,7 @@ In addition to unit tests, openapi-codegen appears to generate valid classes for
 * OpenAI
 * Atlassian JIRA
 * Twitter
+* Stripe
 
 Docusign api needs work here because has more than 255 fields in an object which exceeds Java contructor limits.
 
