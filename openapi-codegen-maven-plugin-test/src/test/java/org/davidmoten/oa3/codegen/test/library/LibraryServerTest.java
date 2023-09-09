@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.http.BearerAuthenticator;
-import org.davidmoten.oa3.codegen.http.service.ApacheHttpClientHttpService;
-import org.davidmoten.oa3.codegen.http.service.DefaultHttpService;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.test.Helper;
 import org.davidmoten.oa3.codegen.test.library.client.Client;
@@ -21,7 +19,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.github.davidmoten.guavamini.Lists;
 
 @SpringBootTest(classes = { LibraryApplication.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
