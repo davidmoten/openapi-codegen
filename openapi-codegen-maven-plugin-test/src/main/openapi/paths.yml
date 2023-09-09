@@ -257,9 +257,11 @@ paths:
           $ref: '#/components/responses/Error'   
           
   /params:
+    description: params test
     parameters:
      - in: query
        name: id
+       description: here's a long identifier description that is more of an essay and is expected to be wrapped at generation time when appearing in javadoc and is > 80 chars
        required: true
        schema:
          type: string
