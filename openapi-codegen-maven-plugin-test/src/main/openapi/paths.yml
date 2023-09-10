@@ -275,6 +275,27 @@ paths:
          | vehicle    | car, truck, bike, motorbike    |
          | aircraft   | monoplane, biplane, helicopter |
          
+         ```
+         what happens to stuff like <this>?
+         ```
+         
+         Note that tables in commonMark are done with html not like with GitHub flavoured mark
+         down
+         
+         <table>
+           <thead>
+             <tr>
+               <th>Header</th>
+               <th>Another Header</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr>
+               <td>field 1</td>
+               <td>value one</td>
+             </tr>
+           </tbody>
+         </table>
        required: true
        schema:
          type: string
