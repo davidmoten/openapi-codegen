@@ -40,7 +40,7 @@
         <guava.mini.version>0.1.6</guava.mini.version>
         <jackson.version>2.15.2</jackson.version>
         <spring.boot.version>2.7.15</spring.boot.version>
-        <spring.version>5.3.29</spring.version>
+        <spring.version>5.3.30</spring.version>
         <httpclient5.version>5.2.1</httpclient5.version>
         <junit.version>5.10.0</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
