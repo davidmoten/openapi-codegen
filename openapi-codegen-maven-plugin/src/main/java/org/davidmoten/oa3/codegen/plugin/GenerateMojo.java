@@ -110,7 +110,7 @@ public final class GenerateMojo extends AbstractMojo {
                         Sets.newHashSet(orElse(includeSchemas, Collections.emptyList())),
                         Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
                         mapNumberToBigDecimal, failOnParseErrors, Optional.ofNullable(generator), generateService);
-                new Generator(d).generate(generateService);
+                new Generator(d).generate();
                 if (generateService || generateClient) {
                     ClientServerGenerator g = new ClientServerGenerator(d);
                     if (generateService) {
