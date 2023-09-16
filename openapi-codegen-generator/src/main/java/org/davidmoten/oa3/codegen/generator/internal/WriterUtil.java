@@ -25,13 +25,23 @@ public final class WriterUtil {
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
     public static final String IMPORTS_HERE = "IMPORTS_HERE";
 
-    private static final String version = readVersion();
+    public static final String GROUP_ID_ARTIFACT_ID_VERSION = readMavenCoordinates();
 
-    private static String readVersion() {
+    private static String readMavenCoordinates() {
         Properties p = new Properties();
         try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
             p.load(in);
             return p.get("groupId") + ":" + p.get("artifactId") + ":" + p.get("version");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+    
+    public static String readVersion() {
+        Properties p = new Properties();
+        try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
+            p.load(in);
+            return String.valueOf(p.get("version"));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -79,7 +89,7 @@ public final class WriterUtil {
     }
 
     public static void addGeneratedAnnotation(CodePrintWriter out) {
-        out.line("@%s(value = \"%s\")", Generated.class, version);
+        out.line("@%s(value = \"%s\")", Generated.class, GROUP_ID_ARTIFACT_ID_VERSION);
     }
 
     public static String escapePattern(String pattern) {

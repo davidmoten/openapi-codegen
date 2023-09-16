@@ -183,6 +183,9 @@ info:
     occurs and the user should be able to see the actual broadcast times.
     
     **TODO** discuss with satellite providers
+
+servers:
+  - url: https://myservice.com/v1
     
 paths:
 

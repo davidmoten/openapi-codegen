@@ -4,6 +4,9 @@ info:
   title: path tests
   version: 0.1
 
+servers:
+  - url: https://myservice.com/v1
+
 paths:
 
   /requestBodyRequired:
