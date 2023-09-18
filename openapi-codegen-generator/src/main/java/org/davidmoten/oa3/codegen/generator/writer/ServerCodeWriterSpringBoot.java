@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -204,7 +205,13 @@ public final class ServerCodeWriterSpringBoot {
             } else if (!m.returnFullClassName.isPresent()) {
                 importedReturnType = "void";
             } else {
-                importedReturnType = out.add(m.returnFullClassName.get());
+                final String fullClassName;
+                if (m.returnFullClassName.orElse("").equals(byte[].class.getCanonicalName())) {
+                    fullClassName = Resource.class.getCanonicalName();
+                } else {
+                    fullClassName = m.returnFullClassName.get();
+                }
+                importedReturnType = out.add(fullClassName);
             }
 //            @RequestMapping(
 //                    method = RequestMethod.POST,

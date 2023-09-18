@@ -55,7 +55,7 @@ public class DefaultSerializer implements Serializer {
                 try (InputStream is = in) {
                     return (T) new String(Util.read(is), StandardCharsets.UTF_8);
                 }
-            } else if (cls.equals(byte[].class) && MediaType.isOctetStream(contentType)) {
+            } else if (MediaType.isOctetStream(contentType)) {
                 try (InputStream is = in) {
                     return (T) Util.read(is);
                 }
