@@ -1,13 +1,16 @@
 package org.davidmoten.oa3.codegen.generator.writer;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.client.runtime.ClientBuilder;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
+import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.ResponseDescriptor;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
@@ -16,6 +19,7 @@ import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.http.Interceptor;
+import org.davidmoten.oa3.codegen.http.MediaType;
 import org.davidmoten.oa3.codegen.http.NotPrimaryResponseException;
 import org.davidmoten.oa3.codegen.http.Serializer;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
@@ -88,6 +92,8 @@ public class ClientCodeWriter {
             } else {
                 importedReturnType = out.add(m.returnFullClassName.get());
             }
+            // we don't want the Resource type being used on the client side
+            // TODO use actual type (usually wrapped binary)?
             if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
                 final Optional<String> returns;
                 if (m.returnFullClassName.isPresent()) {
@@ -96,7 +102,8 @@ public class ClientCodeWriter {
                     returns = Optional.empty();
                 }
                 Map<String, String> throwing = new HashMap<>();
-                throwing.put(NotPrimaryResponseException.class.getCanonicalName(), " if an unexpected HTTP status code or Content-Type is returned");
+                throwing.put(NotPrimaryResponseException.class.getCanonicalName(),
+                        " if an unexpected HTTP status code or Content-Type is returned");
                 ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m, returns, throwing);
                 out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
                 final String paramIdentifiers;
@@ -128,7 +135,17 @@ public class ClientCodeWriter {
             out.line(".serializer(this.serializer)");
             out.line(".interceptors(this.interceptors)");
             out.line(".httpService(this.httpService)");
-            out.line(".acceptApplicationJson()");
+            Set<String> used = new HashSet<>();
+            for (ResponseDescriptor rd : m.responseDescriptors) {
+                if (!used.contains(rd.mediaType())) {
+                    if (MediaType.isJson(rd.mediaType())) {
+                        out.line(".acceptApplicationJson()");
+                    } else {
+                        out.line(".accept(\"%s\")", rd.mediaType());
+                    }
+                    used.add(rd.mediaType());
+                }
+            }
             m.parameters.forEach(p -> {
                 if (p.type == ParamType.QUERY) {
                     out.line(".queryParam(\"%s\", %s)", p.name, p.identifier);

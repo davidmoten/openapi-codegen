@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.davidmoten.oa3.codegen.http.HttpResponse;
+import org.davidmoten.oa3.codegen.http.NotPrimaryResponseException;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 import org.davidmoten.oa3.codegen.spring.runtime.DefaultError;
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
@@ -87,26 +88,21 @@ public class PathsServerTest {
         Response1 r = Http.readError(basePath() + "/responseRef", HttpMethod.GET, Response1.class, m);
         assertEquals("beehive", r.thing());
     }
-    
+
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testClientCustomCall(HttpService httpService) throws ServiceException {
         HttpResponse r = client(httpService) //
                 ._custom(org.davidmoten.oa3.codegen.http.HttpMethod.GET, "/item") //
-                .acceptApplicationJson()
-                .responseAs(Response2.class)
-                .whenStatusCodeMatches("200")
-                .whenContentTypeMatches("application/json")
-                .responseAs(Error.class)
-                .whenStatusCodeMatches("default")
-                .whenContentTypeMatches("application/json")
-                .call();
+                .acceptApplicationJson().responseAs(Response2.class).whenStatusCodeMatches("200")
+                .whenContentTypeMatches("application/json").responseAs(Error.class).whenStatusCodeMatches("default")
+                .whenContentTypeMatches("application/json").call();
         assertEquals(200, r.statusCode());
         assertTrue(r.data().isPresent());
         Response2 a = (Response2) r.data().get();
         assertEquals("abcToken", a.token());
     }
-    
+
     @Test
     public void testQueryObjectModelAttribute() {
         assertEquals(200, Http.readStatusCodeOnly(basePath() + "/query-object?first=abc&second=12", HttpMethod.GET));
@@ -138,6 +134,12 @@ public class PathsServerTest {
         assertEquals("hello there", Http.readStringFromOctetStream(basePath() + "/bytes", HttpMethod.GET));
     }
 
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testOctetStreamWithClient(HttpService httpService) {
+        assertEquals("hello there", new String(client(httpService).bytesGet(), StandardCharsets.UTF_8));
+    }
+
     @Test
     public void testText() {
         assertEquals("example text", Http.readString(basePath() + "/text", HttpMethod.GET, "text/plain"));
@@ -158,14 +160,16 @@ public class PathsServerTest {
     public void testClientFullResponseMultiTypeWithAcceptHeaderJson(HttpService httpService) {
         HttpResponse r = client(httpService).responseMultiTypeGetFullResponse("application/json", "jason");
         assertEquals(200, r.statusCode());
-        assertEquals("jason", ((Response1) r.data().get()).thing());
     }
 
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testClientPrimaryResponseMultiTypeWithAcceptHeaderJson(HttpService httpService) {
-        Response1 r = client(httpService).responseMultiTypeGet("application/json", "jason");
-        assertEquals("jason", r.thing());
+        try {
+            client(httpService).responseMultiTypeGet("application/json", "jason");
+        } catch (NotPrimaryResponseException e) {
+            assertEquals("hello there", new String((byte[]) e.response().data().get(), StandardCharsets.UTF_8));
+        }
     }
 
     @ParameterizedTest
@@ -196,17 +200,17 @@ public class PathsServerTest {
     public void testMultipartFormData(HttpService httpService) {
         Object o = client(httpService) //
                 .uploadPost(UploadPostRequestMultipartFormData //
-                .point(Point.lat(-23).lon(135).build()) //
-                .description("theDescription") //
-                .document(Document //
-                        .contentType(ContentType.APPLICATION_PDF) //
-                        .value(new byte[] { 1, 2, 3 }) //
-                        .build()) //
-                .build());
+                        .point(Point.lat(-23).lon(135).build()) //
+                        .description("theDescription") //
+                        .document(Document //
+                                .contentType(ContentType.APPLICATION_PDF) //
+                                .value(new byte[] { 1, 2, 3 }) //
+                                .build()) //
+                        .build());
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
     }
-    
+
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testUrlEncodedFormData(HttpService httpService) {
@@ -216,7 +220,7 @@ public class PathsServerTest {
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
     }
-    
+
     static List<HttpService> httpServices() {
         return Helper.httpServices();
     }

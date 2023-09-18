@@ -20,7 +20,6 @@ import org.davidmoten.oa3.codegen.generator.internal.Util;
 import org.davidmoten.oa3.codegen.generator.writer.ClientCodeWriter;
 import org.davidmoten.oa3.codegen.generator.writer.ServerCodeWriterSpringBoot;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
-import org.springframework.core.io.Resource;
 
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -212,7 +211,7 @@ public class ClientServerGenerator {
                 } else {
                     // loop through all mime-types and pick first non-default to infer return class
                     // name
-                    final String defaultReturnClassFullName = Resource.class.getCanonicalName();
+                    final String defaultReturnClassFullName = byte[].class.getCanonicalName();
                     returnFullClassName = content. //
                             keySet() //
                             .stream() //

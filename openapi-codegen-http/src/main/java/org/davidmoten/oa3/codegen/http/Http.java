@@ -114,11 +114,15 @@ public final class Http {
         }
 
         public Builder acceptApplicationJson() {
-            return header("Accept", "application/json");
+            return accept("application/json");
         }
 
         public Builder acceptAny() {
-            return header("Accept", "*/*");
+            return accept("*/*");
+        }
+        
+        public Builder accept(String mediaType) {
+            return header("Accept", mediaType);
         }
 
         public Builder param(String name, Optional<?> value, ParameterType type, Optional<String> contentType) {
