@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -105,6 +107,31 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         }
         try {
             Constructor<T> con = cls.getDeclaredConstructor(classes.toArray(new Class<?>[] {}));
+            con.setAccessible(true);
+            return con.newInstance(list.toArray());
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private static <T> T deserializeAnyOf2(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls)
+            throws JsonMappingException, JsonProcessingException {
+        ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        List<Object> list = new ArrayList<>();
+        for (Class<?> c : classes) {
+            try {
+                list.add(Optional.of(m.readValue(json, c)));
+            } catch (DatabindException e) {
+                list.add(Optional.empty());
+            }
+        }
+        try {
+            Constructor<T> con = cls.getDeclaredConstructor(classes //
+                    .stream() //
+                    .map(c -> Optional.class) //
+                    .collect(Collectors.toList()) //
+                    .toArray(new Class<?>[] {}));
             con.setAccessible(true);
             return con.newInstance(list.toArray());
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
