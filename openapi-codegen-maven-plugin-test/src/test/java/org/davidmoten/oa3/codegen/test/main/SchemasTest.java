@@ -58,6 +58,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.External;
 import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
+import org.davidmoten.oa3.codegen.test.main.schema.LargeInt;
 import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
 import org.davidmoten.oa3.codegen.test.main.schema.Longitude;
 import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcast;
@@ -81,6 +82,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
 import org.davidmoten.oa3.codegen.test.main.schema.ObjectNoOptionalFields;
+import org.davidmoten.oa3.codegen.test.main.schema.OneOfUsesConstraints;
 import org.davidmoten.oa3.codegen.test.main.schema.Oval3;
 import org.davidmoten.oa3.codegen.test.main.schema.Payload;
 import org.davidmoten.oa3.codegen.test.main.schema.Pet;
@@ -109,6 +111,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.SimpleTime;
 import org.davidmoten.oa3.codegen.test.main.schema.SingleNotOptional;
 import org.davidmoten.oa3.codegen.test.main.schema.SingleOptional;
 import org.davidmoten.oa3.codegen.test.main.schema.SingletonEnum;
+import org.davidmoten.oa3.codegen.test.main.schema.SmallInt;
 import org.davidmoten.oa3.codegen.test.main.schema.Square;
 import org.davidmoten.oa3.codegen.test.main.schema.Square2;
 import org.davidmoten.oa3.codegen.test.main.schema.Status;
@@ -1086,6 +1089,24 @@ public class SchemasTest {
         m.readValue(json, MixRequiredAndNotRequiredWithConstraint.class);
     }
 
+    @Test
+    public void testOneOfDeserializerUsesConstraintsSmall() throws JsonMappingException, JsonProcessingException {
+        OneOfUsesConstraints u = m.readValue("1", OneOfUsesConstraints.class);
+        assertTrue(u.value() instanceof SmallInt);
+    }
+    
+    @Test
+    public void testOneOfDeserializerUsesConstraintsLarge() throws JsonMappingException, JsonProcessingException {
+        OneOfUsesConstraints u = m.readValue("1000", OneOfUsesConstraints.class);
+        assertTrue(u.value() instanceof LargeInt);
+    }
+    
+    @Test
+    public void testOneOfDeserializerUsesConstraintsTooManyMatches()
+            throws JsonMappingException, JsonProcessingException {
+        assertThrows(JsonMappingException.class, () -> m.readValue("100", OneOfUsesConstraints.class));
+    }
+    
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
