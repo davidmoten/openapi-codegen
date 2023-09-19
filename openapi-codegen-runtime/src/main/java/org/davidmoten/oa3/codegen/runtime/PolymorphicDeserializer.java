@@ -48,7 +48,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         // parser to read value, perf advantage and can stop plugging in ObjectMapper
         String json = mapper.writeValueAsString(tree);
         if (type == PolymorphicType.ANY_OF) {
-            return deserializeAnyOf(mapper, json, classes, cls, ctxt);
+            return deserializeAnyOf2(mapper, json, classes, cls, ctxt);
         } else if (type == PolymorphicType.ONE_OF) {
             return deserializeOneOf(mapper, json, classes, cls, ctxt);
         } else {
@@ -115,14 +115,18 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         }
     }
     
-    private static <T> T deserializeAnyOf2(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls)
+    private static <T> T deserializeAnyOf2(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls,
+            DeserializationContext ctxt)
             throws JsonMappingException, JsonProcessingException {
         ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         List<Object> list = new ArrayList<>();
+        System.out.println(json);
         for (Class<?> c : classes) {
             try {
+                System.out.println(c);
                 list.add(Optional.of(m.readValue(json, c)));
             } catch (DatabindException e) {
+                e.printStackTrace();
                 list.add(Optional.empty());
             }
         }

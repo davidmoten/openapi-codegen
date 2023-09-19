@@ -6,13 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
@@ -37,12 +40,18 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -452,6 +461,25 @@ public class SerializationTest {
         String json = m.writeValueAsString(NullableEnum.HELLO);
         assertEquals(NullableEnum.HELLO, m.readValue(json, NullableEnum.class));
     }
+    
+    @Test
+    public void testAnyOf() throws JsonProcessingException {
+        Person p = new Person();
+        p.firstName = "fred";
+        p.lastName = "smith";
+        p.common = "something";
+        Person2 p2 = new Person2();
+        p2.firstName = "fred";
+        p2.lastName = "smith";
+        p2.hasSeniorCard = true;
+        AnyOf a = new AnyOf(Optional.of(p), Optional.of(p2));
+        String json = m.writeValueAsString(a);
+        AnyOf b = m.readValue(json, AnyOf.class);
+        System.out.println(b);
+        System.out.println(b.person);
+        System.out.println(b.person2);
+        String json2 = m.writeValueAsString(b);
+    }
 
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
@@ -496,10 +524,133 @@ public class SerializationTest {
     }
 
     @JsonInclude(Include.NON_NULL)
+    @JsonDeserialize(using = AnyOf.Deserializer.class)
+    @JsonSerialize(using = AnyOf.Serializer.class)
+    public static final class AnyOf {
+
+        public final Optional<Person> person;
+
+        public final Optional<Person2> person2;
+
+        public AnyOf(Optional<Person> person, Optional<Person2> person2) {
+            this.person = person;
+            this.person2 = person2;
+        }
+
+        @SuppressWarnings("serial")
+        public static final class Deserializer extends PolymorphicDeserializer<AnyOf> {
+            protected Deserializer() {
+                super(Config.builder().build(), PolymorphicType.ANY_OF, AnyOf.class, Person.class, Person2.class);
+            }
+        }
+
+        @SuppressWarnings("serial")
+        public static final class Serializer extends AnyOfSerializer<AnyOf> {
+            protected Serializer() {
+                super(Config.builder().build(), AnyOf.class, Person.class, Person2.class);
+            }
+        }
+    }
+
+    @SuppressWarnings("serial")
+    private static class AnyOfSerializer<T> extends StdSerializer<T> {
+
+        private final Class<T> cls;
+        private final ObjectMapper mapper;
+
+        protected AnyOfSerializer(Config config, Class<T> cls, Class<?>... classes) {
+            super(cls);
+            this.cls = cls;
+            this.mapper = config.mapper();
+        }
+
+        @Override
+        public void serialize(T value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            // loop through fields
+            List<Optional<?>> values = Arrays.stream(cls.getFields()) //
+                    .map(f -> {
+                        try {
+                            System.out.println(f.getName() + " of " + value);
+                            return (Optional<?>) f.get(value);
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }) //
+                    .collect(Collectors.toList());
+            JsonNode node = values.stream() //
+                    .filter(Optional::isPresent) //
+                    .map(x -> {
+                        try {
+                            return mapper.writeValueAsString(x);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }) //
+                    .map(x -> {
+                        try {
+                            return mapper.readTree(x);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }) //
+                    .collect(Collectors.reducing((a, b) -> merge(a, b))).get();
+            gen.writeString(mapper.writeValueAsString(node));
+        }
+    }
+
+    /**
+     * Merges b into a. Only works properly with anyOf serialization
+     * 
+     * @param a input that will be mutated to contain merged result
+     * @param b node to merge into a
+     */
+    private static JsonNode merge(JsonNode a, JsonNode b) {
+        if (a == null || b == null || !a.isArray() && !a.isObject()) {
+            return a;
+        }
+        if (a.isArray()) {
+            if (!b.isArray()) {
+                // shouldn't happen
+                throw new IllegalStateException("unexpected");
+            }
+            ArrayNode x = (ArrayNode) a;
+            ArrayNode y = (ArrayNode) b;
+            if (x.size() != y.size()) {
+                // shouldn't happen
+                throw new IllegalStateException("array lengths don't match");
+            }
+            for (int i = 0; i < x.size(); i++) {
+                merge(x.get(i), y.get(i));
+            }
+        }
+        Iterator<String> fieldNames = b.fieldNames();
+        while (fieldNames.hasNext()) {
+            String fieldName = fieldNames.next();
+            JsonNode node = a.get(fieldName);
+            // if field exists and is an embedded object
+            if (node != null) {
+                merge(node, b.get(fieldName));
+            } else {
+                // Overwrite field
+                JsonNode value = b.get(fieldName);
+                ((ObjectNode) a).replace(fieldName, value);
+            }
+        }
+        return a;
+    }
+
+    @JsonInclude(Include.NON_NULL)
     public static final class Person {
         public String firstName;
         public String lastName;
         public String common;
+    }
+    
+    @JsonInclude(Include.NON_NULL)
+    public static final class Person2 {
+        public String firstName;
+        public String lastName;
+        public boolean hasSeniorCard;
     }
 
     @JsonInclude(Include.NON_NULL)
