@@ -468,6 +468,8 @@ public class SerializationTest {
         p.firstName = "fred";
         p.lastName = "smith";
         p.common = "something";
+        String pJson = m.writeValueAsString(p);
+        m.readValue(pJson, Person.class);
         Person2 p2 = new Person2();
         p2.firstName = "fred";
         p2.lastName = "smith";
@@ -475,10 +477,11 @@ public class SerializationTest {
         AnyOf a = new AnyOf(Optional.of(p), Optional.of(p2));
         String json = m.writeValueAsString(a);
         AnyOf b = m.readValue(json, AnyOf.class);
-        System.out.println(b);
-        System.out.println(b.person);
-        System.out.println(b.person2);
-        String json2 = m.writeValueAsString(b);
+        assertTrue(b.person.isPresent());
+        assertTrue(b.person2.isPresent());
+        assertEquals(json, m.writeValueAsString(b));
+        assertEquals("something", b.person.get().common);
+        assertTrue(b.person2.get().hasSeniorCard);
     }
 
     @JsonInclude(Include.NON_NULL)
@@ -570,7 +573,6 @@ public class SerializationTest {
             List<Optional<?>> values = Arrays.stream(cls.getFields()) //
                     .map(f -> {
                         try {
-                            System.out.println(f.getName() + " of " + value);
                             return (Optional<?>) f.get(value);
                         } catch (IllegalArgumentException | IllegalAccessException e) {
                             throw new RuntimeException(e);
@@ -594,7 +596,7 @@ public class SerializationTest {
                         }
                     }) //
                     .collect(Collectors.reducing((a, b) -> merge(a, b))).get();
-            gen.writeString(mapper.writeValueAsString(node));
+            gen.writeTree(node);
         }
     }
 
@@ -627,7 +629,7 @@ public class SerializationTest {
         while (fieldNames.hasNext()) {
             String fieldName = fieldNames.next();
             JsonNode node = a.get(fieldName);
-            // if field exists and is an embedded object
+            // if field exists and is an embedded objects
             if (node != null) {
                 merge(node, b.get(fieldName));
             } else {

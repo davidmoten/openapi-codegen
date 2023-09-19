@@ -120,13 +120,10 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
             throws JsonMappingException, JsonProcessingException {
         ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         List<Object> list = new ArrayList<>();
-        System.out.println(json);
         for (Class<?> c : classes) {
             try {
-                System.out.println(c);
                 list.add(Optional.of(m.readValue(json, c)));
             } catch (DatabindException e) {
-                e.printStackTrace();
                 list.add(Optional.empty());
             }
         }
