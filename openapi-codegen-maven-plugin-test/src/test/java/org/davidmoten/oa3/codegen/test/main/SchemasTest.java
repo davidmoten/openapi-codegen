@@ -1107,6 +1107,12 @@ public class SchemasTest {
         assertThrows(JsonMappingException.class, () -> m.readValue("100", OneOfUsesConstraints.class));
     }
     
+    @Test
+    public void testOneOfDeserializerUsesConstraintsNoMatch()
+            throws JsonMappingException, JsonProcessingException {
+        assertThrows(JsonMappingException.class, () -> m.readValue("-1", OneOfUsesConstraints.class));
+    }
+    
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
