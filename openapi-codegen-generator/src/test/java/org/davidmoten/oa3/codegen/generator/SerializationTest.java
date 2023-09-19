@@ -370,7 +370,7 @@ public class SerializationTest {
     @Test
     public void testAllOf() throws JsonMappingException, JsonProcessingException {
         String json = "{\"firstName\":\"Dave\",\"numBikes\":3,\"common\":\"abc\"}";
-        ObjectMapper mapper = m.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        ObjectMapper mapper = m.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         AllOf a = mapper.readValue(json, AllOf.class);
         assertEquals("Dave", a.person.firstName);
         assertEquals(3, a.bikes.numBikes);
@@ -461,27 +461,43 @@ public class SerializationTest {
         String json = m.writeValueAsString(NullableEnum.HELLO);
         assertEquals(NullableEnum.HELLO, m.readValue(json, NullableEnum.class));
     }
-    
+
     @Test
     public void testAnyOf() throws JsonProcessingException {
         Person p = new Person();
         p.firstName = "fred";
         p.lastName = "smith";
         p.common = "something";
+//        String s = m.readValue("{\"firstName\":\"fred\",\"lastName\":\"smith\",\"common\":\"something\",\"hasSeniorCard\":true}", SimpleName.class).name;
         String pJson = m.writeValueAsString(p);
         m.readValue(pJson, Person.class);
         Person2 p2 = new Person2();
         p2.firstName = "fred";
         p2.lastName = "smith";
         p2.hasSeniorCard = true;
-        AnyOf a = new AnyOf(Optional.of(p), Optional.of(p2));
-        String json = m.writeValueAsString(a);
-        AnyOf b = m.readValue(json, AnyOf.class);
-        assertTrue(b.person.isPresent());
-        assertTrue(b.person2.isPresent());
-        assertEquals(json, m.writeValueAsString(b));
-        assertEquals("something", b.person.get().common);
-        assertTrue(b.person2.get().hasSeniorCard);
+        {
+            AnyOf a = new AnyOf(Optional.empty(), Optional.of(p), Optional.of(p2));
+            String json = m.writeValueAsString(a);
+            AnyOf b = m.readValue(json, AnyOf.class);
+            assertFalse(b.name.isPresent());
+            assertTrue(b.person.isPresent());
+            assertTrue(b.person2.isPresent());
+            assertEquals(json, m.writeValueAsString(b));
+            assertEquals("something", b.person.get().common);
+            assertTrue(b.person2.get().hasSeniorCard);
+        }
+        {
+            SimpleName nm = new SimpleName("john");
+            m.readValue("\"john\"", SimpleName.class);
+            AnyOf a = new AnyOf(Optional.of(nm), Optional.empty(), Optional.empty());
+            String json = m.writeValueAsString(a);
+            System.out.println(json);
+            AnyOf b = m.readValue(json, AnyOf.class);
+            assertEquals("john", b.name.get().name);
+            assertFalse(b.person.isPresent());
+            assertFalse(b.person2.isPresent());
+        }
+
     }
 
     @JsonInclude(Include.NON_NULL)
@@ -531,11 +547,12 @@ public class SerializationTest {
     @JsonSerialize(using = AnyOf.Serializer.class)
     public static final class AnyOf {
 
+        public final Optional<SimpleName> name;
         public final Optional<Person> person;
-
         public final Optional<Person2> person2;
 
-        public AnyOf(Optional<Person> person, Optional<Person2> person2) {
+        public AnyOf(Optional<SimpleName> name, Optional<Person> person, Optional<Person2> person2) {
+            this.name = name;
             this.person = person;
             this.person2 = person2;
         }
@@ -543,14 +560,15 @@ public class SerializationTest {
         @SuppressWarnings("serial")
         public static final class Deserializer extends PolymorphicDeserializer<AnyOf> {
             protected Deserializer() {
-                super(Config.builder().build(), PolymorphicType.ANY_OF, AnyOf.class, Person.class, Person2.class);
+                super(Config.builder().build(), PolymorphicType.ANY_OF, AnyOf.class, SimpleName.class, Person.class,
+                        Person2.class);
             }
         }
 
         @SuppressWarnings("serial")
         public static final class Serializer extends AnyOfSerializer<AnyOf> {
             protected Serializer() {
-                super(Config.builder().build(), AnyOf.class, Person.class, Person2.class);
+                super(Config.builder().build(), AnyOf.class, SimpleName.class, Person.class, Person2.class);
             }
         }
     }
@@ -612,7 +630,8 @@ public class SerializationTest {
         }
         if (a.isArray()) {
             if (!b.isArray()) {
-                // shouldn't happen
+                // shouldn't happen because identical paths are supposed to have the
+                // same values (but possibly objects that are extended with other properties)
                 throw new IllegalStateException("unexpected");
             }
             ArrayNode x = (ArrayNode) a;
@@ -625,20 +644,32 @@ public class SerializationTest {
                 merge(x.get(i), y.get(i));
             }
         }
-        Iterator<String> fieldNames = b.fieldNames();
-        while (fieldNames.hasNext()) {
-            String fieldName = fieldNames.next();
-            JsonNode node = a.get(fieldName);
-            // if field exists and is an embedded objects
-            if (node != null) {
-                merge(node, b.get(fieldName));
-            } else {
-                // Overwrite field
-                JsonNode value = b.get(fieldName);
-                ((ObjectNode) a).replace(fieldName, value);
+        if (a.isObject() && b.isObject()) {
+            Iterator<String> fieldNames = b.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                JsonNode node = a.get(fieldName);
+                // if field exists and is an embedded objects
+                if (node != null) {
+                    merge(node, b.get(fieldName));
+                } else {
+                    // Overwrite field
+                    JsonNode value = b.get(fieldName);
+                    ((ObjectNode) a).replace(fieldName, value);
+                }
             }
         }
         return a;
+    }
+
+    public static final class SimpleName {
+        @JsonValue
+        public final String name;
+        
+        @JsonCreator
+        public SimpleName(String name) {
+            this.name = name;
+        }
     }
 
     @JsonInclude(Include.NON_NULL)
@@ -647,7 +678,7 @@ public class SerializationTest {
         public String lastName;
         public String common;
     }
-    
+
     @JsonInclude(Include.NON_NULL)
     public static final class Person2 {
         public String firstName;
