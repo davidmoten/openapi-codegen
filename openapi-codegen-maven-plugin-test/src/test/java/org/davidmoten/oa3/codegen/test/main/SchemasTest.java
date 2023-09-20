@@ -32,6 +32,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNullable;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfSimpleTypes;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumber;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
@@ -1111,6 +1112,15 @@ public class SchemasTest {
     public void testOneOfDeserializerUsesConstraintsNoMatch()
             throws JsonMappingException, JsonProcessingException {
         assertThrows(JsonMappingException.class, () -> m.readValue("-1", OneOfUsesConstraints.class));
+    }
+    
+    @Test
+    public void testAnyOf() throws JsonProcessingException {
+        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(100)), Optional.of(LargeInt.value(100)));
+        String json = m.writeValueAsString(a);
+        assertEquals("100", json);
+        AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
+        assertEquals(a, b);
     }
     
     private static void onePublicConstructor(Class<?> c) {

@@ -32,9 +32,10 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
     @Override
     public void serialize(T value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         // loop through fields
-        List<Optional<?>> values = Arrays.stream(cls.getFields()) //
+        List<Optional<?>> values = Arrays.stream(cls.getDeclaredFields()) //
                 .map(f -> {
                     try {
+                        f.setAccessible(true);
                         return (Optional<?>) f.get(value);
                     } catch (IllegalArgumentException | IllegalAccessException e) {
                         throw new RuntimeException(e);
