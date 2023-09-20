@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -55,7 +54,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         // parser to read value, perf advantage and can stop plugging in ObjectMapper
         String json = mapper.writeValueAsString(tree);
         if (type == PolymorphicType.ANY_OF) {
-            return deserializeAnyOf(mapper, json, classes, cls, ctxt);
+            return deserializeAnyOf(mapper, json, classes, cls);
         } else if (type == PolymorphicType.ONE_OF) {
             return deserializeOneOf(mapper, json, classes, cls, ctxt);
         } else {
@@ -107,8 +106,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         }
     }
 
-    private static <T> T deserializeAnyOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls,
-            DeserializationContext ctxt) throws JsonMappingException, JsonProcessingException {
+    private static <T> T deserializeAnyOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls) throws JsonMappingException, JsonProcessingException {
         ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         List<Object> list = new ArrayList<>();
         for (Class<?> c : classes) {
@@ -121,7 +119,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                     o = mapper.readValue(json, c);
                 }
                 list.add(Optional.of(o));
-            } catch (JacksonException | IllegalArgumentException e) {
+            } catch (DatabindException e) {
                 list.add(Optional.empty());
             }
         }
