@@ -381,8 +381,11 @@ public final class SchemasCodeWriter {
                 out.closeParen();
                 
                 // write getters
-                cls.fields.forEach(f -> writeGetter(out, f.resolvedTypePublicConstructor(out.imports()),
-                        f.fieldName(cls), f.fieldName(cls)));
+                cls.fields.forEach(f -> {
+                    out.println();
+                    writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls),
+                            f.fieldName(cls));
+                });
                 
             } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
