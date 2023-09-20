@@ -361,11 +361,11 @@ public final class SchemasCodeWriter {
             } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 writeFields(out, cls);
                 
+                // write constructor
                 out.right().right();
-                final String parameters
-                 = cls.fields
+                final String parameters = cls.fields //
                         .stream() ///
-                        .map(x -> String.format("\n%s%s<%s> %s", out.indent(), out.add(Optional.class), 
+                        .map(x -> String.format("\n%s<%s> %s", out.indent(),
                                 x.resolvedTypePublicConstructor(out.imports()), x.fieldName(cls)))
                         .collect(Collectors.joining(","));
                 out.left().left();
