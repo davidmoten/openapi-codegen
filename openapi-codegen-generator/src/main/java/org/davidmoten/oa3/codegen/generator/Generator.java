@@ -173,7 +173,7 @@ public class Generator {
             return !hasProperties
                     && (classType == ClassType.ENUM || classType == ClassType.ARRAY_WRAPPER
                             || topLevel && fields.size() == 1)
-                    || classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
+                    || classType == ClassType.ONE_OF_NON_DISCRIMINATED;
         }
 
         public Set<String> ownersAndSiblingsSimpleNames() {
@@ -218,7 +218,8 @@ public class Generator {
         CLASS("class"), //
         ENUM("enum"), //
         ONE_OR_ANY_OF_DISCRIMINATED("interface"), //
-        ONE_OR_ANY_OF_NON_DISCRIMINATED("class"), //
+        ONE_OF_NON_DISCRIMINATED("class"), //
+        ANY_OF_NON_DISCRIMINATED("class"), //
         ALL_OF("class"), //
         ARRAY_WRAPPER("class");
 
@@ -737,7 +738,11 @@ public class Generator {
             if (discriminator != null) {
                 cls.classType = ClassType.ONE_OR_ANY_OF_DISCRIMINATED;
             } else {
-                cls.classType = ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
+                if (cls.polymorphicType == PolymorphicType.ONE_OF) {
+                    cls.classType = ClassType.ONE_OF_NON_DISCRIMINATED;
+                } else {
+                    cls.classType = ClassType.ANY_OF_NON_DISCRIMINATED;
+                }
             }
         } else {
             cls.classType = ClassType.ALL_OF;
@@ -834,8 +839,10 @@ public class Generator {
     }
 
     private static ClassType classType(Schema<?> schema) {
-        if (Util.isOneOf(schema) || Util.isAnyOf(schema)) {
-            return ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED;
+        if (Util.isOneOf(schema)) {
+            return ClassType.ONE_OF_NON_DISCRIMINATED;
+        } if (Util.isAnyOf(schema)) {
+            return ClassType.ANY_OF_NON_DISCRIMINATED;
         } else if (Util.isEnum(schema)) {
             return ClassType.ENUM;
         } else if (Util.isArray(schema)) {

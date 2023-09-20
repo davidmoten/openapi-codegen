@@ -144,8 +144,10 @@ public final class SchemasCodeWriter {
     }
 
     private static boolean isPolymorphic(Cls cls) {
-        return cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED
-                || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED || cls.classType == ClassType.ALL_OF;
+        return cls.classType == ClassType.ONE_OF_NON_DISCRIMINATED //
+                || cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED //
+                || cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED //
+                || cls.classType == ClassType.ALL_OF;
     }
 
     private static void addOverrideAnnotation(CodePrintWriter out) {
@@ -206,7 +208,7 @@ public final class SchemasCodeWriter {
         }
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeJsonTypeInfoAnnotation(out, cls);
-        } else if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
+        } else if (cls.classType == ClassType.ONE_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicDeserializerAnnotation(out, cls);
         }
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
@@ -333,7 +335,7 @@ public final class SchemasCodeWriter {
             out.println();
             out.line("%s %s();", String.class, cls.discriminator.fieldName);
         } else {
-            if (cls.classType == ClassType.ONE_OR_ANY_OF_NON_DISCRIMINATED) {
+            if (cls.classType == ClassType.ONE_OF_NON_DISCRIMINATED) {
                 out.println();
                 writeJsonValueAnnotation(out);
                 out.line("private final %s %s;", Object.class, "value");
@@ -347,7 +349,7 @@ public final class SchemasCodeWriter {
                 writeNonDiscriminatedBuilder(out, cls);
                 out.println();
                 writeGetter(out, out.add(Object.class), "value", "value");
-            } else {
+            } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
                 writeFields(out, cls);
 
@@ -378,6 +380,9 @@ public final class SchemasCodeWriter {
 
                 writeGetters(out, cls, fullClassNameInterfaces);
 
+            } else {
+                // anyOf
+                throw new RuntimeException("TODO");
             }
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
