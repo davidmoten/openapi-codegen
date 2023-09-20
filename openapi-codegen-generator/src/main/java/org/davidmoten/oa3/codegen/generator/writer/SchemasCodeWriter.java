@@ -23,7 +23,6 @@ import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
 import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
 import org.davidmoten.oa3.codegen.generator.Generator.MapType;
-import org.davidmoten.oa3.codegen.generator.SerializationTest.AnyOf;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.SchemaCategory;
 import org.davidmoten.oa3.codegen.generator.ServerGeneratorType;
