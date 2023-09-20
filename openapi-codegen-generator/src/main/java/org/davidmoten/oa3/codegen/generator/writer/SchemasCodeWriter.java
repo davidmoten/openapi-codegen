@@ -360,15 +360,35 @@ public final class SchemasCodeWriter {
                 writeGetter(out, out.add(Object.class), "value", "value");
             } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 writeFields(out, cls);
+                
+                out.right().right();
+                final String parameters
+                 = cls.fields
+                        .stream() ///
+                        .map(x -> String.format("\n%s%s<%s> %s", out.indent(), out.add(Optional.class), 
+                                x.resolvedTypePublicConstructor(out.imports()), x.fieldName(cls)))
+                        .collect(Collectors.joining(","));
+                out.left().left();
+                out.println();
+                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
+                ifValidate(cls, out, names, //
+                        o -> cls.fields.stream().forEach(x -> {
+                                checkNotNull(cls, o, x);
+                        }));
+                cls.fields.stream().forEach(x -> {
+                    assignField(out, cls, x);
+                });
+                out.closeParen();
             } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
                 writeFields(out, cls);
 
                 out.right().right();
-                final String parametersNullable;
-                parametersNullable = cls.fields
-                        .stream().map(x -> String.format("\n%s%s %s", out.indent(),
-                                x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
+                final String parametersNullable = cls //
+                        .fields //
+                        .stream() //
+                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedTypeNullable(out.imports()),
+                                x.fieldName(cls))) //
                         .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
