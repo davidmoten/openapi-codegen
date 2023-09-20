@@ -34,6 +34,7 @@ import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.http.HasEncoding;
 import org.davidmoten.oa3.codegen.http.HasStringValue;
+import org.davidmoten.oa3.codegen.runtime.AnyOfSerializer;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
@@ -401,6 +402,17 @@ public final class SchemasCodeWriter {
             out.line("super(%s.config(), %s.%s, %s.class, %s);", out.add(names.globalsFullClassName()),
                     PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName(), classes);
             out.closeParen();
+            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+                out.println();
+                out.line("@%s(\"serial\")", SuppressWarnings.class);
+                out.line("public static final class Serializer extends %s<%s> {", AnyOfSerializer.class,
+                        cls.simpleName());
+                out.println();
+                out.line("public Serializer() {");
+                out.line("super(%s.config(), %s.%s, %s.class);", out.add(names.globalsFullClassName()),
+                        PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName());
+                out.closeParen();
+            }
             out.closeParen();
         }
     }
