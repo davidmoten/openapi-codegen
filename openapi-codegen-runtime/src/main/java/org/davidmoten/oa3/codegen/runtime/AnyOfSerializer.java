@@ -23,7 +23,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
     private final Class<T> cls;
     private final ObjectMapper mapper;
 
-    protected AnyOfSerializer(Config config, Class<T> cls, Class<?>... classes) {
+    protected AnyOfSerializer(Config config, Class<T> cls) {
         super(cls);
         this.cls = cls;
         this.mapper = config.mapper();

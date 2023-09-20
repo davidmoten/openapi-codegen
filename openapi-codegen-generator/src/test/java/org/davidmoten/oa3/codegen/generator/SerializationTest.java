@@ -561,7 +561,7 @@ public class SerializationTest {
         @SuppressWarnings("serial")
         public static final class Serializer extends AnyOfSerializer<AnyOf> {
             protected Serializer() {
-                super(Config.builder().build(), AnyOf.class, SimpleName.class, Person.class, Person2.class);
+                super(Config.builder().build(), AnyOf.class);
             }
         }
     }
