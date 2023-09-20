@@ -215,7 +215,8 @@ public final class SchemasCodeWriter {
         } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
             writeAnyOfSerializerAnnotations(out, cls);
         }
-        if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
+        if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED
+                && cls.classType != ClassType.ANY_OF_NON_DISCRIMINATED) {
             writeJsonIncludeAnnotation(out);
             writeAutoDetectAnnotation(out);
         }
