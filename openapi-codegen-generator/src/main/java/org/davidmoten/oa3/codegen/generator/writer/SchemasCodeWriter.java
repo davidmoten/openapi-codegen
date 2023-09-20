@@ -23,6 +23,7 @@ import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
 import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
 import org.davidmoten.oa3.codegen.generator.Generator.MapType;
+import org.davidmoten.oa3.codegen.generator.SerializationTest.AnyOf;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.SchemaCategory;
 import org.davidmoten.oa3.codegen.generator.ServerGeneratorType;
@@ -60,6 +61,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.davidmoten.guavamini.Maps;
 
 public final class SchemasCodeWriter {
@@ -210,7 +212,9 @@ public final class SchemasCodeWriter {
             writeJsonTypeInfoAnnotation(out, cls);
         } else if (cls.classType == ClassType.ONE_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicDeserializerAnnotation(out, cls);
-        } 
+        } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+            writeAnyOfSerializerAnnotations(out, cls);
+        }
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeJsonIncludeAnnotation(out);
             writeAutoDetectAnnotation(out);
@@ -222,6 +226,11 @@ public final class SchemasCodeWriter {
             WriterUtil.addGeneratedAnnotation(out);
         }
         out.line("public %s%s %s%s {", modifier, cls.classType.word(), cls.simpleName(), implementsClause);
+    }
+
+    private static void writeAnyOfSerializerAnnotations(CodePrintWriter out, Cls cls) {
+        out.line("@%s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
+        out.line("@%s(using = %s.Serializer.class)", JsonSerialize.class, cls.simpleName());
     }
 
     private static void writeEnumNullValueDeserializerAnnotation(CodePrintWriter out, Cls cls) {
