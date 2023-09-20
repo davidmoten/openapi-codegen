@@ -402,6 +402,7 @@ public final class SchemasCodeWriter {
             out.line("super(%s.config(), %s.%s, %s.class, %s);", out.add(names.globalsFullClassName()),
                     PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName(), classes);
             out.closeParen();
+            out.closeParen();
             if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 out.println();
                 out.line("@%s(\"serial\")", SuppressWarnings.class);
@@ -412,8 +413,8 @@ public final class SchemasCodeWriter {
                 out.line("super(%s.config(), %s.%s, %s.class);", out.add(names.globalsFullClassName()),
                         PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName());
                 out.closeParen();
+                out.closeParen();
             }
-            out.closeParen();
         }
     }
 
