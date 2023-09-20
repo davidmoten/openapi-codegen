@@ -210,7 +210,7 @@ public final class SchemasCodeWriter {
             writeJsonTypeInfoAnnotation(out, cls);
         } else if (cls.classType == ClassType.ONE_OF_NON_DISCRIMINATED || cls.classType == ClassType.ALL_OF) {
             writePolymorphicDeserializerAnnotation(out, cls);
-        }
+        } 
         if (cls.classType != ClassType.ENUM && cls.classType != ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             writeJsonIncludeAnnotation(out);
             writeAutoDetectAnnotation(out);
@@ -349,6 +349,8 @@ public final class SchemasCodeWriter {
                 writeNonDiscriminatedBuilder(out, cls);
                 out.println();
                 writeGetter(out, out.add(Object.class), "value", "value");
+            } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+                writeFields(out, cls);
             } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
                 writeFields(out, cls);
@@ -379,11 +381,7 @@ public final class SchemasCodeWriter {
                 writeAllOfBuilder(out, cls);
 
                 writeGetters(out, cls, fullClassNameInterfaces);
-
-            } else {
-                // anyOf
-                throw new RuntimeException("TODO");
-            }
+            } 
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
             out.line("public static final class Deserializer extends %s<%s> {", PolymorphicDeserializer.class,
@@ -447,15 +445,17 @@ public final class SchemasCodeWriter {
                 out.println();
             }
             first.value = false;
-            if (f.isAdditionalProperties() && !f.isArray) {
-                out.line("@%s", JsonAnyGetter.class);
-                out.line("@%s", JsonAnySetter.class);
-            } else if (cls.classType == ClassType.ALL_OF) {
-                out.line("@%s", JsonUnwrapped.class);
-            } else if (cls.unwrapSingleField()) {
-                writeJsonValueAnnotation(out);
-            } else {
-                out.line("@%s(\"%s\")", JsonProperty.class, f.name);
+            if (cls.classType != ClassType.ANY_OF_NON_DISCRIMINATED) {
+                if (f.isAdditionalProperties() && !f.isArray) {
+                    out.line("@%s", JsonAnyGetter.class);
+                    out.line("@%s", JsonAnySetter.class);
+                } else if (cls.classType == ClassType.ALL_OF) {
+                    out.line("@%s", JsonUnwrapped.class);
+                } else if (cls.unwrapSingleField()) {
+                    writeJsonValueAnnotation(out);
+                } else {
+                    out.line("@%s(\"%s\")", JsonProperty.class, f.name);
+                }
             }
             final String fieldType;
             if (f.mapType.isPresent()) {
@@ -465,7 +465,11 @@ public final class SchemasCodeWriter {
             } else {
                 fieldType = f.resolvedTypeNullable(out.imports());
             }
-            out.line("private final %s %s;", fieldType, cls.fieldName(f));
+            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+                out.line("private final %s<%s> %s;", Optional.class, fieldType, cls.fieldName(f));
+            } else {
+                out.line("private final %s %s;", fieldType, cls.fieldName(f));
+            }
         });
     }
 

@@ -2004,3 +2004,9 @@ components:
           format: int32
           minimum: 10
       required: [a]
+
+    AnyOfSimpleTypes:
+      anyOf:
+      - $ref: "#/components/schemas/SmallInt"
+      - $ref: "#/components/schemas/LargeInt"
+      
