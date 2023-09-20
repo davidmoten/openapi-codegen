@@ -430,8 +430,7 @@ public final class SchemasCodeWriter {
                         cls.simpleName());
                 out.println();
                 out.line("public Serializer() {");
-                out.line("super(%s.config(), %s.%s, %s.class);", out.add(names.globalsFullClassName()),
-                        PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName());
+                out.line("super(%s.config(), %s.class);", out.add(names.globalsFullClassName()), cls.simpleName());
                 out.closeParen();
                 out.closeParen();
             }
