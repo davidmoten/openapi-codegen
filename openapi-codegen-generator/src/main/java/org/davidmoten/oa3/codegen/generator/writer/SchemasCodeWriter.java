@@ -365,7 +365,7 @@ public final class SchemasCodeWriter {
                 out.right().right();
                 final String parameters = cls.fields //
                         .stream() ///
-                        .map(x -> String.format("\n%s<%s> %s", out.indent(),
+                        .map(x -> String.format("\n%s%s %s", out.indent(),
                                 x.resolvedTypePublicConstructor(out.imports()), x.fieldName(cls)))
                         .collect(Collectors.joining(","));
                 out.left().left();
