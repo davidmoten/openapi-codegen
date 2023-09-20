@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 public class AnyOfSerializer<T> extends StdSerializer<T> {
 
     private static final long serialVersionUID = -8290019952172548639L;
-    
+
     private final Class<T> cls;
     private final ObjectMapper mapper;
 
@@ -37,7 +37,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
                     try {
                         f.setAccessible(true);
                         return (Optional<?>) f.get(value);
-                    } catch (IllegalArgumentException | IllegalAccessException e) {
+                    } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
                 }) //
@@ -69,31 +69,27 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
      * @param b node to merge into a
      */
     private static JsonNode merge(JsonNode a, JsonNode b) {
-        if (a == null || b == null || !a.isArray() && !a.isObject()) {
+        if (a.equals(b)) {
             return a;
         }
+        if (a.getNodeType() != b.getNodeType()) {
+            throw new IllegalArgumentException("merge error: mismatching node types, a=" + a + ", b=" + b);
+        }
         if (a.isArray()) {
-            if (!b.isArray()) {
-                // shouldn't happen because identical paths are supposed to have the
-                // same values (but possibly objects that are extended with other properties)
-                throw new IllegalStateException("unexpected");
-            }
             ArrayNode x = (ArrayNode) a;
             ArrayNode y = (ArrayNode) b;
             if (x.size() != y.size()) {
-                // shouldn't happen
-                throw new IllegalStateException("array lengths don't match");
+                throw new IllegalArgumentException("merge error: array lengths don't match, a=" + a + ", b=" + b);
             }
             for (int i = 0; i < x.size(); i++) {
                 merge(x.get(i), y.get(i));
             }
-        }
-        if (a.isObject() && b.isObject()) {
+        } else if (a.isObject() && b.isObject()) {
             Iterator<String> fieldNames = b.fieldNames();
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
                 JsonNode node = a.get(fieldName);
-                // if field exists and is an embedded objects
+                // if field exists and is an embedded object
                 if (node != null) {
                     merge(node, b.get(fieldName));
                 } else {
@@ -102,6 +98,9 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
                     ((ObjectNode) a).replace(fieldName, value);
                 }
             }
+        } else {
+            // a not equals to b and are primitives
+            throw new IllegalArgumentException("merge error: a=" + a + ", b=" + b);
         }
         return a;
     }
