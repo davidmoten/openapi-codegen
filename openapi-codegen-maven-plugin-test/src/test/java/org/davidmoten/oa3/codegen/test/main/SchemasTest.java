@@ -34,6 +34,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes2;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfObjectExtensions;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyOfSimpleTypes;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumber;
@@ -1154,6 +1155,16 @@ public class SchemasTest {
     public void testAnyOfConflictWithObject() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new AnyOfConflictingTypes2(Optional.of("a"), Optional.of(AnyOfConflictingTypes2.Object2.name("aya"))));
+    }
+    
+    @Test
+    public void testAnyOfObjectExtensions() throws JsonProcessingException {
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3))); 
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3))).build();
+        AnyOfObjectExtensions o = new AnyOfObjectExtensions(Optional.of(a), Optional.of(b));
+        String json = m.writeValueAsString(o);
+        AnyOfObjectExtensions o2 = m.readValue(json, AnyOfObjectExtensions.class);
+        assertEquals(o, o2);
     }
     
     private static void onePublicConstructor(Class<?> c) {

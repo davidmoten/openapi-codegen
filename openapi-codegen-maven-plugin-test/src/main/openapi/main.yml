@@ -2023,4 +2023,25 @@ components:
           name: 
             type: string
         required: [name]
+        
+    AnyOfObjectExtensions:
+      anyOf:
+      - type: object
+        properties:
+          counts: 
+            type: array
+            items:
+              type: integer
+              format: int32
+        required: [counts]
+      - type: object
+        properties:
+          name: 
+            type: string
+          counts: 
+            type: array
+            items:
+              type: integer
+              format: int32
+        required: [name, counts]        
       
