@@ -1119,24 +1119,24 @@ public class SchemasTest {
     
     @Test
     public void testAnyOfMatchesBoth() throws JsonProcessingException {
-        AnyOfSimpleTypes a = AnyOfSimpleTypes.of(Optional.of(SmallInt.value(100)), Optional.of(LargeInt.value(100)));
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.value(100)).largeInt(LargeInt.value(100)).build();
         checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfMatchesNone() throws JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> AnyOfSimpleTypes.of(Optional.empty(), Optional.empty()));
+        assertThrows(IllegalArgumentException.class, () -> AnyOfSimpleTypes.builder().build());
     }
     
     @Test
     public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
-        AnyOfSimpleTypes a = AnyOfSimpleTypes.of(Optional.of(SmallInt.value(1)), Optional.empty());
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.value(1)).build();
         checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfMatchesLargeIntOnly() throws JsonProcessingException {
-        AnyOfSimpleTypes a = AnyOfSimpleTypes.of(Optional.empty(), Optional.of(LargeInt.value(1000)));
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().largeInt(LargeInt.value(1000)).build();
         checkRoundTrip(a);
     }
     
@@ -1149,14 +1149,14 @@ public class SchemasTest {
     @Test
     public void testAnyOfConflictWithObject() {
         assertThrows(IllegalArgumentException.class,
-                () -> AnyOfConflictingTypes2.of(Optional.of("a"), Optional.of(AnyOfConflictingTypes2.Object2.name("aya"))));
+                () -> AnyOfConflictingTypes2.builder().object1("a").object2(AnyOfConflictingTypes2.Object2.name("aya")).build());
     }
     
     @Test
     public void testAnyOfObjectExtensions() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3))); 
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3))).build();
-        AnyOfObjectExtensions o = AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b));
+        AnyOfObjectExtensions o = AnyOfObjectExtensions.builder().object1(a).object2(b).build();
         checkRoundTrip(o);
     }
     

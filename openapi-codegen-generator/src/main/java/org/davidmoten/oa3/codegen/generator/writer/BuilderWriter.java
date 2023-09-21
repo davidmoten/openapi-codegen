@@ -57,6 +57,10 @@ public class BuilderWriter {
     }
 
     public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
+        write(out, fields, importedBuiltType, false);
+    }
+    
+    public static void write(CodePrintWriter out, List<Field> fields, String importedBuiltType, boolean useOf) {
         if (fields.isEmpty()) {
             return;
         }
@@ -208,7 +212,7 @@ public class BuilderWriter {
                 out.line("return this;");
                 out.closeParen();
                 if (f == last) {
-                    writeBuildMethod(out, fields, importedBuiltType, builderField);
+                    writeBuildMethod(out, fields, importedBuiltType, builderField, useOf);
                 }
             }
             if (!firstFieldStaticMethod.isPresent()) {
@@ -225,7 +229,7 @@ public class BuilderWriter {
                 }
             }
             if (f.mapType.isPresent() && f == last) {
-                writeBuildMethod(out, fields, importedBuiltType, builderField);
+                writeBuildMethod(out, fields, importedBuiltType, builderField, useOf);
             }
             if (f.mandatory() || f == last) {
                 out.closeParen();
@@ -239,7 +243,7 @@ public class BuilderWriter {
                 out.line("%s(%s b) {", nextBuilderName, "Builder");
                 out.line("this.b = b;");
                 out.closeParen();
-                writeBuildMethod(out, fields, importedBuiltType, ".b");
+                writeBuildMethod(out, fields, importedBuiltType, ".b", useOf);
                 out.closeParen();
             }
             passBuilderIntoConstructor = f.mandatory();
@@ -272,12 +276,16 @@ public class BuilderWriter {
     }
 
     private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType,
-            String builderField) {
+            String builderField, boolean useOf) {
         out.println();
         out.line("public %s build() {", importedBuiltType);
         String params = fields.stream().map(x -> String.format("this%s.%s", builderField, x.fieldName))
                 .collect(Collectors.joining(", "));
-        out.line("return new %s(%s);", importedBuiltType, params);
+        if (useOf) {
+            out.line("return %s.of(%s);", importedBuiltType, params);
+        } else {
+            out.line("return new %s(%s);", importedBuiltType, params);
+        }
         out.closeParen();
     }
 

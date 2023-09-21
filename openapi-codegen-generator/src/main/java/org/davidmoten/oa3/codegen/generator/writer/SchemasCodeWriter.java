@@ -391,6 +391,8 @@ public final class SchemasCodeWriter {
                 out.line("return $o;");
                 out.closeParen();
                 
+                writeAnyOfOrAllOfBuilder(out, cls, true);
+                
                 // write getters
                 cls.fields.forEach(f -> {
                     out.println();
@@ -426,7 +428,7 @@ public final class SchemasCodeWriter {
                 });
                 out.closeParen();
                 // write allof builder
-                writeAllOfBuilder(out, cls);
+                writeAnyOfOrAllOfBuilder(out, cls, false);
 
                 writeGetters(out, cls, fullClassNameInterfaces);
             } 
@@ -456,15 +458,15 @@ public final class SchemasCodeWriter {
         }
     }
 
-    private static void writeAllOfBuilder(CodePrintWriter out, Cls cls) {
+    private static void writeAnyOfOrAllOfBuilder(CodePrintWriter out, Cls cls, boolean useOf) {
         List<BuilderWriter.Field> fields = //
                 cls.fields.stream() //
                         .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required, f.isArray,
                                 f.mapType, f.nullable)) //
                         .collect(Collectors.toList());
-        BuilderWriter.write(out, fields, cls.simpleName());
+        BuilderWriter.write(out, fields, cls.simpleName(), useOf);
     }
-
+    
     private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Cls cls) {
         cls.fields.forEach(f -> {
             out.line("public static %s of(%s value) {", cls.simpleName(), out.add(f.fullClassName));
