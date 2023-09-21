@@ -25,13 +25,13 @@ public class AnyOfSerializerTest {
         JsonNode n = node("1");
         assertThrows(IllegalArgumentException.class, () -> merge(n, node("2")));
     }
-    
+
     @Test
     public void testMergeIntegerAndStringThrows() {
         JsonNode n = node("1");
         assertThrows(IllegalArgumentException.class, () -> merge(n, node("\"1\"")));
     }
-    
+
     @Test
     public void testMergeIntegerAndArrayThrows() {
         JsonNode n = node("1");
@@ -43,13 +43,27 @@ public class AnyOfSerializerTest {
         JsonNode n = node("[1,2,3]");
         assertEquals(n, merge(n, n));
     }
-    
+
     @Test
     public void testMergeArrayDifferentLengths() {
         JsonNode n = node("[1,2,3]");
         assertThrows(IllegalArgumentException.class, () -> merge(n, node("[1,2,3,4]")));
     }
-    
+
+    @Test
+    public void testMergeArrayDifferentValues() {
+        JsonNode n = node("[1,2,3]");
+        assertThrows(IllegalArgumentException.class, () -> merge(n, node("[1,2,4]")));
+    }
+
+    @Test
+    public void testMergeObjects() {
+        JsonNode a = node("{\"a\":1, \"b\":2}");
+        JsonNode b = node("{\"c\":3, \"d\":4}");
+        JsonNode c = node("{\"a\":1, \"b\":2, \"c\":3, \"d\":4}");
+        assertEquals(c, merge(a, b));
+    }
+
     private static JsonNode node(String json) {
         try {
             return m.readTree(json);
