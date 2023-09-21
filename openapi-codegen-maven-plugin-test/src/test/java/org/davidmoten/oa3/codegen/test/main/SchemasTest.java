@@ -1115,10 +1115,28 @@ public class SchemasTest {
     }
     
     @Test
-    public void testAnyOf() throws JsonProcessingException {
+    public void testAnyOfMatchesBoth() throws JsonProcessingException {
         AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(100)), Optional.of(LargeInt.value(100)));
         String json = m.writeValueAsString(a);
         assertEquals("100", json);
+        AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
+        assertEquals(a, b);
+    }
+    
+    @Test
+    public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
+        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(1)), Optional.empty());
+        String json = m.writeValueAsString(a);
+        assertEquals("1", json);
+        AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
+        assertEquals(a, b);
+    }
+    
+    @Test
+    public void testAnyOfMatchesLargeIntOnly() throws JsonProcessingException {
+        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.empty(), Optional.of(LargeInt.value(1000)));
+        String json = m.writeValueAsString(a);
+        assertEquals("1000", json);
         AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
         assertEquals(a, b);
     }

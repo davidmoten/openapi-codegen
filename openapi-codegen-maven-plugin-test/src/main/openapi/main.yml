@@ -2010,3 +2010,8 @@ components:
       - $ref: "#/components/schemas/SmallInt"
       - $ref: "#/components/schemas/LargeInt"
       
+    AnyOfConflictingTypes:
+      anyOf:
+      - type: string
+      - type: integer
+      
