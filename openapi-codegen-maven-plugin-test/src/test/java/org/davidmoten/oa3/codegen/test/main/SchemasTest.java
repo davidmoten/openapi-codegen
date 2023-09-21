@@ -32,6 +32,8 @@ import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNullable;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes2;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyOfSimpleTypes;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumber;
@@ -122,6 +124,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.TwoMaps;
 import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
 import org.davidmoten.oa3.codegen.util.Util;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
 
@@ -1139,6 +1142,18 @@ public class SchemasTest {
         assertEquals("1000", json);
         AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
         assertEquals(a, b);
+    }
+    
+    @Test
+    public void testAnyOfPrimitiveConflicts() throws JsonProcessingException {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new AnyOfConflictingTypes(Optional.of("a"), Optional.of(1L)));
+    }
+    
+    @Test
+    public void testAnyOfConflictWithObject() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new AnyOfConflictingTypes2(Optional.of("a"), Optional.of(AnyOfConflictingTypes2.Object2.name("aya"))));
     }
     
     private static void onePublicConstructor(Class<?> c) {

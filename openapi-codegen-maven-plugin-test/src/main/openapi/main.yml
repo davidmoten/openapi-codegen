@@ -2015,3 +2015,12 @@ components:
       - type: string
       - type: integer
       
+    AnyOfConflictingTypes2:
+      anyOf:
+      - type: string
+      - type: object
+        properties:
+          name: 
+            type: string
+        required: [name]
+      
