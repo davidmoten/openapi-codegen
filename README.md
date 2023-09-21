@@ -152,7 +152,7 @@ Note that discriminators are constants that the user does not set (in fact, cann
 ### *anyOf* without discriminator
 [PetSearch.java](src/docs/PetSearch.java), [PetByAge.java](src/docs/PetByAge.java), [PetByType.java](src/docs/PetByType.java)
 
-[AnyOfSerializer.java](src), [PolymorphicDeserializer.java](src)
+[AnyOfSerializer.java](blob/master/openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/AnyOfSerializer.java), [PolymorphicDeserializer.java](blob/master/openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/PolymorphicDeserializer.java)
 
 ### Generated client
 Here's an example of the generated client class (the entry point for interactions with the API). Note the conciseness and reliance on type-safe builders from a non-generated dependency.
