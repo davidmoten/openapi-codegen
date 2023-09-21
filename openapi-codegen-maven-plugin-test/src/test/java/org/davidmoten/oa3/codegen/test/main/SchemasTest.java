@@ -1119,44 +1119,44 @@ public class SchemasTest {
     
     @Test
     public void testAnyOfMatchesBoth() throws JsonProcessingException {
-        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(100)), Optional.of(LargeInt.value(100)));
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.of(Optional.of(SmallInt.value(100)), Optional.of(LargeInt.value(100)));
         checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfMatchesNone() throws JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> new AnyOfSimpleTypes(Optional.empty(), Optional.empty()));
+        assertThrows(IllegalArgumentException.class, () -> AnyOfSimpleTypes.of(Optional.empty(), Optional.empty()));
     }
     
     @Test
     public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
-        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(1)), Optional.empty());
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.of(Optional.of(SmallInt.value(1)), Optional.empty());
         checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfMatchesLargeIntOnly() throws JsonProcessingException {
-        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.empty(), Optional.of(LargeInt.value(1000)));
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.of(Optional.empty(), Optional.of(LargeInt.value(1000)));
         checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfPrimitiveConflicts() throws JsonProcessingException {
         assertThrows(IllegalArgumentException.class,
-                () -> new AnyOfConflictingTypes(Optional.of("a"), Optional.of(1L)));
+                () -> AnyOfConflictingTypes.of(Optional.of("a"), Optional.of(1L)));
     }
     
     @Test
     public void testAnyOfConflictWithObject() {
         assertThrows(IllegalArgumentException.class,
-                () -> new AnyOfConflictingTypes2(Optional.of("a"), Optional.of(AnyOfConflictingTypes2.Object2.name("aya"))));
+                () -> AnyOfConflictingTypes2.of(Optional.of("a"), Optional.of(AnyOfConflictingTypes2.Object2.name("aya"))));
     }
     
     @Test
     public void testAnyOfObjectExtensions() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3))); 
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3))).build();
-        AnyOfObjectExtensions o = new AnyOfObjectExtensions(Optional.of(a), Optional.of(b));
+        AnyOfObjectExtensions o = AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b));
         checkRoundTrip(o);
     }
     
@@ -1166,7 +1166,7 @@ public class SchemasTest {
                 .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
                 .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3, 4))).build();
-        assertThrows(IllegalArgumentException.class, () -> new AnyOfObjectExtensions(Optional.of(a), Optional.of(b)));
+        assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
     
     @Test
@@ -1175,7 +1175,7 @@ public class SchemasTest {
                 .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
                 .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 4))).build();
-        assertThrows(IllegalArgumentException.class, () -> new AnyOfObjectExtensions(Optional.of(a), Optional.of(b)));
+        assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
     
     private static void checkRoundTrip(Object o) {

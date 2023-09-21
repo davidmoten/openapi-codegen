@@ -372,7 +372,7 @@ public final class SchemasCodeWriter {
                         .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
-                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
+                out.line("private %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
                 ifValidate(cls, out, names, //
                         o -> cls.fields.stream().forEach(x -> {
                                 checkNotNull(cls, o, x);
@@ -380,9 +380,15 @@ public final class SchemasCodeWriter {
                 cls.fields.stream().forEach(x -> {
                     assignField(out, cls, x);
                 });
-                out.line("%s.checkCanSerialize(%s.config(), this);", //
+                out.closeParen();
+                out.println();
+                out.line("public static %s of(%s) {", cls.simpleName(), parameters);
+                String fields = cls.fields.stream().map(x -> x.fieldName).collect(Collectors.joining(", "));
+                out.line("%s $o = new %s(%s);", cls.simpleName(), cls.simpleName(), fields);
+                out.line("%s.checkCanSerialize(%s.config(), $o);", //
                         RuntimeUtil.class, //
                         out.add(names.globalsFullClassName()));
+                out.line("return $o;");
                 out.closeParen();
                 
                 // write getters
