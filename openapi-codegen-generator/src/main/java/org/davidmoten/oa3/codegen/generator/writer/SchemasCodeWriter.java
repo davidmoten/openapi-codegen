@@ -41,6 +41,7 @@ import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
+import org.davidmoten.oa3.codegen.runtime.RuntimeUtil;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.boot.context.properties.ConstructorBinding;
@@ -379,6 +380,9 @@ public final class SchemasCodeWriter {
                 cls.fields.stream().forEach(x -> {
                     assignField(out, cls, x);
                 });
+                out.line("%s.checkCanSerialize(%s.config(), this);", //
+                        RuntimeUtil.class, //
+                        out.add(names.globalsFullClassName()));
                 out.closeParen();
                 
                 // write getters
