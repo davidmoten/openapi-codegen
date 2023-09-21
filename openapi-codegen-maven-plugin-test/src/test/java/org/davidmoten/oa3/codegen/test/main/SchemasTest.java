@@ -125,7 +125,6 @@ import org.davidmoten.oa3.codegen.test.main.schema.TwoMaps;
 import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openapitools.jackson.nullable.JsonNullable;
 
@@ -1138,13 +1137,13 @@ public class SchemasTest {
     
     @Test
     public void testAnyOfPrimitiveConflicts() throws JsonProcessingException {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> new AnyOfConflictingTypes(Optional.of("a"), Optional.of(1L)));
     }
     
     @Test
     public void testAnyOfConflictWithObject() {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> new AnyOfConflictingTypes2(Optional.of("a"), Optional.of(AnyOfConflictingTypes2.Object2.name("aya"))));
     }
     
@@ -1154,6 +1153,24 @@ public class SchemasTest {
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3))).build();
         AnyOfObjectExtensions o = new AnyOfObjectExtensions(Optional.of(a), Optional.of(b));
         checkRoundTrip(o);
+    }
+    
+    @Test
+    public void testAnyOfObjectExtensionsThrowsIfArraysDifferentLength() throws JsonProcessingException {
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
+                .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
+                .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3, 4))).build();
+        assertThrows(IllegalArgumentException.class, () -> new AnyOfObjectExtensions(Optional.of(a), Optional.of(b)));
+    }
+    
+    @Test
+    public void testAnyOfObjectExtensionsThrowsIfArraysDifferentElements() throws JsonProcessingException {
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
+                .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
+                .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 4))).build();
+        assertThrows(IllegalArgumentException.class, () -> new AnyOfObjectExtensions(Optional.of(a), Optional.of(b)));
     }
     
     private static void checkRoundTrip(Object o) {

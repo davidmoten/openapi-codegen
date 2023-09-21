@@ -78,13 +78,13 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
             return a;
         }
         if (a.getNodeType() != b.getNodeType()) {
-            throw new IllegalArgumentException("merge error: mismatching node types, a=" + a + ", b=" + b);
+            throw new IllegalArgumentException("merge error: mismatching node types: " + a + ", " + b);
         }
         if (a.isArray()) {
             ArrayNode x = (ArrayNode) a;
             ArrayNode y = (ArrayNode) b;
             if (x.size() != y.size()) {
-                throw new IllegalArgumentException("merge error: array lengths don't match, a=" + a + ", b=" + b);
+                throw new IllegalArgumentException("merge error: array lengths don't match, " + a + ", " + b);
             }
             for (int i = 0; i < x.size(); i++) {
                 merge(x.get(i), y.get(i));
@@ -105,7 +105,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
             }
         } else {
             // a not equals to b and are primitives
-            throw new IllegalArgumentException("merge error: a=" + a + ", b=" + b);
+            throw new IllegalArgumentException("merge error, fields not equals: " + a + ", " + b);
         }
         return a;
     }
