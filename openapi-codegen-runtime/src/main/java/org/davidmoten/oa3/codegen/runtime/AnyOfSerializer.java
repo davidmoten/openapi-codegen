@@ -91,7 +91,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
             for (int i = 0; i < x.size(); i++) {
                 merge(x.get(i), y.get(i));
             }
-        } else if (a.isObject() && b.isObject()) {
+        } else if (a.isObject()) {
             Iterator<String> fieldNames = b.fieldNames();
             while (fieldNames.hasNext()) {
                 String fieldName = fieldNames.next();
@@ -107,7 +107,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
             }
         } else {
             // a not equals to b and are primitives
-            throw new IllegalArgumentException("merge error, fields not equals: " + a + ", " + b);
+            throw new IllegalArgumentException("merge error, fields not equal: " + a + ", " + b);
         }
         return a;
     }
