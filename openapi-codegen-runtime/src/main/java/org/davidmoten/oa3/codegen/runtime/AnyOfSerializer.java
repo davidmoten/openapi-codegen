@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public class AnyOfSerializer<T> extends StdSerializer<T> {
 
@@ -72,7 +73,8 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
      * @param a input that will be mutated to contain merged result
      * @param b node to merge into a
      */
-    private static JsonNode merge(JsonNode a, JsonNode b) {
+    @VisibleForTesting
+    static JsonNode merge(JsonNode a, JsonNode b) {
         // do a deep equals check
         if (a.equals(b)) {
             return a;
