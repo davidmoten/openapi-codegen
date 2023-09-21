@@ -1121,28 +1121,19 @@ public class SchemasTest {
     @Test
     public void testAnyOfMatchesBoth() throws JsonProcessingException {
         AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(100)), Optional.of(LargeInt.value(100)));
-        String json = m.writeValueAsString(a);
-        assertEquals("100", json);
-        AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
-        assertEquals(a, b);
+        checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
         AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(1)), Optional.empty());
-        String json = m.writeValueAsString(a);
-        assertEquals("1", json);
-        AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
-        assertEquals(a, b);
+        checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfMatchesLargeIntOnly() throws JsonProcessingException {
         AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.empty(), Optional.of(LargeInt.value(1000)));
-        String json = m.writeValueAsString(a);
-        assertEquals("1000", json);
-        AnyOfSimpleTypes b = m.readValue(json, AnyOfSimpleTypes.class);
-        assertEquals(a, b);
+        checkRoundTrip(a);
     }
     
     @Test
@@ -1162,9 +1153,18 @@ public class SchemasTest {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3))); 
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3))).build();
         AnyOfObjectExtensions o = new AnyOfObjectExtensions(Optional.of(a), Optional.of(b));
-        String json = m.writeValueAsString(o);
-        AnyOfObjectExtensions o2 = m.readValue(json, AnyOfObjectExtensions.class);
-        assertEquals(o, o2);
+        checkRoundTrip(o);
+    }
+    
+    private static void checkRoundTrip(Object o) {
+        try {
+            String json = m.writeValueAsString(o);
+            Object o2 = m.readValue(json, o.getClass());
+            assertEquals(o, o2);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        
     }
     
     private static void onePublicConstructor(Class<?> c) {
