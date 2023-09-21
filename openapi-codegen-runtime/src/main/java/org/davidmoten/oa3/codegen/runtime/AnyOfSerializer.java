@@ -47,7 +47,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
                 .filter(x -> x instanceof Optional) //
                 .map(x -> (Optional<?>) x) //
                 .collect(Collectors.toList());
-        JsonNode node = values.stream() //
+        Optional<JsonNode> node = values.stream() //
                 .filter(Optional::isPresent) //
                 .map(x -> {
                     try {
@@ -63,8 +63,12 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
                         throw new RuntimeException(e);
                     }
                 }) //
-                .collect(Collectors.reducing((a, b) -> merge(a, b))).get();
-        gen.writeTree(node);
+                .collect(Collectors.reducing((a, b) -> merge(a, b)));
+        if (!node.isPresent()) {
+            throw new IllegalStateException("at least one of the anyOf members must be present");
+        } else {
+            gen.writeTree(node.get());
+        }
     }
 
     /**

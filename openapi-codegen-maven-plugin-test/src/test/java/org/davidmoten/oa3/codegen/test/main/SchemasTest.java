@@ -1124,6 +1124,11 @@ public class SchemasTest {
     }
     
     @Test
+    public void testAnyOfMatchesNone() throws JsonProcessingException {
+        assertThrows(IllegalArgumentException.class, () -> new AnyOfSimpleTypes(Optional.empty(), Optional.empty()));
+    }
+    
+    @Test
     public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
         AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(1)), Optional.empty());
         checkRoundTrip(a);
