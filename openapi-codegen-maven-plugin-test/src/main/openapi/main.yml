@@ -2044,4 +2044,31 @@ components:
               type: integer
               format: int32
         required: [name, counts]        
+        
+    #example from OAS
+    PetSearch:
+      anyOf:
+      - $ref: '#/components/schemas/PetByAge'
+      - $ref: '#/components/schemas/PetByType'
+      
+    PetByAge:
+      type: object
+      properties: 
+        age: 
+          type: integer
+        nickname: 
+          type: string
+      required:
+        - age
+          
+    PetByType:
+      type: object
+      properties:
+        pet_type:
+          type: string
+          enum: [Cat, Dog]
+        hunts:
+          type: boolean
+      required: 
+        - pet_type        
       

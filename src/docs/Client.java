@@ -23,7 +23,7 @@ import org.davidmoten.oa3.codegen.test.library.schema.UsersPage;
  * <p>Library Demo
  * <p>Library demonstration of some features of OpenAPI 3 and <em>openapi-codegen</em>
  */
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.7-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
 public class Client {
 
     private final Serializer serializer;
@@ -48,9 +48,9 @@ public class Client {
      * <p>[status=200, application/json] --&gt; {@link UsersPage}
      * 
      * @param search
-     *            search
+     *            <p>search
      * @param continuationToken
-     *            continuationToken
+     *            <p>continuationToken
      * @return primary response with status code 200
      * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
      *              if an unexpected HTTP status code or Content-Type is returned
@@ -70,9 +70,9 @@ public class Client {
      * <p>[status=200, application/json] --&gt; {@link UsersPage}
      * 
      * @param search
-     *            search
+     *            <p>search
      * @param continuationToken
-     *            continuationToken
+     *            <p>continuationToken
      * @return full response with status code, body and headers
      */
     public HttpResponse getUsersFullResponse(
@@ -98,7 +98,7 @@ public class Client {
      * <p>Creates a new user
      * 
      * @param requestBody
-     *            requestBody
+     *            <p>requestBody
      * @return full response with status code, body and headers
      */
     public HttpResponse createUserFullResponse(
@@ -110,7 +110,6 @@ public class Client {
                 .serializer(this.serializer)
                 .interceptors(this.interceptors)
                 .httpService(this.httpService)
-                .acceptApplicationJson()
                 .body(requestBody)
                 .contentTypeApplicationJson()
                 .call();
@@ -122,7 +121,7 @@ public class Client {
      * <p>[status=200, application/json] --&gt; {@link User}
      * 
      * @param id
-     *            id
+     *            <p>id
      * @return primary response with status code 200
      * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
      *              if an unexpected HTTP status code or Content-Type is returned
@@ -141,7 +140,7 @@ public class Client {
      * <p>[status=200, application/json] --&gt; {@link User}
      * 
      * @param id
-     *            id
+     *            <p>id
      * @return full response with status code, body and headers
      */
     public HttpResponse getUserFullResponse(
@@ -165,9 +164,9 @@ public class Client {
      * <p>Updates a user
      * 
      * @param requestBody
-     *            requestBody
+     *            <p>requestBody
      * @param id
-     *            id
+     *            <p>id
      * @return full response with status code, body and headers
      */
     public HttpResponse updateUserFullResponse(
@@ -180,7 +179,6 @@ public class Client {
                 .serializer(this.serializer)
                 .interceptors(this.interceptors)
                 .httpService(this.httpService)
-                .acceptApplicationJson()
                 .pathParam("id", id)
                 .body(requestBody)
                 .contentTypeApplicationJson()
@@ -191,7 +189,7 @@ public class Client {
      * <p>Deletes a user (logically)
      * 
      * @param id
-     *            id
+     *            <p>id
      * @return full response with status code, body and headers
      */
     public HttpResponse deleteUserFullResponse(
@@ -203,7 +201,6 @@ public class Client {
                 .serializer(this.serializer)
                 .interceptors(this.interceptors)
                 .httpService(this.httpService)
-                .acceptApplicationJson()
                 .pathParam("id", id)
                 .call();
     }
@@ -214,7 +211,7 @@ public class Client {
      * <p>[status=200, application/json] --&gt; {@link Item}
      * 
      * @param itemId
-     *            itemId
+     *            <p>itemId
      * @return primary response with status code 200
      * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
      *              if an unexpected HTTP status code or Content-Type is returned
@@ -233,7 +230,7 @@ public class Client {
      * <p>[status=200, application/json] --&gt; {@link Item}
      * 
      * @param itemId
-     *            itemId
+     *            <p>itemId
      * @return full response with status code, body and headers
      */
     public HttpResponse getItemFullResponse(

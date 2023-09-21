@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.7-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
 public class ServiceController implements ControllerExceptionHandler {
 
     private final Service service;
@@ -38,9 +38,9 @@ public class ServiceController implements ControllerExceptionHandler {
      * <p>[status=200, application/json] --&gt; {@link UsersPage}
      * 
      * @param search
-     *            search
+     *            <p>search
      * @param continuationToken
-     *            continuationToken
+     *            <p>continuationToken
      * @return primary response status code 200
      */
     @RequestMapping(
@@ -66,7 +66,7 @@ public class ServiceController implements ControllerExceptionHandler {
      * <p>Creates a new user
      * 
      * @param requestBody
-     *            requestBody
+     *            <p>requestBody
      */
     @RequestMapping(
         method = RequestMethod.POST,
@@ -88,7 +88,7 @@ public class ServiceController implements ControllerExceptionHandler {
      * <p>[status=200, application/json] --&gt; {@link User}
      * 
      * @param id
-     *            id
+     *            <p>id
      * @return primary response status code 200
      */
     @RequestMapping(
@@ -111,9 +111,9 @@ public class ServiceController implements ControllerExceptionHandler {
      * <p>Updates a user
      * 
      * @param requestBody
-     *            requestBody
+     *            <p>requestBody
      * @param id
-     *            id
+     *            <p>id
      */
     @RequestMapping(
         method = RequestMethod.PUT,
@@ -137,7 +137,7 @@ public class ServiceController implements ControllerExceptionHandler {
      * <p>Deletes a user (logically)
      * 
      * @param id
-     *            id
+     *            <p>id
      */
     @RequestMapping(
         method = RequestMethod.DELETE,
@@ -161,7 +161,7 @@ public class ServiceController implements ControllerExceptionHandler {
      * <p>[status=200, application/json] --&gt; {@link Item}
      * 
      * @param itemId
-     *            itemId
+     *            <p>itemId
      * @return primary response status code 200
      */
     @RequestMapping(

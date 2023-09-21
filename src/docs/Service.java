@@ -15,7 +15,7 @@ import org.davidmoten.oa3.codegen.test.library.schema.UsersPage;
  * <p>Library Demo
  * <p>Library demonstration of some features of OpenAPI 3 and <em>openapi-codegen</em>
  */
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.7-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
 public interface Service extends ErrorHandler {
 
     /**
@@ -24,9 +24,9 @@ public interface Service extends ErrorHandler {
      * <p>[status=200, application/json] --&gt; {@link UsersPage}
      * 
      * @param search
-     *            search
+     *            <p>search
      * @param continuationToken
-     *            continuationToken
+     *            <p>continuationToken
      * @return primary response status code 200
      */
     default UsersPage getUsers(
@@ -39,7 +39,7 @@ public interface Service extends ErrorHandler {
      * <p>Creates a new user
      * 
      * @param requestBody
-     *            requestBody
+     *            <p>requestBody
      */
     default void createUser(
             User requestBody) throws ServiceException {
@@ -52,7 +52,7 @@ public interface Service extends ErrorHandler {
      * <p>[status=200, application/json] --&gt; {@link User}
      * 
      * @param id
-     *            id
+     *            <p>id
      * @return primary response status code 200
      */
     default User getUser(
@@ -64,9 +64,9 @@ public interface Service extends ErrorHandler {
      * <p>Updates a user
      * 
      * @param requestBody
-     *            requestBody
+     *            <p>requestBody
      * @param id
-     *            id
+     *            <p>id
      */
     default void updateUser(
             String id, 
@@ -78,7 +78,7 @@ public interface Service extends ErrorHandler {
      * <p>Deletes a user (logically)
      * 
      * @param id
-     *            id
+     *            <p>id
      */
     default void deleteUser(
             String id) throws ServiceException {
@@ -91,7 +91,7 @@ public interface Service extends ErrorHandler {
      * <p>[status=200, application/json] --&gt; {@link Item}
      * 
      * @param itemId
-     *            itemId
+     *            <p>itemId
      * @return primary response status code 200
      */
     default Item getItem(

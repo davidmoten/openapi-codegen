@@ -6,6 +6,9 @@ cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Veh
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Geometry.java ../src/docs/Geometry.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Circle.java ../src/docs/Circle.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Rectangle.java ../src/docs/Rectangle.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/PetSearch.java ../src/docs/PetSearch.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/PetByAge.java ../src/docs/PetByAge.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/PetByType.java ../src/docs/PetByType.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/client/Client.java ../src/docs/Client.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/Service.java ../src/docs/Service.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/ServiceController.java ../src/docs/ServiceController.java
