@@ -33,14 +33,18 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
     public void serialize(T value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         // loop through fields
         List<Optional<?>> values = Arrays.stream(cls.getDeclaredFields()) //
+                // ignore any weird fields (jacoco makes a $jacocoData field for example
+                .filter(f -> !f.getName().startsWith("$")) //
                 .map(f -> {
                     try {
                         f.setAccessible(true);
-                        return (Optional<?>) f.get(value);
+                        return f.get(value);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
                 }) //
+                .filter(x -> x instanceof Optional) //
+                .map(x -> (Optional<?>) x) //
                 .collect(Collectors.toList());
         JsonNode node = values.stream() //
                 .filter(Optional::isPresent) //
@@ -69,6 +73,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
      * @param b node to merge into a
      */
     private static JsonNode merge(JsonNode a, JsonNode b) {
+        // do a deep equals check
         if (a.equals(b)) {
             return a;
         }

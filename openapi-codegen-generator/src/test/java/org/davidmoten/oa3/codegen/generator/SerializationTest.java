@@ -535,14 +535,13 @@ public class SerializationTest {
         }
     }
 
-    @JsonInclude(Include.NON_NULL)
     @JsonDeserialize(using = AnyOf.Deserializer.class)
     @JsonSerialize(using = AnyOf.Serializer.class)
     public static final class AnyOf {
 
-        public final Optional<SimpleName> name;
-        public final Optional<Person> person;
-        public final Optional<Person2> person2;
+        private final Optional<SimpleName> name;
+        private final Optional<Person> person;
+        private final Optional<Person2> person2;
 
         public AnyOf(Optional<SimpleName> name, Optional<Person> person, Optional<Person2> person2) {
             this.name = name;
