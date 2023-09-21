@@ -32,6 +32,10 @@ import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNullable;
 import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes2;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfObjectExtensions;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfSimpleTypes;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumber;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
@@ -1111,6 +1115,73 @@ public class SchemasTest {
     public void testOneOfDeserializerUsesConstraintsNoMatch()
             throws JsonMappingException, JsonProcessingException {
         assertThrows(JsonMappingException.class, () -> m.readValue("-1", OneOfUsesConstraints.class));
+    }
+    
+    @Test
+    public void testAnyOfMatchesBoth() throws JsonProcessingException {
+        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(100)), Optional.of(LargeInt.value(100)));
+        checkRoundTrip(a);
+    }
+    
+    @Test
+    public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
+        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.of(SmallInt.value(1)), Optional.empty());
+        checkRoundTrip(a);
+    }
+    
+    @Test
+    public void testAnyOfMatchesLargeIntOnly() throws JsonProcessingException {
+        AnyOfSimpleTypes a = new AnyOfSimpleTypes(Optional.empty(), Optional.of(LargeInt.value(1000)));
+        checkRoundTrip(a);
+    }
+    
+    @Test
+    public void testAnyOfPrimitiveConflicts() throws JsonProcessingException {
+        assertThrows(IllegalArgumentException.class,
+                () -> new AnyOfConflictingTypes(Optional.of("a"), Optional.of(1L)));
+    }
+    
+    @Test
+    public void testAnyOfConflictWithObject() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new AnyOfConflictingTypes2(Optional.of("a"), Optional.of(AnyOfConflictingTypes2.Object2.name("aya"))));
+    }
+    
+    @Test
+    public void testAnyOfObjectExtensions() throws JsonProcessingException {
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3))); 
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3))).build();
+        AnyOfObjectExtensions o = new AnyOfObjectExtensions(Optional.of(a), Optional.of(b));
+        checkRoundTrip(o);
+    }
+    
+    @Test
+    public void testAnyOfObjectExtensionsThrowsIfArraysDifferentLength() throws JsonProcessingException {
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
+                .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
+                .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3, 4))).build();
+        assertThrows(IllegalArgumentException.class, () -> new AnyOfObjectExtensions(Optional.of(a), Optional.of(b)));
+    }
+    
+    @Test
+    public void testAnyOfObjectExtensionsThrowsIfArraysDifferentElements() throws JsonProcessingException {
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
+                .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
+                .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 4))).build();
+        assertThrows(IllegalArgumentException.class, () -> new AnyOfObjectExtensions(Optional.of(a), Optional.of(b)));
+    }
+    
+    private static void checkRoundTrip(Object o) {
+        try {
+            String json = m.writeValueAsString(o);
+            Object o2 = m.readValue(json, o.getClass());
+            assertEquals(o, o2);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        
     }
     
     private static void onePublicConstructor(Class<?> c) {

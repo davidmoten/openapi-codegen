@@ -2004,3 +2004,44 @@ components:
           format: int32
           minimum: 10
       required: [a]
+
+    AnyOfSimpleTypes:
+      anyOf:
+      - $ref: "#/components/schemas/SmallInt"
+      - $ref: "#/components/schemas/LargeInt"
+      
+    AnyOfConflictingTypes:
+      anyOf:
+      - type: string
+      - type: integer
+      
+    AnyOfConflictingTypes2:
+      anyOf:
+      - type: string
+      - type: object
+        properties:
+          name: 
+            type: string
+        required: [name]
+        
+    AnyOfObjectExtensions:
+      anyOf:
+      - type: object
+        properties:
+          counts: 
+            type: array
+            items:
+              type: integer
+              format: int32
+        required: [counts]
+      - type: object
+        properties:
+          name: 
+            type: string
+          counts: 
+            type: array
+            items:
+              type: integer
+              format: int32
+        required: [name, counts]        
+      
