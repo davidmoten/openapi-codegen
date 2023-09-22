@@ -30,11 +30,14 @@ public class ProjectGeneratorMain {
         if (file == null) {
             return;
         }
-        for (File f : file.listFiles()) {
-            if (f.isDirectory()) {
-                deleteContents(f);
-            } 
-            f.delete();
+        File[] list = file.listFiles();
+        if (list != null) {
+            for (File f : list) {
+                if (f.isDirectory()) {
+                    deleteContents(f);
+                }
+                f.delete();
+            }
         }
     }
 
