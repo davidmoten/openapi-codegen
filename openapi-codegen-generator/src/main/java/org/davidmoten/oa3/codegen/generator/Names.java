@@ -40,6 +40,14 @@ public final class Names {
             "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
             "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString");
+    
+    // avoid clashes with some of the java.lang classes that don't need imports and might be used in generated classes
+    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet("Boolean", "Byte", "Class", "Comparable",
+            "Deprecated", "Double", "Enum", "Error", "Exception", "Float", "FunctionalInterface",
+            "IllegalArgumentException", "IllegalStateException", "Integer", "Iterable", "Long", "Math",
+            "NullPointerException", "Number", "Object", "Override", "RuntimeException", "SafeVarargs", "Short",
+            "String", "StringBuffer", "StringBuilder", "SuppressWarnings", "System", "Throwable", "Void");
+    
 
     private static final boolean LOG_SCHEMA_PATHS = false;
 
@@ -228,7 +236,15 @@ public final class Names {
     }
 
     public static String simpleClassNameFromSimpleName(String name) {
-        return upperFirst(underscoreToCamel(toIdentifier(skipUnderscoresAtStart(name))));
+        return fixReservedSimpleClassName(upperFirst(underscoreToCamel(toIdentifier(skipUnderscoresAtStart(name)))));
+    }
+
+    private static String fixReservedSimpleClassName(String simpleClassName) {
+        if (reservedSimpleClassNames.contains(simpleClassName)) {
+            return simpleClassName + "_";
+        } else {
+            return simpleClassName;
+        }
     }
 
     @VisibleForTesting

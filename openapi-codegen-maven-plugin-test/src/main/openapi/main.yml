@@ -2071,4 +2071,8 @@ components:
           type: boolean
       required: 
         - pet_type        
+        
+    String: 
+      type: string
+      minLength: 1
       
