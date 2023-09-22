@@ -30,26 +30,31 @@ public final class ProjectGenerator {
             String basePackage, boolean generateClient, boolean generateServer, OutputStream zip) {
         try {
             File directory = Files.createTempDirectory("openapi-codegen").toFile();
-            File generatedSourceDirectory = new File(directory, "src/main/java");
-            generatedSourceDirectory.mkdirs();
-            System.out.println(generatedSourceDirectory);
-            Definition definition = new Definition(openapiFilename, new Packages(basePackage), generatedSourceDirectory,
-                    x -> x, Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), generateServer);
-            Generator g = new Generator(definition);
-            g.generate();
-
-            ClientServerGenerator g2 = new ClientServerGenerator(definition);
-            if (generateClient) {
-                g2.generateClient();
-            }
-            if (generateServer) {
-                g2.generateServer();
-            }
-            writePom(groupId, artifactId, version, basePackage, generateServer, directory);
+            generate(openapiFilename, groupId, artifactId, version, basePackage, generateClient, generateServer,
+                    directory);
             zipDirectory(directory, zip);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public static void generate(String openapiFilename, String groupId, String artifactId, String version,
+            String basePackage, boolean generateClient, boolean generateServer, File directory) throws IOException {
+        File generatedSourceDirectory = new File(directory, "src/main/java");
+        generatedSourceDirectory.mkdirs();
+        Definition definition = new Definition(openapiFilename, new Packages(basePackage), generatedSourceDirectory,
+                x -> x, Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), generateServer);
+        Generator g = new Generator(definition);
+        g.generate();
+
+        ClientServerGenerator g2 = new ClientServerGenerator(definition);
+        if (generateClient) {
+            g2.generateClient();
+        }
+        if (generateServer) {
+            g2.generateServer();
+        }
+        writePom(groupId, artifactId, version, basePackage, generateServer, directory);
     }
 
     private static void writePom(String groupId, String artifactId, String version, String basePackage,
@@ -84,7 +89,7 @@ public final class ProjectGenerator {
         }
     }
 
-    public static void zipDirectory(File sourceDirectory, OutputStream out) throws IOException {
+    private static void zipDirectory(File sourceDirectory, OutputStream out) throws IOException {
         try (ZipOutputStream zs = new ZipOutputStream(out)) {
             Path pp = sourceDirectory.toPath();
             try (Stream<Path> paths = Files.walk(pp)) {
