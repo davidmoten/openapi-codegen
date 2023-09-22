@@ -5,5 +5,4 @@ find . -name "openapi.yaml"|sort|while read f; do
   echo "$f"
   temp=`codegen "$f"|tail -1`
   cd $temp && mvn clean install 
-  mvn clean install 
 done
