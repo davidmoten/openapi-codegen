@@ -150,6 +150,8 @@ Note that discriminators are constants that the user does not set (in fact, cann
 [Geometry.java](src/docs/Geometry.java), [Circle.java](src/docs/Circle.java), [Rectangle.java](src/docs/Rectangle.java)
 
 ### *anyOf* without discriminator
+*anyOf* is an interesting one, mainly because it is rarely used appropriately. In a review of 21 apis in [openapi-directory], 5 had valid use-cases for *anyOf* and the rest should have been *oneOf*. Semantically, yes it is ok, but generated code will not give you as clean an experience (type-safety wise) than if *oneOf* had been used.
+
 [PetSearch.java](src/docs/PetSearch.java), [PetByAge.java](src/docs/PetByAge.java), [PetByType.java](src/docs/PetByType.java)
 
 [AnyOfSerializer.java](openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/AnyOfSerializer.java), [PolymorphicDeserializer.java](openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/PolymorphicDeserializer.java)
