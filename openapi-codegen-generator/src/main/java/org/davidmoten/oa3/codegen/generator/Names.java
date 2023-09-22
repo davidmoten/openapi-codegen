@@ -32,21 +32,22 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
 public final class Names {
 
-    // note that hashCode and toString added to this set so that generated getters
+    // note that all Object methods added to this set so that generated getters
     // without a get prefix don't get into trouble
     private static final Set<String> javaReservedWords = Sets.newHashSet("abstract", "assert", "boolean", "break",
             "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
             "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
             "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
             "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
-            "true", "try", "void", "volatile", "while", "var", "hashCode", "toString");
+            "true", "try", "void", "volatile", "while", "var", "hashCode", "toString", "notify", "clone", "equals",
+            "finalize", "getClass", "notifyAll", "wait", "builder");
     
     // avoid clashes with some of the java.lang classes that don't need imports and might be used in generated classes
     private static final Set<String> reservedSimpleClassNames = Sets.newHashSet("Boolean", "Byte", "Class", "Comparable",
             "Deprecated", "Double", "Enum", "Error", "Exception", "Float", "FunctionalInterface",
             "IllegalArgumentException", "IllegalStateException", "Integer", "Iterable", "Long", "Math",
             "NullPointerException", "Number", "Object", "Override", "RuntimeException", "SafeVarargs", "Short",
-            "String", "StringBuffer", "StringBuilder", "SuppressWarnings", "System", "Throwable", "Void");
+            "String", "StringBuffer", "StringBuilder", "SuppressWarnings", "System", "Throwable", "Void", "Globals", "Builder");
     
 
     private static final boolean LOG_SCHEMA_PATHS = false;
