@@ -42,12 +42,19 @@ public final class Names {
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString", "notify", "clone", "equals",
             "finalize", "getClass", "notifyAll", "wait", "builder");
     
-    // avoid clashes with some of the java.lang classes that don't need imports and might be used in generated classes
-    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet("Boolean", "Byte", "Class", "Comparable",
-            "Deprecated", "Double", "Enum", "Error", "Exception", "Float", "FunctionalInterface",
+    // avoid class names that might clash with generated classes in the same package
+    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet("Boolean", "Byte", "Class",
+            "Comparable", "Deprecated", "Double", "Enum", "Error", "Exception", "Float", "FunctionalInterface",
             "IllegalArgumentException", "IllegalStateException", "Integer", "Iterable", "Long", "Math",
             "NullPointerException", "Number", "Object", "Override", "RuntimeException", "SafeVarargs", "Short",
-            "String", "StringBuffer", "StringBuilder", "SuppressWarnings", "System", "Throwable", "Void", "Globals", "Builder");
+            "String", "StringBuffer", "StringBuilder", "SuppressWarnings", "System", "Throwable", "Void", "Globals",
+            "Builder", "RuntimeUtil", "JsonAnyGetter", "JsonAnySetter", "JsonAutoDetect", "JsonCreator", "JsonInclude",
+            "JsonProperty", "JsonSubTypes", "JsonTypeInfo", "JsonUnwrapped", "JsonValue", "JsonDeserialize",
+            "JsonSerialize", "Maps", "Generated", "Override", "SuppressWarnings", "BigDecimal", "BigInteger",
+            "LocalDate", "OffsetDateTime", "OffsetTime", "HashMap", "List", "Map", "Objects", "Optional", "HasEncoding",
+            "HasStringValue", "AnyOfSerializer", "Config", "DiscriminatorHelper", "MapBuilder", "NullEnumDeserializer",
+            "PolymorphicDeserializer", "PolymorphicType", "Preconditions", "Util", "JsonNullable",
+            "ConstructorBinding");
     
 
     private static final boolean LOG_SCHEMA_PATHS = false;
