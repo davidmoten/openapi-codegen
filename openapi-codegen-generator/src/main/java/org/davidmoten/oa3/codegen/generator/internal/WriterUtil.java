@@ -93,7 +93,7 @@ public final class WriterUtil {
     }
 
     public static String escapePattern(String pattern) {
-        return pattern.replace("\\", "\\\\");
+        return pattern.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
 }
