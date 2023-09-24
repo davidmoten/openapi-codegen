@@ -18,7 +18,6 @@ import org.davidmoten.oa3.codegen.test.paths.path.SubmitPostRequestApplicationXW
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document.ContentType;
-import org.davidmoten.oa3.codegen.test.paths.schema.Error;
 import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
@@ -185,7 +184,7 @@ public class PathsServerTest {
     @MethodSource("httpServices")
     public void testDefaultErrorReturned(HttpService httpService) {
         HttpResponse r = client(httpService).defaultErrorGetFullResponse();
-        org.davidmoten.oa3.codegen.test.paths.schema.Error e = r.dataUnwrapped();
+        org.davidmoten.oa3.codegen.test.paths.schema.Error_ e = r.dataUnwrapped();
         assertEquals("not found eh", e.errorMessage().orElse(""));
     }
 

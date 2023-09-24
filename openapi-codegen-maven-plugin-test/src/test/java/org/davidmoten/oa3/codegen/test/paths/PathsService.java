@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.davidmoten.oa3.codegen.test.paths.path.QueryObjectGetIdParameterId;
-import org.davidmoten.oa3.codegen.test.paths.schema.Error;
+import org.davidmoten.oa3.codegen.test.paths.schema.Error_;
 import org.davidmoten.oa3.codegen.test.paths.schema.Name;
 import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
@@ -82,7 +82,7 @@ public class PathsService implements Service {
     @Override
     public Response1 defaultErrorGet() throws ServiceException {
         return response(
-                ResponseEntity.status(404).body(Error.builder().statusCode(404L).errorMessage("not found eh").build()));
+                ResponseEntity.status(404).body(Error_.builder().statusCode(404L).errorMessage("not found eh").build()));
     }
 
     @Override
