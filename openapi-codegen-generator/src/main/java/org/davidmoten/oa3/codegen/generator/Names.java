@@ -42,6 +42,9 @@ public final class Names {
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString", "notify", "clone", "equals",
             "finalize", "getClass", "notifyAll", "wait", "builder");
     
+    // TODO this can be done in another preferrable way where we check all class names in the same package before 
+    // deciding to leave the package name off a class.
+    
     // avoid class names that might clash with generated classes in the same package
     private static final Set<String> reservedSimpleClassNames = Sets.newHashSet("Boolean", "Byte", "Class",
             "Comparable", "Deprecated", "Double", "Enum", "Error", "Exception", "Float", "FunctionalInterface",
@@ -53,8 +56,8 @@ public final class Names {
             "JsonSerialize", "Maps", "Generated", "Override", "SuppressWarnings", "BigDecimal", "BigInteger",
             "LocalDate", "OffsetDateTime", "OffsetTime", "HashMap", "List", "Map", "Objects", "Optional", "HasEncoding",
             "HasStringValue", "AnyOfSerializer", "Config", "DiscriminatorHelper", "MapBuilder", "NullEnumDeserializer",
-            "PolymorphicDeserializer", "PolymorphicType", "Preconditions", "Util", "JsonNullable",
-            "ConstructorBinding");
+            "PolymorphicDeserializer", "PolymorphicType", "Preconditions", "Util", "JsonNullable", "Serializer",
+            "Deserializer", "ConstructorBinding", "None");
     
 
     private static final boolean LOG_SCHEMA_PATHS = false;
