@@ -486,7 +486,25 @@ public final class Names {
     }
 
     public Predicate<String> simpleNameInPackage(String fullClassName) {
-        return x -> false;
+        return x -> {
+            String pkg = pkg(fullClassName);
+            String simple = simpleClassName(fullClassName);
+            Set<String> set = classes.get(pkg);
+            return set.contains(simple);
+        };
+    }
+    
+    private final Map<String,Set<String>> classes = new HashMap<>();
+
+    public void registerFullClassName(String fullClassName) {
+        String pkg = pkg(fullClassName);
+        String simple = simpleClassName(fullClassName);
+        Set<String> set = classes.get(pkg);
+        if (set == null) {
+            set = new HashSet<>();
+            classes.put(pkg, set);
+        }
+        set.add(simple);
     }
 
 }
