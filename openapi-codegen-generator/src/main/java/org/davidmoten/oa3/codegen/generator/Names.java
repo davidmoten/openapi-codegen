@@ -484,4 +484,8 @@ public final class Names {
         return definition.generateService();
     }
 
+    public Predicate<String> simpleNameInPackage(String fullClassName) {
+        return x -> false;
+    }
+
 }

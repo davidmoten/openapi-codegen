@@ -58,7 +58,7 @@ public final class ServerCodeWriterSpringBoot {
     }
 
     private static void writeApplicationClass(Names names) {
-        CodePrintWriter out = CodePrintWriter.create(names.applicationFullClassName());
+        CodePrintWriter out = CodePrintWriter.create(names.applicationFullClassName(), names.simpleNameInPackage(names.applicationFullClassName()));
         writeApplicationClass(out);
         WriterUtil.writeContent(names, out);
     }
@@ -82,7 +82,7 @@ public final class ServerCodeWriterSpringBoot {
 
     private static void writeJacksonConfigurationClass(Names names) {
         String fullClassName = names.jacksonConfigurationFullClassName();
-        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName, names.simpleNameInPackage(fullClassName));
         writeJacksonConfigurationClass(out, names);
         WriterUtil.writeContent(names, out);
     }
@@ -114,14 +114,14 @@ public final class ServerCodeWriterSpringBoot {
 
     private static void writeServiceControllerClass(Names names, List<Method> methods) {
         String fullClassName = names.serviceControllerFullClassName();
-        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName, names.simpleNameInPackage(fullClassName));
         writeServiceControllerClass(out, names, methods);
         WriterUtil.writeContent(names, out);
     }
 
     private static void writeServiceInterfaceClass(Names names, List<Method> methods) {
         String fullClassName = names.serviceInterfaceFullClassName();
-        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName, names.simpleNameInPackage(fullClassName));
         writeServiceInterfaceClass(out, names, methods);
         WriterUtil.writeContent(names, out);
     }

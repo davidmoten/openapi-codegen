@@ -30,7 +30,7 @@ public class ClientCodeWriter {
 
     public static void writeClientClass(Names names, List<Method> methods) {
         String fullClassName = names.clientFullClassName();
-        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName, names.simpleNameInPackage(fullClassName));
         writeClientClass(out, names, methods);
         WriterUtil.writeContent(names, out);
     }

@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Predicate;
 
 import org.davidmoten.oa3.codegen.generator.Names;
 
@@ -15,8 +16,8 @@ public final class CodePrintWriter extends PrintWriter {
     private final Indent indent;
     private final Imports imports;
 
-    public CodePrintWriter(OutputStream out, String fullClassName) {
-        this(out, new Imports(fullClassName), new Indent());
+    public CodePrintWriter(OutputStream out, String fullClassName, Predicate<String> simpleNameInPackage) {
+        this(out, new Imports(fullClassName, simpleNameInPackage), new Indent());
     }
     
     private CodePrintWriter(OutputStream out, Imports imports, Indent indent) {
@@ -25,8 +26,8 @@ public final class CodePrintWriter extends PrintWriter {
         this.imports = imports;
     }
     
-    public static CodePrintWriter create(String fullClassName) {
-        return create(new Imports(fullClassName), new Indent());
+    public static CodePrintWriter create(String fullClassName, Predicate<String> simpleNameInPackage) {
+        return create(new Imports(fullClassName, simpleNameInPackage), new Indent());
     }
     
     public static CodePrintWriter create(CodePrintWriter w) {

@@ -3,14 +3,17 @@ package org.davidmoten.oa3.codegen.generator.internal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class Imports {
 
     private final String fullClassName;
+    private final Predicate<String> simpleNameInPackage;
 
-    public Imports(String fullClassName) {
+    public Imports(String fullClassName, Predicate<String> simpleNameInPackage) {
         this.fullClassName = fullClassName;
+        this.simpleNameInPackage = simpleNameInPackage;
         add(fullClassName);
     }
 
@@ -29,10 +32,10 @@ public final class Imports {
         }
         final String simpleName = simpleName(className);
         String c = map.get(simpleName);
-        if (c == null) {
+        if (c == null && !simpleNameInPackage.test(simpleName)) {
             map.put(simpleName, className);
             return simpleName;
-        } else if (c.equals(className)) {
+        } else if (c != null && c.equals(className)) {
             return simpleName;
         } else {
             return className;

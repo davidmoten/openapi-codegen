@@ -11,13 +11,13 @@ public class ImportsTest {
 
     @Test
     public void testNoClassWithParentClass() {
-        Imports imports = new Imports("Something");
+        Imports imports = new Imports("Something", x-> false);
         assertEquals("fred.Something", imports.add("fred.Something"));
     }
 
     @Test
     public void test() {
-        Imports imports = new Imports("Something");
+        Imports imports = new Imports("Something", x -> false);
         assertEquals("Boo", imports.add("fred.Boo"));
         assertEquals("jill.Boo", imports.add("jill.Boo"));
         assertEquals("Boo", imports.add("fred.Boo"));
@@ -25,14 +25,14 @@ public class ImportsTest {
 
     @Test
     public void testNameClash() {
-        Imports imports = new Imports("fred.Something");
+        Imports imports = new Imports("fred.Something", x -> false);
         assertEquals("anne.Something", imports.add("anne.Something"));
         assertEquals("Something", imports.add("fred.Something"));
     }
 
     @Test
     public void testSortedAndGroupedWithNewLineSeparatorBetweenFirstSegmentChanges() {
-        Imports imports = new Imports("Something");
+        Imports imports = new Imports("Something", x -> false);
         imports.add("com.fred.MyClass");
         imports.add("com.andrew.AnotherClass");
         imports.add(Integer.class);
