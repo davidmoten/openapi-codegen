@@ -32,7 +32,7 @@ public final class Imports {
         }
         final String simpleName = simpleName(className);
         String c = map.get(simpleName);
-        if (c == null && !simpleNameInPackage.test(simpleName)) {
+        if (c == null && !simpleNameInPackage.test(className)) {
             map.put(simpleName, className);
             return simpleName;
         } else if (c != null && c.equals(className)) {

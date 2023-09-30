@@ -46,20 +46,8 @@ public final class Names {
     // deciding to leave the package name off a class.
     
     // avoid class names that might clash with generated classes in the same package
-    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet("Boolean", "Byte", "Class",
-            "Comparable", "Deprecated", "Double", "Enum", "Error", "Exception", "Float", "FunctionalInterface",
-            "IllegalArgumentException", "IllegalStateException", "Integer", "Iterable", "Long", "Math",
-            "NullPointerException", "Number", "Object", "Override", "RuntimeException", "SafeVarargs", "Short",
-            "String", "StringBuffer", "StringBuilder", "SuppressWarnings", "System", "Throwable", "Void", "Globals",
-            "Builder", "RuntimeUtil", "JsonAnyGetter", "JsonAnySetter", "JsonAutoDetect", "JsonCreator", "JsonInclude",
-            "JsonProperty", "JsonSubTypes", "JsonTypeInfo", "JsonUnwrapped", "JsonValue", "JsonDeserialize",
-            "JsonSerialize", "Maps", "Generated", "Override", "SuppressWarnings", "BigDecimal", "BigInteger",
-            "LocalDate", "OffsetDateTime", "OffsetTime", "HashMap", "List", "Map", "Objects", "Optional", "HasEncoding",
-            "HasStringValue", "AnyOfSerializer", "Config", "DiscriminatorHelper", "MapBuilder", "NullEnumDeserializer",
-            "PolymorphicDeserializer", "PolymorphicType", "Preconditions", "Util", "JsonNullable", "Serializer",
-            "Deserializer", "ConstructorBinding", "None");
+    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet();
     
-
     private static final boolean LOG_SCHEMA_PATHS = false;
 
     private final Definition definition;

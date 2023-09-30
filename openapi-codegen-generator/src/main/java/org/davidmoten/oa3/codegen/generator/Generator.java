@@ -54,10 +54,6 @@ public class Generator {
         MyVisitor v = new MyVisitor(names);
         Apis.visitSchemas(names.api(), v);
 
-        Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
-        for (MyVisitor.Result result : v.results()) {
-            findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
-        }
         for (MyVisitor.Result result : v.results()) {
             Cls cls = result.cls;
             String schemaName = result.name;
@@ -65,6 +61,11 @@ public class Generator {
                     && !definition.excludeSchemas().contains(schemaName)) {
                 names.registerFullClassName(cls.fullClassName);
             }
+        }
+        
+        Map<String, Set<Cls>> fullClassNameInterfaces = new HashMap<>();
+        for (MyVisitor.Result result : v.results()) {
+            findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
         }
         for (MyVisitor.Result result : v.results()) {
             Cls cls = result.cls;
