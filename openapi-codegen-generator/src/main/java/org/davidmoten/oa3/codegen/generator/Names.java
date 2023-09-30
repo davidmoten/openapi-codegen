@@ -60,7 +60,7 @@ public final class Names {
             "Deserializer", "ConstructorBinding", "None");
     
 
-    private static final boolean LOG_SCHEMA_PATHS = false;
+    private static final boolean LOG_SCHEMA_PATHS = true;
 
     private final Definition definition;
 
@@ -90,6 +90,7 @@ public final class Names {
         this.api = result.getOpenAPI();
         superSchemas(api);
         logSchemaFullClassNames(api);
+        
     }
 
     private static void logSchemaFullClassNames(OpenAPI api) {
