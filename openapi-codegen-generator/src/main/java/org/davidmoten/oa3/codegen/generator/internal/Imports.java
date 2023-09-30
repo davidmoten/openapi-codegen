@@ -6,6 +6,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.Names;
+
 public final class Imports {
 
     private final String fullClassName;
@@ -32,7 +34,7 @@ public final class Imports {
         }
         final String simpleName = simpleName(className);
         String c = map.get(simpleName);
-        if (c == null && !simpleNameInPackage.test(className)) {
+        if (c == null && !simpleNameInPackage.test(Names.pkg(fullClassName) + "." + simpleName)) {
             map.put(simpleName, className);
             return simpleName;
         } else if (c != null && c.equals(className)) {
