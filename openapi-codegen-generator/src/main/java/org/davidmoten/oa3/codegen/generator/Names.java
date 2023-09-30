@@ -60,7 +60,7 @@ public final class Names {
             "Deserializer", "ConstructorBinding", "None");
     
 
-    private static final boolean LOG_SCHEMA_PATHS = true;
+    private static final boolean LOG_SCHEMA_PATHS = false;
 
     private final Definition definition;
 
@@ -490,7 +490,7 @@ public final class Names {
             String pkg = pkg(fullClassName);
             String simple = simpleClassName(fullClassName);
             Set<String> set = classes.get(pkg);
-            return set.contains(simple);
+            return set != null && set.contains(simple);
         };
     }
     
