@@ -63,6 +63,14 @@ public class Generator {
             String schemaName = result.name;
             if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
                     && !definition.excludeSchemas().contains(schemaName)) {
+                names.registerFullClassName(cls.fullClassName);
+            }
+        }
+        for (MyVisitor.Result result : v.results()) {
+            Cls cls = result.cls;
+            String schemaName = result.name;
+            if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
+                    && !definition.excludeSchemas().contains(schemaName)) {
                 SchemasCodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
             }
         }
