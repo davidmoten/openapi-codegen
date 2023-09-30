@@ -72,7 +72,7 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
     }
 
     /**
-     * Merges b into a. Only works properly with anyOf serialization
+     * Merges b into a and returns modified a. Designed specifically for use with anyOf serialization.
      * 
      * @param a input that will be mutated to contain merged result
      * @param b node to merge into a
@@ -82,11 +82,9 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
         // do a deep equals check
         if (a.equals(b)) {
             return a;
-        }
-        if (a.getNodeType() != b.getNodeType()) {
+        } else if (a.getNodeType() != b.getNodeType()) {
             throw new IllegalArgumentException("merge error: mismatching node types: " + a + ", " + b);
-        }
-        if (a.isArray()) {
+        } else if (a.isArray()) {
             ArrayNode x = (ArrayNode) a;
             ArrayNode y = (ArrayNode) b;
             if (x.size() != y.size()) {
@@ -96,11 +94,10 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
                 merge(x.get(i), y.get(i));
             }
         } else if (a.isObject()) {
-            Iterator<String> fieldNames = b.fieldNames();
-            while (fieldNames.hasNext()) {
-                String fieldName = fieldNames.next();
+            Iterator<String> it = b.fieldNames();
+            while (it.hasNext()) {
+                String fieldName = it.next();
                 JsonNode node = a.get(fieldName);
-                // if field exists and is an embedded object
                 if (node != null) {
                     merge(node, b.get(fieldName));
                 } else {
@@ -110,7 +107,8 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
                 }
             }
         } else {
-            // a not equals to b and are primitives
+            // a not equal to b and are primitives
+            // TODO test can merge 1 and 1.0?
             throw new IllegalArgumentException("merge error, fields not equal: " + a + ", " + b);
         }
         return a;
