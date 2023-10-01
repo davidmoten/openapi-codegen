@@ -184,7 +184,7 @@ public class PathsServerTest {
     @MethodSource("httpServices")
     public void testDefaultErrorReturned(HttpService httpService) {
         HttpResponse r = client(httpService).defaultErrorGetFullResponse();
-        org.davidmoten.oa3.codegen.test.paths.schema.Error_ e = r.dataUnwrapped();
+        org.davidmoten.oa3.codegen.test.paths.schema.Error e = r.dataUnwrapped();
         assertEquals("not found eh", e.errorMessage().orElse(""));
     }
 
