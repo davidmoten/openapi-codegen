@@ -1,0 +1,2 @@
+#!/bin/bash
+java -Dfile=$1 $2 $3 $4 $5 $6 $7 -jar $WK/openapi-codegen/openapi-codegen-generator/target/openapi-codegen-generator*boot.jar 

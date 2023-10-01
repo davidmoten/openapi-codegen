@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+echo codegen $1
+temp=`codegen $1|tail -1`
+cd $temp && mvn compile -B
