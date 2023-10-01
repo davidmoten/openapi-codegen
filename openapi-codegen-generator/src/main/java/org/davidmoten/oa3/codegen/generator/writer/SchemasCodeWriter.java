@@ -826,7 +826,7 @@ public final class SchemasCodeWriter {
                     .collect(Collectors.joining(""));
         }
         addOverrideAnnotation(out);
-        out.line("public String toString() {");
+        out.line("public %s toString() {", String.class);
         out.line("return %s.toString(%s.class%s);", Util.class, cls.simpleName(), s);
         out.closeParen();
     }
