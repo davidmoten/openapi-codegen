@@ -42,9 +42,7 @@ public final class Names {
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString", "notify", "clone", "equals",
             "finalize", "getClass", "notifyAll", "wait", "builder");
     
-    // TODO this can be done in another preferrable way where we check all class names in the same package before 
-    // deciding to leave the package name off a class.
-    
+    // TODO remove this now that Imports is aware of package contents    
     // avoid class names that might clash with generated classes in the same package
     private static final Set<String> reservedSimpleClassNames = Sets.newHashSet();
     
