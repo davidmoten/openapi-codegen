@@ -6,16 +6,16 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.davidmoten.oa3.codegen.generator.Names;
-
 public final class Imports {
 
     private final String fullClassName;
     private final Predicate<String> simpleNameInPackage;
+    private final String basePackagePrefix;
 
     public Imports(String fullClassName, Predicate<String> simpleNameInPackage) {
         this.fullClassName = fullClassName;
         this.simpleNameInPackage = simpleNameInPackage;
+        this.basePackagePrefix = packagePrefix(fullClassName);
         add(fullClassName);
     }
 
@@ -27,20 +27,31 @@ public final class Imports {
     }
 
     public String add(String className) {
-        if (className.endsWith("[]")
-                && Util.isPrimitiveFullClassName(className.substring(0, className.length() - 2))) {
+        if (className.endsWith("[]") && Util.isPrimitiveFullClassName(className.substring(0, className.length() - 2))) {
             // don't add byte[] etc to imports
             return className;
         }
         final String simpleName = simpleName(className);
         String c = map.get(simpleName);
-        if (c == null && !simpleNameInPackage.test(Names.pkg(fullClassName) + "." + simpleName)) {
+
+        String pp = packagePrefix(fullClassName);
+        if (c == null && (basePackagePrefix.equals(pp)
+                || !simpleNameInPackage.test(packagePrefix(fullClassName) + simpleName))) {
             map.put(simpleName, className);
             return simpleName;
         } else if (c != null && c.equals(className)) {
             return simpleName;
         } else {
             return className;
+        }
+    }
+
+    private static String packagePrefix(String fullClassName) {
+        int i = fullClassName.lastIndexOf('.');
+        if (i == -1) {
+            return "";
+        } else {
+            return fullClassName.substring(0, i + 1);
         }
     }
 
@@ -114,7 +125,7 @@ public final class Imports {
             return s.substring(0, i);
         }
     }
-    
+
     public String fullClassName() {
         return fullClassName;
     }

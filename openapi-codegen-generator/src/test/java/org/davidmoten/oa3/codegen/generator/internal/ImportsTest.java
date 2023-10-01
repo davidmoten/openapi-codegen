@@ -29,6 +29,12 @@ public class ImportsTest {
         assertEquals("anne.Something", imports.add("anne.Something"));
         assertEquals("Something", imports.add("fred.Something"));
     }
+    
+    @Test
+    public void testNameClashWithClassInSamePackage() {
+        Imports imports = new Imports("fred.Something", x -> true);
+        assertEquals("Else", imports.add("anne.Else"));
+    }
 
     @Test
     public void testSortedAndGroupedWithNewLineSeparatorBetweenFirstSegmentChanges() {
