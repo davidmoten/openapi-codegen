@@ -20,7 +20,7 @@ public class BuilderWriterTest {
         fields.add(new Field("lastName", String.class.getCanonicalName(), true, true, Optional.empty(), false));
         fields.add(new Field("mobile", String.class.getCanonicalName(), false, false, Optional.empty(), false));
         fields.add(new Field("age", Integer.class.getCanonicalName(), false, false, Optional.empty(), false));
-        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Mixed.java"), "Mixed")) {
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Mixed.java"), "Mixed", x -> false)) {
             BuilderWriter.write(writer, fields, "Thing");
         }
     }
@@ -32,7 +32,7 @@ public class BuilderWriterTest {
         fields.add(new Field("lastName", String.class.getCanonicalName(), false, true, Optional.empty(), false));
         fields.add(new Field("mobile", String.class.getCanonicalName(), false, false, Optional.empty(), false));
         fields.add(new Field("age", Integer.class.getCanonicalName(), false, false, Optional.empty(), false));
-        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Optionals.java"), "Optionals")) {
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Optionals.java"), "Optionals", x -> false)) {
             BuilderWriter.write(writer, fields, "Thing");
         }
     }
@@ -44,7 +44,7 @@ public class BuilderWriterTest {
         fields.add(new Field("lastName", String.class.getCanonicalName(), true, true, Optional.empty(), false));
         fields.add(new Field("mobile", String.class.getCanonicalName(), true, false, Optional.empty(), false));
         fields.add(new Field("age", Integer.class.getCanonicalName(), true, false, Optional.empty(), false));
-        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Required.java"), "Required")) {
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/Required.java"), "Required", x -> false)) {
             BuilderWriter.write(writer, fields, "Thing");
         }
     }
@@ -54,7 +54,7 @@ public class BuilderWriterTest {
         List<Field> fields = new ArrayList<>();
         fields.add(new Field("name", String.class.getCanonicalName(), false, false, Optional.empty(), false));
         fields.add(new Field("value", String.class.getCanonicalName(), true, false, Optional.empty(), false));
-        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/NameValue.java"), "NameValue")) {
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/NameValue.java"), "NameValue", x -> false)) {
             BuilderWriter.write(writer, fields, "Thing");
         }
     }
@@ -68,7 +68,7 @@ public class BuilderWriterTest {
         fields.add(new Field("lastName", String.class.getCanonicalName(), true, true, Optional.empty(), false));
         fields.add(new Field("mobile", String.class.getCanonicalName(), false, false, Optional.empty(), false));
         fields.add(new Field("age", Integer.class.getCanonicalName(), false, false, Optional.empty(), false));
-        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/WithMap.java"), "Mixed")) {
+        try (CodePrintWriter writer = new CodePrintWriter(new FileOutputStream("target/WithMap.java"), "Mixed", x -> false)) {
             BuilderWriter.write(writer, fields, "Thing");
         }
     }

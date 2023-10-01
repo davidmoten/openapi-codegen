@@ -79,14 +79,14 @@ public final class SchemasCodeWriter {
             // is used in generated code
             return;
         }
-        CodePrintWriter out = CodePrintWriter.create(cls.fullClassName);
+        CodePrintWriter out = CodePrintWriter.create(cls.fullClassName, names.simpleNameInPackage(cls.fullClassName));
         SchemasCodeWriter.writeClass(out, cls, fullClassNameInterfaces, names);
         WriterUtil.writeContent(names, out);
     }
 
     public static void writeGlobalsClass(Names names) {
         String fullClassName = names.globalsFullClassName();
-        CodePrintWriter out = CodePrintWriter.create(fullClassName);
+        CodePrintWriter out = CodePrintWriter.create(fullClassName, names.simpleNameInPackage(fullClassName));
         out.line("package %s;", Names.pkg(fullClassName));
         out.println();
         out.format("%s", IMPORTS_HERE);
@@ -826,7 +826,7 @@ public final class SchemasCodeWriter {
                     .collect(Collectors.joining(""));
         }
         addOverrideAnnotation(out);
-        out.line("public String toString() {");
+        out.line("public %s toString() {", String.class);
         out.line("return %s.toString(%s.class%s);", Util.class, cls.simpleName(), s);
         out.closeParen();
     }

@@ -42,24 +42,10 @@ public final class Names {
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString", "notify", "clone", "equals",
             "finalize", "getClass", "notifyAll", "wait", "builder");
     
-    // TODO this can be done in another preferrable way where we check all class names in the same package before 
-    // deciding to leave the package name off a class.
-    
+    // TODO remove this now that Imports is aware of package contents    
     // avoid class names that might clash with generated classes in the same package
-    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet("Boolean", "Byte", "Class",
-            "Comparable", "Deprecated", "Double", "Enum", "Error", "Exception", "Float", "FunctionalInterface",
-            "IllegalArgumentException", "IllegalStateException", "Integer", "Iterable", "Long", "Math",
-            "NullPointerException", "Number", "Object", "Override", "RuntimeException", "SafeVarargs", "Short",
-            "String", "StringBuffer", "StringBuilder", "SuppressWarnings", "System", "Throwable", "Void", "Globals",
-            "Builder", "RuntimeUtil", "JsonAnyGetter", "JsonAnySetter", "JsonAutoDetect", "JsonCreator", "JsonInclude",
-            "JsonProperty", "JsonSubTypes", "JsonTypeInfo", "JsonUnwrapped", "JsonValue", "JsonDeserialize",
-            "JsonSerialize", "Maps", "Generated", "Override", "SuppressWarnings", "BigDecimal", "BigInteger",
-            "LocalDate", "OffsetDateTime", "OffsetTime", "HashMap", "List", "Map", "Objects", "Optional", "HasEncoding",
-            "HasStringValue", "AnyOfSerializer", "Config", "DiscriminatorHelper", "MapBuilder", "NullEnumDeserializer",
-            "PolymorphicDeserializer", "PolymorphicType", "Preconditions", "Util", "JsonNullable", "Serializer",
-            "Deserializer", "ConstructorBinding", "None");
+    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet();
     
-
     private static final boolean LOG_SCHEMA_PATHS = false;
 
     private final Definition definition;
@@ -90,6 +76,7 @@ public final class Names {
         this.api = result.getOpenAPI();
         superSchemas(api);
         logSchemaFullClassNames(api);
+        
     }
 
     private static void logSchemaFullClassNames(OpenAPI api) {
@@ -482,6 +469,28 @@ public final class Names {
     
     public boolean generateService() {
         return definition.generateService();
+    }
+
+    public Predicate<String> simpleNameInPackage(String fullClassName) {
+        return x -> {
+            String pkg = pkg(fullClassName);
+            String simple = simpleClassName(fullClassName);
+            Set<String> set = classes.get(pkg);
+            return set != null && set.contains(simple);
+        };
+    }
+    
+    private final Map<String,Set<String>> classes = new HashMap<>();
+
+    public void registerFullClassName(String fullClassName) {
+        String pkg = pkg(fullClassName);
+        String simple = simpleClassName(fullClassName);
+        Set<String> set = classes.get(pkg);
+        if (set == null) {
+            set = new HashSet<>();
+            classes.put(pkg, set);
+        }
+        set.add(simple);
     }
 
 }

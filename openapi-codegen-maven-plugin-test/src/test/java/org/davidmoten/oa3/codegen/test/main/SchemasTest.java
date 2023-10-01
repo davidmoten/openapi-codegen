@@ -527,7 +527,7 @@ public class SchemasTest {
 
     @Test
     public void testMinMaxObjectRefMinItemsIsOk() throws JsonMappingException, JsonProcessingException {
-        MinMaxItemsObjectRef.List_ list = new MinMaxItemsObjectRef.List_(
+        MinMaxItemsObjectRef.List list = new MinMaxItemsObjectRef.List(
                 Arrays.asList(new MinMaxInteger(2), new MinMaxInteger(2)));
         new MinMaxItemsObjectRef(Optional.of(list));
     }
@@ -535,12 +535,12 @@ public class SchemasTest {
     @Test
     public void testMinMaxObjectRefMinItemsIsBad() throws JsonMappingException, JsonProcessingException {
         assertThrows(IllegalArgumentException.class,
-                () -> new MinMaxItemsObjectRef.List_(Arrays.asList(new MinMaxInteger(2))));
+                () -> new MinMaxItemsObjectRef.List(Arrays.asList(new MinMaxInteger(2))));
     }
 
     @Test
     public void testMinMaxObjectRefMaxItemsIsBad() throws JsonMappingException, JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> new MinMaxItemsObjectRef.List_(
+        assertThrows(IllegalArgumentException.class, () -> new MinMaxItemsObjectRef.List(
                 IntStream.rangeClosed(1, 5).mapToObj(i -> new MinMaxInteger(2)).collect(Collectors.toList())));
     }
 

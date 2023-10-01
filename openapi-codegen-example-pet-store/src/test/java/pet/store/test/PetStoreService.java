@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.github.davidmoten.guavamini.Lists;
 
 import pet.store.path.FindPets200Response;
-import pet.store.schema.Error_;
+import pet.store.schema.Error;
 import pet.store.schema.NewPet;
 import pet.store.schema.Pet;
 import pet.store.schema.PetId;
@@ -44,7 +44,7 @@ public class PetStoreService implements Service {
         if (pet.isPresent()) {
             return pet.get();
         } else {
-            return response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error_.message("not found")));
+            return response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error.message("not found")));
         }
     }
 
@@ -54,13 +54,13 @@ public class PetStoreService implements Service {
         if (pet.isPresent()) {
             pets.remove(pet.get());
         } else {
-            response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error_.message("not found")));
+            response(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Error.message("not found")));
         }
     }
 
     @Override
     public Object errorResponseBody(int statusCode, Throwable e) {
-        return Error_.message("an error happened");
+        return Error.message("an error happened");
     }
 
 }
