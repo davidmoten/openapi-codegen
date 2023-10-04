@@ -18,6 +18,7 @@ import org.davidmoten.oa3.codegen.test.paths.path.SubmitPostRequestApplicationXW
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document;
 import org.davidmoten.oa3.codegen.test.paths.path.UploadPostRequestMultipartFormData.Document.ContentType;
+import org.davidmoten.oa3.codegen.test.paths.response.Response4;
 import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response2;
@@ -194,6 +195,12 @@ public class PathsServerTest {
         assertEquals("hello", client(httpService).jsonStringGet().value());
     }
 
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testWildcardStatusCode(HttpService httpService) {
+        assertEquals("hi there", client(httpService).wildcardStatusCodeGetFullResponse().<Response4>dataUnwrapped().value());
+    }    
+    
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testMultipartFormData(HttpService httpService) {

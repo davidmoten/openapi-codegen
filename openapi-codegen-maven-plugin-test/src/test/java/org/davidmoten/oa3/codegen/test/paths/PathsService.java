@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
 import org.davidmoten.oa3.codegen.test.paths.path.QueryObjectGetIdParameterId;
+import org.davidmoten.oa3.codegen.test.paths.response.Response4;
 import org.davidmoten.oa3.codegen.test.paths.schema.Error;
 import org.davidmoten.oa3.codegen.test.paths.schema.Name;
 import org.davidmoten.oa3.codegen.test.paths.schema.Point;
@@ -88,6 +89,11 @@ public class PathsService implements Service {
     @Override
     public Name jsonStringGet() throws ServiceException {
         return Name.value("hello");
+    }
+
+    @Override
+    public Response4 wildcardStatusCodeGet() throws ServiceException {
+        return response(ResponseEntity.status(201).body(Response4.value("hi there")));
     }
 
 }
