@@ -345,13 +345,6 @@ public class ClientServerGenerator {
             this.response = response;
         }
         
-        int statusCodeFirstInRange() {
-            if (statusCode.toUpperCase(Locale.ENGLISH).endsWith("XX")) {
-                return Integer.parseInt(statusCode.substring(0, 1)) * 100;
-            } else {
-                return Integer.parseInt(statusCode);
-            }
-        }
     }
 
     private static boolean is2XX(String key) {
