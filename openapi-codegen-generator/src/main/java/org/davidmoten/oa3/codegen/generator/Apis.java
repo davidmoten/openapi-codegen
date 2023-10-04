@@ -105,7 +105,10 @@ class Apis {
             });
         }
         if (pathItem.getParameters() != null) {
-            pathItem.getParameters().forEach(p -> visitSchemas(category, names.add(p.getName()), p, visitor, api));
+            pathItem.getParameters().forEach(p -> {
+                p = resolveRefs(api, p);
+                visitSchemas(category, names.add(p.getName()), p, visitor, api);
+            });
         }
     }
 
@@ -123,11 +126,15 @@ class Apis {
             return;
         }
         if (operation.getParameters() != null) {
-            operation.getParameters().forEach(p -> visitSchemas(category, list.add(p.getName()), p, visitor, api));
+            operation.getParameters().forEach(p -> {
+                p = resolveRefs(api, p);
+                visitSchemas(category, list.add(p.getName()), p, visitor, api);
+            });
         }
         visitSchemas(category, list, operation.getRequestBody(), visitor, api);
         if (operation.getResponses() != null) {
             operation.getResponses().forEach((statusCode, response) -> {
+                response = resolveRefs(api, response);
                 visitSchemas(category, list.add(statusCode), response, visitor, api);
             });
         }
