@@ -259,6 +259,14 @@ paths:
         default:    
           $ref: '#/components/responses/Error'   
           
+  /wildcardStatusCode:
+    get:
+      responses:
+        '2XX':
+          $ref: '#/components/responses/Response4' 
+        default:    
+          $ref: '#/components/responses/Error'           
+          
   /params:
     description: params test
     parameters:

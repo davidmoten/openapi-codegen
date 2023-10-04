@@ -238,13 +238,13 @@ public final class ServerCodeWriterSpringBoot {
                 addValidationChecks(out, m, names);
                 if (m.returnFullClassName.isPresent()) {
                     out.line("return %s.status(%s).body(service.%s(%s));", ResponseEntity.class, //
-                            m.statusCode.get(), //
+                            m.statusCodeFirstInRange().orElse(200), //
                             m.methodName, //
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
                 } else {
                     out.line("service.%s(%s);", m.methodName,
                             m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", ")));
-                    out.line("return %s.status(%s).build();", ResponseEntity.class, m.statusCode.orElse(200));
+                    out.line("return %s.status(%s).build();", ResponseEntity.class, m.statusCodeFirstInRange().orElse(200));
                 }
                 out.left();
                 out.line("} catch (%s e) {", Throwable.class);

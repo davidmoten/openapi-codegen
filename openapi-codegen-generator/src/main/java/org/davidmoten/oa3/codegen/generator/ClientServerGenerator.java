@@ -96,7 +96,7 @@ public class ClientServerGenerator {
         } else {
             methodName = Names.toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
         }
-        Optional<Integer> statusCode = Optional.empty();
+        Optional<String> statusCode = Optional.empty();
         List<Param> params = new ArrayList<>();
         Optional<String> returnFullClassName = Optional.empty();
         List<String> consumes = new ArrayList<>();
@@ -191,7 +191,7 @@ public class ClientServerGenerator {
             consumes = new ArrayList<>(b.getContent().keySet());
         }
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
-        Optional<Integer> primaryStatusCode = response.map(x -> x.statusCode);
+        Optional<String> primaryStatusCode = response.map(x -> x.statusCode);
         Mutable<String> primaryMimeType = Mutable.create(null);
         if (response.isPresent() && response.get().response != null) {
             Content content = resolveResponseRefs(response.get().response).getContent();
@@ -325,11 +325,11 @@ public class ClientServerGenerator {
 
     private static Optional<StatusCodeApiResponse> primaryResponse(ApiResponses responses) {
         if (responses.get("200") != null) {
-            return Optional.of(new StatusCodeApiResponse(200, responses.get("200")));
+            return Optional.of(new StatusCodeApiResponse("200", responses.get("200")));
         } else {
             for (Entry<String, ApiResponse> r : responses.entrySet()) {
                 if (is2XX(r.getKey())) {
-                    return Optional.of(new StatusCodeApiResponse(Integer.parseInt(r.getKey()), r.getValue()));
+                    return Optional.of(new StatusCodeApiResponse(r.getKey(), r.getValue()));
                 }
             }
         }
@@ -337,14 +337,14 @@ public class ClientServerGenerator {
     }
 
     public static final class StatusCodeApiResponse {
-        final int statusCode;
+        final String statusCode;
         final ApiResponse response;
 
-        StatusCodeApiResponse(int statusCode, ApiResponse response) {
+        StatusCodeApiResponse(String statusCode, ApiResponse response) {
             this.statusCode = statusCode;
             this.response = response;
-
         }
+        
     }
 
     private static boolean is2XX(String key) {
@@ -387,18 +387,18 @@ public class ClientServerGenerator {
         public final Optional<String> returnFullClassName; // arrays always wrapped ?
         public final String path;
         public final HttpMethod httpMethod;
-        public final Optional<Integer> statusCode;
+        public final Optional<String> statusCode; // can be 2XX, 3XX, ..
         public final List<String> consumes;
         public final List<String> produces;
         public final Optional<String> description;
-        public final Optional<Integer> primaryStatusCode;
+        public final Optional<String> primaryStatusCode;
         public final Optional<String> primaryMediaType;
         public final List<ResponseDescriptor> responseDescriptors;
         public final boolean includeForServerGeneration;
 
-        Method(String methodName, Optional<Integer> statusCode, List<Param> parameters,
+        Method(String methodName, Optional<String> statusCode, List<Param> parameters,
                 Optional<String> returnFullClassName, String path, HttpMethod httpMethod, List<String> consumes,
-                List<String> produces, Optional<String> description, Optional<Integer> primaryStatusCode,
+                List<String> produces, Optional<String> description, Optional<String> primaryStatusCode,
                 Optional<String> primaryMediaType, List<ResponseDescriptor> responseDescriptors, boolean ignoreForServerGeneration) {
             this.methodName = methodName;
             this.statusCode = statusCode;
@@ -415,6 +415,18 @@ public class ClientServerGenerator {
             this.includeForServerGeneration = ignoreForServerGeneration;
         }
 
+        public Optional<Integer> statusCodeFirstInRange() {
+            return statusCode //
+                    .map(x -> x.toUpperCase(Locale.ENGLISH)) //
+                    .map(x -> {
+                        if (x.endsWith("XX")) {
+                            return Integer.parseInt(x.substring(0, 1)) * 100;
+                        } else {
+                            return Integer.parseInt(x);
+                        }
+                    });
+        }
+        
         @Override
         public String toString() {
             return "Method [path=" + path + ", httpMethod=" + httpMethod + ", methodName=" + methodName + ", returnCls="
