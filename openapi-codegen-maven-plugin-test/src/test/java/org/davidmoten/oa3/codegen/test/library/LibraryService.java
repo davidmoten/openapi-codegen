@@ -30,7 +30,7 @@ public class LibraryService implements Service {
                 .lastName("Gomez") //
                 .email("user" + i + ".gomez@gmail.com") //
                 .build(), //
-                UserIdWrapped.userId(UserId.value(i + "")));
+                UserIdWrapped.userId(UserId.of(i + "")));
     }
 
     @Override

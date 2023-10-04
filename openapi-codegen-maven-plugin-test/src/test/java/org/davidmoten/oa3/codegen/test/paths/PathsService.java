@@ -88,12 +88,12 @@ public class PathsService implements Service {
 
     @Override
     public Name jsonStringGet() throws ServiceException {
-        return Name.value("hello");
+        return Name.of("hello");
     }
 
     @Override
     public Response4 wildcardStatusCodeGet() throws ServiceException {
-        return response(ResponseEntity.status(201).body(Response4.value("hi there")));
+        return response(ResponseEntity.status(201).body(Response4.of("hi there")));
     }
 
 }

@@ -771,7 +771,7 @@ public class SchemasTest {
                 .createdTime(createdTime) //
                 .startTime(startTime) //
                 .endTime(endTime) //
-                .payload(Payload.value("hi there")) //
+                .payload(Payload.of("hi there")) //
                 .status(Status.ACTIVE) //
                 .build();
         String json = m.writeValueAsString(msi);
@@ -829,15 +829,15 @@ public class SchemasTest {
         assertEquals(23L, b.properties().get("there"));
         @SuppressWarnings("unused")
         Geometry g = Geometry.of(Circle //
-                .lat(Latitude.value(-35f)) //
-                .lon(Longitude.value(142f)) //
+                .lat(Latitude.of(-35f)) //
+                .lon(Longitude.of(142f)) //
                 .radiusNm(20) //
                 .build());
     }
 
     @Test
     public void testAdditionalPropertiesTrue() throws JsonProcessingException {
-        Circle c = Circle.lat(Latitude.value(11f)).lon(Longitude.value(123f)).radiusNm(123).build();
+        Circle c = Circle.lat(Latitude.of(11f)).lon(Longitude.of(123f)).radiusNm(123).build();
         AdditionalPropertiesTrue a = AdditionalPropertiesTrue.builder() //
                 .addToProperties("hello", 1L) //
                 .add("there", c) //
@@ -934,23 +934,23 @@ public class SchemasTest {
 
     @Test
     public void testArbitraryPrecisionNumber() {
-        assertEquals(18L, ArbitraryPrecisionNumber.value(BigDecimal.valueOf(18)).value().longValue());
+        assertEquals(18L, ArbitraryPrecisionNumber.of(BigDecimal.valueOf(18)).value().longValue());
     }
 
     @Test
     public void testArbitraryPrecisionNumberOutOfRange() {
-        assertThrows(IllegalArgumentException.class, () -> ArbitraryPrecisionNumber.value(BigDecimal.valueOf(30.123)));
+        assertThrows(IllegalArgumentException.class, () -> ArbitraryPrecisionNumber.of(BigDecimal.valueOf(30.123)));
     }
 
     @Test
     public void testArbitraryPrecisionInteger() {
-        assertEquals(18L, ArbitraryPrecisionInteger.value(BigInteger.valueOf(18)).value().longValue());
+        assertEquals(18L, ArbitraryPrecisionInteger.of(BigInteger.valueOf(18)).value().longValue());
     }
 
     @Test
     public void testArbitraryPrecisionNumberSerialization() throws JsonProcessingException {
         String num = "15.123456789012345678901234567890123456789";
-        ArbitraryPrecisionNumber a = ArbitraryPrecisionNumber.value(new BigDecimal(num));
+        ArbitraryPrecisionNumber a = ArbitraryPrecisionNumber.of(new BigDecimal(num));
         assertEquals(num, a.value().toString());
         String json = m.writeValueAsString(a);
         assertEquals(num, m.readValue(json, ArbitraryPrecisionNumber.class).value().toString());
@@ -1119,7 +1119,7 @@ public class SchemasTest {
     
     @Test
     public void testAnyOfMatchesBoth() throws JsonProcessingException {
-        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.value(100)).largeInt(LargeInt.value(100)).build();
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.of(100)).largeInt(LargeInt.of(100)).build();
         checkRoundTrip(a);
     }
     
@@ -1130,13 +1130,13 @@ public class SchemasTest {
     
     @Test
     public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
-        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.value(1)).build();
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.of(1)).build();
         checkRoundTrip(a);
     }
     
     @Test
     public void testAnyOfMatchesLargeIntOnly() throws JsonProcessingException {
-        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().largeInt(LargeInt.value(1000)).build();
+        AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().largeInt(LargeInt.of(1000)).build();
         checkRoundTrip(a);
     }
     
@@ -1154,8 +1154,8 @@ public class SchemasTest {
     
     @Test
     public void testAnyOfObjectExtensions() throws JsonProcessingException {
-        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3))); 
-        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3))).build();
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.newArrayList(1, 2, 3))); 
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.newArrayList(1, 2, 3))).build();
         AnyOfObjectExtensions o = AnyOfObjectExtensions.builder().object1(a).object2(b).build();
         checkRoundTrip(o);
     }
@@ -1163,18 +1163,18 @@ public class SchemasTest {
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentLength() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
-                .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
+                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.newArrayList(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
-                .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 3, 4))).build();
+                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.newArrayList(1, 2, 3, 4))).build();
         assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
     
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentElements() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
-                .counts(AnyOfObjectExtensions.Object1.Counts.value(Lists.newArrayList(1, 2, 3)));
+                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.newArrayList(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
-                .counts(AnyOfObjectExtensions.Object2.Counts.value(Lists.newArrayList(1, 2, 4))).build();
+                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.newArrayList(1, 2, 4))).build();
         assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
     
