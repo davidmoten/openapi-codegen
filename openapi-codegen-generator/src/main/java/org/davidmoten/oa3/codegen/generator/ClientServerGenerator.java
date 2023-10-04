@@ -191,7 +191,7 @@ public class ClientServerGenerator {
             consumes = new ArrayList<>(b.getContent().keySet());
         }
         Optional<StatusCodeApiResponse> response = primaryResponse(operation.getResponses());
-        Optional<Integer> primaryStatusCode = response.map(x -> x.statusCode);
+        Optional<Integer> primaryStatusCode = response.map(x -> x.statusCodeFirstInRange());
         Mutable<String> primaryMimeType = Mutable.create(null);
         if (response.isPresent() && response.get().response != null) {
             Content content = resolveResponseRefs(response.get().response).getContent();
@@ -240,7 +240,7 @@ public class ClientServerGenerator {
                         primaryMimeType.value = null;
                     }
                 }
-                statusCode = Optional.of(response.get().statusCode);
+                statusCode = Optional.of(response.get().statusCodeFirstInRange());
                 produces = new ArrayList<>(content.keySet());
             }
         }
@@ -325,11 +325,11 @@ public class ClientServerGenerator {
 
     private static Optional<StatusCodeApiResponse> primaryResponse(ApiResponses responses) {
         if (responses.get("200") != null) {
-            return Optional.of(new StatusCodeApiResponse(200, responses.get("200")));
+            return Optional.of(new StatusCodeApiResponse("200", responses.get("200")));
         } else {
             for (Entry<String, ApiResponse> r : responses.entrySet()) {
                 if (is2XX(r.getKey())) {
-                    return Optional.of(new StatusCodeApiResponse(Integer.parseInt(r.getKey()), r.getValue()));
+                    return Optional.of(new StatusCodeApiResponse(r.getKey(), r.getValue()));
                 }
             }
         }
@@ -337,13 +337,20 @@ public class ClientServerGenerator {
     }
 
     public static final class StatusCodeApiResponse {
-        final int statusCode;
+        final String statusCode;
         final ApiResponse response;
 
-        StatusCodeApiResponse(int statusCode, ApiResponse response) {
+        StatusCodeApiResponse(String statusCode, ApiResponse response) {
             this.statusCode = statusCode;
             this.response = response;
-
+        }
+        
+        int statusCodeFirstInRange() {
+            if (statusCode.toUpperCase(Locale.ENGLISH).endsWith("XX")) {
+                return Integer.parseInt(statusCode.substring(0, 1)) * 100;
+            } else {
+                return Integer.parseInt(statusCode);
+            }
         }
     }
 
