@@ -36,10 +36,9 @@ public final class GeneratorTest {
         generateLocal("small.yml");
 //        generate("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/zuora.yml");
     }
-
+    
     private static void generate(String name) throws MalformedURLException {
-        String definition = new File(name).toURI().toURL()
-                .toExternalForm();
+        String definition = name;
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
                 Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), true);
@@ -51,6 +50,10 @@ public final class GeneratorTest {
 
     private static void generateLocal(String name) throws MalformedURLException {
         generate("../openapi-codegen-maven-plugin-test/src/main/openapi/" + name);
+    }
+    
+    public static void main(String[] args) throws MalformedURLException {
+       generate("../../openapi-directory/APIs/adyen.com/CheckoutService/37/openapi.yaml");
     }
 
 }

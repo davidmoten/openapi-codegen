@@ -6,6 +6,7 @@ if [ $RETURN -eq 0 ]
 then
   temp=`tail -1 /tmp/output`
   cd $temp && mvn compile -B
+  exit $?
 else
   echo GENERATOR FAILURE
   cat /tmp/output
