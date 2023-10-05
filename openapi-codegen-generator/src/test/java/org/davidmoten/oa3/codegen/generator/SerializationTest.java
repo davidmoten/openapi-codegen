@@ -45,8 +45,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.guavamini.Preconditions;
-import com.google.common.collect.Lists;
 
 import jakarta.annotation.Generated;
 
@@ -391,7 +391,8 @@ public class SerializationTest {
         Map<String, Object> map2 = new HashMap<>();
         map2.put("you", 23);
         map2.put("num", 1.23);
-        List<Map<String, Object>> list = Lists.newArrayList(map1, map2);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> list = Lists.of(map1, map2);
         ListOfMap a = new ListOfMap(list);
         String json = m.writeValueAsString(a);
         ListOfMap b = m.readValue(json, ListOfMap.class);

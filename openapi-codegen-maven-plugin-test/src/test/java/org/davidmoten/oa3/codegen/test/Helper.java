@@ -15,6 +15,6 @@ public final class Helper {
     }
     
     public static List<HttpService> httpServices() {
-        return Lists.newArrayList(DefaultHttpService.INSTANCE, ApacheHttpClientHttpService.INSTANCE);
+        return Lists.of(DefaultHttpService.INSTANCE, ApacheHttpClientHttpService.INSTANCE);
     }
 }

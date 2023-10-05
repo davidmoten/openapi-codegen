@@ -137,7 +137,8 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         }
     }
     
-    private static final Set<Class<?>> NON_OBJECT_CLASSES = Sets.newHashSet(List.class, Map.class, String.class, Short.class, Integer.class, Float.class, Double.class, byte[].class, Byte.class, BigInteger.class);
+    private static final Set<Class<?>> NON_OBJECT_CLASSES = Sets.of(List.class, Map.class, String.class, Short.class,
+            Integer.class, Float.class, Double.class, byte[].class, Byte.class, BigInteger.class);
 
     private static boolean isObject(Class<?> c) {
         if (c.isPrimitive() || NON_OBJECT_CLASSES.contains(c)) {

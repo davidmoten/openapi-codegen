@@ -293,7 +293,7 @@ public class SchemasTest {
 
     @Test
     public void testSimpleIntegerArray() throws JsonMappingException, JsonProcessingException {
-        List<Long> list = Lists.newArrayList(1L, 2L, 3L);
+        List<Long> list = Lists.of(1L, 2L, 3L);
         String json = "[1,2,3]";
         SimpleIntegerArray a = m.readValue(json, SimpleIntegerArray.class);
         assertEquals(list, a.value());
@@ -1154,8 +1154,8 @@ public class SchemasTest {
     
     @Test
     public void testAnyOfObjectExtensions() throws JsonProcessingException {
-        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.newArrayList(1, 2, 3))); 
-        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.newArrayList(1, 2, 3))).build();
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3))); 
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 3))).build();
         AnyOfObjectExtensions o = AnyOfObjectExtensions.builder().object1(a).object2(b).build();
         checkRoundTrip(o);
     }
@@ -1163,18 +1163,18 @@ public class SchemasTest {
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentLength() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
-                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.newArrayList(1, 2, 3)));
+                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
-                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.newArrayList(1, 2, 3, 4))).build();
+                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 3, 4))).build();
         assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
     
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentElements() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
-                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.newArrayList(1, 2, 3)));
+                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
-                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.newArrayList(1, 2, 4))).build();
+                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 4))).build();
         assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
     

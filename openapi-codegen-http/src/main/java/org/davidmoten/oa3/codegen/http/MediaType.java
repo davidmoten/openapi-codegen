@@ -7,7 +7,7 @@ import com.github.davidmoten.guavamini.Sets;
 
 public final class MediaType {
 
-    private static final Set<String> BINARY_MEDIA_TYPES = Sets.newHashSet( //
+    private static final Set<String> BINARY_MEDIA_TYPES = Sets.of( //
             "application/octet-stream", //
             "application/pdf", //
             "image/jpeg", //

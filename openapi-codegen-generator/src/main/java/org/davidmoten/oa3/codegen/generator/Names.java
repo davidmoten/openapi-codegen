@@ -34,7 +34,7 @@ public final class Names {
 
     // note that all Object methods added to this set so that generated getters
     // without a get prefix don't get into trouble
-    private static final Set<String> javaReservedWords = Sets.newHashSet("abstract", "assert", "boolean", "break",
+    private static final Set<String> javaReservedWords = Sets.of("abstract", "assert", "boolean", "break",
             "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
             "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
             "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
@@ -44,7 +44,7 @@ public final class Names {
     
     // TODO remove this now that Imports is aware of package contents    
     // avoid class names that might clash with generated classes in the same package
-    private static final Set<String> reservedSimpleClassNames = Sets.newHashSet();
+    private static final Set<String> reservedSimpleClassNames = Sets.of();
     
     private static final boolean LOG_SCHEMA_PATHS = false;
 

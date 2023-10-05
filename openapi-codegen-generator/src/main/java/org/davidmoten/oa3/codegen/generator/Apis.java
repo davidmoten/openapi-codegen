@@ -251,7 +251,7 @@ class Apis {
                                 combined.setProperties(new LinkedHashMap<>());
                                 combined.getProperties().put("contentType", contentTypeSchema);
                                 combined.getProperties().put("value", x.getValue());
-                                combined.setRequired(Lists.newArrayList("value", "contentType"));
+                                combined.setRequired(Lists.of("value", "contentType"));
                                 combined.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
                                 
                                 sch = combined;
@@ -305,6 +305,6 @@ class Apis {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.newArrayList( //
+    private static List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.of( //
             ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
 }

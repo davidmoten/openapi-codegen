@@ -243,7 +243,7 @@ public class Generator {
         }
     }
 
-    private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "long", "byte", "float", "double",
+    private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.of("int", "long", "byte", "float", "double",
             "boolean", "short");
 
     public enum MapType {

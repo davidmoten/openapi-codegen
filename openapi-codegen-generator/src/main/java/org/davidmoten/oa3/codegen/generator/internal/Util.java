@@ -19,7 +19,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 public final class Util {
 
-    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.newHashSet("int", "double", "float", "long", "boolean",
+    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.of("int", "double", "float", "long", "boolean",
             "byte", "short");
 
     public static boolean isPrimitiveFullClassName(String className) {

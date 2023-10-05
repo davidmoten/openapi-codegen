@@ -22,7 +22,7 @@ import pet.store.service.Service;
 @Primary
 public class PetStoreService implements Service {
 
-    private List<Pet> pets = Lists.newArrayList( //
+    private List<Pet> pets = Lists.of( //
             new Pet(NewPet.builder().name("fido").tag("A0123").build(), //
                     PetId.id(321L)));
 
