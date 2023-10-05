@@ -3,6 +3,7 @@ package org.davidmoten.oa3.codegen.generator;
 import static org.davidmoten.oa3.codegen.util.Util.orElse;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -250,11 +251,22 @@ public class Generator {
         ADDITIONAL_PROPERTIES, FIELD;
     }
 
+    
+    
     public final static class Field {
         public final String fullClassName;
         public final String name;
         public final String fieldName;
 
+        private static final Set<String> NUMERIC_CLASS_NAMES = Sets.of("int", "long", "float", "double", "short", //
+                Integer.class.getCanonicalName(), //
+                Long.class.getCanonicalName(), //
+                Float.class.getCanonicalName(), //
+                Double.class.getCanonicalName(), //
+                Short.class.getCanonicalName(), //
+                BigInteger.class.getCanonicalName(), //
+                BigDecimal.class.getCanonicalName());
+        
         // note that when isArray is true, required does not apply to the arrray item
         // but rather to the array itself (as an object property for example)
         public final boolean required;
@@ -494,8 +506,11 @@ public class Generator {
                     || fullClassName.equals(OffsetDateTime.class.getCanonicalName());
         }
 
+        public boolean isNumber() {
+            return NUMERIC_CLASS_NAMES.contains(fullClassName);
+        }
     }
-
+    
     public static final class MyVisitor implements Visitor {
         private final Names names;
         private final LinkedStack<Cls> stack = new LinkedStack<>();

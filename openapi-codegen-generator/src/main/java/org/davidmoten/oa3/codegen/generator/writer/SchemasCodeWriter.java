@@ -757,11 +757,11 @@ public final class SchemasCodeWriter {
             out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
                     WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
         }
-        if (x.min.isPresent()) {
+        if (x.min.isPresent() && x.isNumber()) {
             out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(),
                     x.fieldName(cls), x.exclusiveMin);
         }
-        if (x.max.isPresent()) {
+        if (x.max.isPresent() && x.isNumber()) {
             out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.max.get().toString(),
                     x.fieldName(cls), x.exclusiveMax);
         }
