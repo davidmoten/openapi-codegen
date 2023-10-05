@@ -36,6 +36,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes2;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyOfObjectExtensions;
 import org.davidmoten.oa3.codegen.test.main.schema.AnyOfSimpleTypes;
+import org.davidmoten.oa3.codegen.test.main.schema.AnyOfWithNullableMembers;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumber;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
@@ -1176,6 +1177,12 @@ public class SchemasTest {
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
                 .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 4))).build();
         assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
+    }
+    
+    @Test
+    public void testAnyOfNullableMembers() {
+        AnyOfWithNullableMembers a = AnyOfWithNullableMembers.of(JsonNullable.of("hi"), JsonNullable.undefined(), JsonNullable.undefined(), JsonNullable.undefined(), Optional.empty());
+        checkRoundTrip(a);
     }
     
     private static void checkRoundTrip(Object o) {

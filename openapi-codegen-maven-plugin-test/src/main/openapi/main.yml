@@ -2083,25 +2083,17 @@ components:
       maximum: 10
       
     AnyOfWithNullableMembers:
-      type: object
-      properties:
-        value:
-          anyOf:
-            - example: Uses Salesforce and Marketo
-              nullable: true
-              type: string
-            - example: 10
-              nullable: true
-              type: number
-            - example: true
-              nullable: true
-              type: boolean
-            - example:
-                foo: bar
-              nullable: true
-              type: object
-            - items:
-                type: string
-              type: array
+      anyOf:
+        - nullable: true
+          type: string
+        - nullable: true
+          type: number
+        - nullable: true
+          type: boolean
+        - nullable: true
+          type: object
+        - items:
+            type: string
+          type: array
 
       
