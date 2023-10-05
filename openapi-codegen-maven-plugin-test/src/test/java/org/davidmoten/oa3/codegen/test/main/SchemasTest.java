@@ -127,6 +127,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -204,16 +205,7 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleString("abc")));
-        shouldThrowIAE(() -> new SimpleString(null));
-    }
-
-    private static void shouldThrowIAE(Runnable r) {
-        try {
-            r.run();
-            fail();
-        } catch (IllegalArgumentException e) {
-            // all good
-        }
+        iae(() -> new SimpleString(null));
     }
 
     @Test
@@ -226,7 +218,7 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleDateTime(OffsetDateTime.parse(s))));
-        shouldThrowIAE(() -> new SimpleDateTime(null));
+        iae(() -> new SimpleDateTime(null));
     }
 
     @Test
@@ -239,7 +231,7 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleDate(LocalDate.parse(s))));
-        shouldThrowIAE(() -> new SimpleDate(null));
+        iae(() -> new SimpleDate(null));
     }
 
     @Test
@@ -252,7 +244,7 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleTime(OffsetTime.parse(s))));
-        shouldThrowIAE(() -> new SimpleTime(null));
+        iae(() -> new SimpleTime(null));
     }
 
     @Test
@@ -276,7 +268,7 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleByteArray(bytes)));
-        shouldThrowIAE(() -> new SimpleByteArray(null));
+        iae(() -> new SimpleByteArray(null));
     }
 
     @Test
@@ -289,7 +281,7 @@ public class SchemasTest {
         assertEquals(json, m.writeValueAsString(a));
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleBinary(bytes)));
-        shouldThrowIAE(() -> new SimpleBinary(null));
+        iae(() -> new SimpleBinary(null));
     }
 
     @Test
@@ -302,7 +294,7 @@ public class SchemasTest {
         // test constructor
         assertEquals(json, m.writeValueAsString(new SimpleIntegerArray(list)));
         // TODO should null be passable to List<Long>?
-        // shouldThrowIAE(() -> new SimpleIntegerArray(null));
+        // iae(() -> new SimpleIntegerArray(null));
     }
 
     @Test
@@ -373,8 +365,8 @@ public class SchemasTest {
         assertFalse(b.str().isPresent());
         assertFalse(b.num().isPresent());
         assertEquals(1, b.getClass().getConstructors().length);
-        shouldThrowIAE(() -> new ObjectAllOptionalFields(null, Optional.of(123)));
-        shouldThrowIAE(() -> new ObjectAllOptionalFields(Optional.of("hello"), null));
+        iae(() -> new ObjectAllOptionalFields(null, Optional.of(123)));
+        iae(() -> new ObjectAllOptionalFields(Optional.of("hello"), null));
     }
 
     @Test
@@ -392,7 +384,7 @@ public class SchemasTest {
         } catch (ValueInstantiationException e) {
             // expected
         }
-        shouldThrowIAE(() -> new ObjectNoOptionalFields(null, 123));
+        iae(() -> new ObjectNoOptionalFields(null, 123));
         onePublicConstructor(ObjectNoOptionalFields.class);
     }
 
@@ -405,7 +397,7 @@ public class SchemasTest {
         Bike b = new Bike("red");
         assertEquals(json, m.writeValueAsString(b));
         assertEquals(1, Bike.class.getConstructors().length);
-        shouldThrowIAE(() -> new Bike(null));
+        iae(() -> new Bike(null));
         onePublicConstructor(Bike.class);
     }
 
@@ -436,7 +428,7 @@ public class SchemasTest {
         assertEquals(123, r.value().value());
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new Ref(new SimpleInteger(123))));
-        shouldThrowIAE(() -> new Ref(null));
+        iae(() -> new Ref(null));
         onePublicConstructor(Ref.class);
     }
 
@@ -447,7 +439,7 @@ public class SchemasTest {
         assertEquals(123, r.first().value());
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new PropertyRef(new SimpleInteger(123))));
-        shouldThrowIAE(() -> new PropertyRef(null));
+        iae(() -> new PropertyRef(null));
         onePublicConstructor(PropertyRef.class);
     }
 
@@ -458,7 +450,7 @@ public class SchemasTest {
         assertEquals(123, r.first().get().value());
         assertEquals(json, m.writeValueAsString(r));
         assertEquals(json, m.writeValueAsString(new PropertyRefOptional(Optional.of(new SimpleInteger(123)))));
-        shouldThrowIAE(() -> new PropertyRefOptional(null));
+        iae(() -> new PropertyRefOptional(null));
         onePublicConstructor(PropertyRefOptional.class);
     }
 
@@ -483,7 +475,7 @@ public class SchemasTest {
 
     @Test
     public void testMinMaxLengthTooSmallPublicConstructor() throws JsonMappingException, JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("", Optional.of("def")));
+        iae(() -> new MinMaxLength("", Optional.of("def")));
     }
 
     @Test
@@ -497,7 +489,7 @@ public class SchemasTest {
     @Test
     public void testMinMaxLengthTooSmallOptionalPublicConstructor()
             throws JsonMappingException, JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("abc", Optional.of("d")));
+        iae(() -> new MinMaxLength("abc", Optional.of("d")));
     }
 
     @Test
@@ -510,7 +502,7 @@ public class SchemasTest {
 
     @Test
     public void testMinMaxLengthTooBigPublicConstructor() throws JsonMappingException, JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("abcdef", Optional.of("def")));
+        iae(() -> new MinMaxLength("abcdef", Optional.of("def")));
     }
 
     @Test
@@ -523,7 +515,7 @@ public class SchemasTest {
 
     @Test
     public void testMinMaxLengthTooBigOptionalPublicConstructor() throws JsonMappingException, JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> new MinMaxLength("abc", Optional.of("defgh")));
+        iae(() -> new MinMaxLength("abc", Optional.of("defgh")));
     }
 
     @Test
@@ -535,13 +527,12 @@ public class SchemasTest {
 
     @Test
     public void testMinMaxObjectRefMinItemsIsBad() throws JsonMappingException, JsonProcessingException {
-        assertThrows(IllegalArgumentException.class,
-                () -> new MinMaxItemsObjectRef.List(Arrays.asList(new MinMaxInteger(2))));
+        iae(() -> new MinMaxItemsObjectRef.List(Arrays.asList(new MinMaxInteger(2))));
     }
 
     @Test
     public void testMinMaxObjectRefMaxItemsIsBad() throws JsonMappingException, JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> new MinMaxItemsObjectRef.List(
+        iae(() -> new MinMaxItemsObjectRef.List(
                 IntStream.rangeClosed(1, 5).mapToObj(i -> new MinMaxInteger(2)).collect(Collectors.toList())));
     }
 
@@ -688,8 +679,7 @@ public class SchemasTest {
         Dog a = m.readValue(json, Dog.class);
         assertEquals("brown and curly", a.pet().description());
         assertEquals(Breed.CROSS, a.object1().breed().get());
-        Dog b = Dog
-                .pet(Pet.description("brown and curly")) //
+        Dog b = Dog.pet(Pet.description("brown and curly")) //
                 .object1(Dog.Object1.breed(Breed.CROSS)) //
                 .build();
         assertEquals(json, m.writeValueAsString(b));
@@ -940,7 +930,7 @@ public class SchemasTest {
 
     @Test
     public void testArbitraryPrecisionNumberOutOfRange() {
-        assertThrows(IllegalArgumentException.class, () -> ArbitraryPrecisionNumber.of(BigDecimal.valueOf(30.123)));
+        iae(() -> ArbitraryPrecisionNumber.of(BigDecimal.valueOf(30.123)));
     }
 
     @Test
@@ -1086,7 +1076,7 @@ public class SchemasTest {
         assertEquals("there", b.properties().get("hello").get());
         assertNull(b.properties().get("bingo").get());
     }
-    
+
     @Test
     public void testMixRequiredNotRequired() throws JsonProcessingException {
         MixRequiredAndNotRequiredWithConstraint a = MixRequiredAndNotRequiredWithConstraint.a("hello").build();
@@ -1099,92 +1089,117 @@ public class SchemasTest {
         OneOfUsesConstraints u = m.readValue("1", OneOfUsesConstraints.class);
         assertTrue(u.value() instanceof SmallInt);
     }
-    
+
     @Test
     public void testOneOfDeserializerUsesConstraintsLarge() throws JsonMappingException, JsonProcessingException {
         OneOfUsesConstraints u = m.readValue("1000", OneOfUsesConstraints.class);
         assertTrue(u.value() instanceof LargeInt);
     }
-    
+
     @Test
     public void testOneOfDeserializerUsesConstraintsTooManyMatches()
             throws JsonMappingException, JsonProcessingException {
         assertThrows(JsonMappingException.class, () -> m.readValue("100", OneOfUsesConstraints.class));
     }
-    
+
     @Test
-    public void testOneOfDeserializerUsesConstraintsNoMatch()
-            throws JsonMappingException, JsonProcessingException {
+    public void testOneOfDeserializerUsesConstraintsNoMatch() throws JsonMappingException, JsonProcessingException {
         assertThrows(JsonMappingException.class, () -> m.readValue("-1", OneOfUsesConstraints.class));
     }
-    
+
     @Test
     public void testAnyOfMatchesBoth() throws JsonProcessingException {
         AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.of(100)).largeInt(LargeInt.of(100)).build();
         checkRoundTrip(a);
     }
-    
+
     @Test
     public void testAnyOfMatchesNone() throws JsonProcessingException {
-        assertThrows(IllegalArgumentException.class, () -> AnyOfSimpleTypes.builder().build());
+        iae(() -> AnyOfSimpleTypes.builder().build());
     }
-    
+
     @Test
     public void testAnyOfMatchesSmallIntOnly() throws JsonProcessingException {
         AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().smallInt(SmallInt.of(1)).build();
         checkRoundTrip(a);
     }
-    
+
     @Test
     public void testAnyOfMatchesLargeIntOnly() throws JsonProcessingException {
         AnyOfSimpleTypes a = AnyOfSimpleTypes.builder().largeInt(LargeInt.of(1000)).build();
         checkRoundTrip(a);
     }
-    
+
     @Test
     public void testAnyOfPrimitiveConflicts() throws JsonProcessingException {
-        assertThrows(IllegalArgumentException.class,
-                () -> AnyOfConflictingTypes.of(Optional.of("a"), Optional.of(1L)));
+        iae(() -> AnyOfConflictingTypes.of(Optional.of("a"), Optional.of(1L)));
     }
-    
+
     @Test
     public void testAnyOfConflictWithObject() {
-        assertThrows(IllegalArgumentException.class,
-                () -> AnyOfConflictingTypes2.builder().object1("a").object2(AnyOfConflictingTypes2.Object2.name("aya")).build());
+        iae(() -> AnyOfConflictingTypes2.builder().object1("a").object2(AnyOfConflictingTypes2.Object2.name("aya"))
+                .build());
     }
-    
+
     @Test
     public void testAnyOfObjectExtensions() throws JsonProcessingException {
-        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1.counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3))); 
-        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred").counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 3))).build();
+        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
+                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
+        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
+                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 3))).build();
         AnyOfObjectExtensions o = AnyOfObjectExtensions.builder().object1(a).object2(b).build();
         checkRoundTrip(o);
     }
-    
+
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentLength() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
                 .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
                 .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 3, 4))).build();
-        assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
+        iae(() -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
-    
+
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentElements() throws JsonProcessingException {
         AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
                 .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
         AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
                 .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 4))).build();
-        assertThrows(IllegalArgumentException.class, () -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
+        iae(() -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
-    
+
     @Test
     public void testAnyOfNullableMembers() {
-        AnyOfWithNullableMembers a = AnyOfWithNullableMembers.of(JsonNullable.of("hi"), JsonNullable.undefined(), JsonNullable.undefined(), JsonNullable.undefined(), Optional.empty());
+        AnyOfWithNullableMembers a = AnyOfWithNullableMembers.of( //
+                JsonNullable.of("hi"), //
+                JsonNullable.undefined(), //
+                JsonNullable.undefined(), //
+                JsonNullable.undefined(), //
+                Optional.empty());
         checkRoundTrip(a);
     }
-    
+
+    @Test
+    public void testAnyOfNullableMembers2() {
+        iae(() -> AnyOfWithNullableMembers.of( //
+                JsonNullable.of("hi"), //
+                JsonNullable.of(123.4), //
+                JsonNullable.undefined(), //
+                JsonNullable.undefined(), //
+                Optional.empty()));
+    }
+
+    @Test
+    public void testAnyOfNullableMembers3() {
+        iae(() -> AnyOfWithNullableMembers.of( //
+                JsonNullable.of("hi"), //
+                JsonNullable.of(null), //
+                JsonNullable.undefined(), //
+                JsonNullable.undefined(), //
+                Optional.empty()));
+    }
+
     private static void checkRoundTrip(Object o) {
         try {
             String json = m.writeValueAsString(o);
@@ -1193,9 +1208,12 @@ public class SchemasTest {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        
     }
     
+    private static void iae(Executable executable) {
+        assertThrows(IllegalArgumentException.class, executable);
+    }
+
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
     }
