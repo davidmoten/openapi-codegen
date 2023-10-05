@@ -1,6 +1,10 @@
 package org.davidmoten.oa3.codegen.runtime;
 
-public class AnyOfMember {
+import java.io.Serializable;
+
+public final class AnyOfMember implements Serializable {
+    
+    private static final long serialVersionUID = 6145542436093210725L;
     
     private Class<?> cls;
     private boolean nullable;

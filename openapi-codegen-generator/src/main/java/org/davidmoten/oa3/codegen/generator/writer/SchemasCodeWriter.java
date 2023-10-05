@@ -450,10 +450,11 @@ public final class SchemasCodeWriter {
                     .stream() //
                     .map(x -> out.add(toPrimitive(x.fullClassName)) + ".class") //
                     .collect(Collectors.joining(", "));
+            // members is used with anyOf only
             String members = cls.fields //
                     .stream() //
                     .map(x -> {
-                        String c = out.add(toPrimitive(x.fullClassName)) + ".class";
+                        String c = out.add(x.fullClassName) + ".class";
                         String method = x.nullable ? "nullable":"nonNullable";
                         return String.format("%s.%s(%s)", out.add(AnyOfMember.class), method, c);
                     }) //

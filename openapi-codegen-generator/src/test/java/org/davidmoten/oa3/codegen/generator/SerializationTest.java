@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.davidmoten.oa3.codegen.runtime.AnyOfDeserializer;
+import org.davidmoten.oa3.codegen.runtime.AnyOfMember;
 import org.davidmoten.oa3.codegen.runtime.AnyOfSerializer;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
@@ -551,10 +553,10 @@ public class SerializationTest {
         }
 
         @SuppressWarnings("serial")
-        public static final class Deserializer extends PolymorphicDeserializer<AnyOf> {
+        public static final class Deserializer extends AnyOfDeserializer<AnyOf> {
             protected Deserializer() {
-                super(Config.builder().build(), PolymorphicType.ANY_OF, AnyOf.class, SimpleName.class, Person.class,
-                        Person2.class);
+                super(Config.builder().build(), AnyOf.class, AnyOfMember.nonNullable(SimpleName.class),
+                        AnyOfMember.nonNullable(Person.class), AnyOfMember.nonNullable(Person2.class));
             }
         }
 

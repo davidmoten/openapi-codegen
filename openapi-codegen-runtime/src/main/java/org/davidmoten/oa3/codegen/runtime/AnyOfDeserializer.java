@@ -69,11 +69,15 @@ public class AnyOfDeserializer<T> extends StdDeserializer<T> {
                     list.add(Optional.of(o));
                 }
             } catch (DatabindException e) {
-                list.add(Optional.empty());
+                if (member.nullable()) {
+                    list.add(JsonNullable.undefined());
+                } else {
+                    list.add(Optional.empty());
+                }
             }
         }
         try {
-            Constructor<T> con = cls.getDeclaredConstructor(members //
+            Class<?>[] argClasses = members //
                     .stream() //
                     .map(member -> {
                         if (member.nullable()) {
@@ -83,7 +87,8 @@ public class AnyOfDeserializer<T> extends StdDeserializer<T> {
                         }
                     }) //
                     .collect(Collectors.toList()) //
-                    .toArray(new Class<?>[] {}));
+                    .toArray(new Class<?>[] {});
+            Constructor<T> con = cls.getDeclaredConstructor(argClasses);
             con.setAccessible(true);
             return con.newInstance(list.toArray());
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
