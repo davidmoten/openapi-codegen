@@ -44,7 +44,7 @@ public final class Names {
     
     // TODO remove this now that Imports is aware of package contents    
     // avoid class names that might clash with generated classes in the same package
-    private static final Set<String> reservedSimpleClassNames = Sets.of();
+    private static final Set<String> reservedSimpleClassNames = Sets.of("Builder");
     
     private static final boolean LOG_SCHEMA_PATHS = false;
 

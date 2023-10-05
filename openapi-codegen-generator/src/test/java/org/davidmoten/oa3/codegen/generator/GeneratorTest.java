@@ -53,7 +53,7 @@ public final class GeneratorTest {
     }
     
     public static void main(String[] args) throws MalformedURLException {
-       generate("../../openapi-directory/APIs/adyen.com/CheckoutService/37/openapi.yaml");
+       generate("../../openapi-directory/APIs/amazonaws.com/elasticbeanstalk/2010-12-01/openapi.yaml");
     }
 
 }
