@@ -40,7 +40,7 @@ public final class Names {
             "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
             "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString", "notify", "clone", "equals",
-            "finalize", "getClass", "notifyAll", "wait", "builder");
+            "finalize", "getClass", "notifyAll", "wait", "builder", "enum");
     
     // TODO remove this now that Imports is aware of package contents    
     // avoid class names that might clash with generated classes in the same package
