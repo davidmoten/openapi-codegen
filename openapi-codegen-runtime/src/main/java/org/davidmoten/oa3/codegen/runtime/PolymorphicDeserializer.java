@@ -2,18 +2,11 @@ package org.davidmoten.oa3.codegen.runtime;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -23,7 +16,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.github.davidmoten.guavamini.Sets;
 
 public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
 
@@ -54,7 +46,7 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
         // parser to read value, perf advantage and can stop plugging in ObjectMapper
         String json = mapper.writeValueAsString(tree);
         if (type == PolymorphicType.ANY_OF) {
-            return deserializeAnyOf(mapper, json, classes, cls);
+            throw new IllegalArgumentException("use " + AnyOfDeserializer.class.getSimpleName());
         } else if (type == PolymorphicType.ONE_OF) {
             return deserializeOneOf(mapper, json, classes, cls, ctxt);
         } else {
@@ -104,52 +96,6 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
                 | NoSuchMethodException | SecurityException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static <T> T deserializeAnyOf(ObjectMapper mapper, String json, List<Class<?>> classes, Class<T> cls) throws JsonMappingException, JsonProcessingException {
-        ObjectMapper m = mapper.copy().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        List<Object> list = new ArrayList<>();
-        for (Class<?> c : classes) {
-            try {
-                final Object o;
-                // TODO check isObject more efficiently
-                if (json.trim().startsWith("{") && isObject(c)) {
-                    o = m.readValue(json, c);
-                } else {
-                    o = mapper.readValue(json, c);
-                }
-                list.add(Optional.of(o));
-            } catch (DatabindException e) {
-                list.add(Optional.empty());
-            }
-        }
-        try {
-            Constructor<T> con = cls.getDeclaredConstructor(classes //
-                    .stream() //
-                    .map(c -> Optional.class) //
-                    .collect(Collectors.toList()) //
-                    .toArray(new Class<?>[] {}));
-            con.setAccessible(true);
-            return con.newInstance(list.toArray());
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    private static final Set<Class<?>> NON_OBJECT_CLASSES = Sets.of(List.class, Map.class, String.class, Short.class,
-            Integer.class, Float.class, Double.class, byte[].class, Byte.class, BigInteger.class);
-
-    private static boolean isObject(Class<?> c) {
-        if (c.isPrimitive() || NON_OBJECT_CLASSES.contains(c)) {
-            return false;
-        }
-        for (Field f : c.getDeclaredFields()) {
-            if (f.isAnnotationPresent(JsonValue.class)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static <T> T newInstance(Class<T> cls, Object parameter) {

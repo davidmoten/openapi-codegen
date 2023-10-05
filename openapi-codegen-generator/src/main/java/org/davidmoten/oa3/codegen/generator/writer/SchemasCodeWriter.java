@@ -34,6 +34,8 @@ import org.davidmoten.oa3.codegen.generator.internal.Mutable;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.http.HasEncoding;
 import org.davidmoten.oa3.codegen.http.HasStringValue;
+import org.davidmoten.oa3.codegen.runtime.AnyOfDeserializer;
+import org.davidmoten.oa3.codegen.runtime.AnyOfMember;
 import org.davidmoten.oa3.codegen.runtime.AnyOfSerializer;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
@@ -434,14 +436,36 @@ public final class SchemasCodeWriter {
             } 
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
-            out.line("public static final class _Deserializer extends %s<%s> {", PolymorphicDeserializer.class,
+            final Class<?> polymorphicDeserializer;
+            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+                polymorphicDeserializer = AnyOfDeserializer.class;
+            } else {
+                polymorphicDeserializer = PolymorphicDeserializer.class;
+            }
+            out.line("public static final class _Deserializer extends %s<%s> {", polymorphicDeserializer,
                     cls.simpleName());
             out.println();
             out.line("public _Deserializer() {");
-            String classes = cls.fields.stream().map(x -> out.add(toPrimitive(x.fullClassName)) + ".class")
+            String classes = cls.fields //
+                    .stream() //
+                    .map(x -> out.add(toPrimitive(x.fullClassName)) + ".class") //
                     .collect(Collectors.joining(", "));
-            out.line("super(%s.config(), %s.%s, %s.class, %s);", out.add(names.globalsFullClassName()),
-                    PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName(), classes);
+            // members is used with anyOf only
+            String members = cls.fields //
+                    .stream() //
+                    .map(x -> {
+                        String c = out.add(x.fullClassName) + ".class";
+                        String method = x.nullable ? "nullable":"nonNullable";
+                        return String.format("%s.%s(%s)", out.add(AnyOfMember.class), method, c);
+                    }) //
+                    .collect(Collectors.joining(", "));
+            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+                out.line("super(%s.config(), %s.class, %s);", out.add(names.globalsFullClassName()), cls.simpleName(),
+                        members);
+            } else {
+                out.line("super(%s.config(), %s.%s, %s.class, %s);", out.add(names.globalsFullClassName()),
+                        PolymorphicType.class, cls.polymorphicType.name(), cls.simpleName(), classes);
+            }
             out.closeParen();
             out.closeParen();
             if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
@@ -526,7 +550,7 @@ public final class SchemasCodeWriter {
             } else {
                 fieldType = f.resolvedTypeNullable(out.imports());
             }
-            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED && !f.nullable) {
                 out.line("private final %s<%s> %s;", Optional.class, fieldType, cls.fieldName(f));
             } else {
                 out.line("private final %s %s;", fieldType, cls.fieldName(f));

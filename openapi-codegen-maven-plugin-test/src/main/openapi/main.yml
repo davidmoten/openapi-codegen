@@ -2070,7 +2070,8 @@ components:
         hunts:
           type: boolean
       required: 
-        - pet_type        
+        - pet_type
+      additionalProperties: false        
         
     String: 
       type: string
@@ -2080,3 +2081,19 @@ components:
       type: string
       minimum: 1
       maximum: 10
+      
+    AnyOfWithNullableMembers:
+      anyOf:
+        - nullable: true
+          type: string
+        - nullable: true
+          type: number
+        - nullable: true
+          type: boolean
+        - nullable: true
+          type: object
+        - items:
+            type: string
+          type: array
+
+      
