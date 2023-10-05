@@ -2070,7 +2070,8 @@ components:
         hunts:
           type: boolean
       required: 
-        - pet_type        
+        - pet_type
+      additionalProperties: false        
         
     String: 
       type: string
@@ -2080,3 +2081,27 @@ components:
       type: string
       minimum: 1
       maximum: 10
+      
+    AnyOfWithNullableMembers:
+      type: object
+      properties:
+        value:
+          anyOf:
+            - example: Uses Salesforce and Marketo
+              nullable: true
+              type: string
+            - example: 10
+              nullable: true
+              type: number
+            - example: true
+              nullable: true
+              type: boolean
+            - example:
+                foo: bar
+              nullable: true
+              type: object
+            - items:
+                type: string
+              type: array
+
+      

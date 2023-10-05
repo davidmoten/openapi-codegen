@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.openapitools.jackson.nullable.JsonNullable;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,8 +34,8 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
 
     @Override
     public void serialize(T value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        // loop through fields
-        List<Optional<?>> values = Arrays.stream(cls.getDeclaredFields()) //
+        // loop through fields whose values can be Optional<?> or JsonNullable<?>
+        List<Object> values = Arrays.stream(cls.getDeclaredFields()) //
                 // ignore any weird fields (jacoco makes a $jacocoData field for example
                 .filter(f -> !f.getName().startsWith("$")) //
                 .map(f -> {
@@ -44,11 +46,13 @@ public class AnyOfSerializer<T> extends StdSerializer<T> {
                         throw new RuntimeException(e);
                     }
                 }) //
-                .filter(x -> x instanceof Optional) //
-                .map(x -> (Optional<?>) x) //
+                .filter(x -> x instanceof Optional || x instanceof JsonNullable) //
                 .collect(Collectors.toList());
         Optional<JsonNode> node = values.stream() //
-                .filter(Optional::isPresent) //
+                .filter(x -> x instanceof Optional && ((Optional<?>) x).isPresent() //
+                        || //
+                        x instanceof JsonNullable && ((JsonNullable<?>) x)
+                                .isPresent()) //
                 .map(x -> {
                     try {
                         return mapper.writeValueAsString(x);
