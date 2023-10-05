@@ -184,8 +184,8 @@ public final class SchemasCodeWriter {
             String nullValueMemberName = cls.enumMembers.stream().filter(x -> x.parameter == null).map(x -> x.name)
                     .findFirst().get();
             out.println();
-            out.line("public static class Deserializer extends %s<%s> {", NullEnumDeserializer.class, cls.simpleName());
-            out.line("protected Deserializer() {");
+            out.line("public static class _Deserializer extends %s<%s> {", NullEnumDeserializer.class, cls.simpleName());
+            out.line("protected _Deserializer() {");
             out.line("super(%s.class, %s.class, %s);", cls.simpleName(), out.add(cls.enumValueFullType),
                     nullValueMemberName);
             out.closeParen();
@@ -231,12 +231,12 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeAnyOfSerializerAnnotations(CodePrintWriter out, Cls cls) {
-        out.line("@%s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
-        out.line("@%s(using = %s.Serializer.class)", JsonSerialize.class, cls.simpleName());
+        out.line("@%s(using = %s._Deserializer.class)", JsonDeserialize.class, cls.simpleName());
+        out.line("@%s(using = %s._Serializer.class)", JsonSerialize.class, cls.simpleName());
     }
 
     private static void writeEnumNullValueDeserializerAnnotation(CodePrintWriter out, Cls cls) {
-        out.line("@%s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
+        out.line("@%s(using = %s._Deserializer.class)", JsonDeserialize.class, cls.simpleName());
     }
 
     private static void writeJsonIncludeAnnotation(CodePrintWriter out) {
@@ -305,7 +305,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writePolymorphicDeserializerAnnotation(CodePrintWriter out, Cls cls) {
-        out.line("@%s(using = %s.Deserializer.class)", JsonDeserialize.class, cls.simpleName());
+        out.line("@%s(using = %s._Deserializer.class)", JsonDeserialize.class, cls.simpleName());
     }
 
     private static void writeAutoDetectAnnotation(CodePrintWriter out) {
@@ -434,10 +434,10 @@ public final class SchemasCodeWriter {
             } 
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
-            out.line("public static final class Deserializer extends %s<%s> {", PolymorphicDeserializer.class,
+            out.line("public static final class _Deserializer extends %s<%s> {", PolymorphicDeserializer.class,
                     cls.simpleName());
             out.println();
-            out.line("public Deserializer() {");
+            out.line("public _Deserializer() {");
             String classes = cls.fields.stream().map(x -> out.add(toPrimitive(x.fullClassName)) + ".class")
                     .collect(Collectors.joining(", "));
             out.line("super(%s.config(), %s.%s, %s.class, %s);", out.add(names.globalsFullClassName()),
@@ -447,10 +447,10 @@ public final class SchemasCodeWriter {
             if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 out.println();
                 out.line("@%s(\"serial\")", SuppressWarnings.class);
-                out.line("public static final class Serializer extends %s<%s> {", AnyOfSerializer.class,
+                out.line("public static final class _Serializer extends %s<%s> {", AnyOfSerializer.class,
                         cls.simpleName());
                 out.println();
-                out.line("public Serializer() {");
+                out.line("public _Serializer() {");
                 out.line("super(%s.config(), %s.class);", out.add(names.globalsFullClassName()), cls.simpleName());
                 out.closeParen();
                 out.closeParen();
@@ -753,7 +753,7 @@ public final class SchemasCodeWriter {
             out.line("%s.checkMaxLength(%s, %s, \"%s\");", Preconditions.class, raw, x.maxLength.get(),
                     x.fieldName(cls));
         }
-        if (x.pattern.isPresent() && !x.isDateOrTime()) {
+        if (x.pattern.isPresent() && !x.isDateOrTime() && !x.isByteArray() && !x.isOctets()) {
             out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
                     WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
         }
