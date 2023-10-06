@@ -337,7 +337,7 @@ public final class SchemasCodeWriter {
         }
         String text = cls.enumMembers.stream().map(x -> {
             if (x.parameter instanceof ObjectNode) {
-                return String.format("%s%s(%s.toMap(\"%s\")", out.indent(), x.name, out.add(RuntimeUtil.class),
+                return String.format("%s%s(%s.toMap(\"%s\"))", out.indent(), x.name, out.add(RuntimeUtil.class),
                         escapedJson((ObjectNode) x.parameter));
             } else if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
                     || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
