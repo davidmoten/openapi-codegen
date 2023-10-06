@@ -117,7 +117,7 @@ public final class Util {
         } else if ("array".equals(type)) {
             return List.class;
         } else if ("object".equals(type)) {
-            return Object.class;
+            return Map.class;
         } else {
             throw new RuntimeException("unexpected type and format: " + type + ", " + format);
         }

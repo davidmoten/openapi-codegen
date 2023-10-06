@@ -63,8 +63,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.davidmoten.guavamini.Maps;
 
 public final class SchemasCodeWriter {
@@ -314,6 +317,16 @@ public final class SchemasCodeWriter {
         out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY, setterVisibility = %s.ANY)",
                 JsonAutoDetect.class, Visibility.class, Visibility.class, Visibility.class);
     }
+    
+    private final static ObjectMapper MAPPER = new ObjectMapper();
+    
+    private static String escapedJson(ObjectNode node) {
+        try {
+            return MAPPER.writeValueAsString(node).replace("\n", "\\n").replace("\"", "\\\"");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static void writeEnumMembers(CodePrintWriter out, Cls cls) {
         final String parameterFullClassName;
@@ -322,21 +335,33 @@ public final class SchemasCodeWriter {
         } else {
             parameterFullClassName = "NotUsed";
         }
-        String text = cls.enumMembers.stream().map(x -> {
-            if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
-                    || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
-                return String.format("%s%s(new %s(\"\"))", out.indent(), x.name, out.add(parameterFullClassName),
-                        x.parameter);
-            } else {
-                String delim = x.parameter instanceof String ? "\"" : "";
-                if (x.nullable) {
-                    return String.format("%s%s(%s.of(%s%s%s))", out.indent(), x.name, out.add(JsonNullable.class),
-                            delim, x.parameter, delim);
-                } else {
-                    return String.format("%s%s(%s%s%s)", out.indent(), x.name, delim, x.parameter, delim);
-                }
-            }
-        }).collect(Collectors.joining(",\n"));
+        int[] index = new int[] {-1};
+        String text = cls.enumMembers.stream() //
+                .map(x -> {
+                    index[0]++;
+                    final String memberName;
+                    if (!cls.enumNames.isEmpty()) {
+                        memberName = cls.enumNames.get(index[0]);
+                    } else {
+                        memberName = x.name;
+                    }
+                    if (x.parameter instanceof ObjectNode) {
+                        return String.format("%s%s(%s.toMap(\"%s\"))", out.indent(), memberName, out.add(RuntimeUtil.class),
+                                escapedJson((ObjectNode) x.parameter));
+                    } else if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
+                            || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
+                        return String.format("%s%s(new %s(\"\"))", out.indent(), memberName,
+                                out.add(parameterFullClassName), x.parameter);
+                    } else {
+                        String delim = x.parameter instanceof String ? "\"" : "";
+                        if (x.nullable) {
+                            return String.format("%s%s(%s.of(%s%s%s))", out.indent(), memberName,
+                                    out.add(JsonNullable.class), delim, x.parameter, delim);
+                        } else {
+                            return String.format("%s%s(%s%s%s)", out.indent(), memberName, delim, x.parameter, delim);
+                        }
+                    }
+                }).collect(Collectors.joining(",\n"));
         if (!text.isEmpty()) {
             out.println("\n" + text + ";");
         }
@@ -543,7 +568,10 @@ public final class SchemasCodeWriter {
                 }
             }
             final String fieldType;
-            if (f.mapType.isPresent()) {
+            if (cls.classType == ClassType.ENUM && cls.enumValueFullType.equals(Map.class.getCanonicalName())) {
+                fieldType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
+                        out.add(Object.class));
+            } else if (f.mapType.isPresent()) {
                 fieldType = f.resolvedTypeMapPrivate(out.imports());
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
@@ -574,8 +602,14 @@ public final class SchemasCodeWriter {
             // don't annotate parameters with JsonProperty because we will annotate field
             // with JsonValue
             parametersNullable = cls.fields.stream() //
-                    .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedTypeNullable(out.imports()),
-                            x.fieldName(cls)))
+                    .map(x -> {
+                        if (cls.classType == ClassType.ENUM && x.fullClassName.equals(Map.class.getCanonicalName())) {
+                            return String.format("\n%s%s<%s, %s> %s", out.indent(), out.add(Map.class),
+                                    out.add(String.class), out.add(Object.class), x.fieldName(cls));
+                        } else {
+                            return String.format("\n%s%s %s", out.indent(), x.resolvedTypeNullable(out.imports()),
+                                    x.fieldName(cls));
+                        }}) //
                     .collect(Collectors.joining(","));
         } else {
             parametersNullable = cls.fields.stream() //
@@ -946,14 +980,20 @@ public final class SchemasCodeWriter {
                 } else {
                     value = f.fieldName(cls);
                 }
-                writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls), value);
+                final String returnType;
+                if (cls.classType == ClassType.ENUM && f.fullClassName.equals(Map.class.getCanonicalName())) {
+                    returnType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class), out.add(Object.class));
+                } else {
+                    returnType = f.resolvedTypePublicConstructor(out.imports());
+                }
+                writeGetter(out, returnType, f.fieldName(cls), value);
             }
         });
 
     }
     
     private static void writePropertiesMapGetter(CodePrintWriter out, Cls cls) {
-        if (cls.fields.isEmpty()) {
+        if (cls.fields.isEmpty() || cls.classType == ClassType.ENUM) {
             return;
         }
         Indent indent = out.indent().copy().right().right().right();

@@ -57,6 +57,8 @@ import org.davidmoten.oa3.codegen.test.main.schema.Dog.Object1.Breed;
 import org.davidmoten.oa3.codegen.test.main.schema.Dog2;
 import org.davidmoten.oa3.codegen.test.main.schema.DogBreed;
 import org.davidmoten.oa3.codegen.test.main.schema.EnumCollision;
+import org.davidmoten.oa3.codegen.test.main.schema.EnumOfObjects;
+import org.davidmoten.oa3.codegen.test.main.schema.EnumOfObjectsNamed;
 import org.davidmoten.oa3.codegen.test.main.schema.EnumRepeated;
 import org.davidmoten.oa3.codegen.test.main.schema.ExclusiveMinMaxInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.External;
@@ -1198,6 +1200,17 @@ public class SchemasTest {
                 JsonNullable.undefined(), //
                 JsonNullable.undefined(), //
                 Optional.empty()));
+    }
+    
+    @Test
+    public void testEnumOfObjects() {
+        checkRoundTrip(EnumOfObjects.__ID_1_NAME_LOL_SLUG_LEAGUE_OF_LEGENDS_);
+    }
+    
+    @Test
+    public void testEnumOfObjectsNamed() {
+        checkRoundTrip(EnumOfObjectsNamed.LOL);
+        checkRoundTrip(EnumOfObjectsNamed.CSGO);
     }
 
     private static void checkRoundTrip(Object o) {

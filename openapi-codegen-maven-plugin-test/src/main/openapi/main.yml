@@ -2095,5 +2095,27 @@ components:
         - items:
             type: string
           type: array
+          
+    EnumOfObjects:
+      type: object
+      enum:
+        - id: 1
+          name: LoL
+          slug: league-of-legends
+        - id: 3
+          name: CS:GO
+          slug: cs-go
+
+    EnumOfObjectsNamed:
+      type: object
+      enum:
+        - id: 1
+          name: LoL
+          slug: league-of-legends
+        - id: 3
+          name: CS:GO
+          slug: cs-go          
+      x-openapi-codegen-names: [LOL, CSGO]
+    
 
       
