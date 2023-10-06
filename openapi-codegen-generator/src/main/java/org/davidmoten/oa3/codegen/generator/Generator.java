@@ -834,9 +834,10 @@ public class Generator {
             }
         }
         if (schema.getExtensions() != null && schema.getExtensions().get(ExtensionKeys.NAMES) != null) {
-            String[] a = (String[]) schema.getExtensions().get(ExtensionKeys.NAMES);
-            if (a.length == cls.enumMembers.size()) {
-                cls.enumNames = Arrays.asList(a);
+            @SuppressWarnings("unchecked")
+            List<String> a = (List<String>) schema.getExtensions().get(ExtensionKeys.NAMES);
+            if (a.size() == cls.enumMembers.size()) {
+                cls.enumNames = a;
             } else {
                 System.out.println("[WARN] " + ExtensionKeys.NAMES + " array length must match number of enum members");
             }
