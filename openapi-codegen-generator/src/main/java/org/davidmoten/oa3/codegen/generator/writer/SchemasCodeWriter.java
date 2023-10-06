@@ -559,7 +559,10 @@ public final class SchemasCodeWriter {
                 }
             }
             final String fieldType;
-            if (f.mapType.isPresent()) {
+            if (cls.classType == ClassType.ENUM && cls.enumValueFullType.equals(Map.class.getCanonicalName())) {
+                fieldType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
+                        out.add(Object.class));
+            } else if (f.mapType.isPresent()) {
                 fieldType = f.resolvedTypeMapPrivate(out.imports());
             } else if (f.encoding == Encoding.OCTET) {
                 fieldType = out.add(String.class);
