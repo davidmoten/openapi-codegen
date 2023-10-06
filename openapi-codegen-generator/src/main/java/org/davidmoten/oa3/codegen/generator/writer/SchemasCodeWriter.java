@@ -971,7 +971,13 @@ public final class SchemasCodeWriter {
                 } else {
                     value = f.fieldName(cls);
                 }
-                writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls), value);
+                final String returnType;
+                if (cls.classType == ClassType.ENUM && f.fullClassName.equals(Map.class.getCanonicalName())) {
+                    returnType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class), out.add(Object.class));
+                } else {
+                    returnType = f.resolvedTypePublicConstructor(out.imports());
+                }
+                writeGetter(out, returnType, f.fieldName(cls), value);
             }
         });
 

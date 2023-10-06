@@ -23,13 +23,3 @@ components:
     Dummy:
       type: string
       
-    EnumOfObjects:
-      enum:
-        - id: 1
-          name: LoL
-          slug: league-of-legends
-        - id: 3
-          name: CS:GO
-          slug: cs-go
-      type: object      
-      
