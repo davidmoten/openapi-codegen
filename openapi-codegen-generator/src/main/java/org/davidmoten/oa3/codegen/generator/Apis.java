@@ -224,7 +224,7 @@ class Apis {
         if (Boolean.TRUE.equals(schema.getAdditionalProperties())) {
             schema.setAdditionalProperties(new Schema<>());
         }
-        if (schema.getAdditionalProperties() instanceof Schema) {
+        if (schema.getAdditionalProperties() instanceof Schema && schema.getEnum() == null) {
             visitSchemas(category,
                     schemaPath.add(new SchemaWithName("properties", (Schema<?>) schema.getAdditionalProperties())), Maps.empty(),
                     visitor);

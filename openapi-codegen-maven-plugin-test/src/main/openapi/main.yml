@@ -2095,5 +2095,16 @@ components:
         - items:
             type: string
           type: array
+          
+    EnumOfObjects:
+      enum:
+        - id: 1
+          name: LoL
+          slug: league-of-legends
+        - id: 3
+          name: CS:GO
+          slug: cs-go
+      type: object
+    
 
       
