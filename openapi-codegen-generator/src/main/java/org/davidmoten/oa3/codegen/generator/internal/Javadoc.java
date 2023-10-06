@@ -111,12 +111,12 @@ public final class Javadoc {
         ;
 //                .replace("&", "&amp;");
         if (isHtml) {
-            x = x.replace("</p>", "").replace("*/", "*&#47;");
+            x = x.replace("</p>", "");
         } else {
             x = x.replace("<", "&lt;") //
                     .replace(">", "&gt;");
         }
-        return x;
+        return x.replace("*/", "*&#47;");
     }
 
     private static String wrap(String s) {
