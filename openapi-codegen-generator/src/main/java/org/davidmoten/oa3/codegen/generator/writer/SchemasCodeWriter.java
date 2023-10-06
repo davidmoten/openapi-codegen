@@ -984,7 +984,7 @@ public final class SchemasCodeWriter {
     }
     
     private static void writePropertiesMapGetter(CodePrintWriter out, Cls cls) {
-        if (cls.fields.isEmpty()) {
+        if (cls.fields.isEmpty() || cls.classType == ClassType.ENUM) {
             return;
         }
         Indent indent = out.indent().copy().right().right().right();
