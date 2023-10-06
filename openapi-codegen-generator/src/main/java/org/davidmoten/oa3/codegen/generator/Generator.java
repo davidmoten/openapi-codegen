@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,6 +99,7 @@ public class Generator {
         public ClassType classType;
         public List<Field> fields = new ArrayList<>();
         public List<EnumMember> enumMembers = new ArrayList<>();
+        public List<String> enumNames = Collections.emptyList();
         public List<Cls> classes = new ArrayList<>();
         public Discriminator discriminator = null;
         public String enumValueFullType;
@@ -829,6 +831,14 @@ public class Generator {
             if (!used.contains(String.valueOf(o))) {
                 cls.enumMembers.add(new EnumMember(map.get(String.valueOf(o)), o, isNullable(schema)));
                 used.add(String.valueOf(o));
+            }
+        }
+        if (schema.getExtensions() != null && schema.getExtensions().get(ExtensionKeys.NAMES) != null) {
+            String[] a = (String[]) schema.getExtensions().get(ExtensionKeys.NAMES);
+            if (a.length == cls.enumMembers.size()) {
+                cls.enumNames = Arrays.asList(a);
+            } else {
+                System.out.println("[WARN] " + ExtensionKeys.NAMES + " array length must match number of enum members");
             }
         }
         cls.addField(cls.enumValueFullType, "value", "value", true, false, mapType(schemaPath), isNullable(schema));

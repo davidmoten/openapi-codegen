@@ -335,24 +335,33 @@ public final class SchemasCodeWriter {
         } else {
             parameterFullClassName = "NotUsed";
         }
-        String text = cls.enumMembers.stream().map(x -> {
-            if (x.parameter instanceof ObjectNode) {
-                return String.format("%s%s(%s.toMap(\"%s\"))", out.indent(), x.name, out.add(RuntimeUtil.class),
-                        escapedJson((ObjectNode) x.parameter));
-            } else if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
-                    || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
-                return String.format("%s%s(new %s(\"\"))", out.indent(), x.name, out.add(parameterFullClassName),
-                        x.parameter);
-            } else {
-                String delim = x.parameter instanceof String ? "\"" : "";
-                if (x.nullable) {
-                    return String.format("%s%s(%s.of(%s%s%s))", out.indent(), x.name, out.add(JsonNullable.class),
-                            delim, x.parameter, delim);
-                } else {
-                    return String.format("%s%s(%s%s%s)", out.indent(), x.name, delim, x.parameter, delim);
-                }
-            }
-        }).collect(Collectors.joining(",\n"));
+        int[] index = new int[] {-1};
+        String text = cls.enumMembers.stream() //
+                .map(x -> {
+                    index[0]++;
+                    final String memberName;
+                    if (!cls.enumNames.isEmpty()) {
+                        memberName = cls.enumNames.get(index[0]);
+                    } else {
+                        memberName = x.name;
+                    }
+                    if (x.parameter instanceof ObjectNode) {
+                        return String.format("%s%s(%s.toMap(\"%s\"))", out.indent(), memberName, out.add(RuntimeUtil.class),
+                                escapedJson((ObjectNode) x.parameter));
+                    } else if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
+                            || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
+                        return String.format("%s%s(new %s(\"\"))", out.indent(), memberName,
+                                out.add(parameterFullClassName), x.parameter);
+                    } else {
+                        String delim = x.parameter instanceof String ? "\"" : "";
+                        if (x.nullable) {
+                            return String.format("%s%s(%s.of(%s%s%s))", out.indent(), memberName,
+                                    out.add(JsonNullable.class), delim, x.parameter, delim);
+                        } else {
+                            return String.format("%s%s(%s%s%s)", out.indent(), memberName, delim, x.parameter, delim);
+                        }
+                    }
+                }).collect(Collectors.joining(",\n"));
         if (!text.isEmpty()) {
             out.println("\n" + text + ";");
         }
