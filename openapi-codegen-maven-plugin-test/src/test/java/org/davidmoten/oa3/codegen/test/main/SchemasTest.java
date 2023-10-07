@@ -1216,7 +1216,11 @@ public class SchemasTest {
     
     @Test
     public void testEnumYesNoTrueFalse() {
-        
+        assertEquals("yes", EnumSubs.YES.value());
+        assertEquals("no", EnumSubs.NO.value());
+        assertEquals("on", EnumSubs.ON.value());
+        assertEquals("off", EnumSubs.OFF.value());
+        assertEquals("true", EnumSubs.TRUE.value());
     }
 
     private static void checkRoundTrip(Object o) {
