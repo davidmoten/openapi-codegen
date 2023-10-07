@@ -57,8 +57,10 @@ public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
      * yes, no with true or false boolean values.
      * 
      * @param data json or yaml OpenAPI definition
-     * @return data converted to have double quoted strings so YAML 1.1 parser will
-     *         work ok on it.
+     * @return json data untouched or if yaml returns data converted to have double
+     *         quoted strings and !! types so YAML 1.1 parser used by swagger-parser
+     *         will not do annoying replacements of on, off, yes, no with boolean
+     *         true and false values.
      */
     private static String doubleQuoteStrings(String data) {
         if (data.startsWith("{")) {
@@ -72,7 +74,10 @@ public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
         }
     }
 
-    // copied from OpenAPIV3Parser, added Locale.ENGLISH to toLowerCase calls to satisfy spotbugs
+    // copied from OpenAPIV3Parser, added Locale.ENGLISH to toLowerCase calls to
+    // satisfy spotbugs
+    // if this method was public in OpenAPIV3Parser I wouldn't need to copy it (that
+    // would be nice!)
     private String readContentFromLocation(String location, List<AuthorizationValue> auth) {
         final String adjustedLocation = location.replaceAll("\\\\", "/");
         try {
