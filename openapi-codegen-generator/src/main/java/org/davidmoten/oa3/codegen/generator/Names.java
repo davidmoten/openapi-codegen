@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.internal.EnhancedOpenAPIV3Parser;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Maps;
@@ -62,7 +63,7 @@ public final class Names {
         options.setResolve(true);
         // github api goes over snake yaml parser max code points
         System.setProperty("maxYamlCodePoints", "999999999");
-        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        OpenAPIV3Parser parser = new EnhancedOpenAPIV3Parser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
         if (!errors.isEmpty()) {
