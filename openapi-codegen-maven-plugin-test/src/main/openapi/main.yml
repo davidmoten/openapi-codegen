@@ -2082,6 +2082,10 @@ components:
       minimum: 1
       maximum: 10
       
+    EnumSubs:
+      type: string
+      enum: [off, on, yes, no, true, false, ok, bad, good]
+      
     AnyOfWithNullableMembers:
       anyOf:
         - nullable: true
