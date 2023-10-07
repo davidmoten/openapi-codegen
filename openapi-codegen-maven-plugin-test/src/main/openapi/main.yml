@@ -2120,6 +2120,14 @@ components:
           name: CS:GO
           slug: cs-go          
       x-openapi-codegen-names: [LOL, CSGO]
+      
+    ListOfNullableConstraints:
+      type: array
+      items: 
+        type: string
+        nullable: true
+        minLength: 2
+        maxLength: 4
     
 
       

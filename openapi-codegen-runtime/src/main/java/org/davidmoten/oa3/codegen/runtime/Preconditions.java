@@ -17,11 +17,11 @@ public final class Preconditions {
         p.checkMaximum(x, max, name);
     }
 
-    public static void checkMaximum(Collection<? extends Number> x, String max, String name) {
+    public static void checkMaximum(Collection<?> x, String max, String name) {
         p.checkMaximum(x, max, name);
     }
-
-    public static void checkMaximum(Collection<? extends Number> x, String max, String name, boolean exclusive) {
+    
+    public static void checkMaximum(Collection<?> x, String max, String name, boolean exclusive) {
         p.checkMaximum(x, max, name, exclusive);
     }
 
@@ -69,11 +69,11 @@ public final class Preconditions {
         p.checkMinimum(x, min, name, exclusive);
     }
 
-    public static void checkMinimum(Collection<? extends Number> x, String min, String name) {
+    public static void checkMinimum(Collection<?> x, String min, String name) {
         p.checkMinimum(x, min, name);
     }
 
-    public static void checkMinimum(Collection<? extends Number> x, String min, String name, boolean exclusive) {
+    public static void checkMinimum(Collection<?> x, String min, String name, boolean exclusive) {
         p.checkMinimum(x, min, name, exclusive);
     }
 
@@ -81,7 +81,7 @@ public final class Preconditions {
         p.checkMinLength(s, minLength, name);
     }
 
-    public static  void checkMinLength(Collection<String> list, int minLength, String name) {
+    public static  void checkMinLength(Collection<?> list, int minLength, String name) {
         p.checkMinLength(list, minLength, name);
     }
 
@@ -97,7 +97,7 @@ public final class Preconditions {
         p.checkMaxLength(s, maxLength, name);
     }
 
-    public static void checkMaxLength(Collection<String> list, int maxLength, String name) {
+    public static void checkMaxLength(Collection<?> list, int maxLength, String name) {
         p.checkMaxLength(list, maxLength, name);
     }
 
@@ -145,7 +145,7 @@ public final class Preconditions {
         p.checkMatchesPattern(s, pattern, name);
     }
 
-    public static void checkMatchesPattern(Collection<String> s, String pattern, String name) {
+    public static void checkMatchesPattern(Collection<?> s, String pattern, String name) {
         p.checkMatchesPattern(s, pattern, name);
     }
 
