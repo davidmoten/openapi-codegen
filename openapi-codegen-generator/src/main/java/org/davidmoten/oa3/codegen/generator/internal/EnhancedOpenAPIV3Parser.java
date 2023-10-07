@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -71,17 +72,18 @@ public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
         }
     }
 
+    // copied from OpenAPIV3Parser, added Locale.ENGLISH to toLowerCase calls to satisfy spotbugs
     private String readContentFromLocation(String location, List<AuthorizationValue> auth) {
         final String adjustedLocation = location.replaceAll("\\\\", "/");
         try {
-            if (adjustedLocation.toLowerCase().startsWith("http")) {
+            if (adjustedLocation.toLowerCase(Locale.ENGLISH).startsWith("http")) {
                 return RemoteUrl.urlToString(adjustedLocation, auth);
-            } else if (adjustedLocation.toLowerCase().startsWith("jar:")) {
+            } else if (adjustedLocation.toLowerCase(Locale.ENGLISH).startsWith("jar:")) {
                 final InputStream in = new URI(adjustedLocation).toURL().openStream();
                 return IOUtils.toString(in, encoding);
             } else {
                 final String fileScheme = "file:";
-                final Path path = adjustedLocation.toLowerCase().startsWith(fileScheme)
+                final Path path = adjustedLocation.toLowerCase(Locale.ENGLISH).startsWith(fileScheme)
                         ? Paths.get(URI.create(adjustedLocation))
                         : Paths.get(adjustedLocation);
                 if (Files.exists(path)) {
