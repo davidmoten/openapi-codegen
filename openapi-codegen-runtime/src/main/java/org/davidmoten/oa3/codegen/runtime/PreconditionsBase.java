@@ -43,16 +43,21 @@ public final class PreconditionsBase {
         }
     }
 
-    public void checkMinimum(Collection<? extends Number> list, String min, String name) {
+    public void checkMinimum(Collection<?> list, String min, String name) {
         checkMinimum(list, min, name, false);
     }
 
-    public void checkMinimum(Collection<? extends Number> list, String min, String name, boolean exclusive) {
+    @SuppressWarnings("unchecked")
+    public void checkMinimum(Collection<?> list, String min, String name, boolean exclusive) {
         if (list == null) {
             return;
         }
-        for (Number x : list) {
-            checkMinimum(x, min, name, exclusive);
+        for (Object x : list) {
+            if (x instanceof Number) {
+                checkMinimum((Number) x, min, name, exclusive);
+            } else if (x instanceof JsonNullable) {
+                checkMinimum((JsonNullable<Number>) x, min, name, exclusive);
+            }
         }
     }
 
@@ -85,16 +90,21 @@ public final class PreconditionsBase {
     // maximum
     ////////////////////////////////
 
-    public void checkMaximum(Collection<? extends Number> list, String max, String name) {
+    public void checkMaximum(Collection<?> list, String max, String name) {
         checkMaximum(list, max, name, false);
     }
 
-    public void checkMaximum(Collection<? extends Number> list, String max, String name, boolean exclusive) {
+    @SuppressWarnings("unchecked")
+    public void checkMaximum(Collection<?> list, String max, String name, boolean exclusive) {
         if (list == null) {
             return;
         }
-        for (Number x : list) {
-            checkMaximum(x, max, name, exclusive);
+        for (Object x : list) {
+            if (x instanceof Number) {
+                checkMaximum((Number) x, max, name, exclusive);
+            } else if (x instanceof JsonNullable) {
+                checkMaximum((JsonNullable<Number>) x, max, name, exclusive);
+            }
         }
     }
 
@@ -171,8 +181,28 @@ public final class PreconditionsBase {
         }
     }
 
-    public void checkMinLength(Collection<String> list, int minLength, String name) {
-        if (list != null && list.stream().filter(x -> x.length() < minLength).findAny().isPresent()) {
+    public void checkMinLength(Collection<?> list, int minLength, String name) {
+        if (list != null && list //
+                .stream() //
+                .filter(x -> {
+                    final String s;
+                    if (x instanceof String) {
+                        s = (String) x;
+                    } else if (x instanceof JsonNullable) {
+                        @SuppressWarnings("unchecked")
+                        JsonNullable<String> n = (JsonNullable<String>) x;
+                        if (hasValue(n)) {
+                            s = n.get();
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                    return s.length() < minLength;
+                }) //
+                .findAny() //
+                .isPresent()) {
             throw factory.apply(name + " elements must have a length of at least " + minLength);
         }
     }
@@ -187,8 +217,28 @@ public final class PreconditionsBase {
         }
     }
 
-    public void checkMaxLength(Collection<String> list, int maxLength, String name) {
-        if (list != null && list.stream().filter(x -> x.length() > maxLength).findAny().isPresent()) {
+    public void checkMaxLength(Collection<?> list, int maxLength, String name) {
+        if (list != null && list //
+                .stream() //
+                .filter(x -> {
+                    final String s;
+                    if (x instanceof String) {
+                        s = (String) x;
+                    } else if (x instanceof JsonNullable) {
+                        @SuppressWarnings("unchecked")
+                        JsonNullable<String> n = (JsonNullable<String>) x;
+                        if (hasValue(n)) {
+                            s = n.get();
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                    return s.length() > maxLength;
+                }) //
+                .findAny() //
+                .isPresent()) {
             throw factory.apply(name + " elements must have a length of at most " + maxLength);
         }
     }
@@ -268,8 +318,27 @@ public final class PreconditionsBase {
         }
     }
 
-    public void checkMatchesPattern(Collection<String> list, String pattern, String name) {
-        if (list != null && list.stream().filter(x -> !Pattern.matches(pattern, x)).findAny().isPresent()) {
+    public void checkMatchesPattern(Collection<?> list, String pattern, String name) {
+        if (list != null && list //
+                .stream().filter(x -> {
+                    final String s;
+                    if (x instanceof String) {
+                        s = (String) x;
+                    } else if (x instanceof JsonNullable) {
+                        @SuppressWarnings("unchecked")
+                        JsonNullable<String> n = (JsonNullable<String>) x;
+                        if (hasValue(n)) {
+                            s = n.get();
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                    return !Pattern.matches(pattern, s);
+                }) //
+                .findAny() //
+                .isPresent()) {
             throw factory.apply(name + " elements must match this regex pattern: " + pattern);
         }
     }
