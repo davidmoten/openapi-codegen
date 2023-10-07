@@ -207,7 +207,8 @@ public final class SchemasCodeWriter {
         
         final boolean javadocExists;
         if (cls.description.isPresent()) {
-            javadocExists = Javadoc.printJavadoc(out, out.indent(), cls.description.get(), false);
+            String html = WriterUtil.markdownToHtml(cls.description.get());
+            javadocExists = Javadoc.printJavadoc(out, out.indent(), html, true);
         } else {
             javadocExists = false;
         }
