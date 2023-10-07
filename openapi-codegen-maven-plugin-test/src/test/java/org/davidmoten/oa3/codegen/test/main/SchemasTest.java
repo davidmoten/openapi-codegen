@@ -60,6 +60,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.EnumCollision;
 import org.davidmoten.oa3.codegen.test.main.schema.EnumOfObjects;
 import org.davidmoten.oa3.codegen.test.main.schema.EnumOfObjectsNamed;
 import org.davidmoten.oa3.codegen.test.main.schema.EnumRepeated;
+import org.davidmoten.oa3.codegen.test.main.schema.EnumSubs;
 import org.davidmoten.oa3.codegen.test.main.schema.ExclusiveMinMaxInteger;
 import org.davidmoten.oa3.codegen.test.main.schema.External;
 import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
@@ -1211,6 +1212,15 @@ public class SchemasTest {
     public void testEnumOfObjectsNamed() {
         checkRoundTrip(EnumOfObjectsNamed.LOL);
         checkRoundTrip(EnumOfObjectsNamed.CSGO);
+    }
+    
+    @Test
+    public void testEnumYesNoTrueFalse() {
+        assertEquals("yes", EnumSubs.YES.value());
+        assertEquals("no", EnumSubs.NO.value());
+        assertEquals("on", EnumSubs.ON.value());
+        assertEquals("off", EnumSubs.OFF.value());
+        assertEquals("true", EnumSubs.TRUE.value());
     }
 
     private static void checkRoundTrip(Object o) {

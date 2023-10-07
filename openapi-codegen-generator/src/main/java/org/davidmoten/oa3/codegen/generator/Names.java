@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.internal.EnhancedOpenAPIV3Parser;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 
 import com.github.davidmoten.guavamini.Maps;
@@ -20,13 +21,13 @@ import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
-import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 
@@ -62,7 +63,7 @@ public final class Names {
         options.setResolve(true);
         // github api goes over snake yaml parser max code points
         System.setProperty("maxYamlCodePoints", "999999999");
-        OpenAPIParser parser = new OpenAPIParser();
+        OpenAPIV3Parser parser = new EnhancedOpenAPIV3Parser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
         if (!errors.isEmpty()) {

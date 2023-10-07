@@ -354,7 +354,10 @@ public final class SchemasCodeWriter {
                         return String.format("%s%s(new %s(\"\"))", out.indent(), memberName,
                                 out.add(parameterFullClassName), x.parameter);
                     } else {
-                        String delim = x.parameter instanceof String ? "\"" : "";
+                        String delim = x.parameter instanceof String //
+                                || //
+                                cls.enumValueFullType.equals(String.class.getCanonicalName()) // 
+                                && x.parameter instanceof Boolean ? "\"" : "";
                         if (x.nullable) {
                             return String.format("%s%s(%s.of(%s%s%s))", out.indent(), memberName,
                                     out.add(JsonNullable.class), delim, x.parameter, delim);
