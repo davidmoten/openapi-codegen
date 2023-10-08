@@ -109,6 +109,11 @@ public class ClientServerGenerator {
                         p = resolveParameterRefs(p);
                         boolean isArray = false;
                         Schema<?> s = p.getSchema();
+                        if (s == null) {
+                            // TODO do something with p.getContent() instead of schema
+                            System.out.println("[WARN] parameter not without schema not supported yet, skipping:\n" + p);
+                            return;
+                        }
                         final Schema<?> resolvedOriginal = resolveRefs(s);
                         if (Util.isArray(s)) {
                             isArray = true;
@@ -376,7 +381,11 @@ public class ClientServerGenerator {
     private Schema<?> resolveRefs(Schema<?> schema) {
         Schema<?> s = schema;
         while (s.get$ref() != null) {
-            s = refCls.get(s.get$ref()).schema.get();
+            String ref = s.get$ref();
+            s = refCls.get(ref).schema.get();
+            if (s == null) {
+                throw new IllegalArgumentException("$ref not found: " + ref);
+            }
         }
         return s;
     }
