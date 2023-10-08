@@ -692,8 +692,8 @@ public class SchemasTest {
     public void testAllOfWithRefs() throws JsonProcessingException {
         String json = "{\"description\":\"brown and curly\",\"breeder\":\"Jane's Kennels\",\"breed\":\"cross\"}";
         Dog2 a = m.readValue(json, Dog2.class);
-        assertEquals("brown and curly", a.pet().description());
-        assertEquals(DogBreed.CROSS, a.breeding().breed());
+        assertEquals("brown and curly", a.description());
+        assertEquals(DogBreed.CROSS, a.breed());
         Dog2 b = Dog2 //
                 .pet(Pet.description("brown and curly")) //
                 .breeding(Breeding.builder() //

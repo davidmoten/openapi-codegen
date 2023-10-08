@@ -477,7 +477,14 @@ public final class SchemasCodeWriter {
                             if (!used.contains(f.fieldName(cls))) {
                                 used.add(f.fieldName(cls));
                                 out.println();
-                                out.line("public %s.%s %s() {", Names.simpleClassName(f.fullClassName), f.resolvedTypePublicConstructor(out.imports()), f.fieldName(c.get()));
+                                String type = f.resolvedTypePublicConstructor(out.imports());
+                                StringBuilder b = new StringBuilder();
+                                b.append(type);
+                                if (f.fullClassName.startsWith(field.fullClassName)) {
+                                    int i = type.lastIndexOf("<");
+                                    b.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
+                                }
+                                out.line("public %s %s() {", b, f.fieldName(c.get()));
                                 out.line("return %s.%s();", field.fieldName(cls), f.fieldName(c.get()));
                                 out.closeParen();
                             }
