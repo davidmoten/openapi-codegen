@@ -482,7 +482,9 @@ public final class SchemasCodeWriter {
                                 b.append(type);
                                 if (f.fullClassName.startsWith(field.fullClassName)) {
                                     int i = type.lastIndexOf("<");
-                                    b.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
+                                    if (i != -1) {
+                                        b.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
+                                    }
                                 }
                                 out.line("public %s %s() {", b, f.fieldName(c.get()));
                                 out.line("return %s.%s();", field.fieldName(cls), f.fieldName(c.get()));
