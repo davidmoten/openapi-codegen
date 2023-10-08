@@ -477,7 +477,7 @@ public final class SchemasCodeWriter {
                             if (!used.contains(f.fieldName(cls))) {
                                 used.add(f.fieldName(cls));
                                 out.println();
-                                out.line("public %s %s() {", f.resolvedTypePublicConstructor(out.imports()), f.fieldName(c.get()));
+                                out.line("public %s.%s %s() {", Names.simpleClassName(f.fullClassName), f.resolvedTypePublicConstructor(out.imports()), f.fieldName(c.get()));
                                 out.line("return %s.%s();", field.fieldName(cls), f.fieldName(c.get()));
                                 out.closeParen();
                             }
