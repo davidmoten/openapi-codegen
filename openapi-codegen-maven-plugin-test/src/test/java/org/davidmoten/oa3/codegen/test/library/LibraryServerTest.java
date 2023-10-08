@@ -39,7 +39,7 @@ public class LibraryServerTest {
                 .build();
         UsersPage page = client.getUsers(Optional.empty(), Optional.empty());
         assertEquals(20, page.users().value().size());
-        assertEquals("User19", page.users().value().get(18).user().firstName());
+        assertEquals("User19", page.users().value().get(18).firstName());
     }
     
     static List<HttpService> httpServices() {

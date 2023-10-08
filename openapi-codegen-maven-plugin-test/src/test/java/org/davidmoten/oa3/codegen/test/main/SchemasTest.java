@@ -693,7 +693,9 @@ public class SchemasTest {
         String json = "{\"description\":\"brown and curly\",\"breeder\":\"Jane's Kennels\",\"breed\":\"cross\"}";
         Dog2 a = m.readValue(json, Dog2.class);
         assertEquals("brown and curly", a.description());
+        assertEquals("brown and curly", a.asPet().description());
         assertEquals(DogBreed.CROSS, a.breed());
+        assertEquals(DogBreed.CROSS, a.asBreeding().breed());
         Dog2 b = Dog2 //
                 .pet(Pet.description("brown and curly")) //
                 .breeding(Breeding.builder() //
