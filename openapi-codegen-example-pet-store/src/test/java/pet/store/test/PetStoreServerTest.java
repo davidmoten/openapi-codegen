@@ -32,6 +32,6 @@ public class PetStoreServerTest {
     public void testFindPets() {
         FindPets200Response r = client().findPets(Optional.empty(), 10);
         assertEquals(1, r.value().size());
-        assertEquals("fido", r.value().get(0).newPet().name());
+        assertEquals("fido", r.value().get(0).name());
     }
 }

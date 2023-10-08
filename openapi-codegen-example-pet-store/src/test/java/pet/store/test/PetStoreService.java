@@ -40,7 +40,7 @@ public class PetStoreService implements Service {
 
     @Override
     public Pet find_pet_by_id(long id) throws ServiceException {
-        Optional<Pet> pet = pets.stream().filter(p -> p.petId().id() == id).findAny();
+        Optional<Pet> pet = pets.stream().filter(p -> p.id() == id).findAny();
         if (pet.isPresent()) {
             return pet.get();
         } else {
@@ -50,7 +50,7 @@ public class PetStoreService implements Service {
 
     @Override
     public void deletePet(long id) throws ServiceException {
-        Optional<Pet> pet = pets.stream().filter(p -> p.petId().id() == id).findAny();
+        Optional<Pet> pet = pets.stream().filter(p -> p.id() == id).findAny();
         if (pet.isPresent()) {
             pets.remove(pet.get());
         } else {
