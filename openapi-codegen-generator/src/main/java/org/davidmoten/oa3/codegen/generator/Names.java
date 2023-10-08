@@ -9,10 +9,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.internal.EnhancedOpenAPIV3Parser;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 
@@ -476,22 +478,37 @@ public final class Names {
         return x -> {
             String pkg = pkg(fullClassName);
             String simple = simpleClassName(fullClassName);
-            Set<String> set = classes.get(pkg);
+            Set<String> set = packageSimpleClassNames.get(pkg);
             return set != null && set.contains(simple);
         };
     }
     
-    private final Map<String,Set<String>> classes = new HashMap<>();
+    private final Map<String, Set<String>> packageSimpleClassNames = new HashMap<>();
+    private final Map<String, Cls> classes = new HashMap<>();
 
-    public void registerFullClassName(String fullClassName) {
+    private void registerFullClassName(String fullClassName) {
         String pkg = pkg(fullClassName);
         String simple = simpleClassName(fullClassName);
-        Set<String> set = classes.get(pkg);
+        Set<String> set = packageSimpleClassNames.get(pkg);
         if (set == null) {
             set = new HashSet<>();
-            classes.put(pkg, set);
+            packageSimpleClassNames.put(pkg, set);
         }
         set.add(simple);
+    }
+
+    public void registerCls(Cls cls) {
+        registerFullClassName(cls.fullClassName);
+        registerTree(cls);
+    }
+    
+    private void registerTree(Cls cls) {
+        classes.put(cls.fullClassName, cls);
+        cls.classes.forEach(c -> registerTree(c));
+    }
+    
+    public Optional<Cls> cls(String fullClassName) {
+        return Optional.ofNullable(classes.get(fullClassName));
     }
 
 }

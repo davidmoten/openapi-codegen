@@ -60,7 +60,7 @@ public class Generator {
             String schemaName = result.name;
             if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
                     && !definition.excludeSchemas().contains(schemaName)) {
-                names.registerFullClassName(cls.fullClassName);
+                names.registerCls(cls);
             }
         }
         

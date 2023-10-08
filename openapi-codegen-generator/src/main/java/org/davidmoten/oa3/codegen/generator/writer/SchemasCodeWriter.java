@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -123,7 +124,7 @@ public final class SchemasCodeWriter {
         writeClassDeclaration(out, cls, fullClassNameInterfaces);
         writeEnumMembers(out, cls);
         if (isPolymorphic(cls)) {
-            writePolymorphicClassContent(out, cls, names, fullClassNameInterfaces);
+            writePolymorphicClassContent(out, cls, names);
         } else {
             writeFields(out, cls);
             writeConstructor(out, cls, fullClassNameInterfaces, names);
@@ -371,8 +372,7 @@ public final class SchemasCodeWriter {
         }
     }
 
-    private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names,
-            Map<String, Set<Cls>> fullClassNameInterfaces) {
+    private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.println();
             out.line("%s %s();", String.class, cls.discriminator.fieldName);
@@ -430,7 +430,6 @@ public final class SchemasCodeWriter {
                     writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls),
                             f.fieldName(cls));
                 });
-                
             } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
                 writeFields(out, cls);
@@ -461,7 +460,30 @@ public final class SchemasCodeWriter {
                 // write allof builder
                 writeAnyOfOrAllOfBuilder(out, cls, false);
 
-                writeGetters(out, cls, fullClassNameInterfaces);
+                // write getters for allOf members
+                cls.fields.forEach(f -> {
+                    out.println();
+                    writeGetter(out, f.resolvedTypePublicConstructor(out.imports()),
+                            "as" + Names.simpleClassName(f.resolvedTypePublicConstructor(out.imports())),
+                            f.fieldName(cls));
+                });
+                
+                // write all field getters
+                Set<String> used = new HashSet<>();
+                cls.fields.forEach(field -> {
+                    Optional<Cls> c = names.cls(field.fullClassName);
+                    if (c.isPresent()) {
+                        c.get().fields.forEach(f -> {
+                            if (!used.contains(f.fieldName(cls))) {
+                                used.add(f.fieldName(cls));
+                                out.println();
+                                out.line("public %s %s() {", f.resolvedTypePublicConstructor(out.imports()), f.fieldName(c.get()));
+                                out.line("return %s.%s();", field.fieldName(cls), f.fieldName(c.get()));
+                                out.closeParen();
+                            }
+                        });
+                    }
+                });
             } 
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);

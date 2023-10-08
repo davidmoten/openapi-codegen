@@ -52,5 +52,18 @@ public class ImportsTest {
                 + "import java.net.HttpURLConnection;\n", //
                 imports.toString());
     }
+    
+    @Test
+    public void testMemberClasses() {
+        Imports imports = new Imports("a.b.Some", x -> false);
+        assertEquals("Thing.What", imports.add("a.b.Some.Thing.What"));
+    }
+    
+    @Test
+    public void testMore() {
+        Imports imports = new Imports("a.b.Some", x -> false);
+        assertEquals("List", imports.add("a.b.Some.List"));
+        assertEquals("java.util.List", imports.add("java.util.List"));
+    }
 
 }

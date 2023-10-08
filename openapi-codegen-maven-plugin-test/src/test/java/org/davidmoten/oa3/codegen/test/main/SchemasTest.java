@@ -680,8 +680,8 @@ public class SchemasTest {
     public void testAllOfWithAnonymousType() throws JsonProcessingException {
         String json = "{\"description\":\"brown and curly\",\"breed\":\"cross\"}";
         Dog a = m.readValue(json, Dog.class);
-        assertEquals("brown and curly", a.pet().description());
-        assertEquals(Breed.CROSS, a.object1().breed().get());
+        assertEquals("brown and curly", a.asPet().description());
+        assertEquals(Breed.CROSS, a.asObject1().breed().get());
         Dog b = Dog.pet(Pet.description("brown and curly")) //
                 .object1(Dog.Object1.breed(Breed.CROSS)) //
                 .build();
