@@ -123,6 +123,7 @@ Here's an example showing more configuration options:
 * Specify `format: int32` on integers to ensure you end up with `int/integer` types in generated code
 * Be sure to specify the properties that are mandatory (using `required:`)
 * Set an `operationId` field for every path entry to ensure you get sensible generated method names (in client and server)
+* always specify `mapping` and `propertyName` fields for discriminated `oneOf`
 
 ## Generated code examples
 Some examples follow. Note the following:
