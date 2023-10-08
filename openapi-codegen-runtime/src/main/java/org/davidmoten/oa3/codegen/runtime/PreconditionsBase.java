@@ -163,7 +163,9 @@ public final class PreconditionsBase {
     public void checkMinLength(Optional<?> s, int minLength, String name) {
         if (s.isPresent()) {
             if (s.get() instanceof Collection) {
-                checkMaxLength((Collection<String>) s.get(), minLength, name);
+                checkMinLength((Collection<String>) s.get(), minLength, name);
+            } else if (s.get() instanceof byte[]) {
+                checkMinLength((byte[]) s.get(), minLength, name);  
             } else {
                 checkMinLength((String) s.get(), minLength, name);
             }
@@ -174,7 +176,9 @@ public final class PreconditionsBase {
     public void checkMinLength(JsonNullable<?> s, int minLength, String name) {
         if (hasValue(s)) {
             if (s.get() instanceof Collection) {
-                checkMaxLength((Collection<String>) s.get(), minLength, name);
+                checkMinLength((Collection<String>) s.get(), minLength, name);
+            } else if (s.get() instanceof byte[]) {
+                checkMinLength((byte[]) s.get(), minLength, name);   
             } else {
                 checkMinLength((String) s.get(), minLength, name);
             }
@@ -204,6 +208,12 @@ public final class PreconditionsBase {
                 .findAny() //
                 .isPresent()) {
             throw factory.apply(name + " elements must have a length of at least " + minLength);
+        }
+    }
+    
+    public void checkMinLength(byte[] bytes, int minLength, String name) {
+        if (bytes != null && bytes.length < minLength) {
+            throw factory.apply(name + " must have a length of at least " + minLength);
         }
     }
 
@@ -248,6 +258,8 @@ public final class PreconditionsBase {
         if (s.isPresent()) {
             if (s.get() instanceof Collection) {
                 checkMaxLength((Collection<String>) s.get(), maxLength, name);
+            } else if (s.get() instanceof byte[]) {
+                checkMaxLength((byte[]) s.get(), maxLength, name);
             } else {
                 checkMaxLength((String) s.get(), maxLength, name);
             }
@@ -259,9 +271,17 @@ public final class PreconditionsBase {
         if (hasValue(s)) {
             if (s.get() instanceof Collection) {
                 checkMaxLength((Collection<String>) s.get(), maxLength, name);
+            } else if (s.get() instanceof byte[]) {
+                checkMaxLength((byte[]) s.get(), maxLength, name);
             } else {
                 checkMaxLength((String) s.get(), maxLength, name);
             }
+        }
+    }
+    
+    public void checkMaxLength(byte[] bytes, int maxLength, String name) {
+        if (bytes != null && bytes.length > maxLength) {
+            throw factory.apply(name + " must have a length of at most " + maxLength);
         }
     }
 
@@ -368,4 +388,5 @@ public final class PreconditionsBase {
     private static boolean hasValue(JsonNullable<?> x) {
         return x.isPresent() && x.get() != null;
     }
+
 }

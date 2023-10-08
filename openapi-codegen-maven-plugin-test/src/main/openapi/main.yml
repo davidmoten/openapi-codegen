@@ -2128,6 +2128,13 @@ components:
         nullable: true
         minLength: 2
         maxLength: 4
+        
+    BinaryConstraints:
+      type: string
+      format: binary
+      minLength: 2
+      maxLength: 2
+              
     
 
       

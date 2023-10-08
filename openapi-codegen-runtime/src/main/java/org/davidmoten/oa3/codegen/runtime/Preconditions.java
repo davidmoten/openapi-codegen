@@ -80,16 +80,20 @@ public final class Preconditions {
     public static void checkMinLength(String s, int minLength, String name) {
         p.checkMinLength(s, minLength, name);
     }
+    
+    public static void checkMinLength(byte[] bytes, int minLength, String name) {
+        p.checkMinLength(bytes, minLength, name);
+    }
 
     public static  void checkMinLength(Collection<?> list, int minLength, String name) {
         p.checkMinLength(list, minLength, name);
     }
 
-    public static void checkMinLength(Optional<String> s, int minLength, String name) {
+    public static void checkMinLength(Optional<?> s, int minLength, String name) {
         p.checkMinLength(s, minLength, name);
     }
 
-    public static void checkMinLength(JsonNullable<String> s, int minLength, String name) {
+    public static void checkMinLength(JsonNullable<?> s, int minLength, String name) {
         p.checkMinLength(s, minLength, name);
     }
 
@@ -101,14 +105,18 @@ public final class Preconditions {
         p.checkMaxLength(list, maxLength, name);
     }
 
-    public static void checkMaxLength(Optional<String> s, int maxLength, String name) {
+    public static void checkMaxLength(Optional<?> s, int maxLength, String name) {
         p.checkMaxLength(s, maxLength, name);
     }
 
-    public static void checkMaxLength(JsonNullable<String> s, int maxLength, String name) {
+    public static void checkMaxLength(JsonNullable<?> s, int maxLength, String name) {
         p.checkMaxLength(s, maxLength, name);
     }
 
+    public static void checkMaxLength(byte[] s, int maxLength, String name) {
+        p.checkMaxLength(s, maxLength, name);
+    }
+    
     public static void checkMinSize(Collection<?> collection, int min, String name) {
         p.checkMinSize(collection, min, name);
     }
