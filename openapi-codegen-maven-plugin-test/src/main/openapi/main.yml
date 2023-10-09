@@ -1608,7 +1608,7 @@ components:
           type: string
       required: [description]
             
-    AllOfArray:
+    AllOfAllOf:
       allOf:
       - type: object
         properties:
@@ -1617,6 +1617,16 @@ components:
             items:
               $ref: '#/components/schemas/Pet'
       - $ref: '#/components/schemas/Dog'
+      
+    AllOfAnyOf:
+      allOf:
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/Geometry'      
             
     Dog:
       allOf:

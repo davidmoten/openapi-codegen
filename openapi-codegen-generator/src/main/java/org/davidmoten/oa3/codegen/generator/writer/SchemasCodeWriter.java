@@ -474,24 +474,30 @@ public final class SchemasCodeWriter {
                     Optional<Cls> c = names.cls(field.fullClassName);
                     if (c.isPresent()) {
                         c.get().fields.forEach(f -> {
-                            if (!used.contains(f.fieldName(cls))) {
-                                used.add(f.fieldName(cls));
+                            String fieldName = f.fieldName(c.get());
+                            if (!used.contains(fieldName)) {
+                                used.add(fieldName);
                                 out.println();
                                 String type = f.resolvedTypePublicConstructor(out.imports());
-                                StringBuilder b = new StringBuilder();
-                                b.append(type);
-                                if (f.fullClassName.startsWith(field.fullClassName)) {
-                                    int i = type.lastIndexOf("<");
-                                    if (i != -1) {
-                                        b.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
+                                StringBuilder adjustedType = new StringBuilder();
+                                if (c.get().classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
+                                    adjustedType.append(out.add(Objects.class));
+                                } else {
+                                    adjustedType.append(type);
+                                    if (f.fullClassName.startsWith(field.fullClassName)) {
+                                        int i = type.lastIndexOf("<");
+                                        if (i != -1) {
+                                            adjustedType.insert(i + 1,
+                                                    Names.simpleClassName(field.fullClassName) + ".");
+                                        }
                                     }
                                 }
-                                out.line("public %s %s() {", b, f.fieldName(c.get()));
+                                out.line("public %s %s() {", adjustedType, fieldName);
                                 final String getter;
                                 if (c.get().classType == ClassType.ALL_OF) {
-                                    getter = "as" + Names.upperFirst(f.fieldName(c.get()));
+                                    getter = "as" + Names.upperFirst(fieldName);
                                 } else {
-                                    getter = f.fieldName(c.get());
+                                    getter = fieldName;
                                 }
                                 out.line("return %s.%s();", field.fieldName(cls), getter);
                                 out.closeParen();
