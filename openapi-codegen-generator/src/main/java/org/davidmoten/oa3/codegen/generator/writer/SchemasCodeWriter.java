@@ -487,7 +487,13 @@ public final class SchemasCodeWriter {
                                     }
                                 }
                                 out.line("public %s %s() {", b, f.fieldName(c.get()));
-                                out.line("return %s.%s();", field.fieldName(cls), f.fieldName(c.get()));
+                                final String getter;
+                                if (c.get().classType == ClassType.ALL_OF) {
+                                    getter = "as" + Names.upperFirst(f.fieldName(c.get()));
+                                } else {
+                                    getter = f.fieldName(c.get());
+                                }
+                                out.line("return %s.%s();", field.fieldName(cls), getter);
                                 out.closeParen();
                             }
                         });

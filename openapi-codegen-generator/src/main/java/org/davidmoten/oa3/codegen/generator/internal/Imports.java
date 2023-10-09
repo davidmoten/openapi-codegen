@@ -37,12 +37,7 @@ public final class Imports {
         String pp = packagePrefix(fullClassName);
         if (c == null && (basePackagePrefix.equals(pp)
                 || !simpleNameInPackage.test(packagePrefix(fullClassName) + simpleName))) {
-            if (!className.equals(fullClassName) && className.startsWith(fullClassName + ".")) {
-                map.put(simpleName, className);
-                return className.substring(fullClassName.length() + 1);
-            } else {
-                map.put(simpleName, className);
-            }
+            map.put(simpleName, className);
             return simpleName;
         } else if (c != null && c.equals(className)) {
             return simpleName;

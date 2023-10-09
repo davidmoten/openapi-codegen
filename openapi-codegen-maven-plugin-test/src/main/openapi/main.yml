@@ -1607,7 +1607,17 @@ components:
         description: 
           type: string
       required: [description]
-              
+            
+    AllOfArray:
+      allOf:
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/Dog'
+            
     Dog:
       allOf:
       - $ref: '#/components/schemas/Pet'

@@ -56,7 +56,7 @@ public class ImportsTest {
     @Test
     public void testMemberClasses() {
         Imports imports = new Imports("a.b.Some", x -> false);
-        assertEquals("Thing.What", imports.add("a.b.Some.Thing.What"));
+        assertEquals("What", imports.add("a.b.Some.Thing.What"));
     }
     
     @Test
