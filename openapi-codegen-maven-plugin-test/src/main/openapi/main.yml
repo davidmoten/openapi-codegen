@@ -1626,8 +1626,23 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Pet'
-      - $ref: '#/components/schemas/Geometry'      
+      - $ref: '#/components/schemas/Geometry'  
+
+    AllOfAnyOf:
+      allOf:
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/AnyOfThing'
             
+    AnyOfThing:
+      anyOf: 
+      - $ref: '#/components/schemas/Dog'
+      - $ref: '#/components/schemas/EnumProperty'
+      
     Dog:
       allOf:
       - $ref: '#/components/schemas/Pet'
