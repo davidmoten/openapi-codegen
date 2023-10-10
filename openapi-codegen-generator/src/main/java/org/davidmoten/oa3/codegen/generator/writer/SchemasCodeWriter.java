@@ -472,7 +472,7 @@ public final class SchemasCodeWriter {
                 Set<String> used = new HashSet<>();
                 cls.fields.forEach(field -> {
                     Optional<Cls> c = names.cls(field.fullClassName);
-                    if (c.isPresent()) {
+                    if (c.isPresent() && c.get().classType != ClassType.ONE_OF_NON_DISCRIMINATED) {
                         c.get().fields.forEach(f -> {
                             String fieldName = f.fieldName(c.get());
                             if (!used.contains(fieldName)) {
@@ -480,16 +480,11 @@ public final class SchemasCodeWriter {
                                 out.println();
                                 String type = f.resolvedTypePublicConstructor(out.imports());
                                 StringBuilder adjustedType = new StringBuilder();
-                                if (c.get().classType == ClassType.ONE_OF_NON_DISCRIMINATED) {
-                                    adjustedType.append(out.add(Object.class));
-                                } else {
-                                    adjustedType.append(type);
-                                    if (f.fullClassName.startsWith(field.fullClassName)) {
-                                        int i = type.lastIndexOf("<");
-                                        if (i != -1) {
-                                            adjustedType.insert(i + 1,
-                                                    Names.simpleClassName(field.fullClassName) + ".");
-                                        }
+                                adjustedType.append(type);
+                                if (f.fullClassName.startsWith(field.fullClassName)) {
+                                    int i = type.lastIndexOf("<");
+                                    if (i != -1) {
+                                        adjustedType.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
                                     }
                                 }
                                 out.line("public %s %s() {", adjustedType, fieldName);
