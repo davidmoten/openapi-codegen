@@ -33,7 +33,7 @@ public class ImportsTest {
     @Test
     public void testNameClashWithClassInSamePackage() {
         Imports imports = new Imports("fred.Something", x -> true);
-        assertEquals("Else", imports.add("anne.Else"));
+        assertEquals("anne.Else", imports.add("anne.Else"));
     }
 
     @Test
@@ -56,7 +56,19 @@ public class ImportsTest {
     @Test
     public void testMemberClasses() {
         Imports imports = new Imports("a.b.Some", x -> false);
-        assertEquals("What", imports.add("a.b.Some.Thing.What"));
+        assertEquals("Thing.What", imports.add("a.b.Some.Thing.What"));
+    }
+    
+    @Test
+    public void testSamePackage() {
+        Imports imports = new Imports("a.b.Some", x -> false);
+        assertEquals("Thing", imports.add("a.b.Thing"));
+    }
+    
+    @Test
+    public void testAlreadyPresentInSamePackage() {
+        Imports imports = new Imports("a.b.Some", x -> true);
+        assertEquals("a.b.Some.Thing", imports.add("a.b.Some.Thing"));
     }
     
     @Test

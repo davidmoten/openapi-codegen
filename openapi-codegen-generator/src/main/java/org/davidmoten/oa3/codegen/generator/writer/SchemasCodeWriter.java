@@ -481,12 +481,12 @@ public final class SchemasCodeWriter {
                                 String type = f.resolvedTypePublicConstructor(out.imports());
                                 StringBuilder adjustedType = new StringBuilder();
                                 adjustedType.append(type);
-                                if (f.fullClassName.startsWith(field.fullClassName)) {
-                                    int i = type.lastIndexOf("<");
-                                    if (i != -1) {
-                                        adjustedType.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
-                                    }
-                                }
+//                                if (f.fullClassName.startsWith(field.fullClassName)) {
+//                                    int i = type.lastIndexOf("<");
+//                                    if (i != -1) {
+//                                        adjustedType.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
+//                                    }
+//                                }
                                 out.line("public %s %s() {", adjustedType, fieldName);
                                 final String getter;
                                 if (c.get().classType == ClassType.ALL_OF) {
