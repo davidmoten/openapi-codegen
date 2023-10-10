@@ -480,8 +480,8 @@ public final class SchemasCodeWriter {
                                 out.println();
                                 String type = f.resolvedTypePublicConstructor(out.imports());
                                 StringBuilder adjustedType = new StringBuilder();
-                                if (c.get().classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
-                                    adjustedType.append(out.add(Objects.class));
+                                if (c.get().classType == ClassType.ONE_OF_NON_DISCRIMINATED) {
+                                    adjustedType.append(out.add(Object.class));
                                 } else {
                                     adjustedType.append(type);
                                     if (f.fullClassName.startsWith(field.fullClassName)) {

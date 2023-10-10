@@ -1618,7 +1618,7 @@ components:
               $ref: '#/components/schemas/Pet'
       - $ref: '#/components/schemas/Dog'
       
-    AllOfAnyOf:
+    AllOfOneOf:
       allOf:
       - type: object
         properties:
