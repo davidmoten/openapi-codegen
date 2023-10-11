@@ -217,14 +217,14 @@ class Apis {
     static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Map<String, Encoding> propertyEncoding, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
         visitor.startSchema(category, schemaPath);
-        if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getAnyOf() != null) {
-            if (schema.getProperties() != null || schema.getAdditionalProperties() != null) {
-                schema.setProperties(null);
-                schema.setAdditionalProperties(null);
-                System.out.println("[WARN] anyOf with properties not supported yet");
-            }
-        }
-        if (schema instanceof ObjectSchema && schema.getProperties() == null
+        if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getAnyOf() != null
+                && (schema.getProperties() != null || schema.getAdditionalProperties() != null
+                        || schema.getAdditionalItems() != null)) {
+            schema.setProperties(null);
+            schema.setAdditionalProperties(null);
+            schema.setAdditionalItems(null);
+            System.out.println("[WARN] anyOf with extra properties not supported yet, extra properties stripped");
+        } else if (schema instanceof ObjectSchema && schema.getProperties() == null
                 && schema.getAdditionalProperties() == null) {
             schema.setAdditionalProperties(Boolean.TRUE);
         }
