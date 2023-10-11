@@ -37,22 +37,13 @@ public final class Imports {
         if (className.equals(fullClassName)) {
             return simpleName;
         } else if (c == null && !simpleName.equals(simpleName(fullClassName)) && (!basePackagePrefix.equals(pp) //
-                || !simpleNameInPackage.test(packagePrefix(fullClassName) + firstPart(simpleName)))) {
+                || !simpleNameInPackage.test(packagePrefix(fullClassName) + firstSegment(simpleName)))) {
             map.put(simpleName, className);
             return simpleName;
         } else if (c != null && c.equals(className)) {
             return simpleName;
         } else {
             return className;
-        }
-    }
-
-    private static String firstPart(String s) {
-        int i = s.indexOf(".");
-        if (i == -1) {
-            return s;
-        } else {
-            return s.substring(0, i);
         }
     }
 
@@ -68,7 +59,7 @@ public final class Imports {
     private static String simpleName(String baseClassName, String className) {
         if(className.equals(baseClassName)) {
             return simpleName(className);
-        } else if (className.startsWith(baseClassName)){
+        } else if (className.startsWith(baseClassName + ".")){
             return className.substring(baseClassName.length() + 1);
         } else {
             return simpleName(className);

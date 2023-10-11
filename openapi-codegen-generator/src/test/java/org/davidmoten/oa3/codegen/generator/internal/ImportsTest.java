@@ -86,5 +86,11 @@ public class ImportsTest {
         assertEquals("java.lang.String", imports.add("java.lang.String"));
         assertEquals("java.lang.String", imports.add("java.lang.String"));
     }
+    
+    @Test
+    public void testMore2() {
+        Imports imports = new Imports("a.Thing", x -> false);
+        assertEquals("ThingMore", imports.add("a.ThingMore"));
+    }
 
 }

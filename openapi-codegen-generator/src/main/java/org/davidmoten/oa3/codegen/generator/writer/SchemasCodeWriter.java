@@ -473,21 +473,16 @@ public final class SchemasCodeWriter {
                 cls.fields.forEach(field -> {
                     Optional<Cls> c = names.cls(field.fullClassName);
                     if (c.isPresent() && c.get().classType != ClassType.ONE_OF_NON_DISCRIMINATED) {
-                        c.get().fields.forEach(f -> {
+                        c.get().fields //
+                        .stream() //
+                        .filter(f -> !f.mapType.isPresent()) //
+                        .forEach(f -> {
                             String fieldName = f.fieldName(c.get());
                             if (!used.contains(fieldName)) {
                                 used.add(fieldName);
-                                out.println();
                                 String type = f.resolvedTypePublicConstructor(out.imports());
-                                StringBuilder adjustedType = new StringBuilder();
-                                adjustedType.append(type);
-//                                if (f.fullClassName.startsWith(field.fullClassName)) {
-//                                    int i = type.lastIndexOf("<");
-//                                    if (i != -1) {
-//                                        adjustedType.insert(i + 1, Names.simpleClassName(field.fullClassName) + ".");
-//                                    }
-//                                }
-                                out.line("public %s %s() {", adjustedType, fieldName);
+                                out.println();
+                                out.line("public %s %s() {", type, fieldName);
                                 final String getter;
                                 if (c.get().classType == ClassType.ALL_OF) {
                                     getter = "as" + Names.upperFirst(fieldName);

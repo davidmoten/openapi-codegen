@@ -1637,6 +1637,17 @@ components:
             items:
               $ref: '#/components/schemas/Pet'
       - $ref: '#/components/schemas/AnyOfThing'
+      
+    AllOfAnyOfAdditionalProperties:
+      allOf:
+      - type: object
+        additionalProperties: true
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/AnyOfThing'      
             
     AnyOfThing:
       anyOf: 
