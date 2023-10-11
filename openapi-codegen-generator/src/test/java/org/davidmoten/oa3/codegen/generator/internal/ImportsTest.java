@@ -79,5 +79,12 @@ public class ImportsTest {
         assertEquals("List", imports.add("a.b.Some.List"));
         assertEquals("java.util.List", imports.add("java.util.List"));
     }
+    
+    @Test
+    public void testFieldSameTypeNameAsSurroundingClass() {
+        Imports imports = new Imports("a.String", x -> false);
+        assertEquals("java.lang.String", imports.add("java.lang.String"));
+        assertEquals("java.lang.String", imports.add("java.lang.String"));
+    }
 
 }

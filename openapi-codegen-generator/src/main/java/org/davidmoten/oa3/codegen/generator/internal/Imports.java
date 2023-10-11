@@ -34,7 +34,9 @@ public final class Imports {
         String c = map.get(simpleName);
 
         String pp = packagePrefix(className);
-        if (c == null && (!basePackagePrefix.equals(pp) //
+        if (className.equals(fullClassName)) {
+            return simpleName;
+        } else if (c == null && !simpleName.equals(simpleName(fullClassName)) && (!basePackagePrefix.equals(pp) //
                 || !simpleNameInPackage.test(packagePrefix(fullClassName) + firstPart(simpleName)))) {
             map.put(simpleName, className);
             return simpleName;
