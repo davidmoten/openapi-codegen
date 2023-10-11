@@ -1783,7 +1783,15 @@ components:
       additionalProperties:
         type: object
         additionalProperties:
-          type: string                           
+          type: string            
+          
+    AdditionalProperties2:
+      type: object
+      properties:
+        additionalData:
+          additionalProperties: true
+          anyOf:
+            - $ref: "#/components/schemas/Pet"
       
     UntypedObject:
       type: object

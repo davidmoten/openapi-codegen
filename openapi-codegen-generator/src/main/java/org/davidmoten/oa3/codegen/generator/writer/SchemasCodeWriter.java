@@ -616,7 +616,7 @@ public final class SchemasCodeWriter {
             } else {
                 fieldType = f.resolvedTypeNullable(out.imports());
             }
-            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED && !f.nullable) {
+            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED && !f.nullable && !f.mapType.isPresent()) {
                 out.line("private final %s<%s> %s;", Optional.class, fieldType, cls.fieldName(f));
             } else {
                 out.line("private final %s %s;", fieldType, cls.fieldName(f));
