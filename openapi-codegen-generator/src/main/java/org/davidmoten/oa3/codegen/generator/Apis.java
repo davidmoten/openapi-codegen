@@ -217,7 +217,7 @@ class Apis {
     static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Map<String, Encoding> propertyEncoding, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
         visitor.startSchema(category, schemaPath);
-        System.out.println(schemaPath + " " + schema.getClass());
+//        System.out.println(schemaPath + " " + schema.getClass());
         if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getAnyOf() != null
                 && (schema.getProperties() != null || schema.getAdditionalProperties() != null
                         || schema.getAdditionalItems() != null)) {
