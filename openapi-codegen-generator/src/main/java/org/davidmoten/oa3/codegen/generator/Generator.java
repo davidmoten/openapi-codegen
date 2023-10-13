@@ -597,7 +597,7 @@ public class Generator {
                 Cls current = stack.peek();
                 final String fullClassName;
                 if (Util.isPrimitive(schema)) {
-                    Class<?> c = Util.toClass(getType(schema), schema.getFormat(), schema.getExtensions(),
+                    Class<?> c = Util.toClass(Util.getTypeOrThrow(schema), schema.getFormat(), schema.getExtensions(),
                             names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
                     fullClassName = c.getCanonicalName();
                     final Optional<Integer> minLength;
@@ -711,7 +711,7 @@ public class Generator {
     }
 
     private static boolean isString(Schema<?> schema) {
-        return "string".equals(getType(schema));
+        return "string".equals(Util.getType(schema).orElse("object"));
     }
 
     private static boolean fieldIsRequired(ImmutableList<SchemaWithName> schemaPath) {
@@ -739,7 +739,7 @@ public class Generator {
     }
 
     private static boolean allNulls(Schema<?> s) {
-        return s.getClass().equals(Schema.class) && s.getType() == null && (s.getTypes() == null || s.getType().isEmpty()) && s.getProperties() == null
+        return s.getClass().equals(Schema.class) && !Util.getType(s).isPresent() && s.getProperties() == null
                 && s.getAdditionalProperties() == null && s.get$ref() == null && s.getAdditionalItems() == null;
     }
 
@@ -821,7 +821,7 @@ public class Generator {
             cls.schema = Optional.of(schema);
         }
         
-        Class<?> valueCls = Util.toClass(getType(schema), schema.getFormat(), schema.getExtensions(),
+        Class<?> valueCls = Util.toClass(Util.getTypeOrThrow(schema), schema.getFormat(), schema.getExtensions(),
                 names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
         cls.enumValueFullType = valueCls.getCanonicalName();
         Map<String, String> map = Names.getEnumValueToIdentifierMap(schema.getEnum());
@@ -845,18 +845,6 @@ public class Generator {
         boolean required = fieldIsRequired(schemaPath);
         previous.ifPresent(p -> p.addField(cls.fullClassName, schemaPath.last().name, fieldName.get(), required,
                 isArray, mapType(schemaPath), isNullable(schema)));
-    }
-
-    private static String getType(Schema<?> schema) {
-        if (schema.getType() == null) {
-            if (schema.getTypes()!= null && !schema.getTypes().isEmpty()) {
-                return schema.getTypes().iterator().next();
-            } else {
-                throw new IllegalStateException("no type found for\n" + schema);
-            }
-        } else {
-            return schema.getType();
-        }
     }
 
     private static <T> boolean contains(Collection<? extends T> collection, T t) {

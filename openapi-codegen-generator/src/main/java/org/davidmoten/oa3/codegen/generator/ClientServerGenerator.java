@@ -131,7 +131,7 @@ public class ClientServerGenerator {
                         final Param param;
                         if (Util.isPrimitive(s)) {
                             // handle simple schemas
-                            Class<?> c = Util.toClass(s.getType(), s.getFormat(), s.getExtensions(),
+                            Class<?> c = Util.toClass(Util.getTypeOrThrow(s), s.getFormat(), s.getExtensions(),
                                     names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
                             param = new Param(p.getName(), parameterName, defaultValue, p.getRequired(),
                                     c.getCanonicalName(), isArray, false, constraints(s), toParamType(p), false,
@@ -382,7 +382,11 @@ public class ClientServerGenerator {
         Schema<?> s = schema;
         while (s.get$ref() != null) {
             String ref = s.get$ref();
-            s = refCls.get(ref).schema.get();
+            Cls c = refCls.get(ref);
+            if (c == null) {
+                throw new IllegalArgumentException("Cls not found for schema=\n" + schema + "\nrefCls map keys=\n" + refCls.keySet());
+            }
+            s = c.schema.get();
             if (s == null) {
                 throw new IllegalArgumentException("$ref not found: " + ref);
             }

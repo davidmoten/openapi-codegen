@@ -86,6 +86,9 @@ public final class SchemasCodeWriter {
             return;
         }
         CodePrintWriter out = CodePrintWriter.create(cls.fullClassName, names.simpleNameInPackage(cls.fullClassName));
+        if (cls.fullClassName.equals("test.schema.StoredValueBalanceMergeRequest")) {
+            System.out.println("here");
+        }
         SchemasCodeWriter.writeClass(out, cls, fullClassNameInterfaces, names);
         WriterUtil.writeContent(names, out);
     }
