@@ -28,7 +28,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
 public final class UploadPostRequestMultipartFormData {
 
     @JsonProperty("point")
@@ -157,14 +157,14 @@ public final class UploadPostRequestMultipartFormData {
     public static final class Document implements HasEncoding {
 
         @JsonProperty("contentType")
-        private final ContentType contentType;
+        private final Document.ContentType contentType;
 
         @JsonProperty("value")
         private final String value;
 
         @JsonCreator
         private Document(
-                @JsonProperty("contentType") ContentType contentType,
+                @JsonProperty("contentType") Document.ContentType contentType,
                 @JsonProperty("value") String value) {
             this.contentType = contentType;
             this.value = value;
@@ -172,7 +172,7 @@ public final class UploadPostRequestMultipartFormData {
 
         @ConstructorBinding
         public Document(
-                ContentType contentType,
+                Document.ContentType contentType,
                 byte[] value) {
             if (Globals.config().validateInConstructor().test(Document.class)) {
                 Preconditions.checkNotNull(contentType, "contentType");
@@ -188,13 +188,13 @@ public final class UploadPostRequestMultipartFormData {
 
         public static final class Builder {
 
-            private ContentType contentType;
+            private Document.ContentType contentType;
             private byte[] value;
 
             Builder() {
             }
 
-            public BuilderWithContentType contentType(ContentType contentType) {
+            public BuilderWithContentType contentType(Document.ContentType contentType) {
                 this.contentType = contentType;
                 return new BuilderWithContentType(this);
             }
@@ -227,11 +227,11 @@ public final class UploadPostRequestMultipartFormData {
             }
         }
 
-        public static BuilderWithContentType contentType(ContentType contentType) {
+        public static BuilderWithContentType contentType(Document.ContentType contentType) {
             return builder().contentType(contentType);
         }
 
-        public ContentType contentType() {
+        public Document.ContentType contentType() {
             return contentType;
         }
 
@@ -246,7 +246,7 @@ public final class UploadPostRequestMultipartFormData {
                     .build();
         }
 
-        public Document withContentType(ContentType contentType) {
+        public Document withContentType(Document.ContentType contentType) {
             return new Document(contentType, Util.decodeOctets(value));
         }
 
@@ -268,12 +268,6 @@ public final class UploadPostRequestMultipartFormData {
 
             public String value() {
                 return value;
-            }
-
-            Map<String, Object> _internal_properties() {
-                return Maps
-                        .put("value", (Object) value)
-                        .build();
             }
 
             @JsonCreator

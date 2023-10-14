@@ -27,7 +27,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
 public final class PetByType {
 
     @JsonProperty("pet_type")
@@ -143,12 +143,6 @@ public final class PetByType {
 
         public String value() {
             return value;
-        }
-
-        Map<String, Object> _internal_properties() {
-            return Maps
-                    .put("value", (Object) value)
-                    .build();
         }
 
         @JsonCreator

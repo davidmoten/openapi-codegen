@@ -16,49 +16,40 @@ import java.lang.String;
 import java.util.Map;
 import java.util.Objects;
 
-import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
+import org.davidmoten.oa3.codegen.runtime.Preconditions;
+import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
 @Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
-public final class Car implements org.davidmoten.oa3.codegen.test.main.schema.HasWheels, org.davidmoten.oa3.codegen.test.main.schema.Vehicle {
+public final class Pet3 {
 
-    @JsonProperty("vehicleType")
-    private final String vehicleType;
-
-    @JsonProperty("wheelsType")
-    private final String wheelsType;
+    @JsonProperty("pet_type")
+    private final String pet_type;
 
     @JsonCreator
-    private Car(
-            @JsonProperty("vehicleType") String vehicleType,
-            @JsonProperty("wheelsType") String wheelsType) {
-        this.vehicleType = vehicleType;
-        this.wheelsType = wheelsType;
-    }
-
     @ConstructorBinding
-    public Car() {
-        this.vehicleType = DiscriminatorHelper.value(String.class, "car");
-        this.wheelsType = DiscriminatorHelper.value(String.class, "four");
+    public Pet3(
+            @JsonProperty("pet_type") String pet_type) {
+        if (Globals.config().validateInConstructor().test(Pet3.class)) {
+            Preconditions.checkNotNull(pet_type, "pet_type");
+        }
+        this.pet_type = pet_type;
     }
 
-    @Override
-    public String vehicleType() {
-        return DiscriminatorHelper.value(vehicleType);
+    public static Pet3 pet_type(String pet_type) {
+        return new Pet3(pet_type);
     }
 
-    @Override
-    public String wheelsType() {
-        return DiscriminatorHelper.value(wheelsType);
+    public String pet_type() {
+        return pet_type;
     }
 
     Map<String, Object> _internal_properties() {
         return Maps
-                .put("vehicleType", (Object) vehicleType)
-                .put("wheelsType", (Object) wheelsType)
+                .put("pet_type", (Object) pet_type)
                 .build();
     }
 
@@ -70,19 +61,18 @@ public final class Car implements org.davidmoten.oa3.codegen.test.main.schema.Ha
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Car other = (Car) o;
+        Pet3 other = (Pet3) o;
         return 
-            Objects.equals(this.vehicleType, other.vehicleType) && 
-            Objects.equals(this.wheelsType, other.wheelsType);
+            Objects.equals(this.pet_type, other.pet_type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vehicleType, wheelsType);
+        return Objects.hash(pet_type);
     }
 
     @Override
     public String toString() {
-        return Util.toString(Car.class, "vehicleType", vehicleType, "wheelsType", wheelsType);
+        return Util.toString(Pet3.class, "pet_type", pet_type);
     }
 }

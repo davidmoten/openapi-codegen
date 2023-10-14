@@ -12,9 +12,9 @@ import java.lang.String;
 
 @JsonTypeInfo(use = Id.NAME, property = "vehicleType", include = As.EXISTING_PROPERTY, visible = true)
 @JsonSubTypes({
-        @Type(value = Car.class, name = "car"), 
-        @Type(value = Bike.class, name = "bike")})
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
+        @Type(value = org.davidmoten.oa3.codegen.test.main.schema.Car.class, name = "car"), 
+        @Type(value = org.davidmoten.oa3.codegen.test.main.schema.Bike.class, name = "bike")})
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
 public interface Vehicle {
 
     String vehicleType();

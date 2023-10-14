@@ -23,14 +23,14 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
 public final class Circle {
 
     @JsonProperty("lat")
-    private final Latitude lat;
+    private final org.davidmoten.oa3.codegen.test.main.schema.Latitude lat;
 
     @JsonProperty("lon")
-    private final Longitude lon;
+    private final org.davidmoten.oa3.codegen.test.main.schema.Longitude lon;
 
     @JsonProperty("radiusNm")
     private final float radiusNm;
@@ -38,8 +38,8 @@ public final class Circle {
     @JsonCreator
     @ConstructorBinding
     public Circle(
-            @JsonProperty("lat") Latitude lat,
-            @JsonProperty("lon") Longitude lon,
+            @JsonProperty("lat") org.davidmoten.oa3.codegen.test.main.schema.Latitude lat,
+            @JsonProperty("lon") org.davidmoten.oa3.codegen.test.main.schema.Longitude lon,
             @JsonProperty("radiusNm") float radiusNm) {
         if (Globals.config().validateInConstructor().test(Circle.class)) {
             Preconditions.checkNotNull(lat, "lat");
@@ -57,14 +57,14 @@ public final class Circle {
 
     public static final class Builder {
 
-        private Latitude lat;
-        private Longitude lon;
+        private org.davidmoten.oa3.codegen.test.main.schema.Latitude lat;
+        private org.davidmoten.oa3.codegen.test.main.schema.Longitude lon;
         private float radiusNm;
 
         Builder() {
         }
 
-        public BuilderWithLat lat(Latitude lat) {
+        public BuilderWithLat lat(org.davidmoten.oa3.codegen.test.main.schema.Latitude lat) {
             this.lat = lat;
             return new BuilderWithLat(this);
         }
@@ -78,7 +78,7 @@ public final class Circle {
             this.b = b;
         }
 
-        public BuilderWithLon lon(Longitude lon) {
+        public BuilderWithLon lon(org.davidmoten.oa3.codegen.test.main.schema.Longitude lon) {
             this.b.lon = lon;
             return new BuilderWithLon(this.b);
         }
@@ -111,15 +111,15 @@ public final class Circle {
         }
     }
 
-    public static BuilderWithLat lat(Latitude lat) {
+    public static BuilderWithLat lat(org.davidmoten.oa3.codegen.test.main.schema.Latitude lat) {
         return builder().lat(lat);
     }
 
-    public Latitude lat() {
+    public org.davidmoten.oa3.codegen.test.main.schema.Latitude lat() {
         return lat;
     }
 
-    public Longitude lon() {
+    public org.davidmoten.oa3.codegen.test.main.schema.Longitude lon() {
         return lon;
     }
 
@@ -135,11 +135,11 @@ public final class Circle {
                 .build();
     }
 
-    public Circle withLat(Latitude lat) {
+    public Circle withLat(org.davidmoten.oa3.codegen.test.main.schema.Latitude lat) {
         return new Circle(lat, lon, radiusNm);
     }
 
-    public Circle withLon(Longitude lon) {
+    public Circle withLon(org.davidmoten.oa3.codegen.test.main.schema.Longitude lon) {
         return new Circle(lat, lon, radiusNm);
     }
 

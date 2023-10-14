@@ -12,6 +12,7 @@ import jakarta.annotation.Generated;
 
 import java.lang.Object;
 import java.lang.Override;
+import java.lang.String;
 import java.lang.SuppressWarnings;
 import java.util.Objects;
 
@@ -21,10 +22,10 @@ import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
 
-@JsonDeserialize(using = Geometry.Deserializer.class)
+@JsonDeserialize(using = Geometry._Deserializer.class)
 @JsonInclude(Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.8-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
 public final class Geometry {
 
     @JsonValue
@@ -35,17 +36,17 @@ public final class Geometry {
         this.value = Preconditions.checkNotNull(value, "value");
     }
 
-    public Geometry(Rectangle value) {
+    public Geometry(org.davidmoten.oa3.codegen.test.main.schema.Rectangle value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
 
-    public Geometry(Circle value) {
+    public Geometry(org.davidmoten.oa3.codegen.test.main.schema.Circle value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
-    public static Geometry of(Rectangle value) {
+    public static Geometry of(org.davidmoten.oa3.codegen.test.main.schema.Rectangle value) {
         return new Geometry(value);
     }
-    public static Geometry of(Circle value) {
+    public static Geometry of(org.davidmoten.oa3.codegen.test.main.schema.Circle value) {
         return new Geometry(value);
     }
 
@@ -54,10 +55,10 @@ public final class Geometry {
     }
 
     @SuppressWarnings("serial")
-    public static final class Deserializer extends PolymorphicDeserializer<Geometry> {
+    public static final class _Deserializer extends PolymorphicDeserializer<Geometry> {
 
-        public Deserializer() {
-            super(Globals.config(), PolymorphicType.ONE_OF, Geometry.class, Rectangle.class, Circle.class);
+        public _Deserializer() {
+            super(Globals.config(), PolymorphicType.ONE_OF, Geometry.class, org.davidmoten.oa3.codegen.test.main.schema.Rectangle.class, org.davidmoten.oa3.codegen.test.main.schema.Circle.class);
         }
     }
 

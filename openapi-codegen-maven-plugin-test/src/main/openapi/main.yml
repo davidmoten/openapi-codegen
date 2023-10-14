@@ -2197,6 +2197,33 @@ components:
 #      maxLength: 2
 #      nullable: true
               
-    
+    Pet3:
+      type: object
+      required:
+        - pet_type
+      properties:
+        pet_type:
+          type: string
+    Dog3:     
+      allOf: # Combines the main `Pet3` schema with `Dog3`-specific properties 
+        - $ref: '#/components/schemas/Pet3'
+        - type: object
+          # all other properties specific to a `Dog3`
+          properties:
+            bark:
+              type: boolean
+            breed:
+              type: string
+              enum: [Dingo, Husky, Retriever, Shepherd]
+    Cat3:     
+      allOf: # Combines the main `Pet` schema with `Cat`-specific properties 
+        - $ref: '#/components/schemas/Pet3'
+        - type: object
+          # all other properties specific to a `Cat3`
+          properties:
+            hunts:
+              type: boolean
+            age:
+              type: integer 
 
       
