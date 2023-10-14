@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -85,6 +86,9 @@ public final class SchemasCodeWriter {
             return;
         }
         CodePrintWriter out = CodePrintWriter.create(cls.fullClassName, names.simpleNameInPackage(cls.fullClassName));
+        if (cls.fullClassName.equals("test.schema.StoredValueBalanceMergeRequest")) {
+            System.out.println("here");
+        }
         SchemasCodeWriter.writeClass(out, cls, fullClassNameInterfaces, names);
         WriterUtil.writeContent(names, out);
     }
@@ -123,7 +127,7 @@ public final class SchemasCodeWriter {
         writeClassDeclaration(out, cls, fullClassNameInterfaces);
         writeEnumMembers(out, cls);
         if (isPolymorphic(cls)) {
-            writePolymorphicClassContent(out, cls, names, fullClassNameInterfaces);
+            writePolymorphicClassContent(out, cls, names);
         } else {
             writeFields(out, cls);
             writeConstructor(out, cls, fullClassNameInterfaces, names);
@@ -371,8 +375,7 @@ public final class SchemasCodeWriter {
         }
     }
 
-    private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names,
-            Map<String, Set<Cls>> fullClassNameInterfaces) {
+    private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.println();
             out.line("%s %s();", String.class, cls.discriminator.fieldName);
@@ -430,7 +433,6 @@ public final class SchemasCodeWriter {
                     writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls),
                             f.fieldName(cls));
                 });
-                
             } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
                 writeFields(out, cls);
@@ -461,7 +463,41 @@ public final class SchemasCodeWriter {
                 // write allof builder
                 writeAnyOfOrAllOfBuilder(out, cls, false);
 
-                writeGetters(out, cls, fullClassNameInterfaces);
+                // write getters for allOf members
+                cls.fields.forEach(f -> {
+                    out.println();
+                    writeGetter(out, f.resolvedTypePublicConstructor(out.imports()),
+                            "as" + Names.simpleClassName(f.resolvedTypePublicConstructor(out.imports())),
+                            f.fieldName(cls));
+                });
+                
+                // write all field getters
+                Set<String> used = new HashSet<>();
+                cls.fields.forEach(field -> {
+                    Optional<Cls> c = names.cls(field.fullClassName);
+                    if (c.isPresent() && c.get().classType != ClassType.ONE_OF_NON_DISCRIMINATED) {
+                        c.get().fields //
+                        .stream() //
+                        .filter(f -> !f.mapType.isPresent()) //
+                        .forEach(f -> {
+                            String fieldName = f.fieldName(c.get());
+                            if (!used.contains(fieldName)) {
+                                used.add(fieldName);
+                                String type = f.resolvedTypePublicConstructor(out.imports());
+                                out.println();
+                                out.line("public %s %s() {", type, fieldName);
+                                final String getter;
+                                if (c.get().classType == ClassType.ALL_OF) {
+                                    getter = "as" + Names.upperFirst(fieldName);
+                                } else {
+                                    getter = fieldName;
+                                }
+                                out.line("return %s.%s();", field.fieldName(cls), getter);
+                                out.closeParen();
+                            }
+                        });
+                    }
+                });
             } 
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
@@ -583,7 +619,7 @@ public final class SchemasCodeWriter {
             } else {
                 fieldType = f.resolvedTypeNullable(out.imports());
             }
-            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED && !f.nullable) {
+            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED && !f.nullable && !f.mapType.isPresent()) {
                 out.line("private final %s<%s> %s;", Optional.class, fieldType, cls.fieldName(f));
             } else {
                 out.line("private final %s %s;", fieldType, cls.fieldName(f));

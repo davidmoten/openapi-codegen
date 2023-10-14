@@ -1607,7 +1607,53 @@ components:
         description: 
           type: string
       required: [description]
-              
+            
+    AllOfAllOf:
+      allOf:
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/Dog'
+      
+    AllOfOneOf:
+      allOf:
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/Geometry'  
+
+    AllOfAnyOf:
+      allOf:
+      - type: object
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/AnyOfThing'
+      
+    AllOfAnyOfAdditionalProperties:
+      allOf:
+      - type: object
+        additionalProperties: true
+        properties:
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+      - $ref: '#/components/schemas/AnyOfThing'      
+            
+    AnyOfThing:
+      anyOf: 
+      - $ref: '#/components/schemas/Dog'
+      - $ref: '#/components/schemas/EnumProperty'
+      
     Dog:
       allOf:
       - $ref: '#/components/schemas/Pet'
@@ -1737,7 +1783,15 @@ components:
       additionalProperties:
         type: object
         additionalProperties:
-          type: string                           
+          type: string            
+          
+    AdditionalProperties2:
+      type: object
+      properties:
+        additionalData:
+          additionalProperties: true
+          anyOf:
+            - $ref: "#/components/schemas/Pet"
       
     UntypedObject:
       type: object

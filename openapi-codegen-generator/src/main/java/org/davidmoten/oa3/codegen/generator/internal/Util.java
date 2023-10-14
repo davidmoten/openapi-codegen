@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.github.davidmoten.guavamini.Preconditions;
@@ -19,15 +20,38 @@ import io.swagger.v3.oas.models.media.Schema;
 
 public final class Util {
 
-    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.of("int", "double", "float", "long", "boolean",
-            "byte", "short");
+    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.of("int", "double", "float", "long", "boolean", "byte",
+            "short");
+
+    public static String getTypeOrThrow(Schema<?> schema) {
+        return getType(schema) //
+                .orElseThrow(() -> new IllegalStateException("no type found for\n" + schema));
+    }
+
+    public static Optional<String> getType(Schema<?> schema) {
+        if (schema.getType() == null) {
+            if (schema.getTypes() != null) {
+                // mainly want to cover 3.1 nullable: ["string", "null"]
+                // oneOf should take another path hopefully, depending on what parser does
+                return schema //
+                        .getTypes() //
+                        .stream() //
+                        .filter(x -> !"null".equals(x)) //
+                        .findFirst();
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            return Optional.of(schema.getType());
+        }
+    }
 
     public static boolean isPrimitiveFullClassName(String className) {
         return PRIMITIVE_CLASS_NAMES.contains(className);
     }
 
     public static boolean isPrimitive(Schema<?> schema) {
-        String type = schema.getType();
+        String type = Util.getType(schema).orElse("object");
         return type != null && !"array".equals(type) && !"object".equals(type);
     }
 
@@ -40,7 +64,8 @@ public final class Util {
     }
 
     public static boolean isObject(Schema<?> schema) {
-        return schema.getType() == null && schema.getProperties() != null || "object".equals(schema.getType());
+        Optional<String> type = Util.getType(schema);
+        return !type.isPresent() && schema.getProperties() != null || "object".equals(type.orElse(""));
     }
 
     public static boolean isArray(Schema<?> schema) {
@@ -48,7 +73,7 @@ public final class Util {
     }
 
     public static boolean isOneOf(Schema<?> schema) {
-        //TODO support OAS 3.1
+        // TODO support OAS 3.1
 //        if (schema.getTypes().contains("null") && schema.getTypes().size() > 2) {
 //            return true;
 //        }

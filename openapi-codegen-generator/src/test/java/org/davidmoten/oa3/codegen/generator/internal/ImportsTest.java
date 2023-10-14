@@ -34,6 +34,7 @@ public class ImportsTest {
     public void testNameClashWithClassInSamePackage() {
         Imports imports = new Imports("fred.Something", x -> true);
         assertEquals("Else", imports.add("anne.Else"));
+        assertEquals("john.Else", imports.add("john.Else"));
     }
 
     @Test
@@ -51,6 +52,45 @@ public class ImportsTest {
                 + "import java.lang.Integer;\n" //
                 + "import java.net.HttpURLConnection;\n", //
                 imports.toString());
+    }
+    
+    @Test
+    public void testMemberClasses() {
+        Imports imports = new Imports("a.b.Some", x -> false);
+        assertEquals("Thing.What", imports.add("a.b.Some.Thing.What"));
+    }
+    
+    @Test
+    public void testSamePackage() {
+        Imports imports = new Imports("a.b.Some", x -> false);
+        assertEquals("Thing", imports.add("a.b.Thing"));
+    }
+    
+    @Test
+    public void testAlreadyPresentInSamePackage() {
+        Imports imports = new Imports("a.b.Some", x -> true);
+        assertEquals("Thing", imports.add("a.b.Some.Thing"));
+        assertEquals("a.b.Thing", imports.add("a.b.Thing"));
+    }
+    
+    @Test
+    public void testMore() {
+        Imports imports = new Imports("a.b.Some", x -> false);
+        assertEquals("List", imports.add("a.b.Some.List"));
+        assertEquals("java.util.List", imports.add("java.util.List"));
+    }
+    
+    @Test
+    public void testFieldSameTypeNameAsSurroundingClass() {
+        Imports imports = new Imports("a.String", x -> false);
+        assertEquals("java.lang.String", imports.add("java.lang.String"));
+        assertEquals("java.lang.String", imports.add("java.lang.String"));
+    }
+    
+    @Test
+    public void testMore2() {
+        Imports imports = new Imports("a.Thing", x -> false);
+        assertEquals("ThingMore", imports.add("a.ThingMore"));
     }
 
 }

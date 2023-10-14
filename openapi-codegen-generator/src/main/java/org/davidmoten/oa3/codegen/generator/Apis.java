@@ -217,7 +217,15 @@ class Apis {
     static void visitSchemas(SchemaCategory category, ImmutableList<SchemaWithName> schemaPath, Map<String, Encoding> propertyEncoding, Visitor visitor) {
         Schema<?> schema = schemaPath.last().schema;
         visitor.startSchema(category, schemaPath);
-        if (schema instanceof ObjectSchema && schema.getProperties() == null
+//        System.out.println(schemaPath + " " + schema.getClass());
+        if (schema instanceof ComposedSchema && ((ComposedSchema) schema).getAnyOf() != null
+                && (schema.getProperties() != null || schema.getAdditionalProperties() != null
+                        || schema.getAdditionalItems() != null)) {
+            schema.setProperties(null);
+            schema.setAdditionalProperties(null);
+            schema.setAdditionalItems(null);
+            System.out.println("[WARN] anyOf with extra properties not supported yet, extra properties stripped");
+        } else if (schema instanceof ObjectSchema && schema.getProperties() == null
                 && schema.getAdditionalProperties() == null) {
             schema.setAdditionalProperties(Boolean.TRUE);
         }
@@ -283,7 +291,7 @@ class Apis {
                 a.getAnyOf().forEach(x -> visitSchemas(category, schemaPath.add(new SchemaWithName(null, x)), Maps.empty(), visitor));
             }
         }
-        // MapSchema and ObjectSchema have nothing to add
+        // MapSchema, ObjectSchema have nothing to add
 
         visitor.finishSchema(category, schemaPath);
     }

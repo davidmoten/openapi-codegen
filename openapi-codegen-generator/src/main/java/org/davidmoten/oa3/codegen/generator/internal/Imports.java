@@ -11,6 +11,8 @@ public final class Imports {
     private final String fullClassName;
     private final Predicate<String> simpleNameInPackage;
     private final String basePackagePrefix;
+    // simpleName (may be full class name if already present) to fullClassName
+    private final Map<String, String> map = new HashMap<>();
 
     public Imports(String fullClassName, Predicate<String> simpleNameInPackage) {
         this.fullClassName = fullClassName;
@@ -18,9 +20,6 @@ public final class Imports {
         this.basePackagePrefix = packagePrefix(fullClassName);
         add(fullClassName);
     }
-
-    // simpleName (may be full class name if already present) to fullClassName
-    private final Map<String, String> map = new HashMap<>();
 
     public String add(Class<?> cls) {
         return add(cls.getCanonicalName().replace("$", "."));
@@ -31,12 +30,14 @@ public final class Imports {
             // don't add byte[] etc to imports
             return className;
         }
-        final String simpleName = simpleName(className);
+        final String simpleName = simpleName(fullClassName, className);
         String c = map.get(simpleName);
 
-        String pp = packagePrefix(fullClassName);
-        if (c == null && (basePackagePrefix.equals(pp)
-                || !simpleNameInPackage.test(packagePrefix(fullClassName) + simpleName))) {
+        String pp = packagePrefix(className);
+        if (className.equals(fullClassName)) {
+            return simpleName;
+        } else if (c == null && !simpleName.equals(simpleName(fullClassName)) && (!basePackagePrefix.equals(pp) //
+                || !simpleNameInPackage.test(packagePrefix(fullClassName) + firstSegment(simpleName)))) {
             map.put(simpleName, className);
             return simpleName;
         } else if (c != null && c.equals(className)) {
@@ -52,6 +53,16 @@ public final class Imports {
             return "";
         } else {
             return fullClassName.substring(0, i + 1);
+        }
+    }
+
+    private static String simpleName(String baseClassName, String className) {
+        if(className.equals(baseClassName)) {
+            return simpleName(className);
+        } else if (className.startsWith(baseClassName + ".")){
+            return className.substring(baseClassName.length() + 1);
+        } else {
+            return simpleName(className);
         }
     }
 
