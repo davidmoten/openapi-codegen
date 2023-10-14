@@ -157,6 +157,38 @@ Note that discriminators are constants that the user does not set (in fact, cann
 
 [AnyOfSerializer.java](openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/AnyOfSerializer.java), [PolymorphicDeserializer.java](openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/PolymorphicDeserializer.java)
 
+### *allOf*
+
+[Dog3.java](src/docs/Dog3.java), [Cat3.java](src/docs/Cat3.java), [Pet3.java](src/docs/Pet3.java)
+
+```yaml
+    Pet3:
+      type: object
+      required:
+        - pet_type
+      properties:
+        pet_type:
+          type: string
+    Dog3:
+      allOf: # Combines the main `Pet3` schema with `Dog3`-specific properties
+        - $ref: '#/components/schemas/Pet3'
+        - type: object
+          # all other properties specific to a `Dog3`
+          properties:
+            bark:
+              type: boolean
+            breed:
+              type: string
+              enum: [Dingo, Husky, Retriever, Shepherd]
+    Cat3:
+      allOf: # Combines the main `Pet` schema with `Cat`-specific properties
+        - $ref: '#/components/schemas/Pet3'
+        - type: object
+          # all other properties specific to a `Cat3`
+          properties:
+            hunts:
+```
+
 ### Generated client
 Here's an example of the generated client class (the entry point for interactions with the API). Note the conciseness and reliance on type-safe builders from a non-generated dependency.
 
