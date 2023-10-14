@@ -79,6 +79,51 @@ public final class User {
         this.mobile = mobile.orElse(null);
     }
 
+    public String firstName() {
+        return firstName;
+    }
+
+    public String lastName() {
+        return lastName;
+    }
+
+    public String email() {
+        return email;
+    }
+
+    public Optional<String> mobile() {
+        return Optional.ofNullable(mobile);
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("firstName", (Object) firstName)
+                .put("lastName", (Object) lastName)
+                .put("email", (Object) email)
+                .put("mobile", (Object) mobile)
+                .build();
+    }
+
+    public User withFirstName(String firstName) {
+        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
+    }
+
+    public User withLastName(String lastName) {
+        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
+    }
+
+    public User withEmail(String email) {
+        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
+    }
+
+    public User withMobile(Optional<String> mobile) {
+        return new User(firstName, lastName, email, mobile);
+    }
+
+    public User withMobile(String mobile) {
+        return new User(firstName, lastName, email, Optional.of(mobile));
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -152,51 +197,6 @@ public final class User {
 
     public static BuilderWithFirstName firstName(String firstName) {
         return builder().firstName(firstName);
-    }
-
-    public String firstName() {
-        return firstName;
-    }
-
-    public String lastName() {
-        return lastName;
-    }
-
-    public String email() {
-        return email;
-    }
-
-    public Optional<String> mobile() {
-        return Optional.ofNullable(mobile);
-    }
-
-    Map<String, Object> _internal_properties() {
-        return Maps
-                .put("firstName", (Object) firstName)
-                .put("lastName", (Object) lastName)
-                .put("email", (Object) email)
-                .put("mobile", (Object) mobile)
-                .build();
-    }
-
-    public User withFirstName(String firstName) {
-        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
-    }
-
-    public User withLastName(String lastName) {
-        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
-    }
-
-    public User withEmail(String email) {
-        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
-    }
-
-    public User withMobile(Optional<String> mobile) {
-        return new User(firstName, lastName, email, mobile);
-    }
-
-    public User withMobile(String mobile) {
-        return new User(firstName, lastName, email, Optional.of(mobile));
     }
 
     @Override

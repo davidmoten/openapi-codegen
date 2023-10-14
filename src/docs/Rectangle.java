@@ -59,6 +59,47 @@ public final class Rectangle {
         this.widthDegrees = widthDegrees;
     }
 
+    public Latitude minLat() {
+        return minLat;
+    }
+
+    public Longitude leftLon() {
+        return leftLon;
+    }
+
+    public float heightDegrees() {
+        return heightDegrees;
+    }
+
+    public float widthDegrees() {
+        return widthDegrees;
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("minLat", (Object) minLat)
+                .put("leftLon", (Object) leftLon)
+                .put("heightDegrees", (Object) heightDegrees)
+                .put("widthDegrees", (Object) widthDegrees)
+                .build();
+    }
+
+    public Rectangle withMinLat(Latitude minLat) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
+    }
+
+    public Rectangle withLeftLon(Longitude leftLon) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
+    }
+
+    public Rectangle withHeightDegrees(float heightDegrees) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
+    }
+
+    public Rectangle withWidthDegrees(float widthDegrees) {
+        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -136,47 +177,6 @@ public final class Rectangle {
 
     public static BuilderWithMinLat minLat(Latitude minLat) {
         return builder().minLat(minLat);
-    }
-
-    public Latitude minLat() {
-        return minLat;
-    }
-
-    public Longitude leftLon() {
-        return leftLon;
-    }
-
-    public float heightDegrees() {
-        return heightDegrees;
-    }
-
-    public float widthDegrees() {
-        return widthDegrees;
-    }
-
-    Map<String, Object> _internal_properties() {
-        return Maps
-                .put("minLat", (Object) minLat)
-                .put("leftLon", (Object) leftLon)
-                .put("heightDegrees", (Object) heightDegrees)
-                .put("widthDegrees", (Object) widthDegrees)
-                .build();
-    }
-
-    public Rectangle withMinLat(Latitude minLat) {
-        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
-    }
-
-    public Rectangle withLeftLon(Longitude leftLon) {
-        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
-    }
-
-    public Rectangle withHeightDegrees(float heightDegrees) {
-        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
-    }
-
-    public Rectangle withWidthDegrees(float widthDegrees) {
-        return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 
     @Override

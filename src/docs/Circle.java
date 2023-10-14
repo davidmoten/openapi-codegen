@@ -51,6 +51,38 @@ public final class Circle {
         this.radiusNm = radiusNm;
     }
 
+    public Latitude lat() {
+        return lat;
+    }
+
+    public Longitude lon() {
+        return lon;
+    }
+
+    public float radiusNm() {
+        return radiusNm;
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("lat", (Object) lat)
+                .put("lon", (Object) lon)
+                .put("radiusNm", (Object) radiusNm)
+                .build();
+    }
+
+    public Circle withLat(Latitude lat) {
+        return new Circle(lat, lon, radiusNm);
+    }
+
+    public Circle withLon(Longitude lon) {
+        return new Circle(lat, lon, radiusNm);
+    }
+
+    public Circle withRadiusNm(float radiusNm) {
+        return new Circle(lat, lon, radiusNm);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -113,38 +145,6 @@ public final class Circle {
 
     public static BuilderWithLat lat(Latitude lat) {
         return builder().lat(lat);
-    }
-
-    public Latitude lat() {
-        return lat;
-    }
-
-    public Longitude lon() {
-        return lon;
-    }
-
-    public float radiusNm() {
-        return radiusNm;
-    }
-
-    Map<String, Object> _internal_properties() {
-        return Maps
-                .put("lat", (Object) lat)
-                .put("lon", (Object) lon)
-                .put("radiusNm", (Object) radiusNm)
-                .build();
-    }
-
-    public Circle withLat(Latitude lat) {
-        return new Circle(lat, lon, radiusNm);
-    }
-
-    public Circle withLon(Longitude lon) {
-        return new Circle(lat, lon, radiusNm);
-    }
-
-    public Circle withRadiusNm(float radiusNm) {
-        return new Circle(lat, lon, radiusNm);
     }
 
     @Override

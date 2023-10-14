@@ -53,6 +53,26 @@ public final class Dog3 {
         this.object1 = object1;
     }
 
+    public Pet3 asPet3() {
+        return pet3;
+    }
+
+    public Object1 asObject1() {
+        return object1;
+    }
+
+    public String pet_type() {
+        return pet3.pet_type();
+    }
+
+    public Optional<Boolean> bark() {
+        return object1.bark();
+    }
+
+    public Optional<Object1.Breed> breed() {
+        return object1.breed();
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -102,26 +122,6 @@ public final class Dog3 {
         return builder().pet3(pet3);
     }
 
-    public Pet3 asPet3() {
-        return pet3;
-    }
-
-    public Object1 asObject1() {
-        return object1;
-    }
-
-    public String pet_type() {
-        return pet3.pet_type();
-    }
-
-    public Optional<Boolean> bark() {
-        return object1.bark();
-    }
-
-    public Optional<Object1.Breed> breed() {
-        return object1.breed();
-    }
-
     @SuppressWarnings("serial")
     public static final class _Deserializer extends PolymorphicDeserializer<Dog3> {
 
@@ -160,6 +160,37 @@ public final class Dog3 {
             this.breed = breed.orElse(null);
         }
 
+        public Optional<Boolean> bark() {
+            return Optional.ofNullable(bark);
+        }
+
+        public Optional<Object1.Breed> breed() {
+            return Optional.ofNullable(breed);
+        }
+
+        Map<String, Object> _internal_properties() {
+            return Maps
+                    .put("bark", (Object) bark)
+                    .put("breed", (Object) breed)
+                    .build();
+        }
+
+        public Object1 withBark(Optional<Boolean> bark) {
+            return new Object1(bark, Optional.ofNullable(breed));
+        }
+
+        public Object1 withBark(boolean bark) {
+            return new Object1(Optional.of(bark), Optional.ofNullable(breed));
+        }
+
+        public Object1 withBreed(Optional<Object1.Breed> breed) {
+            return new Object1(Optional.ofNullable(bark), breed);
+        }
+
+        public Object1 withBreed(Object1.Breed breed) {
+            return new Object1(Optional.ofNullable(bark), Optional.of(breed));
+        }
+
         public static Builder builder() {
             return new Builder();
         }
@@ -195,37 +226,6 @@ public final class Dog3 {
             public Object1 build() {
                 return new Object1(this.bark, this.breed);
             }
-        }
-
-        public Optional<Boolean> bark() {
-            return Optional.ofNullable(bark);
-        }
-
-        public Optional<Object1.Breed> breed() {
-            return Optional.ofNullable(breed);
-        }
-
-        Map<String, Object> _internal_properties() {
-            return Maps
-                    .put("bark", (Object) bark)
-                    .put("breed", (Object) breed)
-                    .build();
-        }
-
-        public Object1 withBark(Optional<Boolean> bark) {
-            return new Object1(bark, Optional.ofNullable(breed));
-        }
-
-        public Object1 withBark(boolean bark) {
-            return new Object1(Optional.of(bark), Optional.ofNullable(breed));
-        }
-
-        public Object1 withBreed(Optional<Object1.Breed> breed) {
-            return new Object1(Optional.ofNullable(bark), breed);
-        }
-
-        public Object1 withBreed(Object1.Breed breed) {
-            return new Object1(Optional.ofNullable(bark), Optional.of(breed));
         }
 
         public enum Breed {

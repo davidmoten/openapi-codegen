@@ -52,6 +52,26 @@ public final class Cat3 {
         this.object1 = object1;
     }
 
+    public Pet3 asPet3() {
+        return pet3;
+    }
+
+    public Object1 asObject1() {
+        return object1;
+    }
+
+    public String pet_type() {
+        return pet3.pet_type();
+    }
+
+    public Optional<Boolean> hunts() {
+        return object1.hunts();
+    }
+
+    public Optional<Long> age() {
+        return object1.age();
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -101,26 +121,6 @@ public final class Cat3 {
         return builder().pet3(pet3);
     }
 
-    public Pet3 asPet3() {
-        return pet3;
-    }
-
-    public Object1 asObject1() {
-        return object1;
-    }
-
-    public String pet_type() {
-        return pet3.pet_type();
-    }
-
-    public Optional<Boolean> hunts() {
-        return object1.hunts();
-    }
-
-    public Optional<Long> age() {
-        return object1.age();
-    }
-
     @SuppressWarnings("serial")
     public static final class _Deserializer extends PolymorphicDeserializer<Cat3> {
 
@@ -159,6 +159,37 @@ public final class Cat3 {
             this.age = age.orElse(null);
         }
 
+        public Optional<Boolean> hunts() {
+            return Optional.ofNullable(hunts);
+        }
+
+        public Optional<Long> age() {
+            return Optional.ofNullable(age);
+        }
+
+        Map<String, Object> _internal_properties() {
+            return Maps
+                    .put("hunts", (Object) hunts)
+                    .put("age", (Object) age)
+                    .build();
+        }
+
+        public Object1 withHunts(Optional<Boolean> hunts) {
+            return new Object1(hunts, Optional.ofNullable(age));
+        }
+
+        public Object1 withHunts(boolean hunts) {
+            return new Object1(Optional.of(hunts), Optional.ofNullable(age));
+        }
+
+        public Object1 withAge(Optional<Long> age) {
+            return new Object1(Optional.ofNullable(hunts), age);
+        }
+
+        public Object1 withAge(long age) {
+            return new Object1(Optional.ofNullable(hunts), Optional.of(age));
+        }
+
         public static Builder builder() {
             return new Builder();
         }
@@ -194,37 +225,6 @@ public final class Cat3 {
             public Object1 build() {
                 return new Object1(this.hunts, this.age);
             }
-        }
-
-        public Optional<Boolean> hunts() {
-            return Optional.ofNullable(hunts);
-        }
-
-        public Optional<Long> age() {
-            return Optional.ofNullable(age);
-        }
-
-        Map<String, Object> _internal_properties() {
-            return Maps
-                    .put("hunts", (Object) hunts)
-                    .put("age", (Object) age)
-                    .build();
-        }
-
-        public Object1 withHunts(Optional<Boolean> hunts) {
-            return new Object1(hunts, Optional.ofNullable(age));
-        }
-
-        public Object1 withHunts(boolean hunts) {
-            return new Object1(Optional.of(hunts), Optional.ofNullable(age));
-        }
-
-        public Object1 withAge(Optional<Long> age) {
-            return new Object1(Optional.ofNullable(hunts), age);
-        }
-
-        public Object1 withAge(long age) {
-            return new Object1(Optional.ofNullable(hunts), Optional.of(age));
         }
 
         @Override

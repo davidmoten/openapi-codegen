@@ -101,6 +101,87 @@ public final class Book {
         this.language = language;
     }
 
+    public String title() {
+        return title;
+    }
+
+    public PersonName author() {
+        return author;
+    }
+
+    public Optional<Abstract> abstract_() {
+        return Optional.ofNullable(abstract_);
+    }
+
+    public Year publishedYear() {
+        return publishedYear;
+    }
+
+    public Id authorId() {
+        return authorId;
+    }
+
+    public ISBN isbn() {
+        return isbn;
+    }
+
+    public ItemId itemId() {
+        return itemId;
+    }
+
+    public Language language() {
+        return language;
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("title", (Object) title)
+                .put("author", (Object) author)
+                .put("abstract", (Object) abstract_)
+                .put("publishedYear", (Object) publishedYear)
+                .put("authorId", (Object) authorId)
+                .put("isbn", (Object) isbn)
+                .put("itemId", (Object) itemId)
+                .put("language", (Object) language)
+                .build();
+    }
+
+    public Book withTitle(String title) {
+        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withAuthor(PersonName author) {
+        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withAbstract_(Optional<Abstract> abstract_) {
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withAbstract_(Abstract abstract_) {
+        return new Book(title, author, Optional.of(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withPublishedYear(Year publishedYear) {
+        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withAuthorId(Id authorId) {
+        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withIsbn(ISBN isbn) {
+        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withItemId(ItemId itemId) {
+        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
+    public Book withLanguage(Language language) {
+        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -234,87 +315,6 @@ public final class Book {
 
     public static BuilderWithTitle title(String title) {
         return builder().title(title);
-    }
-
-    public String title() {
-        return title;
-    }
-
-    public PersonName author() {
-        return author;
-    }
-
-    public Optional<Abstract> abstract_() {
-        return Optional.ofNullable(abstract_);
-    }
-
-    public Year publishedYear() {
-        return publishedYear;
-    }
-
-    public Id authorId() {
-        return authorId;
-    }
-
-    public ISBN isbn() {
-        return isbn;
-    }
-
-    public ItemId itemId() {
-        return itemId;
-    }
-
-    public Language language() {
-        return language;
-    }
-
-    Map<String, Object> _internal_properties() {
-        return Maps
-                .put("title", (Object) title)
-                .put("author", (Object) author)
-                .put("abstract", (Object) abstract_)
-                .put("publishedYear", (Object) publishedYear)
-                .put("authorId", (Object) authorId)
-                .put("isbn", (Object) isbn)
-                .put("itemId", (Object) itemId)
-                .put("language", (Object) language)
-                .build();
-    }
-
-    public Book withTitle(String title) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withAuthor(PersonName author) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withAbstract_(Optional<Abstract> abstract_) {
-        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withAbstract_(Abstract abstract_) {
-        return new Book(title, author, Optional.of(abstract_), publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withPublishedYear(Year publishedYear) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withAuthorId(Id authorId) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withIsbn(ISBN isbn) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withItemId(ItemId itemId) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
-    }
-
-    public Book withLanguage(Language language) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
     @Override

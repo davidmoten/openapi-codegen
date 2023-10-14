@@ -56,6 +56,33 @@ public final class PetByType {
         this.hunts = hunts.orElse(null);
     }
 
+    public PetType pet_type() {
+        return pet_type;
+    }
+
+    public Optional<Boolean> hunts() {
+        return Optional.ofNullable(hunts);
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("pet_type", (Object) pet_type)
+                .put("hunts", (Object) hunts)
+                .build();
+    }
+
+    public PetByType withPet_type(PetType pet_type) {
+        return new PetByType(pet_type, Optional.ofNullable(hunts));
+    }
+
+    public PetByType withHunts(Optional<Boolean> hunts) {
+        return new PetByType(pet_type, hunts);
+    }
+
+    public PetByType withHunts(boolean hunts) {
+        return new PetByType(pet_type, Optional.of(hunts));
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -99,33 +126,6 @@ public final class PetByType {
 
     public static BuilderWithPet_type pet_type(PetType pet_type) {
         return builder().pet_type(pet_type);
-    }
-
-    public PetType pet_type() {
-        return pet_type;
-    }
-
-    public Optional<Boolean> hunts() {
-        return Optional.ofNullable(hunts);
-    }
-
-    Map<String, Object> _internal_properties() {
-        return Maps
-                .put("pet_type", (Object) pet_type)
-                .put("hunts", (Object) hunts)
-                .build();
-    }
-
-    public PetByType withPet_type(PetType pet_type) {
-        return new PetByType(pet_type, Optional.ofNullable(hunts));
-    }
-
-    public PetByType withHunts(Optional<Boolean> hunts) {
-        return new PetByType(pet_type, hunts);
-    }
-
-    public PetByType withHunts(boolean hunts) {
-        return new PetByType(pet_type, Optional.of(hunts));
     }
 
     public enum PetType {

@@ -131,10 +131,10 @@ public final class SchemasCodeWriter {
         } else {
             writeFields(out, cls);
             writeConstructor(out, cls, fullClassNameInterfaces, names);
-            writeBuilder(out, cls, fullClassNameInterfaces);
             writeGetters(out, cls, fullClassNameInterfaces);
             writePropertiesMapGetter(out, cls);
             writeMutators(out, cls, fullClassNameInterfaces);
+            writeBuilder(out, cls, fullClassNameInterfaces);
         }
         writeEnumCreator(out, cls);
         writeEnumDeserializer(out, cls);
@@ -391,9 +391,9 @@ public final class SchemasCodeWriter {
                 // parameters
                 writeOneOfAnyOfNonDiscriminatedObjectConstructor(out, cls);
                 cls.fields.forEach(f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, cls, f));
+                writeGetter(out, out.add(Object.class), "value", "value");
                 writeNonDiscriminatedBuilder(out, cls);
                 out.println();
-                writeGetter(out, out.add(Object.class), "value", "value");
             } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 writeFields(out, cls);
                 
@@ -425,14 +425,14 @@ public final class SchemasCodeWriter {
                 out.line("return $o;");
                 out.closeParen();
                 
-                writeAnyOfOrAllOfBuilder(out, cls, true);
-                
                 // write getters
                 cls.fields.forEach(f -> {
                     out.println();
                     writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls),
                             f.fieldName(cls));
                 });
+                
+                writeAnyOfOrAllOfBuilder(out, cls, true);
             } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
                 writeFields(out, cls);
@@ -460,8 +460,6 @@ public final class SchemasCodeWriter {
                     assignField(out, cls, x);
                 });
                 out.closeParen();
-                // write allof builder
-                writeAnyOfOrAllOfBuilder(out, cls, false);
 
                 // write getters for allOf members
                 cls.fields.forEach(f -> {
@@ -498,7 +496,10 @@ public final class SchemasCodeWriter {
                         });
                     }
                 });
-            } 
+                // write allof builder
+                writeAnyOfOrAllOfBuilder(out, cls, false);
+            }
+
             out.println();
             out.line("@%s(\"serial\")", SuppressWarnings.class);
             final Class<?> polymorphicDeserializer;

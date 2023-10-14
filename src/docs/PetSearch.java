@@ -48,6 +48,14 @@ public final class PetSearch {
         return $o;
     }
 
+    public Optional<PetByAge> petByAge() {
+        return petByAge;
+    }
+
+    public Optional<PetByType> petByType() {
+        return petByType;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -83,14 +91,6 @@ public final class PetSearch {
         public PetSearch build() {
             return PetSearch.of(this.petByAge, this.petByType);
         }
-    }
-
-    public Optional<PetByAge> petByAge() {
-        return petByAge;
-    }
-
-    public Optional<PetByType> petByType() {
-        return petByType;
     }
 
     @SuppressWarnings("serial")

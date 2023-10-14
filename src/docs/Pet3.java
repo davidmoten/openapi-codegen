@@ -39,10 +39,6 @@ public final class Pet3 {
         this.pet_type = pet_type;
     }
 
-    public static Pet3 pet_type(String pet_type) {
-        return new Pet3(pet_type);
-    }
-
     public String pet_type() {
         return pet_type;
     }
@@ -51,6 +47,10 @@ public final class Pet3 {
         return Maps
                 .put("pet_type", (Object) pet_type)
                 .build();
+    }
+
+    public static Pet3 pet_type(String pet_type) {
+        return new Pet3(pet_type);
     }
 
     @Override

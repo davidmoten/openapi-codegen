@@ -52,6 +52,33 @@ public final class PetByAge {
         this.nickname = nickname.orElse(null);
     }
 
+    public long age() {
+        return age;
+    }
+
+    public Optional<String> nickname() {
+        return Optional.ofNullable(nickname);
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("age", (Object) age)
+                .put("nickname", (Object) nickname)
+                .build();
+    }
+
+    public PetByAge withAge(long age) {
+        return new PetByAge(age, Optional.ofNullable(nickname));
+    }
+
+    public PetByAge withNickname(Optional<String> nickname) {
+        return new PetByAge(age, nickname);
+    }
+
+    public PetByAge withNickname(String nickname) {
+        return new PetByAge(age, Optional.of(nickname));
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -95,33 +122,6 @@ public final class PetByAge {
 
     public static BuilderWithAge age(long age) {
         return builder().age(age);
-    }
-
-    public long age() {
-        return age;
-    }
-
-    public Optional<String> nickname() {
-        return Optional.ofNullable(nickname);
-    }
-
-    Map<String, Object> _internal_properties() {
-        return Maps
-                .put("age", (Object) age)
-                .put("nickname", (Object) nickname)
-                .build();
-    }
-
-    public PetByAge withAge(long age) {
-        return new PetByAge(age, Optional.ofNullable(nickname));
-    }
-
-    public PetByAge withNickname(Optional<String> nickname) {
-        return new PetByAge(age, nickname);
-    }
-
-    public PetByAge withNickname(String nickname) {
-        return new PetByAge(age, Optional.of(nickname));
     }
 
     @Override

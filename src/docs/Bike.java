@@ -57,10 +57,6 @@ public final class Bike implements Vehicle, HasWheels {
         this.colour = colour;
     }
 
-    public static Bike colour(String colour) {
-        return new Bike(colour);
-    }
-
     @Override
     public String vehicleType() {
         return DiscriminatorHelper.value(vehicleType);
@@ -81,6 +77,10 @@ public final class Bike implements Vehicle, HasWheels {
                 .put("wheelsType", (Object) wheelsType)
                 .put("colour", (Object) colour)
                 .build();
+    }
+
+    public static Bike colour(String colour) {
+        return new Bike(colour);
     }
 
     @Override

@@ -56,6 +56,38 @@ public final class UploadPostRequestMultipartFormData {
         this.document = document;
     }
 
+    public Point point() {
+        return point;
+    }
+
+    public String description() {
+        return description;
+    }
+
+    public Document document() {
+        return document;
+    }
+
+    Map<String, Object> _internal_properties() {
+        return Maps
+                .put("point", (Object) point)
+                .put("description", (Object) description)
+                .put("document", (Object) document)
+                .build();
+    }
+
+    public UploadPostRequestMultipartFormData withPoint(Point point) {
+        return new UploadPostRequestMultipartFormData(point, description, document);
+    }
+
+    public UploadPostRequestMultipartFormData withDescription(String description) {
+        return new UploadPostRequestMultipartFormData(point, description, document);
+    }
+
+    public UploadPostRequestMultipartFormData withDocument(Document document) {
+        return new UploadPostRequestMultipartFormData(point, description, document);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -120,38 +152,6 @@ public final class UploadPostRequestMultipartFormData {
         return builder().point(point);
     }
 
-    public Point point() {
-        return point;
-    }
-
-    public String description() {
-        return description;
-    }
-
-    public Document document() {
-        return document;
-    }
-
-    Map<String, Object> _internal_properties() {
-        return Maps
-                .put("point", (Object) point)
-                .put("description", (Object) description)
-                .put("document", (Object) document)
-                .build();
-    }
-
-    public UploadPostRequestMultipartFormData withPoint(Point point) {
-        return new UploadPostRequestMultipartFormData(point, description, document);
-    }
-
-    public UploadPostRequestMultipartFormData withDescription(String description) {
-        return new UploadPostRequestMultipartFormData(point, description, document);
-    }
-
-    public UploadPostRequestMultipartFormData withDocument(Document document) {
-        return new UploadPostRequestMultipartFormData(point, description, document);
-    }
-
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
     public static final class Document implements HasEncoding {
@@ -180,6 +180,29 @@ public final class UploadPostRequestMultipartFormData {
             }
             this.contentType = contentType;
             this.value = Util.encodeOctets(value);
+        }
+
+        public Document.ContentType contentType() {
+            return contentType;
+        }
+
+        public byte[] value() {
+            return Util.decodeOctets(value);
+        }
+
+        Map<String, Object> _internal_properties() {
+            return Maps
+                    .put("contentType", (Object) contentType)
+                    .put("value", (Object) value)
+                    .build();
+        }
+
+        public Document withContentType(Document.ContentType contentType) {
+            return new Document(contentType, Util.decodeOctets(value));
+        }
+
+        public Document withValue(byte[] value) {
+            return new Document(contentType, value);
         }
 
         public static Builder builder() {
@@ -229,29 +252,6 @@ public final class UploadPostRequestMultipartFormData {
 
         public static BuilderWithContentType contentType(Document.ContentType contentType) {
             return builder().contentType(contentType);
-        }
-
-        public Document.ContentType contentType() {
-            return contentType;
-        }
-
-        public byte[] value() {
-            return Util.decodeOctets(value);
-        }
-
-        Map<String, Object> _internal_properties() {
-            return Maps
-                    .put("contentType", (Object) contentType)
-                    .put("value", (Object) value)
-                    .build();
-        }
-
-        public Document withContentType(Document.ContentType contentType) {
-            return new Document(contentType, Util.decodeOctets(value));
-        }
-
-        public Document withValue(byte[] value) {
-            return new Document(contentType, value);
         }
 
         public enum ContentType implements HasStringValue {
