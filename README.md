@@ -158,6 +158,7 @@ Note that discriminators are constants that the user does not set (in fact, cann
 [AnyOfSerializer.java](openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/AnyOfSerializer.java), [PolymorphicDeserializer.java](openapi-codegen-runtime/src/main/java/org/davidmoten/oa3/codegen/runtime/PolymorphicDeserializer.java)
 
 ### *allOf*
+Uses composition but also exposes all subschema properties at allOf class level (that delegate to subschema objects).
 
 [Dog3.java](src/docs/Dog3.java), [Cat3.java](src/docs/Cat3.java), [Pet3.java](src/docs/Pet3.java)
 
