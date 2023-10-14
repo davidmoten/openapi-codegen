@@ -2208,6 +2208,7 @@ components:
       allOf: # Combines the main `Pet3` schema with `Dog3`-specific properties 
         - $ref: '#/components/schemas/Pet3'
         - type: object
+          x-openapi-codegen-name: Detail
           # all other properties specific to a `Dog3`
           properties:
             bark:
@@ -2219,6 +2220,7 @@ components:
       allOf: # Combines the main `Pet` schema with `Cat`-specific properties 
         - $ref: '#/components/schemas/Pet3'
         - type: object
+          x-openapi-codegen-name: Detail
           # all other properties specific to a `Cat3`
           properties:
             hunts:

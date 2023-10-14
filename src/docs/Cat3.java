@@ -39,25 +39,25 @@ public final class Cat3 {
     private final Pet3 pet3;
 
     @JsonUnwrapped
-    private final Object1 object1;
+    private final Detail Detail;
 
     public Cat3(
             Pet3 pet3,
-            Object1 object1) {
+            Detail Detail) {
         if (Globals.config().validateInConstructor().test(Cat3.class)) {
             Preconditions.checkNotNull(pet3, "pet3");
-            Preconditions.checkNotNull(object1, "object1");
+            Preconditions.checkNotNull(Detail, "Detail");
         }
         this.pet3 = pet3;
-        this.object1 = object1;
+        this.Detail = Detail;
     }
 
     public Pet3 asPet3() {
         return pet3;
     }
 
-    public Object1 asObject1() {
-        return object1;
+    public Detail asDetail() {
+        return Detail;
     }
 
     public String pet_type() {
@@ -65,11 +65,11 @@ public final class Cat3 {
     }
 
     public Optional<Boolean> hunts() {
-        return object1.hunts();
+        return Detail.hunts();
     }
 
     public Optional<Long> age() {
-        return object1.age();
+        return Detail.age();
     }
 
     public static Builder builder() {
@@ -79,7 +79,7 @@ public final class Cat3 {
     public static final class Builder {
 
         private Pet3 pet3;
-        private Object1 object1;
+        private Detail Detail;
 
         Builder() {
         }
@@ -98,22 +98,22 @@ public final class Cat3 {
             this.b = b;
         }
 
-        public BuilderWithObject1 object1(Object1 object1) {
-            this.b.object1 = object1;
-            return new BuilderWithObject1(this.b);
+        public BuilderWithDetail Detail(Detail Detail) {
+            this.b.Detail = Detail;
+            return new BuilderWithDetail(this.b);
         }
     }
 
-    public static final class BuilderWithObject1 {
+    public static final class BuilderWithDetail {
 
         private final Builder b;
 
-        BuilderWithObject1(Builder b) {
+        BuilderWithDetail(Builder b) {
             this.b = b;
         }
 
         public Cat3 build() {
-            return new Cat3(this.b.pet3, this.b.object1);
+            return new Cat3(this.b.pet3, this.b.Detail);
         }
     }
 
@@ -125,13 +125,13 @@ public final class Cat3 {
     public static final class _Deserializer extends PolymorphicDeserializer<Cat3> {
 
         public _Deserializer() {
-            super(Globals.config(), PolymorphicType.ALL_OF, Cat3.class, Pet3.class, Object1.class);
+            super(Globals.config(), PolymorphicType.ALL_OF, Cat3.class, Pet3.class, Detail.class);
         }
     }
 
     @JsonInclude(Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-    public static final class Object1 {
+    public static final class Detail {
 
         @JsonProperty("hunts")
         private final Boolean hunts;
@@ -140,7 +140,7 @@ public final class Cat3 {
         private final Long age;
 
         @JsonCreator
-        private Object1(
+        private Detail(
                 @JsonProperty("hunts") Boolean hunts,
                 @JsonProperty("age") Long age) {
             this.hunts = hunts;
@@ -148,10 +148,10 @@ public final class Cat3 {
         }
 
         @ConstructorBinding
-        public Object1(
+        public Detail(
                 Optional<Boolean> hunts,
                 Optional<Long> age) {
-            if (Globals.config().validateInConstructor().test(Object1.class)) {
+            if (Globals.config().validateInConstructor().test(Detail.class)) {
                 Preconditions.checkNotNull(hunts, "hunts");
                 Preconditions.checkNotNull(age, "age");
             }
@@ -174,20 +174,20 @@ public final class Cat3 {
                     .build();
         }
 
-        public Object1 withHunts(Optional<Boolean> hunts) {
-            return new Object1(hunts, Optional.ofNullable(age));
+        public Detail withHunts(Optional<Boolean> hunts) {
+            return new Detail(hunts, Optional.ofNullable(age));
         }
 
-        public Object1 withHunts(boolean hunts) {
-            return new Object1(Optional.of(hunts), Optional.ofNullable(age));
+        public Detail withHunts(boolean hunts) {
+            return new Detail(Optional.of(hunts), Optional.ofNullable(age));
         }
 
-        public Object1 withAge(Optional<Long> age) {
-            return new Object1(Optional.ofNullable(hunts), age);
+        public Detail withAge(Optional<Long> age) {
+            return new Detail(Optional.ofNullable(hunts), age);
         }
 
-        public Object1 withAge(long age) {
-            return new Object1(Optional.ofNullable(hunts), Optional.of(age));
+        public Detail withAge(long age) {
+            return new Detail(Optional.ofNullable(hunts), Optional.of(age));
         }
 
         public static Builder builder() {
@@ -222,8 +222,8 @@ public final class Cat3 {
                 return this;
             }
 
-            public Object1 build() {
-                return new Object1(this.hunts, this.age);
+            public Detail build() {
+                return new Detail(this.hunts, this.age);
             }
         }
 
@@ -235,7 +235,7 @@ public final class Cat3 {
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-            Object1 other = (Object1) o;
+            Detail other = (Detail) o;
             return 
                 Objects.equals(this.hunts, other.hunts) && 
                 Objects.equals(this.age, other.age);
@@ -248,7 +248,7 @@ public final class Cat3 {
 
         @Override
         public String toString() {
-            return Util.toString(Object1.class, "hunts", hunts, "age", age);
+            return Util.toString(Detail.class, "hunts", hunts, "age", age);
         }
     }
 
@@ -263,16 +263,16 @@ public final class Cat3 {
         Cat3 other = (Cat3) o;
         return 
             Objects.equals(this.pet3, other.pet3) && 
-            Objects.equals(this.object1, other.object1);
+            Objects.equals(this.Detail, other.Detail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pet3, object1);
+        return Objects.hash(pet3, Detail);
     }
 
     @Override
     public String toString() {
-        return Util.toString(Cat3.class, "pet3", pet3, "object1", object1);
+        return Util.toString(Cat3.class, "pet3", pet3, "Detail", Detail);
     }
 }

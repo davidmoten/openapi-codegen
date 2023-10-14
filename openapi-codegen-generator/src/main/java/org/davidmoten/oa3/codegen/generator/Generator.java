@@ -118,10 +118,11 @@ public class Generator {
         private int num = 0;
         private Set<String> fieldNames = new HashSet<>();
 
-        public String nextFieldName(String name) {
+        public String nextFieldName(String name, Schema<?> schema) {
             final String next;
             if (name == null) {
-                next = nextAnonymousFieldName();
+            	next = extensionString(schema, ExtensionKeys.NAME) //
+            			.orElseGet(() -> nextAnonymousFieldName());
             } else {
                 String s = Names.toFieldName(name);
                 String a;
@@ -209,8 +210,23 @@ public class Generator {
         public boolean hasEncoding() {
             return schema.isPresent() //
                     && schema.get().getExtensions() != null //
-                    && Boolean.TRUE.equals(schema.get().getExtensions().get(ExtensionKeys.HAS_ENCODING));
+                    && Boolean.TRUE.equals(extension(schema.get(), ExtensionKeys.HAS_ENCODING).orElse(null));
         }
+    }
+    
+    private static Optional<Object> extension(Schema<?> schema, String key) {
+    	Preconditions.checkNotNull(key);
+    	Map<String, Object> map = schema.getExtensions();
+    	if (map == null) {
+    		return Optional.empty();
+    	} else {
+    		return Optional.ofNullable(map.get(key));
+    	}
+    }
+    
+    @SuppressWarnings("unchecked")
+	public static Optional<String> extensionString(Schema<?> schema, String key) {
+    	return (Optional<String>) (Optional<?>)extension(schema, key);
     }
 
     public static class EnumMember {
@@ -540,7 +556,7 @@ public class Generator {
                 Optional<Cls> previous = Optional.ofNullable(stack.peek());
                 updateLinks(cls, previous);
                 if (previous.isPresent()) {
-                    Optional<String> fieldName = Optional.of(previous.get().nextFieldName(last.name));
+                    Optional<String> fieldName = Optional.of(previous.get().nextFieldName(last.name, schema));
                     String candidate = previous.get().fullClassName + "."
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
@@ -567,7 +583,7 @@ public class Generator {
                 updateLinks(cls, previous);
                 final Optional<String> fieldName;
                 if (previous.isPresent()) {
-                    fieldName = Optional.of(previous.get().nextFieldName(last.name));
+                    fieldName = Optional.of(previous.get().nextFieldName(last.name, schema));
                     // Now get the wrapping class name using the field name and avoid collisions
                     // both with the owning class heirarchy and with siblings
                     String candidate = previous.get().fullClassName + "."
@@ -612,7 +628,7 @@ public class Generator {
                         maxLength = Optional.empty();
                         pattern = Optional.empty();
                     }
-                    String fieldName = schemaPath.size() == 1 ? "value" : current.nextFieldName(last.name);
+                    String fieldName = schemaPath.size() == 1 ? "value" : current.nextFieldName(last.name, schema);
                     boolean required = fieldIsRequired(schemaPath);
                     Encoding encoding = encoding(schema);
                     Optional<BigDecimal> min = Optional.ofNullable(schema.getMinimum());
@@ -625,7 +641,7 @@ public class Generator {
                 } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
-                    String fieldName = current.nextFieldName(fieldNameCandidate);
+                    String fieldName = current.nextFieldName(fieldNameCandidate, schema);
                     boolean required = fieldIsRequired(schemaPath);
                     // TODO pick up other constraints
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
@@ -633,7 +649,7 @@ public class Generator {
                             false, false, Encoding.DEFAULT, mapType(schemaPath), isNullable(schema));
                 } else {
                     // any object
-                    String fieldName = current.nextFieldName(last.name);
+                    String fieldName = current.nextFieldName(last.name, schema);
                     boolean required = fieldIsRequired(schemaPath);
                     current.addField(Object.class.getCanonicalName(), last.name, fieldName, required, isArray,
                             mapType(schemaPath), isNullable(schema));
