@@ -568,7 +568,7 @@ public class Generator {
                 final Optional<String> fieldName;
                 if (previous.isPresent()) {
                     fieldName = Optional.of(previous.get().nextFieldName(last.name));
-                    // Now get the wrapping class name using the field name and avoiding collisions
+                    // Now get the wrapping class name using the field name and avoid collisions
                     // both with the owning class heirarchy and with siblings
                     String candidate = previous.get().fullClassName + "."
                             + Names.simpleClassNameFromSimpleName(fieldName.get());
