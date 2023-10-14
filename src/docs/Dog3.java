@@ -37,13 +37,13 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public final class Dog3 {
 
     @JsonUnwrapped
-    private final org.davidmoten.oa3.codegen.test.main.schema.Pet3 pet3;
+    private final Pet3 pet3;
 
     @JsonUnwrapped
     private final Object1 object1;
 
     public Dog3(
-            org.davidmoten.oa3.codegen.test.main.schema.Pet3 pet3,
+            Pet3 pet3,
             Object1 object1) {
         if (Globals.config().validateInConstructor().test(Dog3.class)) {
             Preconditions.checkNotNull(pet3, "pet3");
@@ -59,13 +59,13 @@ public final class Dog3 {
 
     public static final class Builder {
 
-        private org.davidmoten.oa3.codegen.test.main.schema.Pet3 pet3;
+        private Pet3 pet3;
         private Object1 object1;
 
         Builder() {
         }
 
-        public BuilderWithPet3 pet3(org.davidmoten.oa3.codegen.test.main.schema.Pet3 pet3) {
+        public BuilderWithPet3 pet3(Pet3 pet3) {
             this.pet3 = pet3;
             return new BuilderWithPet3(this);
         }
@@ -98,11 +98,11 @@ public final class Dog3 {
         }
     }
 
-    public static BuilderWithPet3 pet3(org.davidmoten.oa3.codegen.test.main.schema.Pet3 pet3) {
+    public static BuilderWithPet3 pet3(Pet3 pet3) {
         return builder().pet3(pet3);
     }
 
-    public org.davidmoten.oa3.codegen.test.main.schema.Pet3 asPet3() {
+    public Pet3 asPet3() {
         return pet3;
     }
 
@@ -126,7 +126,7 @@ public final class Dog3 {
     public static final class _Deserializer extends PolymorphicDeserializer<Dog3> {
 
         public _Deserializer() {
-            super(Globals.config(), PolymorphicType.ALL_OF, Dog3.class, org.davidmoten.oa3.codegen.test.main.schema.Pet3.class, Object1.class);
+            super(Globals.config(), PolymorphicType.ALL_OF, Dog3.class, Pet3.class, Object1.class);
         }
     }
 

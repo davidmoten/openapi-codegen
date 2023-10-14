@@ -25,13 +25,13 @@ import org.davidmoten.oa3.codegen.util.Util;
 @Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
 public final class PetSearch {
 
-    private final Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByAge> petByAge;
+    private final Optional<PetByAge> petByAge;
 
-    private final Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByType> petByType;
+    private final Optional<PetByType> petByType;
 
     private PetSearch(
-            Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByAge> petByAge,
-            Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByType> petByType) {
+            Optional<PetByAge> petByAge,
+            Optional<PetByType> petByType) {
         if (Globals.config().validateInConstructor().test(PetSearch.class)) {
             Preconditions.checkNotNull(petByAge, "petByAge");
             Preconditions.checkNotNull(petByType, "petByType");
@@ -41,8 +41,8 @@ public final class PetSearch {
     }
 
     public static PetSearch of(
-            Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByAge> petByAge,
-            Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByType> petByType) {
+            Optional<PetByAge> petByAge,
+            Optional<PetByType> petByType) {
         PetSearch $o = new PetSearch(petByAge, petByType);
         RuntimeUtil.checkCanSerialize(Globals.config(), $o);
         return $o;
@@ -54,28 +54,28 @@ public final class PetSearch {
 
     public static final class Builder {
 
-        private Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByAge> petByAge = Optional.empty();
-        private Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByType> petByType = Optional.empty();
+        private Optional<PetByAge> petByAge = Optional.empty();
+        private Optional<PetByType> petByType = Optional.empty();
 
         Builder() {
         }
 
-        public Builder petByAge(org.davidmoten.oa3.codegen.test.main.schema.PetByAge petByAge) {
+        public Builder petByAge(PetByAge petByAge) {
             this.petByAge = Optional.of(petByAge);
             return this;
         }
 
-        public Builder petByAge(Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByAge> petByAge) {
+        public Builder petByAge(Optional<PetByAge> petByAge) {
             this.petByAge = petByAge;
             return this;
         }
 
-        public Builder petByType(org.davidmoten.oa3.codegen.test.main.schema.PetByType petByType) {
+        public Builder petByType(PetByType petByType) {
             this.petByType = Optional.of(petByType);
             return this;
         }
 
-        public Builder petByType(Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByType> petByType) {
+        public Builder petByType(Optional<PetByType> petByType) {
             this.petByType = petByType;
             return this;
         }
@@ -85,11 +85,11 @@ public final class PetSearch {
         }
     }
 
-    public Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByAge> petByAge() {
+    public Optional<PetByAge> petByAge() {
         return petByAge;
     }
 
-    public Optional<org.davidmoten.oa3.codegen.test.main.schema.PetByType> petByType() {
+    public Optional<PetByType> petByType() {
         return petByType;
     }
 
@@ -97,7 +97,7 @@ public final class PetSearch {
     public static final class _Deserializer extends AnyOfDeserializer<PetSearch> {
 
         public _Deserializer() {
-            super(Globals.config(), PetSearch.class, AnyOfMember.nonNullable(org.davidmoten.oa3.codegen.test.main.schema.PetByAge.class), AnyOfMember.nonNullable(org.davidmoten.oa3.codegen.test.main.schema.PetByType.class));
+            super(Globals.config(), PetSearch.class, AnyOfMember.nonNullable(PetByAge.class), AnyOfMember.nonNullable(PetByType.class));
         }
     }
 

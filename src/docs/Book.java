@@ -31,36 +31,36 @@ public final class Book {
     private final String title;
 
     @JsonProperty("author")
-    private final org.davidmoten.oa3.codegen.test.library.schema.PersonName author;
+    private final PersonName author;
 
     @JsonProperty("abstract")
-    private final org.davidmoten.oa3.codegen.test.library.schema.Abstract abstract_;
+    private final Abstract abstract_;
 
     @JsonProperty("publishedYear")
-    private final org.davidmoten.oa3.codegen.test.library.schema.Year publishedYear;
+    private final Year publishedYear;
 
     @JsonProperty("authorId")
-    private final org.davidmoten.oa3.codegen.test.library.schema.Id authorId;
+    private final Id authorId;
 
     @JsonProperty("isbn")
-    private final org.davidmoten.oa3.codegen.test.library.schema.ISBN isbn;
+    private final ISBN isbn;
 
     @JsonProperty("itemId")
-    private final org.davidmoten.oa3.codegen.test.library.schema.ItemId itemId;
+    private final ItemId itemId;
 
     @JsonProperty("language")
-    private final org.davidmoten.oa3.codegen.test.library.schema.Language language;
+    private final Language language;
 
     @JsonCreator
     private Book(
             @JsonProperty("title") String title,
-            @JsonProperty("author") org.davidmoten.oa3.codegen.test.library.schema.PersonName author,
-            @JsonProperty("abstract") org.davidmoten.oa3.codegen.test.library.schema.Abstract abstract_,
-            @JsonProperty("publishedYear") org.davidmoten.oa3.codegen.test.library.schema.Year publishedYear,
-            @JsonProperty("authorId") org.davidmoten.oa3.codegen.test.library.schema.Id authorId,
-            @JsonProperty("isbn") org.davidmoten.oa3.codegen.test.library.schema.ISBN isbn,
-            @JsonProperty("itemId") org.davidmoten.oa3.codegen.test.library.schema.ItemId itemId,
-            @JsonProperty("language") org.davidmoten.oa3.codegen.test.library.schema.Language language) {
+            @JsonProperty("author") PersonName author,
+            @JsonProperty("abstract") Abstract abstract_,
+            @JsonProperty("publishedYear") Year publishedYear,
+            @JsonProperty("authorId") Id authorId,
+            @JsonProperty("isbn") ISBN isbn,
+            @JsonProperty("itemId") ItemId itemId,
+            @JsonProperty("language") Language language) {
         this.title = title;
         this.author = author;
         this.abstract_ = abstract_;
@@ -74,13 +74,13 @@ public final class Book {
     @ConstructorBinding
     public Book(
             String title,
-            org.davidmoten.oa3.codegen.test.library.schema.PersonName author,
-            Optional<org.davidmoten.oa3.codegen.test.library.schema.Abstract> abstract_,
-            org.davidmoten.oa3.codegen.test.library.schema.Year publishedYear,
-            org.davidmoten.oa3.codegen.test.library.schema.Id authorId,
-            org.davidmoten.oa3.codegen.test.library.schema.ISBN isbn,
-            org.davidmoten.oa3.codegen.test.library.schema.ItemId itemId,
-            org.davidmoten.oa3.codegen.test.library.schema.Language language) {
+            PersonName author,
+            Optional<Abstract> abstract_,
+            Year publishedYear,
+            Id authorId,
+            ISBN isbn,
+            ItemId itemId,
+            Language language) {
         if (Globals.config().validateInConstructor().test(Book.class)) {
             Preconditions.checkNotNull(title, "title");
             Preconditions.checkNotNull(author, "author");
@@ -108,13 +108,13 @@ public final class Book {
     public static final class Builder {
 
         private String title;
-        private org.davidmoten.oa3.codegen.test.library.schema.PersonName author;
-        private org.davidmoten.oa3.codegen.test.library.schema.Year publishedYear;
-        private org.davidmoten.oa3.codegen.test.library.schema.Id authorId;
-        private org.davidmoten.oa3.codegen.test.library.schema.ISBN isbn;
-        private org.davidmoten.oa3.codegen.test.library.schema.ItemId itemId;
-        private org.davidmoten.oa3.codegen.test.library.schema.Language language;
-        private Optional<org.davidmoten.oa3.codegen.test.library.schema.Abstract> abstract_ = Optional.empty();
+        private PersonName author;
+        private Year publishedYear;
+        private Id authorId;
+        private ISBN isbn;
+        private ItemId itemId;
+        private Language language;
+        private Optional<Abstract> abstract_ = Optional.empty();
 
         Builder() {
         }
@@ -133,7 +133,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithAuthor author(org.davidmoten.oa3.codegen.test.library.schema.PersonName author) {
+        public BuilderWithAuthor author(PersonName author) {
             this.b.author = author;
             return new BuilderWithAuthor(this.b);
         }
@@ -147,7 +147,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithPublishedYear publishedYear(org.davidmoten.oa3.codegen.test.library.schema.Year publishedYear) {
+        public BuilderWithPublishedYear publishedYear(Year publishedYear) {
             this.b.publishedYear = publishedYear;
             return new BuilderWithPublishedYear(this.b);
         }
@@ -161,7 +161,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithAuthorId authorId(org.davidmoten.oa3.codegen.test.library.schema.Id authorId) {
+        public BuilderWithAuthorId authorId(Id authorId) {
             this.b.authorId = authorId;
             return new BuilderWithAuthorId(this.b);
         }
@@ -175,7 +175,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithIsbn isbn(org.davidmoten.oa3.codegen.test.library.schema.ISBN isbn) {
+        public BuilderWithIsbn isbn(ISBN isbn) {
             this.b.isbn = isbn;
             return new BuilderWithIsbn(this.b);
         }
@@ -189,7 +189,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithItemId itemId(org.davidmoten.oa3.codegen.test.library.schema.ItemId itemId) {
+        public BuilderWithItemId itemId(ItemId itemId) {
             this.b.itemId = itemId;
             return new BuilderWithItemId(this.b);
         }
@@ -203,7 +203,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithLanguage language(org.davidmoten.oa3.codegen.test.library.schema.Language language) {
+        public BuilderWithLanguage language(Language language) {
             this.b.language = language;
             return new BuilderWithLanguage(this.b);
         }
@@ -217,12 +217,12 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithLanguage abstract_(org.davidmoten.oa3.codegen.test.library.schema.Abstract abstract_) {
+        public BuilderWithLanguage abstract_(Abstract abstract_) {
             this.b.abstract_ = Optional.of(abstract_);
             return this;
         }
 
-        public BuilderWithLanguage abstract_(Optional<org.davidmoten.oa3.codegen.test.library.schema.Abstract> abstract_) {
+        public BuilderWithLanguage abstract_(Optional<Abstract> abstract_) {
             this.b.abstract_ = abstract_;
             return this;
         }
@@ -240,31 +240,31 @@ public final class Book {
         return title;
     }
 
-    public org.davidmoten.oa3.codegen.test.library.schema.PersonName author() {
+    public PersonName author() {
         return author;
     }
 
-    public Optional<org.davidmoten.oa3.codegen.test.library.schema.Abstract> abstract_() {
+    public Optional<Abstract> abstract_() {
         return Optional.ofNullable(abstract_);
     }
 
-    public org.davidmoten.oa3.codegen.test.library.schema.Year publishedYear() {
+    public Year publishedYear() {
         return publishedYear;
     }
 
-    public org.davidmoten.oa3.codegen.test.library.schema.Id authorId() {
+    public Id authorId() {
         return authorId;
     }
 
-    public org.davidmoten.oa3.codegen.test.library.schema.ISBN isbn() {
+    public ISBN isbn() {
         return isbn;
     }
 
-    public org.davidmoten.oa3.codegen.test.library.schema.ItemId itemId() {
+    public ItemId itemId() {
         return itemId;
     }
 
-    public org.davidmoten.oa3.codegen.test.library.schema.Language language() {
+    public Language language() {
         return language;
     }
 
@@ -285,35 +285,35 @@ public final class Book {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAuthor(org.davidmoten.oa3.codegen.test.library.schema.PersonName author) {
+    public Book withAuthor(PersonName author) {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAbstract_(Optional<org.davidmoten.oa3.codegen.test.library.schema.Abstract> abstract_) {
+    public Book withAbstract_(Optional<Abstract> abstract_) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAbstract_(org.davidmoten.oa3.codegen.test.library.schema.Abstract abstract_) {
+    public Book withAbstract_(Abstract abstract_) {
         return new Book(title, author, Optional.of(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withPublishedYear(org.davidmoten.oa3.codegen.test.library.schema.Year publishedYear) {
+    public Book withPublishedYear(Year publishedYear) {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAuthorId(org.davidmoten.oa3.codegen.test.library.schema.Id authorId) {
+    public Book withAuthorId(Id authorId) {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withIsbn(org.davidmoten.oa3.codegen.test.library.schema.ISBN isbn) {
+    public Book withIsbn(ISBN isbn) {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withItemId(org.davidmoten.oa3.codegen.test.library.schema.ItemId itemId) {
+    public Book withItemId(ItemId itemId) {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withLanguage(org.davidmoten.oa3.codegen.test.library.schema.Language language) {
+    public Book withLanguage(Language language) {
         return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 

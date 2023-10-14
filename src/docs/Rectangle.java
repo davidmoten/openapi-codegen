@@ -27,10 +27,10 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public final class Rectangle {
 
     @JsonProperty("minLat")
-    private final org.davidmoten.oa3.codegen.test.main.schema.Latitude minLat;
+    private final Latitude minLat;
 
     @JsonProperty("leftLon")
-    private final org.davidmoten.oa3.codegen.test.main.schema.Longitude leftLon;
+    private final Longitude leftLon;
 
     @JsonProperty("heightDegrees")
     private final float heightDegrees;
@@ -41,8 +41,8 @@ public final class Rectangle {
     @JsonCreator
     @ConstructorBinding
     public Rectangle(
-            @JsonProperty("minLat") org.davidmoten.oa3.codegen.test.main.schema.Latitude minLat,
-            @JsonProperty("leftLon") org.davidmoten.oa3.codegen.test.main.schema.Longitude leftLon,
+            @JsonProperty("minLat") Latitude minLat,
+            @JsonProperty("leftLon") Longitude leftLon,
             @JsonProperty("heightDegrees") float heightDegrees,
             @JsonProperty("widthDegrees") float widthDegrees) {
         if (Globals.config().validateInConstructor().test(Rectangle.class)) {
@@ -65,15 +65,15 @@ public final class Rectangle {
 
     public static final class Builder {
 
-        private org.davidmoten.oa3.codegen.test.main.schema.Latitude minLat;
-        private org.davidmoten.oa3.codegen.test.main.schema.Longitude leftLon;
+        private Latitude minLat;
+        private Longitude leftLon;
         private float heightDegrees;
         private float widthDegrees;
 
         Builder() {
         }
 
-        public BuilderWithMinLat minLat(org.davidmoten.oa3.codegen.test.main.schema.Latitude minLat) {
+        public BuilderWithMinLat minLat(Latitude minLat) {
             this.minLat = minLat;
             return new BuilderWithMinLat(this);
         }
@@ -87,7 +87,7 @@ public final class Rectangle {
             this.b = b;
         }
 
-        public BuilderWithLeftLon leftLon(org.davidmoten.oa3.codegen.test.main.schema.Longitude leftLon) {
+        public BuilderWithLeftLon leftLon(Longitude leftLon) {
             this.b.leftLon = leftLon;
             return new BuilderWithLeftLon(this.b);
         }
@@ -134,15 +134,15 @@ public final class Rectangle {
         }
     }
 
-    public static BuilderWithMinLat minLat(org.davidmoten.oa3.codegen.test.main.schema.Latitude minLat) {
+    public static BuilderWithMinLat minLat(Latitude minLat) {
         return builder().minLat(minLat);
     }
 
-    public org.davidmoten.oa3.codegen.test.main.schema.Latitude minLat() {
+    public Latitude minLat() {
         return minLat;
     }
 
-    public org.davidmoten.oa3.codegen.test.main.schema.Longitude leftLon() {
+    public Longitude leftLon() {
         return leftLon;
     }
 
@@ -163,11 +163,11 @@ public final class Rectangle {
                 .build();
     }
 
-    public Rectangle withMinLat(org.davidmoten.oa3.codegen.test.main.schema.Latitude minLat) {
+    public Rectangle withMinLat(Latitude minLat) {
         return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 
-    public Rectangle withLeftLon(org.davidmoten.oa3.codegen.test.main.schema.Longitude leftLon) {
+    public Rectangle withLeftLon(Longitude leftLon) {
         return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 

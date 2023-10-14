@@ -36,17 +36,17 @@ public final class Geometry {
         this.value = Preconditions.checkNotNull(value, "value");
     }
 
-    public Geometry(org.davidmoten.oa3.codegen.test.main.schema.Rectangle value) {
+    public Geometry(Rectangle value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
 
-    public Geometry(org.davidmoten.oa3.codegen.test.main.schema.Circle value) {
+    public Geometry(Circle value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
-    public static Geometry of(org.davidmoten.oa3.codegen.test.main.schema.Rectangle value) {
+    public static Geometry of(Rectangle value) {
         return new Geometry(value);
     }
-    public static Geometry of(org.davidmoten.oa3.codegen.test.main.schema.Circle value) {
+    public static Geometry of(Circle value) {
         return new Geometry(value);
     }
 
@@ -58,7 +58,7 @@ public final class Geometry {
     public static final class _Deserializer extends PolymorphicDeserializer<Geometry> {
 
         public _Deserializer() {
-            super(Globals.config(), PolymorphicType.ONE_OF, Geometry.class, org.davidmoten.oa3.codegen.test.main.schema.Rectangle.class, org.davidmoten.oa3.codegen.test.main.schema.Circle.class);
+            super(Globals.config(), PolymorphicType.ONE_OF, Geometry.class, Rectangle.class, Circle.class);
         }
     }
 
