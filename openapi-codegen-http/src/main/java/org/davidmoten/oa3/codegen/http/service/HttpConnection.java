@@ -15,6 +15,10 @@ import java.util.function.Consumer;
 public interface HttpConnection {
 
     void header(String key, String value);
+    
+	void setConnectTimeoutMs(long connectTimeoutMs);
+	
+	void setReadTimeoutMs(long readTimeoutMs);
 
     /**
      * When a consumer is defined (when this method is called), this class is

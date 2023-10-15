@@ -3,14 +3,15 @@ package org.davidmoten.oa3.codegen.test.library.client;
 import jakarta.annotation.Generated;
 
 import java.lang.String;
+import java.lang.Void;
 import java.util.List;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.client.runtime.ClientBuilder;
 import org.davidmoten.oa3.codegen.http.Http;
 import org.davidmoten.oa3.codegen.http.Http.Builder;
+import org.davidmoten.oa3.codegen.http.Http.RequestBuilder;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
-import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.http.Interceptor;
 import org.davidmoten.oa3.codegen.http.Serializer;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
@@ -42,26 +43,14 @@ public class Client {
         return new ClientBuilder<>(b -> new Client(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), Globals.config(), basePath);
     }
 
-    /**
-     * <p>List users page by page, filtered by search if present
-     * 
-     * <p>[status=200, application/json] --&gt; {@link UsersPage}
-     * 
-     * @param search
-     *            <p>search
-     * @param continuationToken
-     *            <p>continuationToken
-     * @return primary response with status code 200
-     * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
-     *              if an unexpected HTTP status code or Content-Type is returned
-     */
-    public UsersPage getUsers(
-            Optional<String> search, 
-            Optional<String> continuationToken) {
-        return getUsersFullResponse(search, continuationToken)
-                .assertStatusCodeMatches("200")
-                .assertContentTypeMatches("application/json")
-                .dataUnwrapped();
+    private Builder http(HttpMethod method, String path) {
+        return Http
+                .method(method)
+                .basePath(this.basePath)
+                .path(path)
+                .serializer(this.serializer)
+                .interceptors(this.interceptors)
+                .httpService(this.httpService);
     }
 
     /**
@@ -73,25 +62,19 @@ public class Client {
      *            <p>search
      * @param continuationToken
      *            <p>continuationToken
-     * @return full response with status code, body and headers
+     * @return call builder
      */
-    public HttpResponse getUsersFullResponse(
+    public RequestBuilder<UsersPage> getUsers(
             Optional<String> search, 
             Optional<String> continuationToken) {
-        return Http
-                .method(HttpMethod.GET)
-                .basePath(this.basePath)
-                .path("/user")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.GET, "/user")
                 .acceptApplicationJson()
                 .queryParam("search", search)
                 .queryParam("continuationToken", continuationToken)
                 .responseAs(UsersPage.class)
                 .whenStatusCodeMatches("200")
                 .whenContentTypeMatches("application/json")
-                .call();
+                .<UsersPage>requestBuilder("200", "application/json");
     }
 
     /**
@@ -99,20 +82,14 @@ public class Client {
      * 
      * @param requestBody
      *            <p>requestBody
-     * @return full response with status code, body and headers
+     * @return call builder
      */
-    public HttpResponse createUserFullResponse(
+    public RequestBuilder<Void> createUser(
             User requestBody) {
-        return Http
-                .method(HttpMethod.POST)
-                .basePath(this.basePath)
-                .path("/user")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.POST, "/user")
                 .body(requestBody)
                 .contentTypeApplicationJson()
-                .call();
+                .<Void>requestBuilder();
     }
 
     /**
@@ -122,42 +99,17 @@ public class Client {
      * 
      * @param id
      *            <p>id
-     * @return primary response with status code 200
-     * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
-     *              if an unexpected HTTP status code or Content-Type is returned
+     * @return call builder
      */
-    public User getUser(
+    public RequestBuilder<User> getUser(
             String id) {
-        return getUserFullResponse(id)
-                .assertStatusCodeMatches("200")
-                .assertContentTypeMatches("application/json")
-                .dataUnwrapped();
-    }
-
-    /**
-     * <p>Gets user details
-     * 
-     * <p>[status=200, application/json] --&gt; {@link User}
-     * 
-     * @param id
-     *            <p>id
-     * @return full response with status code, body and headers
-     */
-    public HttpResponse getUserFullResponse(
-            String id) {
-        return Http
-                .method(HttpMethod.GET)
-                .basePath(this.basePath)
-                .path("/user/{id}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.GET, "/user/{id}")
                 .acceptApplicationJson()
                 .pathParam("id", id)
                 .responseAs(User.class)
                 .whenStatusCodeMatches("200")
                 .whenContentTypeMatches("application/json")
-                .call();
+                .<User>requestBuilder("200", "application/json");
     }
 
     /**
@@ -167,22 +119,16 @@ public class Client {
      *            <p>requestBody
      * @param id
      *            <p>id
-     * @return full response with status code, body and headers
+     * @return call builder
      */
-    public HttpResponse updateUserFullResponse(
+    public RequestBuilder<Void> updateUser(
             String id, 
             User requestBody) {
-        return Http
-                .method(HttpMethod.PUT)
-                .basePath(this.basePath)
-                .path("/user/{id}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.PUT, "/user/{id}")
                 .pathParam("id", id)
                 .body(requestBody)
                 .contentTypeApplicationJson()
-                .call();
+                .<Void>requestBuilder();
     }
 
     /**
@@ -190,19 +136,13 @@ public class Client {
      * 
      * @param id
      *            <p>id
-     * @return full response with status code, body and headers
+     * @return call builder
      */
-    public HttpResponse deleteUserFullResponse(
+    public RequestBuilder<Void> deleteUser(
             String id) {
-        return Http
-                .method(HttpMethod.DELETE)
-                .basePath(this.basePath)
-                .path("/user/{id}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.DELETE, "/user/{id}")
                 .pathParam("id", id)
-                .call();
+                .<Void>requestBuilder();
     }
 
     /**
@@ -212,42 +152,17 @@ public class Client {
      * 
      * @param itemId
      *            <p>itemId
-     * @return primary response with status code 200
-     * @throws org.davidmoten.oa3.codegen.http.NotPrimaryResponseException
-     *              if an unexpected HTTP status code or Content-Type is returned
+     * @return call builder
      */
-    public Item getItem(
+    public RequestBuilder<Item> getItem(
             String itemId) {
-        return getItemFullResponse(itemId)
-                .assertStatusCodeMatches("200")
-                .assertContentTypeMatches("application/json")
-                .dataUnwrapped();
-    }
-
-    /**
-     * <p>Gets item details
-     * 
-     * <p>[status=200, application/json] --&gt; {@link Item}
-     * 
-     * @param itemId
-     *            <p>itemId
-     * @return full response with status code, body and headers
-     */
-    public HttpResponse getItemFullResponse(
-            String itemId) {
-        return Http
-                .method(HttpMethod.GET)
-                .basePath(this.basePath)
-                .path("/item/{itemId}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.GET, "/item/{itemId}")
                 .acceptApplicationJson()
                 .pathParam("itemId", itemId)
                 .responseAs(Item.class)
                 .whenStatusCodeMatches("200")
                 .whenContentTypeMatches("application/json")
-                .call();
+                .<Item>requestBuilder("200", "application/json");
     }
 
     public Builder _custom(HttpMethod method, String path) {

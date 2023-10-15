@@ -65,4 +65,14 @@ public final class DefaultHttpConnection implements HttpConnection {
         con.disconnect();
     }
 
+	@Override
+	public void setConnectTimeoutMs(long connectTimeoutMs) {
+		con.setConnectTimeout((int) connectTimeoutMs);
+	}
+
+	@Override
+	public void setReadTimeoutMs(long readTimeoutMs) {
+		con.setReadTimeout((int) readTimeoutMs);
+	}
+
 }
