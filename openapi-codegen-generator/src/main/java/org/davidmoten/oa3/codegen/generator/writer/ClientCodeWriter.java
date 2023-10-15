@@ -1,9 +1,7 @@
 package org.davidmoten.oa3.codegen.generator.writer;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,11 +14,10 @@ import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.http.Http;
+import org.davidmoten.oa3.codegen.http.Http.CallBuilder;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
-import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.http.Interceptor;
 import org.davidmoten.oa3.codegen.http.MediaType;
-import org.davidmoten.oa3.codegen.http.NotPrimaryResponseException;
 import org.davidmoten.oa3.codegen.http.Serializer;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
 
@@ -88,45 +85,46 @@ public class ClientCodeWriter {
             out.left().left();
             final String importedReturnType;
             if (!m.returnFullClassName.isPresent()) {
-                importedReturnType = "void";
+                importedReturnType = out.add(Void.class.getCanonicalName());
             } else {
                 importedReturnType = out.add(m.returnFullClassName.get());
             }
             // we don't want the Resource type being used on the client side
             // TODO use actual type (usually wrapped binary)?
-            if (m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent()) {
-                final Optional<String> returns;
-                if (m.returnFullClassName.isPresent()) {
-                    returns = m.primaryStatusCode.map(x -> "primary response with status code " + x);
-                } else {
-                    returns = Optional.empty();
-                }
-                Map<String, String> throwing = new HashMap<>();
-                throwing.put(NotPrimaryResponseException.class.getCanonicalName(),
-                        " if an unexpected HTTP status code or Content-Type is returned");
-                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m, returns, throwing);
-                out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
-                final String paramIdentifiers;
-                if (m.parameters.size() <= 3) {
-                    paramIdentifiers = m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", "));
-                } else {
-                    out.right().right().right();
-                    paramIdentifiers = m.parameters.stream()
-                            .map(p -> String.format("\n%s%s", out.indent(), p.identifier))
-                            .collect(Collectors.joining(","));
-                    out.left().left().left();
-                }
-                out.line("return %s%s(%s)", m.methodName, FULL_RESPONSE_SUFFIX, paramIdentifiers);
-                out.right().right();
-                out.line(".assertStatusCodeMatches(\"%s\")", m.primaryStatusCode.get());
-                out.line(".assertContentTypeMatches(\"%s\")", m.primaryMediaType.get());
-                out.line(".dataUnwrapped();");
-                out.left().left();
-                out.closeParen();
-            }
+            boolean hasPrimaryResponse = m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent();
+//            if (hasPrimaryResponse) {
+//                final Optional<String> returns;
+//                if (m.returnFullClassName.isPresent()) {
+//                    returns = m.primaryStatusCode.map(x -> "primary response with status code " + x);
+//                } else {
+//                    returns = Optional.empty();
+//                }
+//                Map<String, String> throwing = new HashMap<>();
+//                throwing.put(NotPrimaryResponseException.class.getCanonicalName(),
+//                        " if an unexpected HTTP status code or Content-Type is returned");
+//                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m, returns, throwing);
+//                out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
+//                final String paramIdentifiers;
+//                if (m.parameters.size() <= 3) {
+//                    paramIdentifiers = m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", "));
+//                } else {
+//                    out.right().right().right();
+//                    paramIdentifiers = m.parameters.stream()
+//                            .map(p -> String.format("\n%s%s", out.indent(), p.identifier))
+//                            .collect(Collectors.joining(","));
+//                    out.left().left().left();
+//                }
+//                out.line("return %s%s(%s)", m.methodName, FULL_RESPONSE_SUFFIX, paramIdentifiers);
+//                out.right().right();
+//                out.line(".assertStatusCodeMatches(\"%s\")", m.primaryStatusCode.get());
+//                out.line(".assertContentTypeMatches(\"%s\")", m.primaryMediaType.get());
+//                out.line(".dataUnwrapped();");
+//                out.left().left();
+//                out.closeParen();
+//            }
             ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
-                    Optional.of("full response with status code, body and headers"), Maps.empty());
-            out.line("public %s %s%s(%s) {", HttpResponse.class, m.methodName, FULL_RESPONSE_SUFFIX, params);
+                    Optional.of("call builder"), Maps.empty());
+            out.line("public %s<%s> %s(%s) {", CallBuilder.class, importedReturnType, m.methodName, params);
             out.line("return %s", Http.class);
             out.right().right();
             out.line(".method(%s.%s)", HttpMethod.class, m.httpMethod.name());
@@ -169,7 +167,12 @@ public class ClientCodeWriter {
                 out.line(".whenStatusCodeMatches(\"%s\")", r.statusCode());
                 out.line(".whenContentTypeMatches(\"%s\")", r.mediaType());
             });
-            out.line(".call();");
+			if (hasPrimaryResponse) {
+				out.line(".<%s>callBuilder(\"%s\", \"%s\");", importedReturnType, m.primaryStatusCode.get(),
+						m.primaryMediaType.get());
+			} else {
+				out.line(".<%s>callBuilder();", importedReturnType);
+			}
             out.left().left();
             out.closeParen();
         });

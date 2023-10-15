@@ -62,6 +62,8 @@ public final class Http {
         private List<Interceptor> interceptors = new ArrayList<>();
         private boolean allowPatch = false;
         private HttpService httpService = DefaultHttpService.INSTANCE;
+		private Optional<String> assertStatusCodeMatches = Optional.empty();
+		private Optional<String> assertContentTypeMatches = Optional.empty();
 
         Builder(HttpMethod method) {
             this.method = method;
@@ -177,13 +179,28 @@ public final class Http {
             return new BuilderWithReponseDescriptor(this, cls);
         }
         
-        public <T> CallBuilder<T> callBuilder(Class<?> primaryResponseCls) {
+        public <T> CallBuilder<T> callBuilder() {
         	return new CallBuilder<>(this);
+        }
+        
+        public <T> CallBuilder<T> callBuilder(String primaryStatusCode, String primaryMediaType) {
+        	Preconditions.checkArgumentNotNull(primaryStatusCode);
+        	Preconditions.checkArgumentNotNull(primaryMediaType);
+        	this.assertStatusCodeMatches = Optional.of(primaryStatusCode);
+            this.assertContentTypeMatches = Optional.of(primaryMediaType);
+        	return new CallBuilder<T>(this);
         }
 
         public HttpResponse call() {
-            return Http.call(httpService, method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
+            HttpResponse r = Http.call(httpService, method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
                     allowPatch);
+            if (assertStatusCodeMatches.isPresent()) {
+            	r.assertStatusCodeMatches(assertStatusCodeMatches.get());
+            }
+            if (assertContentTypeMatches.isPresent()) {
+            	r.assertContentTypeMatches(assertContentTypeMatches.get());
+            }
+            return r;
         }
 
     }
@@ -235,7 +252,7 @@ public final class Http {
         	return builder.call();
         }
         
-        public T call() {
+        public T get() {
         	return fullResponse().dataUnwrapped();
         }
     }
