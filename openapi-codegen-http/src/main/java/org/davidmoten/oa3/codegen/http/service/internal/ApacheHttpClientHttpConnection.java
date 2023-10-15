@@ -28,8 +28,8 @@ import org.davidmoten.oa3.codegen.util.Util;
 public class ApacheHttpClientHttpConnection implements HttpConnection {
 
     private final HttpUriRequestBase request;
-	private Optional<Long> connectTimeoutMs;
-	private Optional<Long> readTimeoutMs;
+	private Optional<Long> connectTimeoutMs = Optional.empty();
+	private Optional<Long> readTimeoutMs = Optional.empty();
 
     public ApacheHttpClientHttpConnection(HttpUriRequestBase request) {
         this.request = request;
