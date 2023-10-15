@@ -119,10 +119,13 @@ public class Generator {
         private Set<String> fieldNames = new HashSet<>();
 
         public String nextFieldName(String name, Schema<?> schema) {
+            Optional<String> nameOverride = extensionString(schema, ExtensionKeys.NAME);
+            if (nameOverride.isPresent()) {
+            	name = nameOverride.get();
+            }
             final String next;
             if (name == null) {
-            	next = extensionString(schema, ExtensionKeys.NAME) //
-            			.orElseGet(() -> nextAnonymousFieldName());
+            	next = nextAnonymousFieldName();
             } else {
                 String s = Names.toFieldName(name);
                 String a;
@@ -226,7 +229,7 @@ public class Generator {
     
     @SuppressWarnings("unchecked")
 	public static Optional<String> extensionString(Schema<?> schema, String key) {
-    	return (Optional<String>) (Optional<?>)extension(schema, key);
+    	return (Optional<String>) (Optional<?>) extension(schema, key);
     }
 
     public static class EnumMember {

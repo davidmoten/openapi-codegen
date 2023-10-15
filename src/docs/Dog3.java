@@ -40,17 +40,17 @@ public final class Dog3 {
     private final Pet3 pet3;
 
     @JsonUnwrapped
-    private final Detail Detail;
+    private final Detail detail;
 
     public Dog3(
             Pet3 pet3,
-            Detail Detail) {
+            Detail detail) {
         if (Globals.config().validateInConstructor().test(Dog3.class)) {
             Preconditions.checkNotNull(pet3, "pet3");
-            Preconditions.checkNotNull(Detail, "Detail");
+            Preconditions.checkNotNull(detail, "detail");
         }
         this.pet3 = pet3;
-        this.Detail = Detail;
+        this.detail = detail;
     }
 
     public Pet3 asPet3() {
@@ -58,7 +58,7 @@ public final class Dog3 {
     }
 
     public Detail asDetail() {
-        return Detail;
+        return detail;
     }
 
     public String pet_type() {
@@ -66,11 +66,11 @@ public final class Dog3 {
     }
 
     public Optional<Boolean> bark() {
-        return Detail.bark();
+        return detail.bark();
     }
 
     public Optional<Detail.Breed> breed() {
-        return Detail.breed();
+        return detail.breed();
     }
 
     public static Builder builder() {
@@ -80,7 +80,7 @@ public final class Dog3 {
     public static final class Builder {
 
         private Pet3 pet3;
-        private Detail Detail;
+        private Detail detail;
 
         Builder() {
         }
@@ -99,8 +99,8 @@ public final class Dog3 {
             this.b = b;
         }
 
-        public BuilderWithDetail Detail(Detail Detail) {
-            this.b.Detail = Detail;
+        public BuilderWithDetail detail(Detail detail) {
+            this.b.detail = detail;
             return new BuilderWithDetail(this.b);
         }
     }
@@ -114,7 +114,7 @@ public final class Dog3 {
         }
 
         public Dog3 build() {
-            return new Dog3(this.b.pet3, this.b.Detail);
+            return new Dog3(this.b.pet3, this.b.detail);
         }
     }
 
@@ -294,16 +294,16 @@ public final class Dog3 {
         Dog3 other = (Dog3) o;
         return 
             Objects.equals(this.pet3, other.pet3) && 
-            Objects.equals(this.Detail, other.Detail);
+            Objects.equals(this.detail, other.detail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pet3, Detail);
+        return Objects.hash(pet3, detail);
     }
 
     @Override
     public String toString() {
-        return Util.toString(Dog3.class, "pet3", pet3, "Detail", Detail);
+        return Util.toString(Dog3.class, "pet3", pet3, "detail", detail);
     }
 }
