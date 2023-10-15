@@ -166,10 +166,10 @@ public class ClientCodeWriter {
                 out.line(".whenContentTypeMatches(\"%s\")", r.mediaType());
             });
 			if (hasPrimaryResponse) {
-				out.line(".<%s>callBuilder(\"%s\", \"%s\");", importedReturnType, m.primaryStatusCode.get(),
+				out.line(".<%s>requestBuilder(\"%s\", \"%s\");", importedReturnType, m.primaryStatusCode.get(),
 						m.primaryMediaType.get());
 			} else {
-				out.line(".<%s>callBuilder();", importedReturnType);
+				out.line(".<%s>requestBuilder();", importedReturnType);
 			}
             out.left().left();
             out.closeParen();

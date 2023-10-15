@@ -198,11 +198,11 @@ public final class Http {
             return new BuilderWithReponseDescriptor(this, cls);
         }
         
-        public <T> RequestBuilder<T> callBuilder() {
+        public <T> RequestBuilder<T> requestBuilder() {
         	return new RequestBuilder<>(this);
         }
         
-        public <T> RequestBuilder<T> callBuilder(String primaryStatusCode, String primaryMediaType) {
+        public <T> RequestBuilder<T> requestBuilder(String primaryStatusCode, String primaryMediaType) {
         	Preconditions.checkArgumentNotNull(primaryStatusCode);
         	Preconditions.checkArgumentNotNull(primaryMediaType);
         	this.assertStatusCodeMatches = Optional.of(primaryStatusCode);
