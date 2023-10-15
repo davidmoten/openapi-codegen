@@ -14,7 +14,7 @@ import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
 import org.davidmoten.oa3.codegen.http.Http;
-import org.davidmoten.oa3.codegen.http.Http.CallBuilder;
+import org.davidmoten.oa3.codegen.http.Http.RequestBuilder;
 import org.davidmoten.oa3.codegen.http.HttpMethod;
 import org.davidmoten.oa3.codegen.http.Interceptor;
 import org.davidmoten.oa3.codegen.http.MediaType;
@@ -122,7 +122,7 @@ public class ClientCodeWriter {
 //            }
             ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
                     Optional.of("call builder"), Maps.empty());
-            out.line("public %s<%s> %s(%s) {", CallBuilder.class, importedReturnType, m.methodName, params);
+            out.line("public %s<%s> %s(%s) {", RequestBuilder.class, importedReturnType, m.methodName, params);
             out.line("return %s", Http.class);
             out.right().right();
             out.line(".method(%s.%s)", HttpMethod.class, m.httpMethod.name());

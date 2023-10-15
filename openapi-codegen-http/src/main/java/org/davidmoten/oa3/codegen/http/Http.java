@@ -198,16 +198,16 @@ public final class Http {
             return new BuilderWithReponseDescriptor(this, cls);
         }
         
-        public <T> CallBuilder<T> callBuilder() {
-        	return new CallBuilder<>(this);
+        public <T> RequestBuilder<T> callBuilder() {
+        	return new RequestBuilder<>(this);
         }
         
-        public <T> CallBuilder<T> callBuilder(String primaryStatusCode, String primaryMediaType) {
+        public <T> RequestBuilder<T> callBuilder(String primaryStatusCode, String primaryMediaType) {
         	Preconditions.checkArgumentNotNull(primaryStatusCode);
         	Preconditions.checkArgumentNotNull(primaryMediaType);
         	this.assertStatusCodeMatches = Optional.of(primaryStatusCode);
             this.assertContentTypeMatches = Optional.of(primaryMediaType);
-        	return new CallBuilder<T>(this);
+        	return new RequestBuilder<T>(this);
         }
 
         public HttpResponse call() {
@@ -228,45 +228,45 @@ public final class Http {
 
     }
     
-    public static final class CallBuilder<T> {
+    public static final class RequestBuilder<T> {
 
 		private Builder builder;
 
-		public CallBuilder(Builder builder) {
+		public RequestBuilder(Builder builder) {
 			this.builder = builder;
 		}
     	
-		public CallBuilder<T> acceptApplicationJson() {
+		public RequestBuilder<T> acceptApplicationJson() {
             builder.accept("application/json");
             return this;
         }
 
-        public CallBuilder<T> acceptAny() {
+        public RequestBuilder<T> acceptAny() {
             builder.accept("*/*");
             return this;
         }
         
-        public CallBuilder<T> accept(String mediaType) {
+        public RequestBuilder<T> accept(String mediaType) {
             builder.header("Accept", mediaType);
             return this;
         }
         
-        public CallBuilder<T> header(String name, String value) {
+        public RequestBuilder<T> header(String name, String value) {
             builder.header(name, value);
             return this;
         }
         
-        public CallBuilder<T> interceptor(Interceptor interceptor) {
+        public RequestBuilder<T> interceptor(Interceptor interceptor) {
         	builder.interceptor(interceptor);
         	return this;
         }
         
-        public CallBuilder<T> connectTimeout(long duration, TimeUnit unit) {
+        public RequestBuilder<T> connectTimeout(long duration, TimeUnit unit) {
         	builder.connectTimeout(duration, unit);
         	return this;
         }
         
-        public CallBuilder<T> readTimeout(long duration, TimeUnit unit) {
+        public RequestBuilder<T> readTimeout(long duration, TimeUnit unit) {
         	builder.readTimeout(duration, unit);
         	return this;
         }
