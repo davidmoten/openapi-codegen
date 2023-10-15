@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -175,12 +176,68 @@ public final class Http {
         public BuilderWithReponseDescriptor responseAs(Class<?> cls) {
             return new BuilderWithReponseDescriptor(this, cls);
         }
+        
+        public <T> CallBuilder<T> callBuilder(Class<?> primaryResponseCls) {
+        	return new CallBuilder<>(this);
+        }
 
         public HttpResponse call() {
             return Http.call(httpService, method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
                     allowPatch);
         }
 
+    }
+    
+    public static final class CallBuilder<T> {
+
+		private Builder builder;
+
+		public CallBuilder(Builder builder) {
+			this.builder = builder;
+		}
+    	
+		public CallBuilder<T> acceptApplicationJson() {
+            builder.accept("application/json");
+            return this;
+        }
+
+        public CallBuilder<T> acceptAny() {
+            builder.accept("*/*");
+            return this;
+        }
+        
+        public CallBuilder<T> accept(String mediaType) {
+            builder.header("Accept", mediaType);
+            return this;
+        }
+        
+        public CallBuilder<T> header(String name, String value) {
+            builder.header(name, value);
+            return this;
+        }
+        
+        public CallBuilder<T> interceptor(Interceptor interceptor) {
+        	builder.interceptor(interceptor);
+        	return this;
+        }
+        
+        public CallBuilder<T> connectTimeout(long duration, TimeUnit unit) {
+        	// TODO
+        	return this;
+        }
+        
+        public CallBuilder<T> readTimeout(long duration, TimeUnit unit) {
+        	// TODO
+        	return this;
+        }
+        
+        public HttpResponse fullResponse() {
+        	return builder.call();
+        }
+        
+        public T call() {
+        	return fullResponse().dataUnwrapped();
+        }
     }
 
     public static final class BuilderWithBasePath {
