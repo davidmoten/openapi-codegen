@@ -192,8 +192,12 @@ public final class Http {
         }
 
         public HttpResponse call() {
-            HttpResponse r = Http.call(httpService, method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
+        	return Http.call(httpService, method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
                     allowPatch);
+        }
+        
+        public HttpResponse callAssertIsPrimaryResponse() {
+            HttpResponse r = call();
             if (assertStatusCodeMatches.isPresent()) {
             	r.assertStatusCodeMatches(assertStatusCodeMatches.get());
             }
@@ -253,7 +257,7 @@ public final class Http {
         }
         
         public T get() {
-        	return fullResponse().dataUnwrapped();
+        	return builder.callAssertIsPrimaryResponse().dataUnwrapped();
         }
     }
 

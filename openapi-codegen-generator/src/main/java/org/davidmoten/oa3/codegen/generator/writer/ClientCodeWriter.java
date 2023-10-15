@@ -72,8 +72,6 @@ public class ClientCodeWriter {
         out.closeParen();
     }
 
-    private static final String FULL_RESPONSE_SUFFIX = "FullResponse";
-
     private static void writeClientClassMethods(CodePrintWriter out, List<Method> methods) {
         methods.forEach(m -> {
             out.right().right();

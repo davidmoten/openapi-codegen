@@ -37,7 +37,7 @@ public class LibraryServerTest {
                 .interceptor(authenticator) //
                 .httpService(httpService) //
                 .build();
-        UsersPage page = client.getUsers(Optional.empty(), Optional.empty());
+        UsersPage page = client.getUsers(Optional.empty(), Optional.empty()).get();
         assertEquals(20, page.users().value().size());
         assertEquals("User19", page.users().value().get(18).firstName());
     }

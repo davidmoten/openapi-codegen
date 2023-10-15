@@ -137,7 +137,7 @@ public class PathsServerTest {
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testOctetStreamWithClient(HttpService httpService) {
-        assertEquals("hello there", new String(client(httpService).bytesGet(), StandardCharsets.UTF_8));
+        assertEquals("hello there", new String(client(httpService).bytesGet().get(), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -148,7 +148,7 @@ public class PathsServerTest {
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testClientNoArgs(HttpService httpService) throws ServiceException {
-        HttpResponse r = client(httpService).itemGetFullResponse();
+        HttpResponse r = client(httpService).itemGet().fullResponse();
         assertEquals(200, r.statusCode());
         assertTrue(r.data().isPresent());
         Response2 a = (Response2) r.data().get();
@@ -158,7 +158,7 @@ public class PathsServerTest {
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testClientFullResponseMultiTypeWithAcceptHeaderJson(HttpService httpService) {
-        HttpResponse r = client(httpService).responseMultiTypeGetFullResponse("application/json", "jason");
+        HttpResponse r = client(httpService).responseMultiTypeGet("application/json", "jason").fullResponse();
         assertEquals(200, r.statusCode());
     }
 
@@ -175,7 +175,7 @@ public class PathsServerTest {
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testClientResponseMultiTypeWithAcceptHeaderOctetStream(HttpService httpService) {
-        HttpResponse r = client(httpService).responseMultiTypeGetFullResponse("application/octet-stream", "jason");
+        HttpResponse r = client(httpService).responseMultiTypeGet("application/octet-stream", "jason").fullResponse();
         assertEquals(200, r.statusCode());
         assertEquals("hello there", new String((byte[]) r.data().get(), StandardCharsets.UTF_8));
         assertTrue(r.headers().contains("content-type", "application/octet-stream"));
@@ -184,7 +184,7 @@ public class PathsServerTest {
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testDefaultErrorReturned(HttpService httpService) {
-        HttpResponse r = client(httpService).defaultErrorGetFullResponse();
+        HttpResponse r = client(httpService).defaultErrorGet().fullResponse();
         org.davidmoten.oa3.codegen.test.paths.schema.Error e = r.dataUnwrapped();
         assertEquals("not found eh", e.errorMessage().orElse(""));
     }
@@ -192,13 +192,13 @@ public class PathsServerTest {
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testSimpleStringJsonResponse(HttpService httpService) {
-        assertEquals("hello", client(httpService).jsonStringGet().value());
+        assertEquals("hello", client(httpService).jsonStringGet().get().value());
     }
 
     @ParameterizedTest
     @MethodSource("httpServices")
     public void testWildcardStatusCode(HttpService httpService) {
-        assertEquals("hi there", client(httpService).wildcardStatusCodeGetFullResponse().<Response4>dataUnwrapped().value());
+        assertEquals("hi there", client(httpService).wildcardStatusCodeGet().fullResponse().<Response4>dataUnwrapped().value());
     }    
     
     @ParameterizedTest
@@ -212,7 +212,7 @@ public class PathsServerTest {
                                 .contentType(ContentType.APPLICATION_PDF) //
                                 .value(new byte[] { 1, 2, 3 }) //
                                 .build()) //
-                        .build());
+                        .build()).get();
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
     }
@@ -222,7 +222,7 @@ public class PathsServerTest {
     public void testUrlEncodedFormData(HttpService httpService) {
         SubmitPostRequestApplicationXWwwFormUrlencoded request = //
                 SubmitPostRequestApplicationXWwwFormUrlencoded.name("Fred").count(23).build();
-        Object o = client(httpService).submitPost(request);
+        Object o = client(httpService).submitPost(request).get();
         assertTrue(o instanceof ObjectNode);
         assertTrue(((ObjectNode) o).isEmpty());
     }
