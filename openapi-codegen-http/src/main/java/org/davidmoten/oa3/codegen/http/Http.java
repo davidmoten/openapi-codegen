@@ -44,7 +44,10 @@ import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Http {
 
-    private static Logger log = LoggerFactory.getLogger(Http.class);
+	private static Logger log = LoggerFactory.getLogger(Http.class);
+
+	private static final long DEFAULT_CONNECT_TIMEOUT_MS = 30000L;
+    private static final long DEFAULT_READ_TIMEOUT_MS = 180000L;
 
     public static Builder method(HttpMethod method) {
         return new Builder(method);
@@ -64,6 +67,8 @@ public final class Http {
         private HttpService httpService = DefaultHttpService.INSTANCE;
 		private Optional<String> assertStatusCodeMatches = Optional.empty();
 		private Optional<String> assertContentTypeMatches = Optional.empty();
+		public Optional<Long> connectTimeoutMs = Optional.empty();
+		public Optional<Long> readTimeoutMs = Optional.empty();
 
         Builder(HttpMethod method) {
             this.method = method;
@@ -95,6 +100,20 @@ public final class Http {
             } else {
                 return this;
             }
+        }
+        
+        public Builder connectTimeout(long duration, TimeUnit unit) {
+        	Preconditions.checkArgumentNotNull(duration, "duration");
+        	Preconditions.checkArgumentNotNull(unit, "unit");
+        	this.connectTimeoutMs = Optional.of(unit.toMillis(duration));
+        	return this;
+        }
+        
+        public Builder readTimeout(long duration, TimeUnit unit) {
+        	Preconditions.checkArgumentNotNull(duration, "duration");
+        	Preconditions.checkArgumentNotNull(unit, "unit");
+        	this.readTimeoutMs = Optional.of(unit.toMillis(duration));
+        	return this;
         }
 
         public Builder allowPatch() {
@@ -193,7 +212,7 @@ public final class Http {
 
         public HttpResponse call() {
         	return Http.call(httpService, method, basePath, path, serializer, interceptors, headers, values, responseDescriptors,
-                    allowPatch);
+                    allowPatch, connectTimeoutMs, readTimeoutMs);
         }
         
         public HttpResponse callAssertIsPrimaryResponse() {
@@ -243,12 +262,12 @@ public final class Http {
         }
         
         public CallBuilder<T> connectTimeout(long duration, TimeUnit unit) {
-        	// TODO
+        	builder.connectTimeout(duration, unit);
         	return this;
         }
         
         public CallBuilder<T> readTimeout(long duration, TimeUnit unit) {
-        	// TODO
+        	builder.readTimeout(duration, unit);
         	return this;
         }
         
@@ -365,9 +384,9 @@ public final class Http {
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode, contentType, class)
-            List<ResponseDescriptor> descriptors, boolean allowPatch) {
+            List<ResponseDescriptor> descriptors, boolean allowPatch, Optional<Long> connectTimeoutMs, Optional<Long> readTimeoutMs) {
         return call(httpService, method, basePath, pathTemplate, serializer, interceptors, requestHeaders, parameters,
-                (statusCode, contentType) -> match(descriptors, statusCode, contentType), allowPatch);
+                (statusCode, contentType) -> match(descriptors, statusCode, contentType), allowPatch, connectTimeoutMs, readTimeoutMs);
     }
 
     private static Optional<Class<?>> match(List<ResponseDescriptor> descriptors, Integer statusCode,
@@ -392,7 +411,8 @@ public final class Http {
             Headers requestHeaders, //
             List<ParameterValue> parameters, //
             // (statusCode x contentType) -> class
-            BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, boolean allowPatch) {
+            BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, boolean allowPatch,
+            		Optional<Long> connectTimeoutMs, Optional<Long> readTimeoutMs) {
         String url = buildUrl(basePath, pathTemplate, parameters);
         Optional<ParameterValue> requestBody = parameters.stream().filter(x -> x.type() == ParameterType.BODY)
                 .findFirst();
@@ -412,7 +432,7 @@ public final class Http {
             }
             log.debug("connecting to method=" + r.method() + ", url=" + url + ", headers=" + r.headers());
             return connectAndProcess(serializer, parameters, responseCls, r.url(), requestBody, r.headers(), r.method(),
-                    httpService, options);
+                    httpService, connectTimeoutMs, readTimeoutMs, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -421,10 +441,13 @@ public final class Http {
     private static HttpResponse connectAndProcess(Serializer serializer, List<ParameterValue> parameters,
             BiFunction<? super Integer, ? super String, Optional<Class<?>>> responseCls, String url,
             Optional<ParameterValue> requestBody, Headers headers, final HttpMethod method, HttpService httpService,
+            Optional<Long> connectTimeoutMs, Optional<Long> readTimeoutMs,
             Option... options)
             throws IOException, MalformedURLException, ProtocolException, StreamReadException, DatabindException {
         log.debug("Http.headers={}", headers);
         HttpConnection con = httpService.connection(url, method, options);
+        con.setConnectTimeoutMs(connectTimeoutMs.orElse(DEFAULT_CONNECT_TIMEOUT_MS));
+        con.setReadTimeoutMs(readTimeoutMs.orElse(DEFAULT_READ_TIMEOUT_MS));
         parameters.stream() //
                 .filter(p -> p.type() == ParameterType.HEADER && p.value().isPresent()) //
                 .forEach(p -> headers.put(p.name(), String.valueOf(p.value().get())));
