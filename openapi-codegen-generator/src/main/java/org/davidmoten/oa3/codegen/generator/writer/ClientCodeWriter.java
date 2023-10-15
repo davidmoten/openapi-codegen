@@ -40,12 +40,13 @@ public class ClientCodeWriter {
         WriterUtil.addGeneratedAnnotation(out);
         out.line("public class %s {", out.simpleClassName());
         writeClientClassFieldsConstructorAndBuilder(out, names);
+        writeClientUtilityMethods(out);
         writeClientClassMethods(out, methods);
         writeCustomMethod(out);
         out.closeParen();
     }
 
-    private static void writeClientClassFieldsConstructorAndBuilder(CodePrintWriter out, Names names) {
+	private static void writeClientClassFieldsConstructorAndBuilder(CodePrintWriter out, Names names) {
         // add fields
         out.println();
         out.line("private final %s serializer;", Serializer.class);
@@ -71,6 +72,23 @@ public class ClientCodeWriter {
                 ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
         out.closeParen();
     }
+	
+    private static void writeClientUtilityMethods(CodePrintWriter out) {
+    	out.println();
+    	out.line("private %s http(%s method, %s path) {", Http.Builder.class, HttpMethod.class, String.class);
+    	out.line("return %s", Http.class);
+    	out.right();
+    	out.right();
+    	out.line(".method(method)");
+    	out.line(".basePath(this.basePath)");
+    	out.line(".path(path)");
+    	out.line(".serializer(this.serializer)");
+    	out.line(".interceptors(this.interceptors)");
+    	out.line(".httpService(this.httpService);");
+    	out.left();
+    	out.left();
+    	out.closeParen();
+	}
 
     private static void writeClientClassMethods(CodePrintWriter out, List<Method> methods) {
         methods.forEach(m -> {
@@ -90,47 +108,11 @@ public class ClientCodeWriter {
             // we don't want the Resource type being used on the client side
             // TODO use actual type (usually wrapped binary)?
             boolean hasPrimaryResponse = m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent();
-//            if (hasPrimaryResponse) {
-//                final Optional<String> returns;
-//                if (m.returnFullClassName.isPresent()) {
-//                    returns = m.primaryStatusCode.map(x -> "primary response with status code " + x);
-//                } else {
-//                    returns = Optional.empty();
-//                }
-//                Map<String, String> throwing = new HashMap<>();
-//                throwing.put(NotPrimaryResponseException.class.getCanonicalName(),
-//                        " if an unexpected HTTP status code or Content-Type is returned");
-//                ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m, returns, throwing);
-//                out.line("public %s %s(%s) {", importedReturnType, m.methodName, params);
-//                final String paramIdentifiers;
-//                if (m.parameters.size() <= 3) {
-//                    paramIdentifiers = m.parameters.stream().map(p -> p.identifier).collect(Collectors.joining(", "));
-//                } else {
-//                    out.right().right().right();
-//                    paramIdentifiers = m.parameters.stream()
-//                            .map(p -> String.format("\n%s%s", out.indent(), p.identifier))
-//                            .collect(Collectors.joining(","));
-//                    out.left().left().left();
-//                }
-//                out.line("return %s%s(%s)", m.methodName, FULL_RESPONSE_SUFFIX, paramIdentifiers);
-//                out.right().right();
-//                out.line(".assertStatusCodeMatches(\"%s\")", m.primaryStatusCode.get());
-//                out.line(".assertContentTypeMatches(\"%s\")", m.primaryMediaType.get());
-//                out.line(".dataUnwrapped();");
-//                out.left().left();
-//                out.closeParen();
-//            }
             ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
                     Optional.of("call builder"), Maps.empty());
             out.line("public %s<%s> %s(%s) {", RequestBuilder.class, importedReturnType, m.methodName, params);
-            out.line("return %s", Http.class);
+            out.line("return http(%s.%s, \"%s\")", HttpMethod.class, m.httpMethod.name(), m.path);
             out.right().right();
-            out.line(".method(%s.%s)", HttpMethod.class, m.httpMethod.name());
-            out.line(".basePath(this.basePath)");
-            out.line(".path(\"%s\")", m.path);
-            out.line(".serializer(this.serializer)");
-            out.line(".interceptors(this.interceptors)");
-            out.line(".httpService(this.httpService)");
             Set<String> used = new HashSet<>();
             for (ResponseDescriptor rd : m.responseDescriptors) {
                 if (!used.contains(rd.mediaType())) {

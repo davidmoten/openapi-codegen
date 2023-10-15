@@ -43,6 +43,16 @@ public class Client {
         return new ClientBuilder<>(b -> new Client(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), Globals.config(), basePath);
     }
 
+    private Builder http(HttpMethod method, String path) {
+        return Http
+                .method(method)
+                .basePath(this.basePath)
+                .path(path)
+                .serializer(this.serializer)
+                .interceptors(this.interceptors)
+                .httpService(this.httpService);
+    }
+
     /**
      * <p>List users page by page, filtered by search if present
      * 
@@ -57,13 +67,7 @@ public class Client {
     public RequestBuilder<UsersPage> getUsers(
             Optional<String> search, 
             Optional<String> continuationToken) {
-        return Http
-                .method(HttpMethod.GET)
-                .basePath(this.basePath)
-                .path("/user")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.GET, "/user")
                 .acceptApplicationJson()
                 .queryParam("search", search)
                 .queryParam("continuationToken", continuationToken)
@@ -82,13 +86,7 @@ public class Client {
      */
     public RequestBuilder<Void> createUser(
             User requestBody) {
-        return Http
-                .method(HttpMethod.POST)
-                .basePath(this.basePath)
-                .path("/user")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.POST, "/user")
                 .body(requestBody)
                 .contentTypeApplicationJson()
                 .<Void>requestBuilder();
@@ -105,13 +103,7 @@ public class Client {
      */
     public RequestBuilder<User> getUser(
             String id) {
-        return Http
-                .method(HttpMethod.GET)
-                .basePath(this.basePath)
-                .path("/user/{id}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.GET, "/user/{id}")
                 .acceptApplicationJson()
                 .pathParam("id", id)
                 .responseAs(User.class)
@@ -132,13 +124,7 @@ public class Client {
     public RequestBuilder<Void> updateUser(
             String id, 
             User requestBody) {
-        return Http
-                .method(HttpMethod.PUT)
-                .basePath(this.basePath)
-                .path("/user/{id}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.PUT, "/user/{id}")
                 .pathParam("id", id)
                 .body(requestBody)
                 .contentTypeApplicationJson()
@@ -154,13 +140,7 @@ public class Client {
      */
     public RequestBuilder<Void> deleteUser(
             String id) {
-        return Http
-                .method(HttpMethod.DELETE)
-                .basePath(this.basePath)
-                .path("/user/{id}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.DELETE, "/user/{id}")
                 .pathParam("id", id)
                 .<Void>requestBuilder();
     }
@@ -176,13 +156,7 @@ public class Client {
      */
     public RequestBuilder<Item> getItem(
             String itemId) {
-        return Http
-                .method(HttpMethod.GET)
-                .basePath(this.basePath)
-                .path("/item/{itemId}")
-                .serializer(this.serializer)
-                .interceptors(this.interceptors)
-                .httpService(this.httpService)
+        return http(HttpMethod.GET, "/item/{itemId}")
                 .acceptApplicationJson()
                 .pathParam("itemId", itemId)
                 .responseAs(Item.class)
