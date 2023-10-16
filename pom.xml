@@ -38,7 +38,7 @@
         <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
 
         <guava.mini.version>0.1.7</guava.mini.version>
-        <jackson.version>2.15.2</jackson.version>
+        <jackson.version>2.15.3</jackson.version>
         <spring.boot.version>2.7.16</spring.boot.version>
         <spring.version>5.3.30</spring.version>
         <httpclient5.version>5.2.1</httpclient5.version>
