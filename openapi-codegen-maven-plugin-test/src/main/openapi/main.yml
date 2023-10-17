@@ -2233,5 +2233,6 @@ components:
       properties:
         thing: 
           type: string
+          minLength: 2
           x-openapi-codegen-name: stuff
       required: [thing]
