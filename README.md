@@ -13,7 +13,9 @@ I suspect the future of this project will be to generate Java clients for APIs r
 * Extensively unit tested (and easy to add more to either demonstrate problems or correctness)
 * Supports Java 8, 11, 17 (CI)
 * Supports Spring Boot 2.x, 3.x server-side
-* Supports polymorphism `oneOf`, `anyOf`, `allOf` with or without discriminators
+* Supports `oneOf`(discriminated/non-discriminated), `anyOf` (non-discriminated), `allOf`
+* `oneOf` and `anyOf` validate on creation
+* `allOf` generates an uber object with all members properties and `asBlah()` methods to access the individual members in a typed fashion
 * Nesting in openapi definition reflected in nested Java classes
 * Generates [chained builders](https://github.com/davidmoten/java-builder-pattern-tricks#trick-3-enforce-mandatory-fields-at-compile-time-with-builder-chaining) (chaining occurs when mandatory fields are present). This makes checking setting of mandatory fields a compile-time check.
 * Strong typing (primitives are used for mandatory simple types, chained builders)
@@ -26,6 +28,7 @@ I suspect the future of this project will be to generate Java clients for APIs r
 * Constructor validation of schema objects means fail-fast which helps with diagnosis
 * `multipart/form-data` request body support (client)
 * `form-urlencoded` request body support (client)
+* individual requests can be customized with timeouts and extra headers
 * use Java HttpsURLConnection for HTTP interactions or use Apache Httpclient 5.x (raise an issue to add another Http library)
 
 **Status**: released to Maven Central
@@ -124,6 +127,7 @@ Here's an example showing more configuration options:
 * Be sure to specify the properties that are mandatory (using `required:`)
 * Set an `operationId` field for every path entry to ensure you get sensible generated method names (in client and server)
 * always specify `mapping` and `propertyName` fields for discriminated `oneOf`
+* use OpenAPI 3.0 not 3.1 (the world is still working on tool support for 3.0 and is not ready for 3.1) 
 
 ## Generated code examples
 Some examples follow. Note the following:
