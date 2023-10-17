@@ -2228,4 +2228,10 @@ components:
             age:
               type: integer 
 
-      
+    NameOverride:
+      type: object
+      properties:
+        thing: 
+          type: string
+          x-openapi-codegen-name: stuff
+      required: [thing]

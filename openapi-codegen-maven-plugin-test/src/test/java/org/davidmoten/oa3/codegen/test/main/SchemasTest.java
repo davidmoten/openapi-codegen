@@ -79,6 +79,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.MinMaxLength;
 import org.davidmoten.oa3.codegen.test.main.schema.MixRequiredAndNotRequiredWithConstraint;
 import org.davidmoten.oa3.codegen.test.main.schema.Msi;
 import org.davidmoten.oa3.codegen.test.main.schema.MsiId;
+import org.davidmoten.oa3.codegen.test.main.schema.NameOverride;
 import org.davidmoten.oa3.codegen.test.main.schema.NamesWithSpaces;
 import org.davidmoten.oa3.codegen.test.main.schema.NonSARPriority;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample;
@@ -1223,6 +1224,14 @@ public class SchemasTest {
         assertEquals("on", EnumSubs.ON.value());
         assertEquals("off", EnumSubs.OFF.value());
         assertEquals("true", EnumSubs.TRUE.value());
+    }
+    
+    @Test
+    public void testRenameProperty() throws JsonProcessingException {
+    	NameOverride a = NameOverride.stuff("hi");
+    	String json = m.writeValueAsString(a);
+    	assertEquals("{\"thing\":\"hi\"}", json);
+    	checkRoundTrip(a);
     }
 
     private static void checkRoundTrip(Object o) {
