@@ -4,7 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import com.github.davidmoten.guavamini.Preconditions;
 
@@ -18,12 +22,34 @@ public final class Util {
         }
     }
     
-    public static String encodeOctets(Optional<byte[]> a) {
-        return a.map(Util::encodeOctets).orElse("");
+    public static Optional<String> encodeOctets(Optional<byte[]> a) {
+        return a.map(Util::encodeOctets);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static JsonNullable<String> encodeOctets(JsonNullable<byte[]> a) {
+        if (a.isPresent() && a.get() != null) {
+            return JsonNullable.of(encodeOctets(a.get()));
+        } else {
+            return (JsonNullable<String>) (JsonNullable<?>) a;
+        }
     }
 
     public static byte[] decodeOctets(String s) {
         return new BigInteger(s, 16).toByteArray();
+    }
+    
+    public static Optional<byte[]> decodeOctets(Optional<String> s) {
+        return s.map(Util::decodeOctets);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static JsonNullable<byte[]> decodeOctets(JsonNullable<String> a) {
+        if (a.isPresent() && a.get() != null) {
+            return JsonNullable.of(decodeOctets(a.get()));
+        } else {
+            return (JsonNullable<byte[]>) (JsonNullable<?>) a;
+        }
     }
 
     public static <T> T orElse(T value, T defaultValue) {
@@ -54,6 +80,10 @@ public final class Util {
             bytes.write(buffer, 0, n);
         }
         return bytes.toByteArray();
+    }
+    
+    public static <K, V> Map<K, V> createMapIfNull(Map<K, V> map) {
+        return map == null ? new HashMap<>() : map;
     }
 
 }
