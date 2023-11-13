@@ -352,6 +352,14 @@ public class Generator {
             }
         }
         
+        public String resolvedType(Imports imports) {
+            if (mapType.isPresent()) {
+                return resolvedTypeMapPublic(imports);
+            } else {
+                return resolvedTypePublicConstructor(imports);
+            }
+        }
+        
         public String resolvedTypePublicConstructor(Imports imports) {
             if (isOctets()) {
                 if (isArray) {
@@ -419,13 +427,11 @@ public class Generator {
                         return String.format("%s<%s<%s, %s>>", imports.add(JsonNullable.class), imports.add(Map.class),
                                 imports.add(String.class), t);
                     }
+                } else if (required) {
+                    return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
                 } else {
-                    if (required) {
-                        return String.format("%s<%s, %s>", imports.add(Map.class), imports.add(String.class), t);
-                    } else {
-                        return String.format("%s<%s<%s, %s>>", imports.add(Optional.class), imports.add(Map.class),
-                                imports.add(String.class), t);
-                    }
+                    return String.format("%s<%s<%s, %s>>", imports.add(Optional.class), imports.add(Map.class),
+                            imports.add(String.class), t);
                 }
             }
         }

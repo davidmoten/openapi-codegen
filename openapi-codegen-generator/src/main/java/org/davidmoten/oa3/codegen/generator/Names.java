@@ -139,7 +139,16 @@ public final class Names {
     }
 
     public static String simpleClassName(String fullClassName) {
-        return getLastItemInDotDelimitedString(fullClassName);
+        return stripGenerics(getLastItemInDotDelimitedString(fullClassName));
+    }
+    
+    private static String stripGenerics(String name) {
+        int i = name.indexOf("<");
+        if (i == -1) {
+            return name;
+        } else {
+            return name.substring(0, i);
+        }
     }
 
     public static String pkg(String className) {

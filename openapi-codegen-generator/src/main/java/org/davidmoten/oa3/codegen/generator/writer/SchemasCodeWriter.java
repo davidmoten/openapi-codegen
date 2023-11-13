@@ -439,15 +439,15 @@ public final class SchemasCodeWriter {
                 writeFields(out, cls);
 
                 out.right().right();
-                final String parametersNullable = cls //
+                final String parameters = cls //
                         .fields //
                         .stream() //
-                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedTypePublicConstructor(out.imports()),
+                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()),
                                 x.fieldName(cls))) //
                         .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
-                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersNullable);
+                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
                 ifValidate(cls, out, names, //
                         o -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
@@ -465,8 +465,8 @@ public final class SchemasCodeWriter {
                 // write getters for allOf members
                 cls.fields.forEach(f -> {
                     out.println();
-                    writeGetter(out, f.resolvedTypePublicConstructor(out.imports()),
-                            "as" + Names.simpleClassName(f.resolvedTypePublicConstructor(out.imports())),
+                    writeGetter(out, f.resolvedType(out.imports()),
+                            "as" + Names.simpleClassName(f.resolvedType(out.imports())),
                             f.fieldName(cls));
                 });
                 
@@ -627,10 +627,8 @@ public final class SchemasCodeWriter {
             if (cls.classType == ClassType.ENUM && cls.enumValueFullType.equals(Map.class.getCanonicalName())) {
                 fieldType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
                         out.add(Object.class));
-            } else if (f.mapType.isPresent()) {
-                fieldType = f.resolvedTypeMapPublic(out.imports());
             } else {
-                fieldType = f.resolvedTypePublicConstructor(out.imports());
+                fieldType = f.resolvedType(out.imports());
             }
             out.line("private final %s %s;", fieldType, cls.fieldName(f));
         });
