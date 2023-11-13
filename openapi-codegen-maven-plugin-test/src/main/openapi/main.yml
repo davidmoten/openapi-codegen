@@ -2236,3 +2236,10 @@ components:
           minLength: 2
           x-openapi-codegen-name: stuff
       required: [thing]
+
+    OctetsList:
+      type: array
+      items: 
+        type: string
+        format: binary
+      

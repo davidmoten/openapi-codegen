@@ -354,7 +354,13 @@ public class Generator {
         
         public String resolvedTypePublicConstructor(Imports imports) {
             if (isOctets()) {
-                if (!required && nullable) {
+                if (isArray) {
+                    if (required) {
+                        return String.format("%s<byte[]>", imports.add(List.class));
+                    } else {
+                        return String.format("%s<%s<byte[]>>",imports.add(Optional.class), imports.add(List.class));
+                    }
+                } else if (!required && nullable) {
                     return String.format("%s<%s>", imports.add(JsonNullable.class), "byte[]");
                 } else if (!required || nullable) {
                     return String.format("%s<%s>", imports.add(Optional.class), "byte[]");

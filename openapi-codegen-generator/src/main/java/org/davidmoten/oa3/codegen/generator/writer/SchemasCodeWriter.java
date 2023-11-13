@@ -614,6 +614,7 @@ public final class SchemasCodeWriter {
                 out.line("@%s(%s.ALWAYS)", JsonInclude.class, JsonInclude.Include.class);
             }
             if (f.isOctets()) {
+                // TODO handle f.isArray (more serializers?)
                 if (!f.required && f.nullable) {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, JsonNullableOctetsSerializer.class);
                 } else if (!f.required || f.nullable) {
