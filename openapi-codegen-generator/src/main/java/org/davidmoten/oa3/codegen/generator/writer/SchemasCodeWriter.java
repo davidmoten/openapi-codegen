@@ -15,15 +15,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.davidmoten.oa3.codegen.generator.Generator.ClassType;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.Generator.Discriminator;
-import org.davidmoten.oa3.codegen.generator.Generator.Encoding;
 import org.davidmoten.oa3.codegen.generator.Generator.Field;
-import org.davidmoten.oa3.codegen.generator.Generator.MapType;
 import org.davidmoten.oa3.codegen.generator.Names;
 import org.davidmoten.oa3.codegen.generator.SchemaCategory;
 import org.davidmoten.oa3.codegen.generator.ServerGeneratorType;
@@ -40,7 +39,13 @@ import org.davidmoten.oa3.codegen.runtime.AnyOfMember;
 import org.davidmoten.oa3.codegen.runtime.AnyOfSerializer;
 import org.davidmoten.oa3.codegen.runtime.Config;
 import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
+import org.davidmoten.oa3.codegen.runtime.JsonNullableOctetsDeserializer;
+import org.davidmoten.oa3.codegen.runtime.JsonNullableOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
+import org.davidmoten.oa3.codegen.runtime.OctetsDeserializer;
+import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalOctetsDeserializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
@@ -52,13 +57,11 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
@@ -250,7 +253,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeJsonIncludeAnnotation(CodePrintWriter out) {
-        out.line("@%s(%s.NON_NULL)", JsonInclude.class, Include.class);
+        out.line("@%s(%s.NON_ABSENT)", JsonInclude.class, Include.class);
     }
 
     private static String classModifier(Cls cls) {
@@ -296,22 +299,11 @@ public final class SchemasCodeWriter {
             } else {
                 fieldImportedType = out.add(x.fullClassName);
             }
-            return String.format("\n%s@%s(value = %s.class, name = \"%s\")", out.indent(), out.add(Type.class),
+            return String.format("\n%s@%s.Type(value = %s.class, name = \"%s\")", out.indent(), out.add(JsonSubTypes.class),
                     fieldImportedType, cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName));
         }).collect(Collectors.joining(", "));
         out.left().left();
         out.line("@%s({%s})", JsonSubTypes.class, types);
-    }
-
-    private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
-        if (names.generateService()) {
-            if (names.generatorType() == ServerGeneratorType.SPRING3) {
-                out.line("@%s", out
-                        .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
-            } else {
-                out.line("@%s", ConstructorBinding.class);
-            }
-        }
     }
 
     private static void writePolymorphicDeserializerAnnotation(CodePrintWriter out, Cls cls) {
@@ -319,8 +311,12 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeAutoDetectAnnotation(CodePrintWriter out) {
-        out.line("@%s(fieldVisibility = %s.ANY, creatorVisibility = %s.ANY, setterVisibility = %s.ANY)",
-                JsonAutoDetect.class, Visibility.class, Visibility.class, Visibility.class);
+        out.line("@%s(", JsonAutoDetect.class);
+        out.right().right();
+        out.line("fieldVisibility = %s.Visibility.ANY,", JsonAutoDetect.class);
+        out.line("creatorVisibility = %s.Visibility.ANY,", JsonAutoDetect.class);
+        out.line("setterVisibility = %s.Visibility.ANY)", JsonAutoDetect.class);
+        out.left().left();
     }
     
     private final static ObjectMapper MAPPER = new ObjectMapper();
@@ -363,8 +359,13 @@ public final class SchemasCodeWriter {
                                 cls.enumValueFullType.equals(String.class.getCanonicalName()) // 
                                 && x.parameter instanceof Boolean ? "\"" : "";
                         if (x.nullable) {
-                            return String.format("%s%s(%s.of(%s%s%s))", out.indent(), memberName,
-                                    out.add(JsonNullable.class), delim, x.parameter, delim);
+                            if (x.parameter == null) {
+                                return String.format("%s%s(%s.empty())", out.indent(), memberName,
+                                        out.add(Optional.class), delim, x.parameter, delim);
+                            } else {
+                                return String.format("%s%s(%s.of(%s%s%s))", out.indent(), memberName,
+                                        out.add(Optional.class), delim, x.parameter, delim);
+                            }
                         } else {
                             return String.format("%s%s(%s%s%s)", out.indent(), memberName, delim, x.parameter, delim);
                         }
@@ -402,7 +403,7 @@ public final class SchemasCodeWriter {
                 final String parameters = cls.fields //
                         .stream() ///
                         .map(x -> String.format("\n%s%s %s", out.indent(),
-                                x.resolvedTypePublicConstructor(out.imports()), x.fieldName(cls)))
+                                x.resolvedType(out.imports()), x.fieldName(cls)))
                         .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
@@ -428,7 +429,7 @@ public final class SchemasCodeWriter {
                 // write getters
                 cls.fields.forEach(f -> {
                     out.println();
-                    writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls),
+                    writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls),
                             f.fieldName(cls));
                 });
                 
@@ -438,15 +439,15 @@ public final class SchemasCodeWriter {
                 writeFields(out, cls);
 
                 out.right().right();
-                final String parametersNullable = cls //
+                final String parameters = cls //
                         .fields //
                         .stream() //
-                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedTypeNullable(out.imports()),
+                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()),
                                 x.fieldName(cls))) //
                         .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
-                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parametersNullable);
+                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
                 ifValidate(cls, out, names, //
                         o -> cls.fields.stream().forEach(x -> {
                             if (!x.isPrimitive() && x.required) {
@@ -464,8 +465,8 @@ public final class SchemasCodeWriter {
                 // write getters for allOf members
                 cls.fields.forEach(f -> {
                     out.println();
-                    writeGetter(out, f.resolvedTypePublicConstructor(out.imports()),
-                            "as" + Names.simpleClassName(f.resolvedTypePublicConstructor(out.imports())),
+                    writeGetter(out, f.resolvedType(out.imports()),
+                            "as" + Names.simpleClassName(f.resolvedType(out.imports())),
                             f.fieldName(cls));
                 });
                 
@@ -553,7 +554,7 @@ public final class SchemasCodeWriter {
         List<BuilderWriter.Field> fields = //
                 cls.fields.stream() //
                         .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, f.required, f.isArray,
-                                f.mapType, f.nullable)) //
+                                f.mapType, f.nullable, Optional.empty())) //
                         .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName(), useOf);
     }
@@ -609,22 +610,27 @@ public final class SchemasCodeWriter {
                     out.line("@%s(\"%s\")", JsonProperty.class, f.name);
                 }
             }
+            if (f.required && f.nullable) {
+                out.line("@%s(%s.ALWAYS)", JsonInclude.class, JsonInclude.Include.class);
+            }
+            if (f.isOctets()) {
+                // TODO handle f.isArray (more serializers?)
+                if (!f.required && f.nullable) {
+                    out.line("@%s(using = %s.class)", JsonSerialize.class, JsonNullableOctetsSerializer.class);
+                } else if (!f.required || f.nullable) {
+                    out.line("@%s(using = %s.class)", JsonSerialize.class, OptionalOctetsSerializer.class);
+                } else {
+                    out.line("@%s(using = %s.class)", JsonSerialize.class, OctetsSerializer.class);
+                }
+            }
             final String fieldType;
             if (cls.classType == ClassType.ENUM && cls.enumValueFullType.equals(Map.class.getCanonicalName())) {
                 fieldType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
                         out.add(Object.class));
-            } else if (f.mapType.isPresent()) {
-                fieldType = f.resolvedTypeMapPrivate(out.imports());
-            } else if (f.encoding == Encoding.OCTET) {
-                fieldType = out.add(String.class);
             } else {
-                fieldType = f.resolvedTypeNullable(out.imports());
+                fieldType = f.resolvedType(out.imports());
             }
-            if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED && !f.nullable && !f.mapType.isPresent()) {
-                out.line("private final %s<%s> %s;", Optional.class, fieldType, cls.fieldName(f));
-            } else {
-                out.line("private final %s %s;", fieldType, cls.fieldName(f));
-            }
+            out.line("private final %s %s;", fieldType, cls.fieldName(f));
         });
     }
 
@@ -637,169 +643,219 @@ public final class SchemasCodeWriter {
         // this code will write one public constructor or one private and one public.
         // The private one is to be annotated with JsonCreator for use by Jackson.
         // TODO javadoc
-        out.right().right();
-        // collect constructor parameters
-        final String parametersNullable;
-        if (cls.unwrapSingleField()) {
-            // don't annotate parameters with JsonProperty because we will annotate field
-            // with JsonValue
-            parametersNullable = cls.fields.stream() //
-                    .map(x -> {
-                        if (cls.classType == ClassType.ENUM && x.fullClassName.equals(Map.class.getCanonicalName())) {
-                            return String.format("\n%s%s<%s, %s> %s", out.indent(), out.add(Map.class),
-                                    out.add(String.class), out.add(Object.class), x.fieldName(cls));
-                        } else {
-                            return String.format("\n%s%s %s", out.indent(), x.resolvedTypeNullable(out.imports()),
-                                    x.fieldName(cls));
-                        }}) //
-                    .collect(Collectors.joining(","));
-        } else {
-            parametersNullable = cls.fields.stream() //
-                    .filter(x -> !x.isAdditionalProperties()) //
-                    .map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
-                            x.resolvedTypeNullable(out.imports()), x.fieldName(cls)))
-                    .collect(Collectors.joining(","));
-        }
-        out.left().left();
+//        out.right().right();
+//        // collect constructor parameters
+//        final String parametersNullable;
+//        if (cls.unwrapSingleField()) {
+//            // don't annotate parameters with JsonProperty because we will annotate field
+//            // with JsonValue
+//            parametersNullable = cls.fields.stream() //
+//                    .map(x -> {
+//                        if (cls.classType == ClassType.ENUM && x.fullClassName.equals(Map.class.getCanonicalName())) {
+//                            return String.format("\n%s%s<%s, %s> %s", out.indent(), out.add(Map.class),
+//                                    out.add(String.class), out.add(Object.class), x.fieldName(cls));
+//                        } else {
+//                            return String.format("\n%s%s %s", out.indent(), x.resolvedTypePublicConstructor(out.imports()),
+//                                    x.fieldName(cls));
+//                        }}) //
+//                    .collect(Collectors.joining(","));
+//        } else {
+//            parametersNullable = cls.fields.stream() //
+//                    .filter(x -> !x.isAdditionalProperties()) //
+//                    .map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
+//                            x.resolvedTypePublicConstructor(out.imports()), x.fieldName(cls)))
+//                    .collect(Collectors.joining(","));
+//        }
+//        out.left().left();
 
         Set<Cls> interfaces = interfaces(cls, fullClassNameInterfaces);
 
-        out.println();
-        if (cls.classType != ClassType.ENUM) {
-            out.line("@%s", JsonCreator.class);
-        }
-        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required //
-                && (!f.nullable || f.isArray) //
-                && !f.isMapType(MapType.FIELD) //
-                || //
-                f.required //
-                        && f.nullable //
-                        && !f.isMapType(MapType.ADDITIONAL_PROPERTIES) //
-                        && !f.isArray //
-                || //
-                !f.nullable && !f.required && f.isMapType(MapType.FIELD));
-        boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
-        // if has optional or other criteria then write a private constructor with
-        // nullable parameters and a public constructor with Optional parameters
-        final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
-                ? "private"
-                : "public";
-        if (visibility.equals("public")) {
-            addConstructorBindingAnnotation(out, names);
-        }
-        out.line("%s %s(%s) {", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
+//        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required //
+//                && (!f.nullable || f.isArray) //
+//                && !f.isMapType(MapType.FIELD) //
+//                || //
+//                f.required //
+//                        && f.nullable //
+//                        && !f.isMapType(MapType.ADDITIONAL_PROPERTIES) //
+//                        && !f.isArray //
+//                || //
+//                !f.nullable && !f.required && f.isMapType(MapType.FIELD));
+//        boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
+//        // if has optional or other criteria then write a private constructor with
+//        // nullable parameters and a public constructor with Optional parameters
+//        final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
+//                ? "private"
+//                : "public";
+//        if (visibility.equals("public")) {
+//            addConstructorBindingAnnotation(out, names);
+//        }
+//        out.line("%s %s(%s) {", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
+//
 
-        ifValidate(cls, out, names, //
-                out2 -> cls.fields.stream() //
-                        .filter(x -> !x.isAdditionalProperties()) //
-                        .forEach(x -> {
-                            if (!x.isPrimitive() && x.required && !visibility.equals("private")) {
-                                checkNotNull(cls, out2, x);
+//
+//        // assign
+//        cls.fields.stream().forEach(x -> {
+//            if (x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
+//                if (x.isArray) {
+//                    out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+//                } else {
+//                    out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
+//                }
+//            } else {
+//                assignField(out, cls, x);
+//            }
+//        });
+//        out.closeParen();
+           
+            
+            boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
+            boolean hasDiscriminator = cls.fields.stream().anyMatch(x -> isDiscriminator(interfaces, x));
+            boolean extraConstructor = hasAdditionalProperties;
+            if (extraConstructor) {
+                // if has additionalProperties then we make the JsonCreator constructor private
+                // (excluding properties) and make another public constructor that includes the 
+                // Map for additional properties as a parameter)
+                out.right().right();
+                String parameters = cls //
+                        .fields //
+                        .stream() //
+                        // ignore discriminators that should be constants
+//                    .filter(x -> !isDiscriminator(interfaces, x)) //
+                        .map(x -> {
+                            final String t;
+                            if (x.mapType.isPresent()) {
+                                t = x.resolvedTypeMapPublic(out.imports());
+                            } else {
+                                t = x.resolvedTypePublicConstructor(out.imports());
                             }
-                            validateMore(out2, cls, x);
-                        }));
-
-        // assign
-        cls.fields.stream().forEach(x -> {
-            if (x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-                if (x.isArray) {
-                    out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
-                } else {
-                    out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
-                }
-            } else {
-                assignField(out, cls, x);
+                            return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
+                        }) //
+                        .collect(Collectors.joining(","));
+                out.left().left();
+                out.println();
+                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
+                writeConstructorBody(out, cls, names, interfaces, true);
+                out.closeParen();
             }
-        });
-        out.closeParen();
-        boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
-        if (cls.classType != ClassType.ENUM
-                && (hasOptional || !interfaces.isEmpty() || hasBinary || hasAdditionalProperties)) {
             out.right().right();
-            String parametersOptional = cls.fields //
+            String parameters = cls //
+                    .fields //
                     .stream() //
                     // ignore discriminators that should be constants
-                    .filter(x -> !isDiscriminator(interfaces, x)) //
-                    .filter(x -> !x.isAdditionalProperties() || !x.isArray) //
-                    .map(x -> {
-                        String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
-                                : x.resolvedTypePublicConstructor(out.imports());
-                        return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
+//                    .filter(x -> !isDiscriminator(interfaces, x)) //
+                    .filter(x -> !x.isAdditionalProperties()) //
+                    .map(f -> {
+                        final String t;
+                        if (f.mapType.isPresent()) {
+                            t = f.resolvedTypeMapPublic(out.imports());
+                        } else {
+                            t = f.resolvedTypePublicConstructor(out.imports());
+                        }
+                        String annotations = cls.unwrapSingleField() ? "" //
+                                : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
+                        if (f.isOctets()) {
+                            if (!f.required && f.nullable) {
+                                annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                        out.add(JsonNullableOctetsDeserializer.class));
+                            } else if (!f.required || f.nullable) {
+                                annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                        out.add(OptionalOctetsDeserializer.class));
+                            } else {
+                                annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                        out.add(OctetsDeserializer.class));
+                            }
+                        }
+                        return String.format("\n%s%s%s %s", out.indent(), annotations, t, f.fieldName(cls));
                     }) //
                     .collect(Collectors.joining(","));
             out.left().left();
             out.println();
-            addConstructorBindingAnnotation(out, names);
-            String modifier = cls.classType == ClassType.ENUM ? "private" : "public";
-            out.line("%s %s(%s) {", modifier, Names.simpleClassName(cls.fullClassName), parametersOptional);
-            // validate
-            ifValidate(cls, out, names, //
-                    out2 -> cls.fields.stream() //
-                            .filter(x -> !x.isAdditionalProperties()) //
-                            .forEach(x -> {
-                                if (!isDiscriminator(interfaces, x)
-                                        && (x.isOctets() || !x.isPrimitive() && !x.isByteArray())) {
-                                    checkNotNull(cls, out2, x);
-                                    validateMore(out2, cls, x);
-                                }
-                            }));
-
-            // assign
-            cls.fields.stream() //
-                    .forEach(x -> {
-                        if (x.mapType.isPresent()) {
-                            if (x.isArray) {
-                                if (x.nullable) {
-                                    out.line("this.%s = %s.of(new %s<>());", x.fieldName(cls), JsonNullable.class,
-                                            ArrayList.class);
-                                } else {
-                                    out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
-                                }
-                            } else {
-                                if (x.nullable && !x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-                                    if (x.required) {
-                                        out.line("this.%s = %s.of(%s.orElse(null));", x.fieldName(cls),
-                                                JsonNullable.class, x.fieldName(cls));
-                                    } else {
-                                        out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
-                                    }
-                                } else {
-                                    if (x.required) {
-                                        out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
-                                    } else {
-                                        out.line("this.%s = %s.orElse(null);", x.fieldName(cls), x.fieldName(cls));
-                                    }
-                                }
-                            }
-                            return;
-                        }
-                        Optional<Discriminator> disc = discriminator(interfaces, x);
-                        if (disc.isPresent()) {
-                            // write constant value for discriminator, if is enum then
-                            // grab it's value using the DiscriminatorHelper
-                            out.line("this.%s = %s.value(%s.class, \"%s\");", x.fieldName(cls),
-                                    DiscriminatorHelper.class, out.add(x.fullClassName),
-                                    disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
-                        } else if (x.nullable) {
-                            if (x.required) {
-                                out.line("this.%s = %s.of(%s.orElse(null));", x.fieldName(cls), JsonNullable.class,
-                                        x.fieldName(cls));
-                            } else {
-                                assignField(out, cls, x);
-                            }
-                        } else if (x.isOctets()) {
-                            assignEncodedOctets(out, cls, x);
-                        } else if (!x.isPrimitive()) {
-                            if (x.required) {
-                                assignField(out, cls, x);
-                            } else {
-                                assignOptionalField(out, cls, x);
-                            }
-                        } else {
-                            assignField(out, cls, x);
-                        }
-                    });
+            String modifier = cls.classType == ClassType.ENUM || hasDiscriminator || extraConstructor ? "private" : "public";
+            if (modifier.equals("private")) {
+                addConstructorBindingAnnotation(out, names);
+            }
+            if (cls.classType != ClassType.ENUM) {
+                out.line("@%s", JsonCreator.class);
+            }
+            out.line("%s %s(%s) {", modifier, Names.simpleClassName(cls.fullClassName), parameters);
+            writeConstructorBody(out, cls, names, interfaces, false);
             out.closeParen();
+    }
+
+    private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
+        if (names.generateService()) {
+            if (names.generatorType() == ServerGeneratorType.SPRING3) {
+                out.line("@%s", out
+                        .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
+            } else {
+                out.line("@%s", ConstructorBinding.class);
+            }
+        }
+    }
+
+    private static void writeConstructorBody(CodePrintWriter out, Cls cls, Names names, Set<Cls> interfaces,
+            boolean additionalPropertiesIsParameter) {
+        // validate
+        ifValidate(cls, out, names, //
+                out2 -> cls.fields.stream() //
+                        .filter(x -> !x.isAdditionalProperties() || additionalPropertiesIsParameter) //
+                        .forEach(x -> {
+                            if (!isDiscriminator(interfaces, x)) {
+                                if (x.isOctets() || !x.isPrimitive()) {
+                                    checkNotNull(cls, out2, x);
+                                }
+                                validateMore(out2, cls, x);
+                            }
+                        }));
+        // assign
+        cls //
+                .fields //
+                .stream() //
+                .forEach(x -> writeConstructorBodyFieldAssignment(out, cls, interfaces, x,
+                        additionalPropertiesIsParameter));
+    }
+
+    private static void writeConstructorBodyFieldAssignment(CodePrintWriter out, Cls cls, Set<Cls> interfaces, Field x,
+            boolean additionalPropertiesIsParameter) {
+        if (x.isAdditionalProperties() && !additionalPropertiesIsParameter) {
+            out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
+        } else if (x.mapType.isPresent()) {
+            if (x.isArray) {
+                out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
+            } else if (x.required && !x.nullable) {
+                out.line("this.%s = %s.createMapIfNull(%s);", x.fieldName(cls), Util.class, x.fieldName(cls));
+            } else {
+                out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+            }
+            return;
+        } else {
+            Optional<Discriminator> disc = discriminator(interfaces, x);
+            if (disc.isPresent()) {
+                // write constant value for discriminator, if is enum then
+                // grab it's value using the DiscriminatorHelper
+                out.line("%s.checkEquals(%s.value(%s.class, \"%s\"), %s, \"%s\");", //
+                        Preconditions.class, //
+                        DiscriminatorHelper.class, //
+                        out.add(x.fullClassName), //
+                        disc.get().discriminatorValueFromFullClassName(cls.fullClassName), //
+                        x.fieldName(cls), //
+                        x.fieldName(cls));
+                out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+            } else if (x.nullable) {
+                if (x.required) {
+                    out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
+                } else {
+                    assignField(out, cls, x);
+                }
+            } else if (!x.isPrimitive()) {
+                if (x.required) {
+                    assignField(out, cls, x);
+                } else {
+                    assignOptionalField(out, cls, x);
+                }
+            } else {
+                assignField(out, cls, x);
+            }
         }
     }
 
@@ -815,9 +871,23 @@ public final class SchemasCodeWriter {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         List<BuilderWriter.Field> fields = cls.fields //
                 .stream() //
-                .filter(x -> !isDiscriminator(interfaces, x)) //
-                .map(f -> new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        f.required && !f.isAdditionalProperties(), f.isArray, f.mapType, f.nullable))
+//                .filter(x -> !isDiscriminator(interfaces, x)) //
+                .map(f -> {
+                    Optional<Function<String, String>> expressionFactory;
+                    Optional<Discriminator> disc = discriminator(interfaces, f);
+                    if (disc.isPresent()) {
+                        // write constant value for discriminator, if is enum then
+                        // grab it's value using the DiscriminatorHelper
+                        String expression = String.format("%s.value(%s.class, \"%s\")", 
+                                out.add(DiscriminatorHelper.class), 
+                                out.add(f.fullClassName),
+                                disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
+                        expressionFactory = Optional.of(x -> expression);
+                    } else {
+                        expressionFactory = Optional.empty();
+                    }
+                    return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
+                        f.required && !f.isAdditionalProperties(), f.isArray, f.mapType, f.nullable, expressionFactory);})
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -826,12 +896,8 @@ public final class SchemasCodeWriter {
         out.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, x.fieldName(cls), x.fieldName(cls));
     }
 
-    private static void assignEncodedOctets(CodePrintWriter out, Cls cls, Field x) {
-        out.line("this.%s = %s.encodeOctets(%s);", x.fieldName(cls), Util.class, x.fieldName(cls));
-    }
-
     private static void assignOptionalField(CodePrintWriter out, Cls cls, Field x) {
-        out.line("this.%s = %s.orElse(null);", x.fieldName(cls), x.fieldName(cls));
+        out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
     }
 
     private static boolean isDiscriminator(Set<Cls> interfaces, Field x) {
@@ -844,6 +910,10 @@ public final class SchemasCodeWriter {
     }
 
     private static void validateMore(CodePrintWriter out, Cls cls, Field x) {
+        if (x.isAdditionalProperties()) {
+            // TODO check values of map
+            return;
+        }
         String raw = x.fieldName(cls);
         if (x.minLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(),
@@ -960,7 +1030,7 @@ public final class SchemasCodeWriter {
             if (disc.isPresent()) {
                 // write constant value for discriminator, if is enum then
                 // grab it's value using the DiscriminatorHelper
-                String value = String.format("%s.value(%s)", out.add(DiscriminatorHelper.class), f.fieldName(cls));
+                String value = discriminatorHelperExpression(out, f.fieldName(cls));
                 addOverrideAnnotation(out);
                 writeGetter(out, out.add(String.class), f.fieldName(cls), value);
             } else if (f.mapType.isPresent()) {
@@ -968,60 +1038,11 @@ public final class SchemasCodeWriter {
                     writeJsonAnySetter(out, cls, f);
                 }
                 out.println();
-                final String expression;
-                if (f.isMapType(MapType.FIELD)) {
-                    if (f.nullable) {
-                        if (f.required) {
-                            if (f.isArray) {
-                                expression = f.fieldName(cls);
-                            } else {
-                                expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
-                                        f.fieldName(cls));
-                            }
-                        } else {
-                            expression = f.fieldName(cls);
-                        }
-                    } else {
-                        if (f.required) {
-                            expression = f.fieldName(cls);
-                        } else {
-                            expression = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
-                        }
-                    }
-                } else if (f.nullable && !f.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-                    if (!f.isArray && f.required) {
-                        expression = String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
-                                f.fieldName(cls));
-                    } else {
-                        expression = f.fieldName(cls);
-                    }
-                } else {
-                    expression = f.fieldName(cls);
-                }
+                final String expression = f.fieldName(cls);
                 writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), expression);
             } else {
                 out.println();
-                final String value;
-                if (f.nullable) {
-                    if (f.isArray) {
-                        value = f.fieldName(cls);
-                    } else if (f.required) {
-                        value = String.format("%s.ofNullable(%s.get())", out.add(Optional.class), f.fieldName(cls));
-                    } else {
-                        value = f.fieldName(cls);
-                    }
-                } else if (!f.isOctets() && !f.required) {
-                    value = String.format("%s.ofNullable(%s)", out.add(Optional.class), f.fieldName(cls));
-                } else if (f.isOctets()) {
-                    if (f.required) {
-                        value = String.format("%s.decodeOctets(%s)", out.add(Util.class), f.fieldName(cls));
-                    } else {
-                        value = String.format("%s.ofNullable(%s.decodeOctets(%s))", out.add(Optional.class),
-                                out.add(Util.class), f.fieldName(cls));
-                    }
-                } else {
-                    value = f.fieldName(cls);
-                }
+                final String value = f.fieldName(cls);
                 final String returnType;
                 if (cls.classType == ClassType.ENUM && f.fullClassName.equals(Map.class.getCanonicalName())) {
                     returnType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class), out.add(Object.class));
@@ -1032,6 +1053,10 @@ public final class SchemasCodeWriter {
             }
         });
 
+    }
+
+    private static String discriminatorHelperExpression(CodePrintWriter out, String fieldExpression) {
+        return String.format("%s.value(%s)", out.add(DiscriminatorHelper.class), fieldExpression);
     }
     
     private static void writePropertiesMapGetter(CodePrintWriter out, Cls cls) {
@@ -1049,87 +1074,52 @@ public final class SchemasCodeWriter {
     private static void writeMutators(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         List<Field> fields = cls.fields //
                 .stream() //
-                // ignore discriminators that should be constants
-                .filter(x -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), x)) //
                 .collect(Collectors.toList());
         if (fields.size() <= 1) {
             return;
         }
-        fields.forEach(x -> {
-            String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
-                    : x.resolvedTypePublicConstructor(out.imports());
-            out.println();
-            out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
-                    x.fieldName(cls));
-            {
-                String params = fields.stream() //
-                        // ignore discriminators because they are effectively constant
-                        .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
-                        .map(y -> {
-                            if (y.fieldName(cls).equals(x.fieldName(cls))) {
-                                if (y.nullable && !y.required) {
-                                    return String.format("%s.of(%s.orElse(null))", out.add(JsonNullable.class),
-                                            y.fieldName(cls));
-                                } else {
-                                    return y.fieldName(cls);
-                                }
-                            } else {
-                                return nonMutatedFieldAsParameter(out, cls, y);
-                            }
-                        }).collect(Collectors.joining(", "));
-                out.line("return new %s(%s);", cls.simpleName(), params);
-                out.closeParen();
-            }
-            if (!x.mapType.isPresent()) {
-                Optional<String> tNonOptional = x.resolvedTypePublicConstructorNonOptional(out.imports());
-                if (tNonOptional.isPresent() && !tNonOptional.get().equals(t)) {
+        fields //
+                .stream() //
+                // ignore discriminators that should be constants so don't need a mutator
+                .filter(x -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), x)) //
+                .forEach(x -> {
+                    String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
+                            : x.resolvedTypePublicConstructor(out.imports());
                     out.println();
-                    out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)),
-                            tNonOptional.get(), x.fieldName(cls));
-                    String params = fields.stream() //
-                            // ignore discriminators because they are effectively constant
-                            .filter(y -> !isDiscriminator(interfaces(cls, fullClassNameInterfaces), y)) //
-                            .map(y -> {
-                                if (y.fieldName(cls).equals(x.fieldName(cls))) {
-                                    if (y.nullable && !y.required) {
-                                        return String.format("%s.of(%s)", out.add(JsonNullable.class),
-                                                y.fieldName(cls));
-                                    } else {
-                                        return String.format("%s.of(%s)", out.add(Optional.class), y.fieldName(cls));
-                                    }
-                                } else
-                                    return nonMutatedFieldAsParameter(out, cls, y);
-                            }).collect(Collectors.joining(", "));
-                    out.line("return new %s(%s);", cls.simpleName(), params);
-                    out.closeParen();
-                }
-            }
-        });
-    }
-
-    private static String nonMutatedFieldAsParameter(CodePrintWriter out, Cls cls, Field y) {
-        if (y.nullable) {
-            if (y.required) {
-                return String.format("%s.ofNullable(%s.get())", out.add(Optional.class),
-                        y.fieldName(cls));
-            } else {
-                return y.fieldName(cls);
-            }
-        } else if (y.required) {
-            if (y.isOctets()) {
-                return String.format("%s.decodeOctets(%s)", out.add(Util.class), y.fieldName(cls));
-            } else {
-                return y.fieldName(cls);
-            }
-        } else {
-            if (y.isOctets()) {
-                return String.format("%s.ofNullable(%s.decodeOctets(%s))", out.add(Optional.class),
-                        out.add(Util.class), y.fieldName(cls));
-            } else {
-                return String.format("%s.ofNullable(%s)", out.add(Optional.class),
-                        y.fieldName(cls));
-            }
-        }
+                    out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
+                            x.fieldName(cls));
+                    {
+                        String params = fields.stream() //
+                                .map(y -> y.fieldName(cls)) //
+                                .collect(Collectors.joining(", "));
+                        out.line("return new %s(%s);", cls.simpleName(), params);
+                        out.closeParen();
+                    }
+                    if (!x.mapType.isPresent()) {
+                        Optional<String> tNonOptional = x.resolvedTypePublicConstructorNonOptional(out.imports());
+                        if (tNonOptional.isPresent() && !tNonOptional.get().equals(t)) {
+                            out.println();
+                            out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)),
+                                    tNonOptional.get(), x.fieldName(cls));
+                            String params = fields.stream() //
+                                    .map(y -> {
+                                        if (y.fieldName(cls).equals(x.fieldName(cls))) {
+                                            if (y.nullable && !y.required) {
+                                                return String.format("%s.of(%s)", out.add(JsonNullable.class),
+                                                        y.fieldName(cls));
+                                            } else {
+                                                return String.format("%s.of(%s)", out.add(Optional.class),
+                                                        y.fieldName(cls));
+                                            }
+                                        } else {
+                                            return y.fieldName(cls);
+                                        }
+                                    }).collect(Collectors.joining(", "));
+                            out.line("return new %s(%s);", cls.simpleName(), params);
+                            out.closeParen();
+                        }
+                    }
+                });
     }
 
     private static void writeJsonAnySetter(CodePrintWriter out, Cls cls, Field f) {

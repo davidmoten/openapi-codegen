@@ -1,6 +1,7 @@
 package org.davidmoten.oa3.codegen.runtime;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.openapitools.jackson.nullable.JsonNullable;
@@ -155,6 +156,12 @@ public final class Preconditions {
 
     public static void checkMatchesPattern(Collection<?> s, String pattern, String name) {
         p.checkMatchesPattern(s, pattern, name);
+    }
+    
+    public static void checkEquals(Object expected, Object o, String name) {
+        if (!Objects.equals(expected, o)) {
+            throw new IllegalArgumentException("name was expected to be '" + expected + "' but was '" + o + "'");
+        }
     }
 
 }

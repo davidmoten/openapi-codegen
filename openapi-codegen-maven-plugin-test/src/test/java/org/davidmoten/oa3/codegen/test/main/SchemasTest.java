@@ -134,6 +134,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -398,11 +403,18 @@ public class SchemasTest {
         Vehicle v = m.readValue(json, Vehicle.class);
         assertEquals("bike", v.vehicleType());
         assertTrue(v instanceof Bike);
-        Bike b = new Bike("red");
-        assertEquals(json, m.writeValueAsString(b));
-        assertEquals(1, Bike.class.getConstructors().length);
-        iae(() -> new Bike(null));
-        onePublicConstructor(Bike.class);
+        Bike b = Bike.colour("red");
+        assertJsonEquals(json, m.writeValueAsString(b));
+        noPublicConstructors(Bike.class);
+        iae(() -> Bike.colour(null));
+    }
+    
+    private static void assertJsonEquals(String a, String b) {
+        try {
+            assertEquals(m.readTree(a), m.readTree(b));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -411,8 +423,8 @@ public class SchemasTest {
         Shape s = m.readValue(json, Shape.class);
         assertEquals("square", s.shapeType());
         assertEquals(json, m.writeValueAsString(s));
-        assertEquals(json, m.writeValueAsString(new Square()));
-        onePublicConstructor(Square.class);
+        assertEquals(json, m.writeValueAsString(Square.instance()));
+        noPublicConstructors(Square.class);
     }
 
     @Test
@@ -421,8 +433,8 @@ public class SchemasTest {
         Shape2 s = m.readValue(json, Shape2.class);
         assertEquals("Square2", s.shapeType());
         assertEquals(json, m.writeValueAsString(s));
-        assertEquals(json, m.writeValueAsString(new Square2()));
-        onePublicConstructor(Square2.class);
+        assertEquals(json, m.writeValueAsString(Square2.instance()));
+        noPublicConstructors(Square2.class);
     }
 
     @Test
@@ -883,7 +895,7 @@ public class SchemasTest {
     @Test
     public void testOneOfWithDiscriminatorUsingEnums()
             throws JsonProcessingException, NoSuchMethodException, SecurityException {
-        Shape3 a = new Oval3();
+        Shape3 a = Oval3.instance();
         String json = m.writeValueAsString(a);
         assertEquals("{\"shapeType\":\"oval\"}", json);
         assertEquals("oval", a.shapeType());
@@ -1250,6 +1262,10 @@ public class SchemasTest {
 
     private static void onePublicConstructor(Class<?> c) {
         assertEquals(1, c.getConstructors().length);
+    }
+    
+    private static void noPublicConstructors(Class<?> c) {
+        assertEquals(0, c.getConstructors().length);
     }
 
 }

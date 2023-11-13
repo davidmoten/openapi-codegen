@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.generator.Generator.MapType;
@@ -26,15 +27,17 @@ public class BuilderWriter {
         private final boolean isArray;
         private final Optional<MapType> mapType;
         private final boolean nullable;
+        private final Optional<Function<String, String>> valueExpressionFactory;
 
         public Field(String fieldName, String fullClassName, boolean required, boolean isArray,
-                Optional<MapType> mapType, boolean nullable) {
+                Optional<MapType> mapType, boolean nullable, Optional<Function<String,String>> valueExpressionFactory) {
             this.fieldName = fieldName;
             this.fullClassName = fullClassName;
             this.required = required;
             this.isArray = isArray;
             this.mapType = mapType;
             this.nullable = nullable;
+            this.valueExpressionFactory = valueExpressionFactory;
         }
 
         public boolean mandatory() {
@@ -50,7 +53,8 @@ public class BuilderWriter {
             StringBuilder builder = new StringBuilder();
             builder.append("Field [fieldName=").append(fieldName).append(", fullClassName=").append(fullClassName)
                     .append(", required=").append(required).append(", isArray=").append(isArray).append(", mapType=")
-                    .append(mapType).append(", nullable=").append(nullable).append("]");
+                    .append(mapType).append(", nullable=").append(nullable) //
+                    .append(", valueExpressionFactory=" + valueExpressionFactory.map(x -> "present").orElse("")).append("]");
             return builder.toString();
         }
         
@@ -64,11 +68,17 @@ public class BuilderWriter {
         if (fields.isEmpty()) {
             return;
         }
-        if (fields.size() == 1) {
-            writeSingleValueStaticFactoryMethods(out, fields.get(0), importedBuiltType);
+        List<Field> settableFields = fields.stream().filter(x -> !x.valueExpressionFactory.isPresent())
+                .collect(Collectors.toList());
+        if (settableFields.size() == 1) {
+            writeSingleValueStaticFactoryMethods(out, fields, settableFields.get(0), importedBuiltType);
             return;
         }
-        List<Field> sortedFields = new ArrayList<>(fields);
+        if (settableFields.isEmpty()) {
+            writeSingletonInstanceGetter(out, fields, importedBuiltType);
+            return;
+        }
+        List<Field> sortedFields = new ArrayList<>(settableFields);
         // sort so required are first
         sortedFields.sort((a, b) -> Boolean.compare(b.mandatory(), a.mandatory()));
 
@@ -257,7 +267,7 @@ public class BuilderWriter {
         }
     }
 
-    private static void writeSingleValueStaticFactoryMethods(CodePrintWriter out, Field field, String importedBuiltType) {
+    private static void writeSingleValueStaticFactoryMethods(CodePrintWriter out, List<Field> fields, Field field, String importedBuiltType) {
         out.println();
         final String methodName;
         if ("value".equals(field.fieldName)) {
@@ -265,9 +275,15 @@ public class BuilderWriter {
         } else {
             methodName = field.fieldName;
         }
+        
         out.line("public static %s %s(%s %s) {", importedBuiltType, methodName, 
                 enhancedImportedType(field, out.imports()), field.fieldName);
-        out.line("return new %s(%s);", importedBuiltType, field.fieldName);
+        
+        String params = fields //
+                .stream() //
+                .map(x -> fieldExpression(x)) //
+                .collect(Collectors.joining(", "));
+        out.line("return new %s(%s);", importedBuiltType, params);
         out.closeParen();
 
         if (!field.mandatory() //
@@ -276,16 +292,44 @@ public class BuilderWriter {
             out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
                     baseImportedType(field, out.imports()), field.fieldName);
             Class<?> c = field.nullable && !field.required ? JsonNullable.class : Optional.class;
-            out.line("return new %s(%s.of(%s));", importedBuiltType, c, field.fieldName);
+            String params2 = fields //
+                    .stream() //
+                    .map(x -> {
+                        if (x.fieldName.equals(field.fieldName)) {
+                            return String.format("%s.of(%s)", out.add(c), x.fieldName);
+                        } else {
+                            return fieldExpression(x);
+                        }
+                    }) //
+                    .collect(Collectors.joining(", "));
+            out.line("return new %s(%s);", importedBuiltType, params2);
             out.closeParen();
         }
+    }
+    
+    private static void writeSingletonInstanceGetter(CodePrintWriter out, List<Field> fields, String importedBuiltType) {
+        out.println();
+        out.line("private static final %s INSTANCE = ", importedBuiltType);
+        String params = fields //
+                .stream() //
+                .map(x -> fieldExpression(x))
+                .collect(Collectors.joining(", "));
+        out.right().right();
+        out.line("new %s(%s);", importedBuiltType, params);
+        out.left().left();
+        out.println();
+        out.line("public static %s instance() {", importedBuiltType);
+        out.line("return INSTANCE;");
+        out.closeParen();
     }
 
     private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType,
             String builderField, boolean useOf) {
         out.println();
         out.line("public %s build() {", importedBuiltType);
-        String params = fields.stream().map(x -> String.format("this%s.%s", builderField, x.fieldName))
+        String params = fields //
+                .stream() //
+                .map(x -> fieldExpression(builderField, x))
                 .collect(Collectors.joining(", "));
         if (useOf) {
             out.line("return %s.of(%s);", importedBuiltType, params);
@@ -293,6 +337,15 @@ public class BuilderWriter {
             out.line("return new %s(%s);", importedBuiltType, params);
         }
         out.closeParen();
+    }
+
+    private static String fieldExpression(Field x) {
+        return x.valueExpressionFactory.map(factory -> factory.apply(x.fieldName)).orElse(x.fieldName);
+    }
+    
+    private static String fieldExpression(String builderField, Field x) {
+        String fieldExpression = String.format("this%s.%s", builderField, x.fieldName);
+        return x.valueExpressionFactory.map(factory -> factory.apply(fieldExpression)).orElse(fieldExpression);
     }
 
     private static String baseImportedType(Field f, Imports imports) {
