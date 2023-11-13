@@ -403,7 +403,7 @@ public final class SchemasCodeWriter {
                 final String parameters = cls.fields //
                         .stream() ///
                         .map(x -> String.format("\n%s%s %s", out.indent(),
-                                x.resolvedTypePublicConstructor(out.imports()), x.fieldName(cls)))
+                                x.resolvedType(out.imports()), x.fieldName(cls)))
                         .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
@@ -429,7 +429,7 @@ public final class SchemasCodeWriter {
                 // write getters
                 cls.fields.forEach(f -> {
                     out.println();
-                    writeGetter(out, f.resolvedTypePublicConstructor(out.imports()), f.fieldName(cls),
+                    writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls),
                             f.fieldName(cls));
                 });
                 
