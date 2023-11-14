@@ -15,9 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.davidmoten.oa3.codegen.generator.internal.Imports;
@@ -71,22 +68,13 @@ public class Generator {
         for (MyVisitor.Result result : v.results()) {
             findFullClassNameInterfaces(result.cls, fullClassNameInterfaces);
         }
-        ExecutorService executor = Executors.newWorkStealingPool();
         for (MyVisitor.Result result : v.results()) {
-            executor.submit(() -> {
-                Cls cls = result.cls;
-                String schemaName = result.name;
-                if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
-                        && !definition.excludeSchemas().contains(schemaName)) {
-                    SchemasCodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
-                }
-            });
-        }
-        executor.shutdown();
-        try {
-            executor.awaitTermination(5, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            // do nothing
+            Cls cls = result.cls;
+            String schemaName = result.name;
+            if ((definition.includeSchemas().isEmpty() || definition.includeSchemas().contains(schemaName))
+                    && !definition.excludeSchemas().contains(schemaName)) {
+                SchemasCodeWriter.writeSchemaClass(names, fullClassNameInterfaces, cls, schemaName);
+            }
         }
     }
 
