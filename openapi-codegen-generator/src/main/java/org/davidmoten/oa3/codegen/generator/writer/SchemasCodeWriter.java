@@ -640,73 +640,9 @@ public final class SchemasCodeWriter {
 
     private static void writeConstructor(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces,
             Names names) {
-        // this code will write one public constructor or one private and one public.
-        // The private one is to be annotated with JsonCreator for use by Jackson.
-        // TODO javadoc
-//        out.right().right();
-//        // collect constructor parameters
-//        final String parametersNullable;
-//        if (cls.unwrapSingleField()) {
-//            // don't annotate parameters with JsonProperty because we will annotate field
-//            // with JsonValue
-//            parametersNullable = cls.fields.stream() //
-//                    .map(x -> {
-//                        if (cls.classType == ClassType.ENUM && x.fullClassName.equals(Map.class.getCanonicalName())) {
-//                            return String.format("\n%s%s<%s, %s> %s", out.indent(), out.add(Map.class),
-//                                    out.add(String.class), out.add(Object.class), x.fieldName(cls));
-//                        } else {
-//                            return String.format("\n%s%s %s", out.indent(), x.resolvedTypePublicConstructor(out.imports()),
-//                                    x.fieldName(cls));
-//                        }}) //
-//                    .collect(Collectors.joining(","));
-//        } else {
-//            parametersNullable = cls.fields.stream() //
-//                    .filter(x -> !x.isAdditionalProperties()) //
-//                    .map(x -> String.format("\n%s@%s(\"%s\") %s %s", out.indent(), out.add(JsonProperty.class), x.name,
-//                            x.resolvedTypePublicConstructor(out.imports()), x.fieldName(cls)))
-//                    .collect(Collectors.joining(","));
-//        }
-//        out.left().left();
 
         Set<Cls> interfaces = interfaces(cls, fullClassNameInterfaces);
 
-//        boolean hasOptional = cls.fields.stream().anyMatch(f -> !f.required //
-//                && (!f.nullable || f.isArray) //
-//                && !f.isMapType(MapType.FIELD) //
-//                || //
-//                f.required //
-//                        && f.nullable //
-//                        && !f.isMapType(MapType.ADDITIONAL_PROPERTIES) //
-//                        && !f.isArray //
-//                || //
-//                !f.nullable && !f.required && f.isMapType(MapType.FIELD));
-//        boolean hasBinary = cls.fields.stream().anyMatch(Field::isOctets);
-//        // if has optional or other criteria then write a private constructor with
-//        // nullable parameters and a public constructor with Optional parameters
-//        final String visibility = cls.classType == ClassType.ENUM || hasOptional || hasBinary || !interfaces.isEmpty()
-//                ? "private"
-//                : "public";
-//        if (visibility.equals("public")) {
-//            addConstructorBindingAnnotation(out, names);
-//        }
-//        out.line("%s %s(%s) {", visibility, Names.simpleClassName(cls.fullClassName), parametersNullable);
-//
-
-//
-//        // assign
-//        cls.fields.stream().forEach(x -> {
-//            if (x.isMapType(MapType.ADDITIONAL_PROPERTIES)) {
-//                if (x.isArray) {
-//                    out.line("this.%s = new %s<>();", x.fieldName(cls), ArrayList.class);
-//                } else {
-//                    out.line("this.%s = new %s<>();", x.fieldName(cls), HashMap.class);
-//                }
-//            } else {
-//                assignField(out, cls, x);
-//            }
-//        });
-//        out.closeParen();
-           
             
             boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
             boolean hasDiscriminator = cls.fields.stream().anyMatch(x -> isDiscriminator(interfaces, x));
