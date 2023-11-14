@@ -170,9 +170,9 @@ Uses composition but also exposes all subschema properties at allOf class level 
     Pet3:
       type: object
       required:
-        - pet_type
+        - petType
       properties:
-        pet_type:
+        petType:
           type: string
     Dog3:
       allOf: # Combines the main `Pet3` schema with `Dog3`-specific properties
