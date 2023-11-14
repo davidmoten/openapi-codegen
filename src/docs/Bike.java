@@ -54,10 +54,12 @@ public final class Bike implements HasWheels, Vehicle {
         this.colour = colour;
     }
 
+
     @Override
     public String vehicleType() {
         return DiscriminatorHelper.value(vehicleType);
     }
+
 
     @Override
     public String wheelsType() {

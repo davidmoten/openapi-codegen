@@ -45,10 +45,12 @@ public final class Car implements HasWheels, Vehicle {
         this.wheelsType = wheelsType;
     }
 
+
     @Override
     public String vehicleType() {
         return DiscriminatorHelper.value(vehicleType);
     }
+
 
     @Override
     public String wheelsType() {

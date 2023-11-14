@@ -45,16 +45,18 @@ public final class Geometry {
     public Geometry(Circle value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
+
     public Object value() {
         return value;
     }
+
     public static Geometry of(Rectangle value) {
         return new Geometry(value);
     }
+
     public static Geometry of(Circle value) {
         return new Geometry(value);
     }
-
 
     @SuppressWarnings("serial")
     public static final class _Deserializer extends PolymorphicDeserializer<Geometry> {
