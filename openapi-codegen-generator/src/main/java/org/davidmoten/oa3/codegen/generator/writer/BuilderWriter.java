@@ -268,7 +268,6 @@ public class BuilderWriter {
     }
 
     private static void writeSingleValueStaticFactoryMethods(CodePrintWriter out, List<Field> fields, Field field, String importedBuiltType) {
-        out.println();
         final String methodName;
         if ("value".equals(field.fieldName)) {
             methodName = "of";

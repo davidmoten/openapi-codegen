@@ -392,6 +392,7 @@ public final class SchemasCodeWriter {
                 // parameters
                 writeOneOfAnyOfNonDiscriminatedObjectConstructor(out, cls);
                 cls.fields.forEach(f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, cls, f));
+                out.println();
                 writeGetter(out, out.add(Object.class), "value", "value");
                 writeNonDiscriminatedBuilder(out, cls);
             } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
@@ -962,6 +963,7 @@ public final class SchemasCodeWriter {
     private static void writeGetters(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
         cls.fields.forEach(f -> {
+            out.println();
             Optional<Discriminator> disc = discriminator(interfaces, f);
             if (disc.isPresent()) {
                 // write constant value for discriminator, if is enum then
@@ -973,11 +975,9 @@ public final class SchemasCodeWriter {
                 if (!f.isArray && f.isAdditionalProperties()) {
                     writeJsonAnySetter(out, cls, f);
                 }
-                out.println();
                 final String expression = f.fieldName(cls);
                 writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), expression);
             } else {
-                out.println();
                 final String value = f.fieldName(cls);
                 final String returnType;
                 if (cls.classType == ClassType.ENUM && f.fullClassName.equals(Map.class.getCanonicalName())) {
@@ -1072,7 +1072,6 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeGetter(CodePrintWriter out, String returnImportedType, String fieldName, String value) {
-        out.println();
         out.line("public %s %s() {", returnImportedType, fieldName);
         out.line("return %s;", value);
         out.closeParen();
