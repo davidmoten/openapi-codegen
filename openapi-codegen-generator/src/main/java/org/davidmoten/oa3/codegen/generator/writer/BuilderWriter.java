@@ -276,6 +276,7 @@ public class BuilderWriter {
             methodName = field.fieldName;
         }
         
+        out.println();
         out.line("public static %s %s(%s %s) {", importedBuiltType, methodName, 
                 enhancedImportedType(field, out.imports()), field.fieldName);
         

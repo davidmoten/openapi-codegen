@@ -394,7 +394,6 @@ public final class SchemasCodeWriter {
                 cls.fields.forEach(f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, cls, f));
                 writeGetter(out, out.add(Object.class), "value", "value");
                 writeNonDiscriminatedBuilder(out, cls);
-                out.println();
             } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 writeFields(out, cls);
                 
@@ -561,6 +560,7 @@ public final class SchemasCodeWriter {
     
     private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Cls cls) {
         cls.fields.forEach(f -> {
+            out.println();
             out.line("public static %s of(%s value) {", cls.simpleName(), out.add(f.fullClassName));
             out.line("return new %s(value);", cls.simpleName());
             out.closeParen();
@@ -1072,6 +1072,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeGetter(CodePrintWriter out, String returnImportedType, String fieldName, String value) {
+        out.println();
         out.line("public %s %s() {", returnImportedType, fieldName);
         out.line("return %s;", value);
         out.closeParen();
