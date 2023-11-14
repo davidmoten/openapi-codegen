@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.main.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -31,9 +30,12 @@ import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonDeserialize(using = Dog3._Deserializer.class)
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class Dog3 {
 
     @JsonUnwrapped
@@ -130,42 +132,37 @@ public final class Dog3 {
         }
     }
 
-    @JsonInclude(Include.NON_NULL)
-    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonAutoDetect(
+            fieldVisibility = JsonAutoDetect.Visibility.ANY,
+            creatorVisibility = JsonAutoDetect.Visibility.ANY,
+            setterVisibility = JsonAutoDetect.Visibility.ANY)
     public static final class Detail {
 
         @JsonProperty("bark")
-        private final Boolean bark;
+        private final Optional<Boolean> bark;
 
         @JsonProperty("breed")
-        private final Detail.Breed breed;
+        private final Optional<Detail.Breed> breed;
 
         @JsonCreator
-        private Detail(
-                @JsonProperty("bark") Boolean bark,
-                @JsonProperty("breed") Detail.Breed breed) {
-            this.bark = bark;
-            this.breed = breed;
-        }
-
-        @ConstructorBinding
         public Detail(
-                Optional<Boolean> bark,
-                Optional<Detail.Breed> breed) {
+                @JsonProperty("bark") Optional<Boolean> bark,
+                @JsonProperty("breed") Optional<Detail.Breed> breed) {
             if (Globals.config().validateInConstructor().test(Detail.class)) {
                 Preconditions.checkNotNull(bark, "bark");
                 Preconditions.checkNotNull(breed, "breed");
             }
-            this.bark = bark.orElse(null);
-            this.breed = breed.orElse(null);
+            this.bark = bark;
+            this.breed = breed;
         }
 
         public Optional<Boolean> bark() {
-            return Optional.ofNullable(bark);
+            return bark;
         }
 
         public Optional<Detail.Breed> breed() {
-            return Optional.ofNullable(breed);
+            return breed;
         }
 
         Map<String, Object> _internal_properties() {
@@ -176,19 +173,19 @@ public final class Dog3 {
         }
 
         public Detail withBark(Optional<Boolean> bark) {
-            return new Detail(bark, Optional.ofNullable(breed));
+            return new Detail(bark, breed);
         }
 
         public Detail withBark(boolean bark) {
-            return new Detail(Optional.of(bark), Optional.ofNullable(breed));
+            return new Detail(Optional.of(bark), breed);
         }
 
         public Detail withBreed(Optional<Detail.Breed> breed) {
-            return new Detail(Optional.ofNullable(bark), breed);
+            return new Detail(bark, breed);
         }
 
         public Detail withBreed(Detail.Breed breed) {
-            return new Detail(Optional.ofNullable(bark), Optional.of(breed));
+            return new Detail(bark, Optional.of(breed));
         }
 
         public static Builder builder() {
@@ -238,8 +235,12 @@ public final class Dog3 {
             @JsonValue
             private final String value;
 
+            @ConstructorBinding
             private Breed(
                     String value) {
+                if (Globals.config().validateInConstructor().test(Breed.class)) {
+                    Preconditions.checkNotNull(value, "value");
+                }
                 this.value = value;
             }
 

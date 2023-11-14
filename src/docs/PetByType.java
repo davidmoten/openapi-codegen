@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.main.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -25,35 +24,30 @@ import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class PetByType {
 
     @JsonProperty("pet_type")
     private final PetType pet_type;
 
     @JsonProperty("hunts")
-    private final Boolean hunts;
+    private final Optional<Boolean> hunts;
 
     @JsonCreator
-    private PetByType(
-            @JsonProperty("pet_type") PetType pet_type,
-            @JsonProperty("hunts") Boolean hunts) {
-        this.pet_type = pet_type;
-        this.hunts = hunts;
-    }
-
-    @ConstructorBinding
     public PetByType(
-            PetType pet_type,
-            Optional<Boolean> hunts) {
+            @JsonProperty("pet_type") PetType pet_type,
+            @JsonProperty("hunts") Optional<Boolean> hunts) {
         if (Globals.config().validateInConstructor().test(PetByType.class)) {
             Preconditions.checkNotNull(pet_type, "pet_type");
             Preconditions.checkNotNull(hunts, "hunts");
         }
         this.pet_type = pet_type;
-        this.hunts = hunts.orElse(null);
+        this.hunts = hunts;
     }
 
     public PetType pet_type() {
@@ -61,7 +55,7 @@ public final class PetByType {
     }
 
     public Optional<Boolean> hunts() {
-        return Optional.ofNullable(hunts);
+        return hunts;
     }
 
     Map<String, Object> _internal_properties() {
@@ -72,7 +66,7 @@ public final class PetByType {
     }
 
     public PetByType withPet_type(PetType pet_type) {
-        return new PetByType(pet_type, Optional.ofNullable(hunts));
+        return new PetByType(pet_type, hunts);
     }
 
     public PetByType withHunts(Optional<Boolean> hunts) {
@@ -136,8 +130,12 @@ public final class PetByType {
         @JsonValue
         private final String value;
 
+        @ConstructorBinding
         private PetType(
                 String value) {
+            if (Globals.config().validateInConstructor().test(PetType.class)) {
+                Preconditions.checkNotNull(value, "value");
+            }
             this.value = value;
         }
 

@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.library.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -20,11 +19,13 @@ import java.util.Optional;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.library.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class User {
 
     @JsonProperty("firstName")
@@ -37,32 +38,14 @@ public final class User {
     private final String email;
 
     @JsonProperty("mobile")
-    private final String mobile;
+    private final Optional<String> mobile;
 
     @JsonCreator
-    private User(
+    public User(
             @JsonProperty("firstName") String firstName,
             @JsonProperty("lastName") String lastName,
             @JsonProperty("email") String email,
-            @JsonProperty("mobile") String mobile) {
-        if (Globals.config().validateInConstructor().test(User.class)) {
-            Preconditions.checkMinLength(firstName, 1, "firstName");
-            Preconditions.checkMinLength(lastName, 1, "lastName");
-            Preconditions.checkMinLength(email, 3, "email");
-            Preconditions.checkMatchesPattern(mobile, "[\\+][0-9]+", "mobile");
-        }
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.mobile = mobile;
-    }
-
-    @ConstructorBinding
-    public User(
-            String firstName,
-            String lastName,
-            String email,
-            Optional<String> mobile) {
+            @JsonProperty("mobile") Optional<String> mobile) {
         if (Globals.config().validateInConstructor().test(User.class)) {
             Preconditions.checkNotNull(firstName, "firstName");
             Preconditions.checkMinLength(firstName, 1, "firstName");
@@ -76,7 +59,7 @@ public final class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
-        this.mobile = mobile.orElse(null);
+        this.mobile = mobile;
     }
 
     public String firstName() {
@@ -92,7 +75,7 @@ public final class User {
     }
 
     public Optional<String> mobile() {
-        return Optional.ofNullable(mobile);
+        return mobile;
     }
 
     Map<String, Object> _internal_properties() {
@@ -105,15 +88,15 @@ public final class User {
     }
 
     public User withFirstName(String firstName) {
-        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
+        return new User(firstName, lastName, email, mobile);
     }
 
     public User withLastName(String lastName) {
-        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
+        return new User(firstName, lastName, email, mobile);
     }
 
     public User withEmail(String email) {
-        return new User(firstName, lastName, email, Optional.ofNullable(mobile));
+        return new User(firstName, lastName, email, mobile);
     }
 
     public User withMobile(Optional<String> mobile) {

@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.main.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -17,12 +16,16 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.davidmoten.oa3.codegen.runtime.DiscriminatorHelper;
+import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class Car implements HasWheels, Vehicle {
 
     @JsonProperty("vehicleType")
@@ -31,18 +34,15 @@ public final class Car implements HasWheels, Vehicle {
     @JsonProperty("wheelsType")
     private final String wheelsType;
 
+    @ConstructorBinding
     @JsonCreator
     private Car(
             @JsonProperty("vehicleType") String vehicleType,
             @JsonProperty("wheelsType") String wheelsType) {
+        Preconditions.checkEquals(DiscriminatorHelper.value(String.class, "car"), vehicleType, "vehicleType");
         this.vehicleType = vehicleType;
+        Preconditions.checkEquals(DiscriminatorHelper.value(String.class, "four"), wheelsType, "wheelsType");
         this.wheelsType = wheelsType;
-    }
-
-    @ConstructorBinding
-    public Car() {
-        this.vehicleType = DiscriminatorHelper.value(String.class, "car");
-        this.wheelsType = DiscriminatorHelper.value(String.class, "four");
     }
 
     @Override
@@ -60,6 +60,13 @@ public final class Car implements HasWheels, Vehicle {
                 .put("vehicleType", (Object) vehicleType)
                 .put("wheelsType", (Object) wheelsType)
                 .build();
+    }
+
+    private static final Car INSTANCE = 
+            new Car(DiscriminatorHelper.value(String.class, "car"), DiscriminatorHelper.value(String.class, "four"));
+
+    public static Car instance() {
+        return INSTANCE;
     }
 
     @Override

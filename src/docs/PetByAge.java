@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.main.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -20,36 +19,30 @@ import java.util.Optional;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class PetByAge {
 
     @JsonProperty("age")
     private final long age;
 
     @JsonProperty("nickname")
-    private final String nickname;
+    private final Optional<String> nickname;
 
     @JsonCreator
-    private PetByAge(
-            @JsonProperty("age") long age,
-            @JsonProperty("nickname") String nickname) {
-        this.age = age;
-        this.nickname = nickname;
-    }
-
-    @ConstructorBinding
     public PetByAge(
-            long age,
-            Optional<String> nickname) {
+            @JsonProperty("age") long age,
+            @JsonProperty("nickname") Optional<String> nickname) {
         if (Globals.config().validateInConstructor().test(PetByAge.class)) {
             Preconditions.checkNotNull(nickname, "nickname");
         }
         this.age = age;
-        this.nickname = nickname.orElse(null);
+        this.nickname = nickname;
     }
 
     public long age() {
@@ -57,7 +50,7 @@ public final class PetByAge {
     }
 
     public Optional<String> nickname() {
-        return Optional.ofNullable(nickname);
+        return nickname;
     }
 
     Map<String, Object> _internal_properties() {
@@ -68,7 +61,7 @@ public final class PetByAge {
     }
 
     public PetByAge withAge(long age) {
-        return new PetByAge(age, Optional.ofNullable(nickname));
+        return new PetByAge(age, nickname);
     }
 
     public PetByAge withNickname(Optional<String> nickname) {

@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.main.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -27,12 +26,14 @@ import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonDeserialize(using = Cat3._Deserializer.class)
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class Cat3 {
 
     @JsonUnwrapped
@@ -129,42 +130,37 @@ public final class Cat3 {
         }
     }
 
-    @JsonInclude(Include.NON_NULL)
-    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonAutoDetect(
+            fieldVisibility = JsonAutoDetect.Visibility.ANY,
+            creatorVisibility = JsonAutoDetect.Visibility.ANY,
+            setterVisibility = JsonAutoDetect.Visibility.ANY)
     public static final class Detail {
 
         @JsonProperty("hunts")
-        private final Boolean hunts;
+        private final Optional<Boolean> hunts;
 
         @JsonProperty("age")
-        private final Long age;
+        private final Optional<Long> age;
 
         @JsonCreator
-        private Detail(
-                @JsonProperty("hunts") Boolean hunts,
-                @JsonProperty("age") Long age) {
-            this.hunts = hunts;
-            this.age = age;
-        }
-
-        @ConstructorBinding
         public Detail(
-                Optional<Boolean> hunts,
-                Optional<Long> age) {
+                @JsonProperty("hunts") Optional<Boolean> hunts,
+                @JsonProperty("age") Optional<Long> age) {
             if (Globals.config().validateInConstructor().test(Detail.class)) {
                 Preconditions.checkNotNull(hunts, "hunts");
                 Preconditions.checkNotNull(age, "age");
             }
-            this.hunts = hunts.orElse(null);
-            this.age = age.orElse(null);
+            this.hunts = hunts;
+            this.age = age;
         }
 
         public Optional<Boolean> hunts() {
-            return Optional.ofNullable(hunts);
+            return hunts;
         }
 
         public Optional<Long> age() {
-            return Optional.ofNullable(age);
+            return age;
         }
 
         Map<String, Object> _internal_properties() {
@@ -175,19 +171,19 @@ public final class Cat3 {
         }
 
         public Detail withHunts(Optional<Boolean> hunts) {
-            return new Detail(hunts, Optional.ofNullable(age));
+            return new Detail(hunts, age);
         }
 
         public Detail withHunts(boolean hunts) {
-            return new Detail(Optional.of(hunts), Optional.ofNullable(age));
+            return new Detail(Optional.of(hunts), age);
         }
 
         public Detail withAge(Optional<Long> age) {
-            return new Detail(Optional.ofNullable(hunts), age);
+            return new Detail(hunts, age);
         }
 
         public Detail withAge(long age) {
-            return new Detail(Optional.ofNullable(hunts), Optional.of(age));
+            return new Detail(hunts, Optional.of(age));
         }
 
         public static Builder builder() {

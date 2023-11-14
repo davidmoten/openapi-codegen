@@ -10,7 +10,11 @@ import java.lang.Object;
 import java.lang.String;
 import java.util.Objects;
 
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+import org.davidmoten.oa3.codegen.runtime.Preconditions;
+import org.davidmoten.oa3.codegen.test.library.Globals;
+import org.springframework.boot.context.properties.ConstructorBinding;
+
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public enum Language {
 
     CHINESE("Chinese"),
@@ -34,8 +38,12 @@ public enum Language {
     @JsonValue
     private final String value;
 
+    @ConstructorBinding
     private Language(
             String value) {
+        if (Globals.config().validateInConstructor().test(Language.class)) {
+            Preconditions.checkNotNull(value, "value");
+        }
         this.value = value;
     }
 

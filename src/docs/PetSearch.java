@@ -22,7 +22,7 @@ import org.davidmoten.oa3.codegen.util.Util;
 
 @JsonDeserialize(using = PetSearch._Deserializer.class)
 @JsonSerialize(using = PetSearch._Serializer.class)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class PetSearch {
 
     private final Optional<PetByAge> petByAge;

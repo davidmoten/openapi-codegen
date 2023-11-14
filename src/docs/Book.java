@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.library.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -20,11 +19,13 @@ import java.util.Optional;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.library.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class Book {
 
     @JsonProperty("title")
@@ -34,7 +35,7 @@ public final class Book {
     private final PersonName author;
 
     @JsonProperty("abstract")
-    private final Abstract abstract_;
+    private final Optional<Abstract> abstract_;
 
     @JsonProperty("publishedYear")
     private final Year publishedYear;
@@ -52,35 +53,15 @@ public final class Book {
     private final Language language;
 
     @JsonCreator
-    private Book(
+    public Book(
             @JsonProperty("title") String title,
             @JsonProperty("author") PersonName author,
-            @JsonProperty("abstract") Abstract abstract_,
+            @JsonProperty("abstract") Optional<Abstract> abstract_,
             @JsonProperty("publishedYear") Year publishedYear,
             @JsonProperty("authorId") Id authorId,
             @JsonProperty("isbn") ISBN isbn,
             @JsonProperty("itemId") ItemId itemId,
             @JsonProperty("language") Language language) {
-        this.title = title;
-        this.author = author;
-        this.abstract_ = abstract_;
-        this.publishedYear = publishedYear;
-        this.authorId = authorId;
-        this.isbn = isbn;
-        this.itemId = itemId;
-        this.language = language;
-    }
-
-    @ConstructorBinding
-    public Book(
-            String title,
-            PersonName author,
-            Optional<Abstract> abstract_,
-            Year publishedYear,
-            Id authorId,
-            ISBN isbn,
-            ItemId itemId,
-            Language language) {
         if (Globals.config().validateInConstructor().test(Book.class)) {
             Preconditions.checkNotNull(title, "title");
             Preconditions.checkNotNull(author, "author");
@@ -93,7 +74,7 @@ public final class Book {
         }
         this.title = title;
         this.author = author;
-        this.abstract_ = abstract_.orElse(null);
+        this.abstract_ = abstract_;
         this.publishedYear = publishedYear;
         this.authorId = authorId;
         this.isbn = isbn;
@@ -110,7 +91,7 @@ public final class Book {
     }
 
     public Optional<Abstract> abstract_() {
-        return Optional.ofNullable(abstract_);
+        return abstract_;
     }
 
     public Year publishedYear() {
@@ -147,11 +128,11 @@ public final class Book {
     }
 
     public Book withTitle(String title) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
     public Book withAuthor(PersonName author) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
     public Book withAbstract_(Optional<Abstract> abstract_) {
@@ -163,23 +144,23 @@ public final class Book {
     }
 
     public Book withPublishedYear(Year publishedYear) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
     public Book withAuthorId(Id authorId) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
     public Book withIsbn(ISBN isbn) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
     public Book withItemId(ItemId itemId) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
     public Book withLanguage(Language language) {
-        return new Book(title, author, Optional.ofNullable(abstract_), publishedYear, authorId, isbn, itemId, language);
+        return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
     public static Builder builder() {

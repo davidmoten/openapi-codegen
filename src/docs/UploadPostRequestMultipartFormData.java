@@ -1,12 +1,13 @@
 package org.davidmoten.oa3.codegen.test.paths.path;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
@@ -20,15 +21,20 @@ import java.util.Objects;
 
 import org.davidmoten.oa3.codegen.http.HasEncoding;
 import org.davidmoten.oa3.codegen.http.HasStringValue;
+import org.davidmoten.oa3.codegen.runtime.OctetsDeserializer;
+import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.paths.Globals;
 import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class UploadPostRequestMultipartFormData {
 
     @JsonProperty("point")
@@ -41,7 +47,6 @@ public final class UploadPostRequestMultipartFormData {
     private final Document document;
 
     @JsonCreator
-    @ConstructorBinding
     public UploadPostRequestMultipartFormData(
             @JsonProperty("point") Point point,
             @JsonProperty("description") String description,
@@ -152,34 +157,30 @@ public final class UploadPostRequestMultipartFormData {
         return builder().point(point);
     }
 
-    @JsonInclude(Include.NON_NULL)
-    @JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
+    @JsonInclude(Include.NON_ABSENT)
+    @JsonAutoDetect(
+            fieldVisibility = JsonAutoDetect.Visibility.ANY,
+            creatorVisibility = JsonAutoDetect.Visibility.ANY,
+            setterVisibility = JsonAutoDetect.Visibility.ANY)
     public static final class Document implements HasEncoding {
 
         @JsonProperty("contentType")
         private final Document.ContentType contentType;
 
         @JsonProperty("value")
-        private final String value;
+        @JsonSerialize(using = OctetsSerializer.class)
+        private final byte[] value;
 
         @JsonCreator
-        private Document(
-                @JsonProperty("contentType") Document.ContentType contentType,
-                @JsonProperty("value") String value) {
-            this.contentType = contentType;
-            this.value = value;
-        }
-
-        @ConstructorBinding
         public Document(
-                Document.ContentType contentType,
-                byte[] value) {
+                @JsonProperty("contentType") Document.ContentType contentType,
+                @JsonProperty("value") @JsonDeserialize(using = OctetsDeserializer.class) byte[] value) {
             if (Globals.config().validateInConstructor().test(Document.class)) {
                 Preconditions.checkNotNull(contentType, "contentType");
                 Preconditions.checkNotNull(value, "value");
             }
             this.contentType = contentType;
-            this.value = Util.encodeOctets(value);
+            this.value = value;
         }
 
         public Document.ContentType contentType() {
@@ -187,7 +188,7 @@ public final class UploadPostRequestMultipartFormData {
         }
 
         public byte[] value() {
-            return Util.decodeOctets(value);
+            return value;
         }
 
         Map<String, Object> _internal_properties() {
@@ -198,7 +199,7 @@ public final class UploadPostRequestMultipartFormData {
         }
 
         public Document withContentType(Document.ContentType contentType) {
-            return new Document(contentType, Util.decodeOctets(value));
+            return new Document(contentType, value);
         }
 
         public Document withValue(byte[] value) {
@@ -261,8 +262,12 @@ public final class UploadPostRequestMultipartFormData {
             @JsonValue
             private final String value;
 
+            @ConstructorBinding
             private ContentType(
                     String value) {
+                if (Globals.config().validateInConstructor().test(ContentType.class)) {
+                    Preconditions.checkNotNull(value, "value");
+                }
                 this.value = value;
             }
 

@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.main.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -22,9 +21,12 @@ import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-@JsonInclude(Include.NON_NULL)
-@JsonAutoDetect(fieldVisibility = Visibility.ANY, creatorVisibility = Visibility.ANY, setterVisibility = Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.9-SNAPSHOT")
+@JsonInclude(Include.NON_ABSENT)
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        creatorVisibility = JsonAutoDetect.Visibility.ANY,
+        setterVisibility = JsonAutoDetect.Visibility.ANY)
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class Bike implements HasWheels, Vehicle {
 
     @JsonProperty("vehicleType")
@@ -36,24 +38,19 @@ public final class Bike implements HasWheels, Vehicle {
     @JsonProperty("colour")
     private final String colour;
 
+    @ConstructorBinding
     @JsonCreator
     private Bike(
             @JsonProperty("vehicleType") String vehicleType,
             @JsonProperty("wheelsType") String wheelsType,
             @JsonProperty("colour") String colour) {
-        this.vehicleType = vehicleType;
-        this.wheelsType = wheelsType;
-        this.colour = colour;
-    }
-
-    @ConstructorBinding
-    public Bike(
-            String colour) {
         if (Globals.config().validateInConstructor().test(Bike.class)) {
             Preconditions.checkNotNull(colour, "colour");
         }
-        this.vehicleType = DiscriminatorHelper.value(String.class, "bike");
-        this.wheelsType = DiscriminatorHelper.value(String.class, "two");
+        Preconditions.checkEquals(DiscriminatorHelper.value(String.class, "bike"), vehicleType, "vehicleType");
+        this.vehicleType = vehicleType;
+        Preconditions.checkEquals(DiscriminatorHelper.value(String.class, "two"), wheelsType, "wheelsType");
+        this.wheelsType = wheelsType;
         this.colour = colour;
     }
 
@@ -79,8 +76,12 @@ public final class Bike implements HasWheels, Vehicle {
                 .build();
     }
 
+    public Bike withColour(String colour) {
+        return new Bike(vehicleType, wheelsType, colour);
+    }
+
     public static Bike colour(String colour) {
-        return new Bike(colour);
+        return new Bike(DiscriminatorHelper.value(String.class, "bike"), DiscriminatorHelper.value(String.class, "two"), colour);
     }
 
     @Override
