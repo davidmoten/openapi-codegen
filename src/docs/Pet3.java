@@ -27,30 +27,30 @@ import org.davidmoten.oa3.codegen.util.Util;
 @Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
 public final class Pet3 {
 
-    @JsonProperty("pet_type")
-    private final String pet_type;
+    @JsonProperty("petType")
+    private final String petType;
 
     @JsonCreator
     public Pet3(
-            @JsonProperty("pet_type") String pet_type) {
+            @JsonProperty("petType") String petType) {
         if (Globals.config().validateInConstructor().test(Pet3.class)) {
-            Preconditions.checkNotNull(pet_type, "pet_type");
+            Preconditions.checkNotNull(petType, "petType");
         }
-        this.pet_type = pet_type;
+        this.petType = petType;
     }
 
-    public String pet_type() {
-        return pet_type;
+    public String petType() {
+        return petType;
     }
 
     Map<String, Object> _internal_properties() {
         return Maps
-                .put("pet_type", (Object) pet_type)
+                .put("petType", (Object) petType)
                 .build();
     }
 
-    public static Pet3 pet_type(String pet_type) {
-        return new Pet3(pet_type);
+    public static Pet3 petType(String petType) {
+        return new Pet3(petType);
     }
 
     @Override
@@ -63,16 +63,16 @@ public final class Pet3 {
         }
         Pet3 other = (Pet3) o;
         return 
-            Objects.equals(this.pet_type, other.pet_type);
+            Objects.equals(this.petType, other.petType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pet_type);
+        return Objects.hash(petType);
     }
 
     @Override
     public String toString() {
-        return Util.toString(Pet3.class, "pet_type", pet_type);
+        return Util.toString(Pet3.class, "petType", petType);
     }
 }

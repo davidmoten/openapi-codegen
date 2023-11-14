@@ -61,8 +61,8 @@ public final class Cat3 {
         return detail;
     }
 
-    public String pet_type() {
-        return pet3.pet_type();
+    public String petType() {
+        return pet3.petType();
     }
 
     public Optional<Boolean> hunts() {
