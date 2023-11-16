@@ -84,7 +84,7 @@
             <plugin>
                 <groupId>com.github.davidmoten</groupId>
                 <artifactId>plantuml-maven-plugin</artifactId>
-                <version>0.2.8</version>
+                <version>0.2.9-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <id>generate-diagrams</id>
@@ -94,9 +94,10 @@
                         </goals>
                         <configuration>
                             <formats>
-                                <format>png</format>
                                 <format>svg</format>
+                                <format>png</format>
                             </formats>
+                            <outputDirectory>src/docs/images</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
