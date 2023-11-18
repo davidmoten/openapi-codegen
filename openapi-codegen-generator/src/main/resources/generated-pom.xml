@@ -97,7 +97,6 @@
                                 <format>svg</format>
                                 <format>png</format>
                             </formats>
-                            <outputDirectory>src/docs/images</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
