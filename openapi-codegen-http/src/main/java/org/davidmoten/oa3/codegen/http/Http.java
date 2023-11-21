@@ -131,7 +131,7 @@ public final class Http {
         }
 
         public Builder interceptors(Iterable<? extends Interceptor> list) {
-            interceptors.forEach(x -> interceptor(x));
+            list.forEach(x -> interceptor(x));
             return this;
         }
 

@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.davidmoten.oa3.codegen.client.runtime.ClientBuilder;
 import org.davidmoten.oa3.codegen.http.HttpResponse;
 import org.davidmoten.oa3.codegen.http.NotPrimaryResponseException;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
@@ -48,8 +50,12 @@ public class PathsServerTest {
         return "http://localhost:" + serverPort;
     }
 
+    private ClientBuilder<Client> clientBuilder(HttpService httpService) {
+        return Client.basePath(basePath()).httpService(httpService);
+    }
+    
     private Client client(HttpService httpService) {
-        return Client.basePath(basePath()).httpService(httpService).build();
+        return clientBuilder(httpService).build();
     }
 
     @Test
@@ -193,6 +199,19 @@ public class PathsServerTest {
     @MethodSource("httpServices")
     public void testSimpleStringJsonResponse(HttpService httpService) {
         assertEquals("hello", client(httpService).jsonStringGet().get().value());
+    }
+    
+    @ParameterizedTest
+    @MethodSource("httpServices")
+    public void testInterceptorsUsed(HttpService httpService) {
+        AtomicBoolean intercepted = new AtomicBoolean();
+        assertEquals("hello", clientBuilder(httpService)
+                .interceptor(r -> {
+                    intercepted.set(true);
+                    return r;
+                })
+                .build().jsonStringGet().get().value());
+        assertTrue(intercepted.get());
     }
 
     @ParameterizedTest
