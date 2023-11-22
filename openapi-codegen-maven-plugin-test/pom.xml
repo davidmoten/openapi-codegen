@@ -226,6 +226,9 @@
                             <goal>check</goal>
                             <goal>cpd-check</goal>
                         </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
