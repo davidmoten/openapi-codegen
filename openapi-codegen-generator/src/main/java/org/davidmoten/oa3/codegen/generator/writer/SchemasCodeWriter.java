@@ -706,15 +706,21 @@ public final class SchemasCodeWriter {
                 .collect(Collectors.joining(","));
         out.left().left();
         out.println();
-        String modifier = cls.classType == ClassType.ENUM || hasDiscriminator || extraConstructor ? "private"
-                : "public";
-        if (modifier.equals("private")) {
+        final String modifier;
+        if (cls.classType == ClassType.ENUM) {
+            modifier = "";
+        } else if (hasDiscriminator||extraConstructor) {
+            modifier = "private ";
+        } else {
+            modifier = "public ";
+        }
+        if (modifier.equals("private ")) {
             addConstructorBindingAnnotation(out, names);
         }
         if (cls.classType != ClassType.ENUM) {
             out.line("@%s", JsonCreator.class);
         }
-        out.line("%s %s(%s) {", modifier, Names.simpleClassName(cls.fullClassName), parameters);
+        out.line("%s%s(%s) {", modifier, Names.simpleClassName(cls.fullClassName), parameters);
         writeConstructorBody(out, cls, names, interfaces, false);
         out.closeParen();
     }
