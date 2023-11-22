@@ -893,8 +893,10 @@ public final class SchemasCodeWriter {
         out.closeParen();
         out.right();
         String s = cls.fields
-                .stream().map(x -> String.format("\n%s%s.equals(this.%s, other.%s)", out.indent(),
+                .stream() //
+                .map(x -> String.format("\n%s%s.deepEquals(this.%s, other.%s)", out.indent(),
                         out.add(Objects.class), x.fieldName(cls), x.fieldName(cls)))
+                .distinct()
                 .collect(Collectors.joining(" && "));
         out.left();
         if (!s.isEmpty()) {
