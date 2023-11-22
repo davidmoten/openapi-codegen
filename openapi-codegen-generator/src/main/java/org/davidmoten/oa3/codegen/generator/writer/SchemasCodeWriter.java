@@ -644,79 +644,79 @@ public final class SchemasCodeWriter {
 
         Set<Cls> interfaces = interfaces(cls, fullClassNameInterfaces);
 
-            
-            boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
-            boolean hasDiscriminator = cls.fields.stream().anyMatch(x -> isDiscriminator(interfaces, x));
-            boolean extraConstructor = hasAdditionalProperties;
-            if (extraConstructor) {
-                // if has additionalProperties then we make the JsonCreator constructor private
-                // (excluding properties) and make another public constructor that includes the 
-                // Map for additional properties as a parameter)
-                out.right().right();
-                String parameters = cls //
-                        .fields //
-                        .stream() //
-                        // ignore discriminators that should be constants
-//                    .filter(x -> !isDiscriminator(interfaces, x)) //
-                        .map(x -> {
-                            final String t;
-                            if (x.mapType.isPresent()) {
-                                t = x.resolvedTypeMapPublic(out.imports());
-                            } else {
-                                t = x.resolvedTypePublicConstructor(out.imports());
-                            }
-                            return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
-                        }) //
-                        .collect(Collectors.joining(","));
-                out.left().left();
-                out.println();
-                out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
-                writeConstructorBody(out, cls, names, interfaces, true);
-                out.closeParen();
-            }
+        boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
+        boolean hasDiscriminator = cls.fields.stream().anyMatch(x -> isDiscriminator(interfaces, x));
+        boolean extraConstructor = hasAdditionalProperties;
+        if (extraConstructor) {
+            // if has additionalProperties then we make the JsonCreator constructor private
+            // (excluding properties) and make another public constructor that includes the
+            // Map for additional properties as a parameter)
             out.right().right();
             String parameters = cls //
                     .fields //
                     .stream() //
                     // ignore discriminators that should be constants
 //                    .filter(x -> !isDiscriminator(interfaces, x)) //
-                    .filter(x -> !x.isAdditionalProperties()) //
-                    .map(f -> {
+                    .map(x -> {
                         final String t;
-                        if (f.mapType.isPresent()) {
-                            t = f.resolvedTypeMapPublic(out.imports());
+                        if (x.mapType.isPresent()) {
+                            t = x.resolvedTypeMapPublic(out.imports());
                         } else {
-                            t = f.resolvedTypePublicConstructor(out.imports());
+                            t = x.resolvedTypePublicConstructor(out.imports());
                         }
-                        String annotations = cls.unwrapSingleField() ? "" //
-                                : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
-                        if (f.isOctets()) {
-                            if (!f.required && f.nullable) {
-                                annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
-                                        out.add(JsonNullableOctetsDeserializer.class));
-                            } else if (!f.required || f.nullable) {
-                                annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
-                                        out.add(OptionalOctetsDeserializer.class));
-                            } else {
-                                annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
-                                        out.add(OctetsDeserializer.class));
-                            }
-                        }
-                        return String.format("\n%s%s%s %s", out.indent(), annotations, t, f.fieldName(cls));
+                        return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
                     }) //
                     .collect(Collectors.joining(","));
             out.left().left();
             out.println();
-            String modifier = cls.classType == ClassType.ENUM || hasDiscriminator || extraConstructor ? "private" : "public";
-            if (modifier.equals("private")) {
-                addConstructorBindingAnnotation(out, names);
-            }
-            if (cls.classType != ClassType.ENUM) {
-                out.line("@%s", JsonCreator.class);
-            }
-            out.line("%s %s(%s) {", modifier, Names.simpleClassName(cls.fullClassName), parameters);
-            writeConstructorBody(out, cls, names, interfaces, false);
+            out.line("public %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
+            writeConstructorBody(out, cls, names, interfaces, true);
             out.closeParen();
+        }
+        out.right().right();
+        String parameters = cls //
+                .fields //
+                .stream() //
+                // ignore discriminators that should be constants
+//                    .filter(x -> !isDiscriminator(interfaces, x)) //
+                .filter(x -> !x.isAdditionalProperties()) //
+                .map(f -> {
+                    final String t;
+                    if (f.mapType.isPresent()) {
+                        t = f.resolvedTypeMapPublic(out.imports());
+                    } else {
+                        t = f.resolvedTypePublicConstructor(out.imports());
+                    }
+                    String annotations = cls.unwrapSingleField() ? "" //
+                            : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
+                    if (f.isOctets()) {
+                        if (!f.required && f.nullable) {
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(JsonNullableOctetsDeserializer.class));
+                        } else if (!f.required || f.nullable) {
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(OptionalOctetsDeserializer.class));
+                        } else {
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(OctetsDeserializer.class));
+                        }
+                    }
+                    return String.format("\n%s%s%s %s", out.indent(), annotations, t, f.fieldName(cls));
+                }) //
+                .collect(Collectors.joining(","));
+        out.left().left();
+        out.println();
+        String modifier = cls.classType == ClassType.ENUM || hasDiscriminator || extraConstructor ? "private"
+                : "public";
+        if (modifier.equals("private")) {
+            addConstructorBindingAnnotation(out, names);
+        }
+        if (cls.classType != ClassType.ENUM) {
+            out.line("@%s", JsonCreator.class);
+        }
+        out.line("%s %s(%s) {", modifier, Names.simpleClassName(cls.fullClassName), parameters);
+        writeConstructorBody(out, cls, names, interfaces, false);
+        out.closeParen();
     }
 
     private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
