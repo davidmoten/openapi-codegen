@@ -133,6 +133,8 @@ public final class ServerCodeWriterSpringBoot {
         WriterUtil.writeApiJavadoc(out, names);
         WriterUtil.addGeneratedAnnotation(out);
         out.line("public interface %s extends %s {", out.simpleClassName(), ErrorHandler.class);
+        out.println();
+        out.line("public static final Service DEFAULT = new Service() {};");
         writeServiceMethods(out, methods, false, names);
         out.closeParen();
     }
@@ -150,7 +152,7 @@ public final class ServerCodeWriterSpringBoot {
         out.println();
         out.line("public %s(@%s(required = false) %s service) {", out.simpleClassName(), Autowired.class,
                 out.add(names.serviceInterfaceFullClassName()));
-        out.line("this.service = %s.orElse(service, new %s() {});", org.davidmoten.oa3.codegen.util.Util.class,
+        out.line("this.service = %s.orElse(service, %s.DEFAULT);", org.davidmoten.oa3.codegen.util.Util.class,
                 out.add(names.serviceInterfaceFullClassName()));
         out.closeParen();
         writeServiceMethods(out, methods, true, names);
