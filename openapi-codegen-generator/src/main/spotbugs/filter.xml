@@ -12,6 +12,7 @@
   <Bug pattern="EI_EXPOSE_REP"/>
   <Bug pattern="EI_EXPOSE_REP2"/>
   <Bug pattern="SE_NO_SERIALVERSIONID"/>
+  <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/>
   <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
   <And>
     <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
