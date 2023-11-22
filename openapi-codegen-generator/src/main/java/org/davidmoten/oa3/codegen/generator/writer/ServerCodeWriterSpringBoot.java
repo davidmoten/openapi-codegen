@@ -134,7 +134,7 @@ public final class ServerCodeWriterSpringBoot {
         WriterUtil.addGeneratedAnnotation(out);
         out.line("public interface %s extends %s {", out.simpleClassName(), ErrorHandler.class);
         out.println();
-        out.line("public static final Service DEFAULT = new Service() {};");
+        out.line("Service DEFAULT = new Service() {};");
         writeServiceMethods(out, methods, false, names);
         out.closeParen();
     }
