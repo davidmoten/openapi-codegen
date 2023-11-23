@@ -37,6 +37,7 @@ I suspect the future of this project will be to generate Java clients for APIs r
 * `allOf` only with object schemas
 * parameter types like explode, label, deepObject not implemented yet
 * multipart and form url encoded request bodied implemented on client, not server yet.
+* security schemes not modelled (implement an `Interceptor` or use `BearerAuthenticator` or `BearerAuthenticator`)
 * json only (xml not supported)
 
 ## Getting started
