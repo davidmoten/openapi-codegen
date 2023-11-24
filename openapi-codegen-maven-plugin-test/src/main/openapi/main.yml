@@ -1196,8 +1196,8 @@ components:
      
     Vehicle:
       oneOf: 
-      - $ref: '#/components/schemas/Car'
-      - $ref: '#/components/schemas/Bike'
+      - $ref: Car
+      - $ref: Bike
       discriminator:
         propertyName: vehicleType
         mapping: 
@@ -1259,9 +1259,7 @@ components:
       required: [shapeType]      
       
     OneOfUsesConstraints:
-      oneOf:
-      - $ref: SmallInt
-      - $ref: LargeInt
+      oneOf: [$ref: SmallInt, $ref: LargeInt]
       
     SmallInt:
       type: integer
