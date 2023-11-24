@@ -25,7 +25,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class PetByAge {
 
     @JsonProperty("age")
@@ -127,8 +127,8 @@ public final class PetByAge {
         }
         PetByAge other = (PetByAge) o;
         return 
-            Objects.equals(this.age, other.age) && 
-            Objects.equals(this.nickname, other.nickname);
+            Objects.deepEquals(this.age, other.age) && 
+            Objects.deepEquals(this.nickname, other.nickname);
     }
 
     @Override

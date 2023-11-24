@@ -27,7 +27,6 @@ import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonDeserialize(using = Dog3._Deserializer.class)
 @JsonInclude(Include.NON_ABSENT)
@@ -35,7 +34,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Dog3 {
 
     @JsonUnwrapped
@@ -235,8 +234,7 @@ public final class Dog3 {
             @JsonValue
             private final String value;
 
-            @ConstructorBinding
-            private Breed(
+            Breed(
                     String value) {
                 if (Globals.config().validateInConstructor().test(Breed.class)) {
                     Preconditions.checkNotNull(value, "value");
@@ -269,8 +267,8 @@ public final class Dog3 {
             }
             Detail other = (Detail) o;
             return 
-                Objects.equals(this.bark, other.bark) && 
-                Objects.equals(this.breed, other.breed);
+                Objects.deepEquals(this.bark, other.bark) && 
+                Objects.deepEquals(this.breed, other.breed);
         }
 
         @Override
@@ -294,8 +292,8 @@ public final class Dog3 {
         }
         Dog3 other = (Dog3) o;
         return 
-            Objects.equals(this.pet3, other.pet3) && 
-            Objects.equals(this.detail, other.detail);
+            Objects.deepEquals(this.pet3, other.pet3) && 
+            Objects.deepEquals(this.detail, other.detail);
     }
 
     @Override

@@ -27,7 +27,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Geometry {
 
     @JsonValue
@@ -76,8 +76,7 @@ public final class Geometry {
         }
         Geometry other = (Geometry) o;
         return 
-            Objects.equals(this.value, other.value) && 
-            Objects.equals(this.value, other.value);
+            Objects.deepEquals(this.value, other.value);
     }
 
     @Override

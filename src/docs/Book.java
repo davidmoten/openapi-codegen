@@ -25,7 +25,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Book {
 
     @JsonProperty("title")
@@ -308,14 +308,14 @@ public final class Book {
         }
         Book other = (Book) o;
         return 
-            Objects.equals(this.title, other.title) && 
-            Objects.equals(this.author, other.author) && 
-            Objects.equals(this.abstract_, other.abstract_) && 
-            Objects.equals(this.publishedYear, other.publishedYear) && 
-            Objects.equals(this.authorId, other.authorId) && 
-            Objects.equals(this.isbn, other.isbn) && 
-            Objects.equals(this.itemId, other.itemId) && 
-            Objects.equals(this.language, other.language);
+            Objects.deepEquals(this.title, other.title) && 
+            Objects.deepEquals(this.author, other.author) && 
+            Objects.deepEquals(this.abstract_, other.abstract_) && 
+            Objects.deepEquals(this.publishedYear, other.publishedYear) && 
+            Objects.deepEquals(this.authorId, other.authorId) && 
+            Objects.deepEquals(this.isbn, other.isbn) && 
+            Objects.deepEquals(this.itemId, other.itemId) && 
+            Objects.deepEquals(this.language, other.language);
     }
 
     @Override

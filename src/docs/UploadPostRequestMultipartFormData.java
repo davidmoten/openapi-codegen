@@ -27,14 +27,13 @@ import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.paths.Globals;
 import org.davidmoten.oa3.codegen.test.paths.schema.Point;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_ABSENT)
 @JsonAutoDetect(
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class UploadPostRequestMultipartFormData {
 
     @JsonProperty("point")
@@ -262,8 +261,7 @@ public final class UploadPostRequestMultipartFormData {
             @JsonValue
             private final String value;
 
-            @ConstructorBinding
-            private ContentType(
+            ContentType(
                     String value) {
                 if (Globals.config().validateInConstructor().test(ContentType.class)) {
                     Preconditions.checkNotNull(value, "value");
@@ -296,8 +294,8 @@ public final class UploadPostRequestMultipartFormData {
             }
             Document other = (Document) o;
             return 
-                Objects.equals(this.contentType, other.contentType) && 
-                Objects.equals(this.value, other.value);
+                Objects.deepEquals(this.contentType, other.contentType) && 
+                Objects.deepEquals(this.value, other.value);
         }
 
         @Override
@@ -321,9 +319,9 @@ public final class UploadPostRequestMultipartFormData {
         }
         UploadPostRequestMultipartFormData other = (UploadPostRequestMultipartFormData) o;
         return 
-            Objects.equals(this.point, other.point) && 
-            Objects.equals(this.description, other.description) && 
-            Objects.equals(this.document, other.document);
+            Objects.deepEquals(this.point, other.point) && 
+            Objects.deepEquals(this.description, other.description) && 
+            Objects.deepEquals(this.document, other.document);
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Circle {
 
     @JsonProperty("lat")
@@ -157,9 +157,9 @@ public final class Circle {
         }
         Circle other = (Circle) o;
         return 
-            Objects.equals(this.lat, other.lat) && 
-            Objects.equals(this.lon, other.lon) && 
-            Objects.equals(this.radiusNm, other.radiusNm);
+            Objects.deepEquals(this.lat, other.lat) && 
+            Objects.deepEquals(this.lon, other.lon) && 
+            Objects.deepEquals(this.radiusNm, other.radiusNm);
     }
 
     @Override

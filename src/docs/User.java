@@ -25,7 +25,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class User {
 
     @JsonProperty("firstName")
@@ -192,10 +192,10 @@ public final class User {
         }
         User other = (User) o;
         return 
-            Objects.equals(this.firstName, other.firstName) && 
-            Objects.equals(this.lastName, other.lastName) && 
-            Objects.equals(this.email, other.email) && 
-            Objects.equals(this.mobile, other.mobile);
+            Objects.deepEquals(this.firstName, other.firstName) && 
+            Objects.deepEquals(this.lastName, other.lastName) && 
+            Objects.deepEquals(this.email, other.email) && 
+            Objects.deepEquals(this.mobile, other.mobile);
     }
 
     @Override

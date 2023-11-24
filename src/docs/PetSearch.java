@@ -22,7 +22,7 @@ import org.davidmoten.oa3.codegen.util.Util;
 
 @JsonDeserialize(using = PetSearch._Deserializer.class)
 @JsonSerialize(using = PetSearch._Serializer.class)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class PetSearch {
 
     private final Optional<PetByAge> petByAge;
@@ -119,8 +119,8 @@ public final class PetSearch {
         }
         PetSearch other = (PetSearch) o;
         return 
-            Objects.equals(this.petByAge, other.petByAge) && 
-            Objects.equals(this.petByType, other.petByType);
+            Objects.deepEquals(this.petByAge, other.petByAge) && 
+            Objects.deepEquals(this.petByType, other.petByType);
     }
 
     @Override

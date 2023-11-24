@@ -22,14 +22,13 @@ import java.util.Optional;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.main.Globals;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 @JsonInclude(Include.NON_ABSENT)
 @JsonAutoDetect(
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class PetByType {
 
     @JsonProperty("pet_type")
@@ -130,8 +129,7 @@ public final class PetByType {
         @JsonValue
         private final String value;
 
-        @ConstructorBinding
-        private PetType(
+        PetType(
                 String value) {
             if (Globals.config().validateInConstructor().test(PetType.class)) {
                 Preconditions.checkNotNull(value, "value");
@@ -164,8 +162,8 @@ public final class PetByType {
         }
         PetByType other = (PetByType) o;
         return 
-            Objects.equals(this.pet_type, other.pet_type) && 
-            Objects.equals(this.hunts, other.hunts);
+            Objects.deepEquals(this.pet_type, other.pet_type) && 
+            Objects.deepEquals(this.hunts, other.hunts);
     }
 
     @Override

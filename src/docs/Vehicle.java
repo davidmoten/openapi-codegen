@@ -13,7 +13,7 @@ import java.lang.String;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Car.class, name = "car"), 
         @JsonSubTypes.Type(value = Bike.class, name = "bike")})
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public interface Vehicle {
 
     String vehicleType();

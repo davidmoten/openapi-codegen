@@ -24,7 +24,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Pet3 {
 
     @JsonProperty("petType")
@@ -63,7 +63,7 @@ public final class Pet3 {
         }
         Pet3 other = (Pet3) o;
         return 
-            Objects.equals(this.petType, other.petType);
+            Objects.deepEquals(this.petType, other.petType);
     }
 
     @Override

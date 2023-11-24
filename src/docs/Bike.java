@@ -26,7 +26,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Bike implements Vehicle, HasWheels {
 
     @JsonProperty("vehicleType")
@@ -96,9 +96,9 @@ public final class Bike implements Vehicle, HasWheels {
         }
         Bike other = (Bike) o;
         return 
-            Objects.equals(this.vehicleType, other.vehicleType) && 
-            Objects.equals(this.wheelsType, other.wheelsType) && 
-            Objects.equals(this.colour, other.colour);
+            Objects.deepEquals(this.vehicleType, other.vehicleType) && 
+            Objects.deepEquals(this.wheelsType, other.wheelsType) && 
+            Objects.deepEquals(this.colour, other.colour);
     }
 
     @Override

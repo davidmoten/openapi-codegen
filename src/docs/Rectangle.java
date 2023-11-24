@@ -24,7 +24,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Rectangle {
 
     @JsonProperty("minLat")
@@ -189,10 +189,10 @@ public final class Rectangle {
         }
         Rectangle other = (Rectangle) o;
         return 
-            Objects.equals(this.minLat, other.minLat) && 
-            Objects.equals(this.leftLon, other.leftLon) && 
-            Objects.equals(this.heightDegrees, other.heightDegrees) && 
-            Objects.equals(this.widthDegrees, other.widthDegrees);
+            Objects.deepEquals(this.minLat, other.minLat) && 
+            Objects.deepEquals(this.leftLon, other.leftLon) && 
+            Objects.deepEquals(this.heightDegrees, other.heightDegrees) && 
+            Objects.deepEquals(this.widthDegrees, other.widthDegrees);
     }
 
     @Override

@@ -23,13 +23,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public class ServiceController implements ControllerExceptionHandler {
 
     private final Service service;
 
     public ServiceController(@Autowired(required = false) Service service) {
-        this.service = Util.orElse(service, new Service() {});
+        this.service = Util.orElse(service, Service.DEFAULT);
     }
 
     /**

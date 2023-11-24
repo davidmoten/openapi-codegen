@@ -33,7 +33,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.13-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
 public final class Cat3 {
 
     @JsonUnwrapped
@@ -233,8 +233,8 @@ public final class Cat3 {
             }
             Detail other = (Detail) o;
             return 
-                Objects.equals(this.hunts, other.hunts) && 
-                Objects.equals(this.age, other.age);
+                Objects.deepEquals(this.hunts, other.hunts) && 
+                Objects.deepEquals(this.age, other.age);
         }
 
         @Override
@@ -258,8 +258,8 @@ public final class Cat3 {
         }
         Cat3 other = (Cat3) o;
         return 
-            Objects.equals(this.pet3, other.pet3) && 
-            Objects.equals(this.detail, other.detail);
+            Objects.deepEquals(this.pet3, other.pet3) && 
+            Objects.deepEquals(this.detail, other.detail);
     }
 
     @Override
