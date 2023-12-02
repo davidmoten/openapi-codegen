@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.test.main.schema;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -33,7 +32,6 @@ public final class Geometry {
     @JsonValue
     private final Object value;
 
-    @JsonCreator
     private Geometry(Object value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
