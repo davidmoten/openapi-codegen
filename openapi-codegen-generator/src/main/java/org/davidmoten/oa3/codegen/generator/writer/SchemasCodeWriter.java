@@ -583,7 +583,6 @@ public final class SchemasCodeWriter {
 
     private static void writeOneOfAnyOfNonDiscriminatedObjectConstructor(CodePrintWriter out, Cls cls) {
         out.println();
-        out.line("@%s", JsonCreator.class);
         out.line("private %s(%s value) {", cls.simpleName(), Object.class);
         out.line("this.value = %s.checkNotNull(value, \"value\");", Preconditions.class);
         out.closeParen();
