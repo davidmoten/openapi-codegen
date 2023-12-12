@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.internal.EnhancedOpenAPIV3Parser;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
+import org.davidmoten.oa3.codegen.util.Util;
 
 import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
@@ -95,6 +96,23 @@ public final class Names {
 
     public OpenAPI api() {
         return api;
+    }
+    
+    public List<Server> servers() {
+        return Util.<List<io.swagger.v3.oas.models.servers.Server>>nvl(api.getServers(), Collections.emptyList()) //
+                .stream() //
+                .map(x -> new Server(x.getUrl(), Optional.ofNullable(x.getDescription()))) //
+                .collect(Collectors.toList());
+    }
+    
+    public static final class Server {
+        public final String url;
+        public final Optional<String> description;
+        
+        Server(String url, Optional<String> description) {
+            this.url = url;
+            this.description = description;
+        }
     }
 
     public String schemaNameToFullClassName(SchemaCategory category, String schemaName) {

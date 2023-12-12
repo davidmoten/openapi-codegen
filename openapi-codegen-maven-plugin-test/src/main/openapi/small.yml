@@ -6,6 +6,12 @@ info:
   title: Small test
 
   description: Used to isolate small fragments for testing
+  
+servers:
+- url: "https://myserver.com/api"
+  description: primary endpoint
+- url: "https://myotherserver.com/api"
+  description: secondary endpoint
 
 paths:
   /dummy:

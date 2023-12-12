@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.openapitools.jackson.nullable.JsonNullable;
 
@@ -84,6 +85,22 @@ public final class Util {
     
     public static <K, V> Map<K, V> createMapIfNull(Map<K, V> map) {
         return map == null ? new HashMap<>() : map;
+    }
+
+    public static <T> T nvl(T value, T defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
+    
+    public static <T> T nvl(T value, Supplier<? extends T> defaultValue) {
+        if (value == null) {
+            return defaultValue.get();
+        } else {
+            return value;
+        }
     }
 
 }
