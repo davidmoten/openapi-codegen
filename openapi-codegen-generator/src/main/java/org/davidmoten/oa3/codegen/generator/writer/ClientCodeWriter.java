@@ -10,6 +10,7 @@ import org.davidmoten.oa3.codegen.client.runtime.ClientBuilder;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.Method;
 import org.davidmoten.oa3.codegen.generator.ClientServerGenerator.ResponseDescriptor;
 import org.davidmoten.oa3.codegen.generator.Names;
+import org.davidmoten.oa3.codegen.generator.Names.Server;
 import org.davidmoten.oa3.codegen.generator.ParamType;
 import org.davidmoten.oa3.codegen.generator.internal.CodePrintWriter;
 import org.davidmoten.oa3.codegen.generator.internal.WriterUtil;
@@ -71,6 +72,38 @@ public class ClientCodeWriter {
         out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), %s.config(), basePath);",
                 ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
         out.closeParen();
+        
+        List<Server> servers = names.servers();
+        if (!servers.isEmpty()) {
+            
+            out.println();
+            out.line("public static %s<%s> basePath(Server server) {", ClientBuilder.class, out.simpleClassName());
+            out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), %s.config(), server.url());",
+                    ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
+            out.closeParen();
+            
+            out.println();
+            out.line("public enum Server {");
+            out.println();
+            for (int i = 0; i < servers.size(); i++) {
+                Server server = servers.get(i);
+                String name = Names.enumNameToEnumConstant(server.description.orElse("server" + (i+1)));
+                final String delimiter = i == servers.size() - 1 ? ";": ",";
+                out.line("%s(\"%s\")%s", name, server.url, delimiter);
+            }
+            out.println();
+            out.line("private String url;");
+            out.println();
+            out.line("Server(String url) {");
+            out.line("this.url = url;");
+            out.closeParen();
+            out.println();
+            out.line("public String url() {");
+            out.line("return url;");
+            out.closeParen();
+            out.closeParen();
+        }
+        
     }
 	
     private static void writeClientUtilityMethods(CodePrintWriter out) {
