@@ -36,6 +36,7 @@ public class StrictDeserializersTest {
             assertFalse(mOriginal.readValue("\"false\"", Boolean.class));
             assertTrue(mOriginal.readValue("\"TRUE\"", Boolean.class));
             assertFalse(mOriginal.readValue("\"FALSE\"", Boolean.class));
+            assertNull(mOriginal.readValue("null", Boolean.class));
         }
 
         // demonstrate new strict behaviour
@@ -46,6 +47,7 @@ public class StrictDeserializersTest {
 
         assertFalse(m.readValue("false", Boolean.class));
         assertTrue(m.readValue("true", Boolean.class));
+        assertNull(m.readValue("null", Boolean.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("2", Boolean.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("0", Boolean.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"true\"", Boolean.class));
@@ -64,6 +66,7 @@ public class StrictDeserializersTest {
             assertEquals(123, mOriginal.readValue("123", Short.class).intValue());
             assertEquals(123, mOriginal.readValue("\"123\"", Short.class).intValue());
             assertEquals(123, mOriginal.readValue("123.4", Short.class).intValue());
+            assertNull(mOriginal.readValue("null", Short.class));
         }
 
         // demonstrate new strict behaviour
@@ -74,6 +77,7 @@ public class StrictDeserializersTest {
 
         assertEquals(0, m.readValue("0", Integer.class).intValue());
         assertEquals(123, m.readValue("123", Short.class).intValue());
+        assertNull(m.readValue("null", Short.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("123.4", Short.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"123\"", Short.class));
         assertThrows(InputCoercionException.class, () -> m.readValue("1234567890123", Short.class));
@@ -89,6 +93,7 @@ public class StrictDeserializersTest {
             assertEquals(123, mOriginal.readValue("123", Integer.class).intValue());
             assertEquals(123, mOriginal.readValue("\"123\"", Integer.class).intValue());
             assertEquals(123, mOriginal.readValue("123.4", Integer.class).intValue());
+            assertNull(mOriginal.readValue("null", Integer.class));
         }
 
         // demonstrate new strict behaviour
@@ -99,6 +104,7 @@ public class StrictDeserializersTest {
 
         assertEquals(0, m.readValue("0", Integer.class).intValue());
         assertEquals(123, m.readValue("123", Integer.class).intValue());
+        assertNull(m.readValue("null", Integer.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("123.4", Integer.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"123\"", Integer.class));
         assertThrows(InputCoercionException.class, () -> m.readValue("1234567890123", Integer.class));
@@ -114,6 +120,7 @@ public class StrictDeserializersTest {
             assertEquals(123, mOriginal.readValue("123", Long.class).longValue());
             assertEquals(123, mOriginal.readValue("\"123\"", Long.class).longValue());
             assertEquals(123, mOriginal.readValue("123.4", Long.class).longValue());
+            assertNull(mOriginal.readValue("null", Long.class));
         }
 
         // demonstrate new strict behaviour
@@ -125,6 +132,7 @@ public class StrictDeserializersTest {
         assertEquals(0, m.readValue("0", Long.class).longValue());
         assertEquals(123, m.readValue("123", Long.class).longValue());
         assertEquals(1234567890123L, m.readValue("1234567890123", Long.class).longValue());
+        assertNull(m.readValue("null", Long.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("123.4", Long.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"123\"", Long.class));
         assertThrows(InputCoercionException.class, () -> m.readValue("123456789012345678901234567890", Long.class));
@@ -140,6 +148,7 @@ public class StrictDeserializersTest {
             assertEquals(123, mOriginal.readValue("123", Float.class).floatValue());
             assertEquals(123, mOriginal.readValue("\"123\"", Float.class).floatValue());
             assertEquals(123.4, mOriginal.readValue("123.4", Float.class).floatValue(), 0.00001);
+            assertNull(mOriginal.readValue("null", Float.class));
         }
 
         // demonstrate new strict behaviour
@@ -154,6 +163,7 @@ public class StrictDeserializersTest {
         assertEquals(123.4, m.readValue("123.4", Float.class).floatValue(), 0.00001);
         assertEquals(1.2345679e29f, m.readValue("123456789012345678901234567890", Float.class));
         assertEquals(Float.POSITIVE_INFINITY, m.readValue("1e300", Float.class));
+        assertNull(m.readValue("null", Float.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"123\"", Float.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"123.4\"", Float.class));
     }
@@ -168,6 +178,7 @@ public class StrictDeserializersTest {
             assertEquals(123, mOriginal.readValue("123", Double.class).doubleValue());
             assertEquals(123, mOriginal.readValue("\"123\"", Double.class).doubleValue());
             assertEquals(123.4, mOriginal.readValue("123.4", Double.class).doubleValue(), 0.00001);
+            assertNull(mOriginal.readValue("null", Double.class));
         }
 
         // demonstrate new strict behaviour
@@ -182,6 +193,7 @@ public class StrictDeserializersTest {
         assertEquals(123.4, m.readValue("123.4", Double.class).doubleValue(), 0.00001);
         assertEquals(1.2345678901234568E29, m.readValue("123456789012345678901234567890", Double.class));
         assertEquals(Double.POSITIVE_INFINITY, m.readValue("1e310", Double.class));
+        assertNull(m.readValue("null", Double.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"123\"", Double.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("\"123.4\"", Double.class));
     }
@@ -197,6 +209,7 @@ public class StrictDeserializersTest {
             assertEquals(LocalDate.of(1970, 1, 1), mOriginal.readValue("0", LocalDate.class));
             assertEquals(LocalDate.of(1975, 07, 18), mOriginal.readValue("2024", LocalDate.class));
             assertNull(mOriginal.readValue("\"\"", LocalDate.class));
+            assertNull(mOriginal.readValue("null", LocalDate.class));
         }
 
         // demonstrate new strict behaviour
@@ -206,6 +219,7 @@ public class StrictDeserializersTest {
         m.registerModule(module);
 
         assertEquals(LocalDate.of(2024, 11, 30), m.readValue("\"2024-11-30\"", LocalDate.class));
+        assertNull(m.readValue("null", LocalDate.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("0", LocalDate.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("2024", LocalDate.class));
         assertThrows(InvalidFormatException.class, () -> m.readValue("\"abc\"", LocalDate.class));
@@ -226,6 +240,7 @@ public class StrictDeserializersTest {
             assertEquals(OffsetDateTime.of(1970, 1, 24, 10, 13, 20, 0, ZoneOffset.UTC),
                     mOriginal.readValue("2024000", OffsetDateTime.class));
             assertNull(mOriginal.readValue("\"\"", OffsetDateTime.class));
+            assertNull(mOriginal.readValue("null", OffsetDateTime.class));
         }
 
         // demonstrate new strict behaviour
@@ -236,6 +251,7 @@ public class StrictDeserializersTest {
 
         assertEquals(OffsetDateTime.of(2024, 11, 30, 22, 54, 37, 0, ZoneOffset.UTC),
                 m.readValue("\"2024-11-30T22:54:37Z\"", OffsetDateTime.class));
+        assertNull(m.readValue("null", OffsetDateTime.class));
         // must have time zone
         assertThrows(InvalidFormatException.class, () -> m.readValue("\"2024-11-30T22:54:37\"", OffsetDateTime.class));
         assertThrows(MismatchedInputException.class, () -> m.readValue("0", OffsetDateTime.class));
@@ -243,10 +259,35 @@ public class StrictDeserializersTest {
         assertThrows(InvalidFormatException.class, () -> m.readValue("\"abc\"", OffsetDateTime.class));
         assertThrows(InvalidFormatException.class, () -> m.readValue("\"\"", OffsetDateTime.class));
     }
-    
+
+    @Test
+    public void testStringStrictDeserializer() throws JsonMappingException, JsonProcessingException {
+
+        // demonstrate original non-strict behaviour
+        {
+            ObjectMapper mOriginal = new ObjectMapper();
+            assertEquals("hello", mOriginal.readValue("\"hello\"", String.class));
+            assertEquals("true", mOriginal.readValue("true", String.class));
+            assertEquals("1.4", mOriginal.readValue("1.4", String.class));
+            assertNull(mOriginal.readValue("null", String.class));
+        }
+
+        // demonstrate new strict behaviour
+        ObjectMapper m = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(String.class, new StrictStringDeserializer());
+        m.registerModule(module);
+
+        assertEquals("hello", m.readValue("\"hello\"", String.class));
+        assertNull(m.readValue("null", String.class));
+        assertThrows(MismatchedInputException.class, () -> m.readValue("true", String.class));
+        assertThrows(MismatchedInputException.class, () -> m.readValue("1.4", String.class));
+    }
+
     @Test
     public void testModuleIsUsed() {
-        assertThrows(MismatchedInputException.class, () -> Config.builder().build().mapper().readValue("2", Boolean.class));
+        assertThrows(MismatchedInputException.class,
+                () -> Config.builder().build().mapper().readValue("2", Boolean.class));
     }
-    
+
 }

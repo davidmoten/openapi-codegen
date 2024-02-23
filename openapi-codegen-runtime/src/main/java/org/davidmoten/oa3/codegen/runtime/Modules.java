@@ -20,6 +20,7 @@ public final class Modules {
         m.addDeserializer(Double.class, new StrictDoubleDeserializer());
         m.addDeserializer(OffsetDateTime.class, new StrictOffsetDateTimeDeserializer());
         m.addDeserializer(LocalDate.class, new StrictLocalDateDeserializer());
+        m.addDeserializer(String.class, new StrictStringDeserializer());
         return m;
     }
 }
