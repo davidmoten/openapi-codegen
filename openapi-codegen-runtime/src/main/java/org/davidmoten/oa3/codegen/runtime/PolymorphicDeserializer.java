@@ -62,12 +62,11 @@ public class PolymorphicDeserializer<T> extends StdDeserializer<T> {
             // try to deserialize with each of the member classes
             // @formatter:off
             try {
-                // Jackson very permissive with readValue so we will tighten things up a bit
-                if (!c.equals(String.class) || json.startsWith("\"") && json.endsWith("\"")) {
-                    Object o = mapper.readValue(json, c);
-                    v = newInstance(cls, o);
-                    count++;
-                }
+                // Note that ObjectMapper configured for strict
+                // deserialization
+                Object o = mapper.readValue(json, c);
+                v = newInstance(cls, o);
+                count++;
             } catch (DatabindException e) {} // NOPMD
             // @formatter:on
         }
