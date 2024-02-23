@@ -9,7 +9,7 @@
     </parent>
     <groupId>com.github.davidmoten</groupId>
     <artifactId>openapi-codegen-parent</artifactId>
-    <version>0.1.16-SNAPSHOT</version>
+    <version>0.1.16</version>
 
     <name>${project.artifactId}</name>
     <description>Generates objects from OpenAPI schema v3</description>
@@ -87,7 +87,7 @@
         <connection>${scm.url}</connection>
         <developerConnection>${scm.url}</developerConnection>
         <url>${scm.url}</url>
-        <tag>0.1</tag>
+        <tag>0.1.16</tag>
     </scm>
 
 
