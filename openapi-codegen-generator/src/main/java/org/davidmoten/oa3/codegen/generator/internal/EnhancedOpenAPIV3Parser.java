@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.generator.internal;
 
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,12 +23,7 @@ import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
-import org.yaml.snakeyaml.LoaderOptions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
-import io.swagger.v3.core.util.Yaml31;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.AuthorizationValue;
 import io.swagger.v3.parser.core.models.ParseOptions;
@@ -40,8 +34,6 @@ import io.swagger.v3.parser.util.RemoteUrl;
 
 public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
     
-    private boolean initialized;
-
     /**
      * Encoding of the resource content with OpenAPI spec to parse.
      */
@@ -49,46 +41,10 @@ public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
 
     public EnhancedOpenAPIV3Parser() {
-
-    }
-
-    private synchronized void init() {
-        if (initialized) {
-            return;
-        }
-        initialized = true;
-        try {
-            YAMLFactory yamlFactory = createUnlimitedSizeYamlFactory();
-            ObjectMapper mapper = new ObjectMapper(yamlFactory);
-            {
-                Field fld = OpenAPIV3Parser.class.getDeclaredField("YAML_MAPPER");
-                fld.setAccessible(true);
-                fld.set(this, mapper);
-                LOGGER.debug("OpenAPIV3Parser.YAML_MAPPER overriden via reflection to support unlimited code points");
-            }
-            {
-                Yaml31.mapper();
-                Field fld = Yaml31.class.getDeclaredField("mapper");
-                fld.setAccessible(true);
-                fld.set(this, mapper);
-                LOGGER.debug("Yaml31.mapper overriden via reflection to support unlimited code points");
-            }
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            LOGGER.warn("could not modify OpenAPIV3Parser.YAML_MAPPER", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static YAMLFactory createUnlimitedSizeYamlFactory() {
-        LoaderOptions loaderOptions = new LoaderOptions();
-        loaderOptions.setCodePointLimit(Integer.MAX_VALUE);
-        YAMLFactory yamlFactory = YAMLFactory.builder().loaderOptions(loaderOptions).build();
-        return yamlFactory;
     }
 
     @Override
     public SwaggerParseResult readLocation(String url, List<AuthorizationValue> auth, ParseOptions options) {
-        init();
         try {
             final String content = doubleQuoteStrings(readContentFromLocation(url, emptyListIfNull(auth)));
             LOGGER.debug("Loaded raw data: {}", content);
