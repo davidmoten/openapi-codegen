@@ -41,7 +41,7 @@ public final class GeneratorTest {
         String definition = name;
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
-                Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), true);
+                Collections.emptySet(), Collections.emptySet(), false, false, false, Optional.empty(), true);
         new Generator(d).generate();
         ClientServerGenerator g = new ClientServerGenerator(d);
         g.generateClient();
@@ -53,7 +53,8 @@ public final class GeneratorTest {
     }
     
     public static void main(String[] args) throws MalformedURLException {
-       generate("../../openapi-directory/APIs/amazonaws.com/accessanalyzer/2019-11-01/openapi.yaml");
+       //generate("../../openapi-directory/APIs/amazonaws.com/accessanalyzer/2019-11-01/openapi.yaml");
+       generate("/home/dave/Downloads/codat-lending.yaml");
     }
 
 }
