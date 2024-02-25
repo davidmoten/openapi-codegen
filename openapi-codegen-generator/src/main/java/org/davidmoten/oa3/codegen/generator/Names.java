@@ -18,10 +18,8 @@ import org.davidmoten.oa3.codegen.generator.Generator.Cls;
 import org.davidmoten.oa3.codegen.generator.internal.EnhancedOpenAPIV3Parser;
 import org.davidmoten.oa3.codegen.util.ImmutableList;
 import org.davidmoten.oa3.codegen.util.Util;
-import org.yaml.snakeyaml.LoaderOptions;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
@@ -37,7 +35,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.util.DeserializationUtils;
 
 public final class Names {
 
@@ -72,10 +69,8 @@ public final class Names {
                 .orElse(ServerGeneratorType.SPRING2);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        System.setProperty("maxYamlCodePoints", "999999999");
-        YAMLFactory yamlFactory = createUnlimitedSizeYamlFactory();
         // github api goes over snake yaml parser max code points for 3.0
-        
+        System.setProperty("maxYamlCodePoints", "999999999");
         OpenAPIV3Parser parser = new EnhancedOpenAPIV3Parser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
@@ -93,13 +88,6 @@ public final class Names {
         
     }
     
-    private static YAMLFactory createUnlimitedSizeYamlFactory() {
-        LoaderOptions loaderOptions = new LoaderOptions();
-        loaderOptions.setCodePointLimit(Integer.MAX_VALUE);
-        YAMLFactory yamlFactory = YAMLFactory.builder().loaderOptions(loaderOptions).build();
-        return yamlFactory;
-    }
-
     private static void logSchemaFullClassNames(OpenAPI api) {
         if (LOG_SCHEMA_PATHS) {
             Apis.visitSchemas(api, (category, schemaPath) -> {
