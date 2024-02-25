@@ -33,7 +33,7 @@ import io.swagger.v3.parser.util.ClasspathHelper;
 import io.swagger.v3.parser.util.RemoteUrl;
 
 public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
-    
+
     /**
      * Encoding of the resource content with OpenAPI spec to parse.
      */
@@ -78,10 +78,8 @@ public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
     }
 
     // copied from OpenAPIV3Parser, added Locale.ENGLISH to toLowerCase calls to
-    // satisfy spotbugs
-    // if this method was protected in OpenAPIV3Parser I wouldn't need to copy it
-    // (that
-    // would be nice!)
+    // satisfy spotbugs if this method was protected in OpenAPIV3Parser I wouldn't
+    // need to copy it (that would be nice!)
     private String readContentFromLocation(String location, List<AuthorizationValue> auth) {
         final String adjustedLocation = location.replaceAll("\\\\", "/");
         try {
