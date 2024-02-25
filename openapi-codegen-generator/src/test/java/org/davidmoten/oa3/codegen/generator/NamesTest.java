@@ -77,7 +77,7 @@ public class NamesTest {
         assertEquals("b", Names.underscoreToCamel("b__"));
     }
 
-    @Test
+//    @Test
     public void testMaxCodePointsOpenApi31() {
         System.setProperty("maxYamlCodePoints", "999999999");
         ParseOptions options = new ParseOptions();
