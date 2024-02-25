@@ -76,7 +76,7 @@ public final class Names {
         YAMLFactory yamlFactory = createUnlimitedSizeYamlFactory();
         // github api goes over snake yaml parser max code points for 3.0
         
-        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        OpenAPIV3Parser parser = new EnhancedOpenAPIV3Parser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
         if (!errors.isEmpty()) {
