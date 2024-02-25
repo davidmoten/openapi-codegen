@@ -8,6 +8,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.util.DeserializationUtils;
+
 public class NamesTest {
 
     @Test
@@ -70,4 +77,13 @@ public class NamesTest {
         assertEquals("b", Names.underscoreToCamel("b__"));
     }
 
+    @Test
+    public void testMaxCodePointsOpenApi31() {
+        System.setProperty("maxYamlCodePoints", "999999999");
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        parser.readLocation("https://raw.githubusercontent.com/codatio/oas/main/yaml/Codat-Lending.yaml", null, options);
+    }
+    
 }

@@ -20,12 +20,14 @@ import org.davidmoten.oa3.codegen.util.ImmutableList;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.yaml.snakeyaml.LoaderOptions;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.davidmoten.guavamini.Maps;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.Sets;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
+import io.swagger.v3.core.util.ObjectMapperFactory;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -62,16 +64,19 @@ public final class Names {
     private final ServerGeneratorType generatorType;
 
     Names(Definition definition) {
+        StreamReadConstraints streamReadConstraints = StreamReadConstraints.builder()
+                .maxStringLength(Integer.MAX_VALUE).build();
+        ObjectMapperFactory.createJson31().getFactory().setStreamReadConstraints(streamReadConstraints);
         this.definition = definition;
         this.generatorType = definition.generator().map(x -> ServerGeneratorType.valueOf(x.toUpperCase(Locale.ENGLISH)))
                 .orElse(ServerGeneratorType.SPRING2);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
+        System.setProperty("maxYamlCodePoints", "999999999");
         YAMLFactory yamlFactory = createUnlimitedSizeYamlFactory();
         // github api goes over snake yaml parser max code points for 3.0
-        System.setProperty("maxYamlCodePoints", "999999999");
-        DeserializationUtils.setYaml31Mapper(yamlFactory);
-        OpenAPIV3Parser parser = new EnhancedOpenAPIV3Parser();
+        
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
         SwaggerParseResult result = parser.readLocation(definition.definition(), null, options);
         String errors = result.getMessages().stream().collect(Collectors.joining("\n"));
         if (!errors.isEmpty()) {
