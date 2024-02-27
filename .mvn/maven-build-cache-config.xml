@@ -7,7 +7,7 @@
     </configuration>
     <input>
         <global>
-            <glob>{*.java,*.xml,*.properties,*.mod,*.adoc}</glob>
+            <glob>{*.java,*.xml,*.properties,*.mod,*.adoc,*.yaml,*.yml}</glob>
             <excludes>
                 <exclude>*Jenkinsfile*</exclude>
                 <exclude>./idea/*</exclude>

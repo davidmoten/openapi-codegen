@@ -2240,4 +2240,13 @@ components:
       items: 
         type: string
         format: binary
+        
+    One:
+      oneOf:
+      - type: array
+        items: 
+          type: string
+      - type: array
+        items: 
+          type: integer
       
