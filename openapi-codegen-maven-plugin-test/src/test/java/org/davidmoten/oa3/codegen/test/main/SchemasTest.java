@@ -53,7 +53,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.Breeding;
 import org.davidmoten.oa3.codegen.test.main.schema.Broadcast;
 import org.davidmoten.oa3.codegen.test.main.schema.Circle;
 import org.davidmoten.oa3.codegen.test.main.schema.Dog;
-import org.davidmoten.oa3.codegen.test.main.schema.Dog.Object1.Breed;
+import org.davidmoten.oa3.codegen.test.main.schema.Dog.Option1.Breed;
 import org.davidmoten.oa3.codegen.test.main.schema.Dog2;
 import org.davidmoten.oa3.codegen.test.main.schema.DogBreed;
 import org.davidmoten.oa3.codegen.test.main.schema.EnumCollision;
@@ -134,11 +134,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.openapitools.jackson.nullable.JsonNullable;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -694,9 +689,9 @@ public class SchemasTest {
         String json = "{\"description\":\"brown and curly\",\"breed\":\"cross\"}";
         Dog a = m.readValue(json, Dog.class);
         assertEquals("brown and curly", a.asPet().description());
-        assertEquals(Breed.CROSS, a.asObject1().breed().get());
+        assertEquals(Breed.CROSS, a.asOption1().breed().get());
         Dog b = Dog.pet(Pet.description("brown and curly")) //
-                .object1(Dog.Object1.breed(Breed.CROSS)) //
+                .option1(Dog.Option1.breed(Breed.CROSS)) //
                 .build();
         assertEquals(json, m.writeValueAsString(b));
     }
@@ -1155,35 +1150,35 @@ public class SchemasTest {
 
     @Test
     public void testAnyOfConflictWithObject() {
-        iae(() -> AnyOfConflictingTypes2.builder().object1("a").object2(AnyOfConflictingTypes2.Object2.name("aya"))
+        iae(() -> AnyOfConflictingTypes2.builder().option1("a").option2(AnyOfConflictingTypes2.Option2.name("aya"))
                 .build());
     }
 
     @Test
     public void testAnyOfObjectExtensions() throws JsonProcessingException {
-        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
-                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
-        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
-                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 3))).build();
-        AnyOfObjectExtensions o = AnyOfObjectExtensions.builder().object1(a).object2(b).build();
+        AnyOfObjectExtensions.Option1 a = AnyOfObjectExtensions.Option1
+                .counts(AnyOfObjectExtensions.Option1.Counts.of(Lists.of(1, 2, 3)));
+        AnyOfObjectExtensions.Option2 b = AnyOfObjectExtensions.Option2.name("fred")
+                .counts(AnyOfObjectExtensions.Option2.Counts.of(Lists.of(1, 2, 3))).build();
+        AnyOfObjectExtensions o = AnyOfObjectExtensions.builder().option1(a).option2(b).build();
         checkRoundTrip(o);
     }
 
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentLength() throws JsonProcessingException {
-        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
-                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
-        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
-                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 3, 4))).build();
+        AnyOfObjectExtensions.Option1 a = AnyOfObjectExtensions.Option1
+                .counts(AnyOfObjectExtensions.Option1.Counts.of(Lists.of(1, 2, 3)));
+        AnyOfObjectExtensions.Option2 b = AnyOfObjectExtensions.Option2.name("fred")
+                .counts(AnyOfObjectExtensions.Option2.Counts.of(Lists.of(1, 2, 3, 4))).build();
         iae(() -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
 
     @Test
     public void testAnyOfObjectExtensionsThrowsIfArraysDifferentElements() throws JsonProcessingException {
-        AnyOfObjectExtensions.Object1 a = AnyOfObjectExtensions.Object1
-                .counts(AnyOfObjectExtensions.Object1.Counts.of(Lists.of(1, 2, 3)));
-        AnyOfObjectExtensions.Object2 b = AnyOfObjectExtensions.Object2.name("fred")
-                .counts(AnyOfObjectExtensions.Object2.Counts.of(Lists.of(1, 2, 4))).build();
+        AnyOfObjectExtensions.Option1 a = AnyOfObjectExtensions.Option1
+                .counts(AnyOfObjectExtensions.Option1.Counts.of(Lists.of(1, 2, 3)));
+        AnyOfObjectExtensions.Option2 b = AnyOfObjectExtensions.Option2.name("fred")
+                .counts(AnyOfObjectExtensions.Option2.Counts.of(Lists.of(1, 2, 4))).build();
         iae(() -> AnyOfObjectExtensions.of(Optional.of(a), Optional.of(b)));
     }
 

@@ -112,7 +112,7 @@ public class Generator {
 
         public String nextAnonymousFieldName() {
             num++;
-            return "object" + num;
+            return "option" + num;
         }
 
         private int num = 0;
