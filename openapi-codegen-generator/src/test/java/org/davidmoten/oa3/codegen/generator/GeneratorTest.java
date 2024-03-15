@@ -54,7 +54,8 @@ public final class GeneratorTest {
     
     public static void main(String[] args) throws MalformedURLException {
         // generate("../../openapi-directory/APIs/amazonaws.com/accessanalyzer/2019-11-01/openapi.yaml");
-        generate("https://raw.githubusercontent.com/Modern-Treasury/modern-treasury-openapi/main/openapi/mt_openapi_spec_v1.yamls");
+        //generate("https://raw.githubusercontent.com/Modern-Treasury/modern-treasury-openapi/main/openapi/mt_openapi_spec_v1.yamls");
+        generate("../../temp.yaml");
     }
 
 }
