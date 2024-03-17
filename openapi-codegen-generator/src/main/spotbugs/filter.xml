@@ -8,7 +8,6 @@
     </Or>
     <Bug code="RV"/>
   </And>
-  <Bug pattern="SE_BAD_FIELD"/>
   <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
   <Bug pattern="EI_EXPOSE_REP"/>
   <Bug pattern="EI_EXPOSE_REP2"/>
