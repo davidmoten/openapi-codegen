@@ -92,5 +92,5 @@ public class ImportsTest {
         Imports imports = new Imports("a.Thing", x -> false);
         assertEquals("ThingMore", imports.add("a.ThingMore"));
     }
-
+    
 }

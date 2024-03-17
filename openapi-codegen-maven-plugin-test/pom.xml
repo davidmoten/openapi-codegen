@@ -207,6 +207,7 @@
                     <threshold>Low</threshold>
                     <xmlOutput>true</xmlOutput>
                     <excludeFilterFile>../openapi-codegen-generator/src/main/spotbugs/filter.xml</excludeFilterFile>
+                    <maxHeap>3000</maxHeap>
                 </configuration>
                 <executions>
                     <execution>

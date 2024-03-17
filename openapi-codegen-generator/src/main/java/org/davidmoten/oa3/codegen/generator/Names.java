@@ -40,18 +40,18 @@ public final class Names {
 
     // note that all Object methods added to this set so that generated getters
     // without a get prefix don't get into trouble
-    private static final Set<String> javaReservedWords = Sets.of("abstract", "assert", "boolean", "break",
-            "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
+    private static final Set<String> javaReservedWords = Sets.of("abstract", "assert", "boolean", "break", "byte",
+            "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
             "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
             "interface", "long", "native", "new", "null", "package", "private", "protected", "public", "return",
             "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient",
             "true", "try", "void", "volatile", "while", "var", "hashCode", "toString", "notify", "clone", "equals",
             "finalize", "getClass", "notifyAll", "wait", "builder", "enum");
-    
-    // TODO remove this now that Imports is aware of package contents    
+
+    // TODO remove this now that Imports is aware of package contents
     // avoid class names that might clash with generated classes in the same package
     private static final Set<String> reservedSimpleClassNames = Sets.of("Builder");
-    
+
     private static final boolean LOG_SCHEMA_PATHS = false;
 
     private final Definition definition;
@@ -61,8 +61,8 @@ public final class Names {
     private final ServerGeneratorType generatorType;
 
     Names(Definition definition) {
-        StreamReadConstraints streamReadConstraints = StreamReadConstraints.builder()
-                .maxStringLength(Integer.MAX_VALUE).build();
+        StreamReadConstraints streamReadConstraints = StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE)
+                .build();
         ObjectMapperFactory.createJson31().getFactory().setStreamReadConstraints(streamReadConstraints);
         this.definition = definition;
         this.generatorType = definition.generator().map(x -> ServerGeneratorType.valueOf(x.toUpperCase(Locale.ENGLISH)))
@@ -85,9 +85,9 @@ public final class Names {
         this.api = result.getOpenAPI();
         superSchemas(api);
         logSchemaFullClassNames(api);
-        
+
     }
-    
+
     private static void logSchemaFullClassNames(OpenAPI api) {
         if (LOG_SCHEMA_PATHS) {
             Apis.visitSchemas(api, (category, schemaPath) -> {
@@ -102,18 +102,18 @@ public final class Names {
     public OpenAPI api() {
         return api;
     }
-    
+
     public List<Server> servers() {
         return Util.<List<io.swagger.v3.oas.models.servers.Server>>nvl(api.getServers(), Collections.emptyList()) //
                 .stream() //
                 .map(x -> new Server(x.getUrl(), Optional.ofNullable(x.getDescription()))) //
                 .collect(Collectors.toList());
     }
-    
+
     public static final class Server {
         public final String url;
         public final Optional<String> description;
-        
+
         Server(String url, Optional<String> description) {
             this.url = url;
             this.description = description;
@@ -164,7 +164,7 @@ public final class Names {
     public static String simpleClassName(String fullClassName) {
         return stripGenerics(getLastItemInDotDelimitedString(fullClassName));
     }
-    
+
     private static String stripGenerics(String name) {
         int i = name.indexOf("<");
         if (i == -1) {
@@ -190,7 +190,7 @@ public final class Names {
             return candidate;
         }
     }
-    
+
     public static String toEnumIdentifier(String s) {
         String candidate = identifierCandidate(s);
         if (javaReservedWords.contains(candidate.toUpperCase(Locale.ENGLISH))) {
@@ -367,11 +367,12 @@ public final class Names {
     private static List<Schema<?>> findSchemas(SchemaCategory category, String name, Schema<?> schema,
             Predicate<Schema<?>> predicate) {
         List<Schema<?>> list = new ArrayList<>();
-        Apis.visitSchemas(category, ImmutableList.of(new SchemaWithName(name, schema)), Maps.empty(), (c, schemaPath) -> {
-            if (predicate.test(schemaPath.last().schema)) {
-                list.add(schemaPath.last().schema);
-            }
-        });
+        Apis.visitSchemas(category, ImmutableList.of(new SchemaWithName(name, schema)), Maps.empty(),
+                (c, schemaPath) -> {
+                    if (predicate.test(schemaPath.last().schema)) {
+                        list.add(schemaPath.last().schema);
+                    }
+                });
         return list;
     }
 
@@ -501,7 +502,7 @@ public final class Names {
     public boolean mapNumberToBigDecimal() {
         return definition.mapNumberToBigDecimal();
     }
-    
+
     public boolean generateService() {
         return definition.generateService();
     }
@@ -509,7 +510,7 @@ public final class Names {
     public Predicate<String> simpleNameInPackage(String fullClassName) {
         return x -> {
             String pkg = pkg(fullClassName);
-            String simple = simpleClassName(fullClassName);
+            String simple = simpleClassName(x);
             Set<String> set = packageSimpleClassNames.get(pkg);
             return set != null && set.contains(simple);
         };
@@ -533,12 +534,12 @@ public final class Names {
         registerFullClassName(cls.fullClassName);
         registerTree(cls);
     }
-    
+
     private void registerTree(Cls cls) {
         classes.put(cls.fullClassName, cls);
         cls.classes.forEach(c -> registerTree(c));
     }
-    
+
     public Optional<Cls> cls(String fullClassName) {
         return Optional.ofNullable(classes.get(fullClassName));
     }
