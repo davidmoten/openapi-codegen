@@ -2250,3 +2250,19 @@ components:
         items: 
           type: integer
       
+    ObjectNameClash:
+      properties:
+        line_items:
+          description: >-
+            The line items that will appear on the next invoice after this quote
+            is accepted. This does not include pending invoice items that exist
+            on the customer but may still be included in the next invoice.
+          properties:
+            object:
+              enum: [list]
+              type: string
+            string:
+              enum: [A, B]
+          required:
+            - object
+          type: object
