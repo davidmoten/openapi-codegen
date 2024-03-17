@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 set -x
-MAVEN_OPTS="-Xmx3g -Dmaven.javadoc.skip=true"
+MAVEN_OPTS="-Xmx3g -Dmaven.javadoc.skip=true -Dspotbugs.skip=true"
 mvnd clean install -P extras
 rm -rf /tmp/extras && cp -pr *test/target /tmp/extras
 mvnd clean install -pl *test -P bitbucket

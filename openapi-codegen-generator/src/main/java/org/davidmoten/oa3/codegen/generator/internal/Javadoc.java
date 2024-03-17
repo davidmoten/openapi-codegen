@@ -96,7 +96,10 @@ public final class Javadoc {
     }
 
     private static String encodeAndWrapForJavadoc(String s, boolean isHtml, String linePrefix) {
-        s = s.trim().replace("{@", "zxxz");
+        s = s //
+                .trim() //
+                .replace("{@link ", "{@code ") //
+                .replace("{@", "zxxz");
         if (!isHtml) {
             s = wrap(s);
         }
