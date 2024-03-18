@@ -7,6 +7,8 @@ Generates server-side and client-side Java classes of OpenAPI v3.0.3 (3.1 suppor
 
 I suspect the future of this project will be to generate Java clients for APIs rather than server-side (except for one primary target that will be used for unit testing). The main reason for this is really the huge number of server-side frameworks that are out there. Yet to be decided!
 
+Try it online [here](https://openapi-codegen.davidmoten.org/prod/site/index.html)!
+
 **Features**
 * Very clean minimal generated code (reused logic is in runtime libraries (server or client))
 * Immutable generated schema classes (none of this mutable Java beans getters-and-setters rubbish)
