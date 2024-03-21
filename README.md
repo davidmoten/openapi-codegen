@@ -259,7 +259,7 @@ and
 ```json
 {}
 ```
-This is achieved using the special class `JsonNullable` from the Jackson library. When you want an entry like `"thing" : null` to be
+This is achieved using the special class `JsonNullable` from [OpenAPITools](https://github.com/OpenAPITools/jackson-databind-nullable). When you want an entry like `"thing" : null` to be
 preserved in json then pass `JsonNullable.of(null)`. If you want the entry to be absent then pass `JsonNullable.undefined`.
 
 For situations where `nullable` is false (the default) then pass `java.util.Optional`. The API itself will make this obvious.
