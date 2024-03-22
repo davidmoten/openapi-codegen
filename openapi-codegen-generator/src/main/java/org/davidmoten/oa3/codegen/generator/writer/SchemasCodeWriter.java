@@ -58,6 +58,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -598,6 +599,9 @@ public final class SchemasCodeWriter {
                 out.println();
             }
             first.value = false;
+            if (f.writeOnly && f.readOnly) {
+                System.out.println("both set!");
+            }
             if (cls.classType != ClassType.ANY_OF_NON_DISCRIMINATED) {
                 if (f.isAdditionalProperties() && !f.isArray) {
                     out.line("@%s", JsonAnyGetter.class);
@@ -606,14 +610,16 @@ public final class SchemasCodeWriter {
                     out.line("@%s", JsonUnwrapped.class);
                 } else if (cls.unwrapSingleField()) {
                     writeJsonValueAnnotation(out);
+                } else if (f.readOnly) {
+                    out.line("@%s", JsonIgnore.class);
                 } else {
                     out.line("@%s(\"%s\")", JsonProperty.class, f.name);
                 }
             }
-            if (f.required && f.nullable) {
+            if (f.required && f.nullable && !f.readOnly) {
                 out.line("@%s(%s.ALWAYS)", JsonInclude.class, JsonInclude.Include.class);
             }
-            if (f.isOctets()) {
+            if (f.isOctets() && !f.readOnly) {
                 // TODO handle f.isArray (more serializers?)
                 if (!f.required && f.nullable) {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, JsonNullableOctetsSerializer.class);

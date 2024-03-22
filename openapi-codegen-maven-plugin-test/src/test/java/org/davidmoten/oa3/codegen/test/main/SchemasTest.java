@@ -99,6 +99,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.PropertyAnonymous;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyNotRequired;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyRef;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyRefOptional;
+import org.davidmoten.oa3.codegen.test.main.schema.ReadOnly;
 import org.davidmoten.oa3.codegen.test.main.schema.Ref;
 import org.davidmoten.oa3.codegen.test.main.schema.Shape;
 import org.davidmoten.oa3.codegen.test.main.schema.Shape2;
@@ -1240,15 +1241,28 @@ public class SchemasTest {
     	assertEquals("{\"thing\":\"hi\"}", json);
     	checkRoundTrip(a);
     }
+    
+    @Test
+    public void testReadOnly() throws JsonMappingException, JsonProcessingException {
+        ReadOnly a = m.readValue("{\"name\":\"apple\",\"readOnly\":\"hi\",\"readOnlyOptional\": \"there\"}", ReadOnly.class);
+        assertEquals("hi", a.readOnly());
+        assertEquals("there", a.readOnlyOptional().get());
+        assertEquals("{\"name\":\"apple\"}", m.writeValueAsString(a));
+        assertThrows(ValueInstantiationException.class, () -> checkRoundTrip2(a),"readOnly cannot be null");
+    }
 
     private static void checkRoundTrip(Object o) {
         try {
-            String json = m.writeValueAsString(o);
-            Object o2 = m.readValue(json, o.getClass());
-            assertEquals(o, o2);
+            checkRoundTrip2(o);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    private static void checkRoundTrip2(Object o) throws JsonMappingException, JsonProcessingException {
+        String json = m.writeValueAsString(o);
+        Object o2 = m.readValue(json, o.getClass());
+        assertEquals(o, o2);
     }
     
     private static void iae(Executable executable) {
