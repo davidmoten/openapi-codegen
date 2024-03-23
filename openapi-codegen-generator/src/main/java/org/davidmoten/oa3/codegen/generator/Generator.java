@@ -485,6 +485,10 @@ public class Generator {
             builder.append(mapType);
             builder.append(", nullable=");
             builder.append(nullable);
+            builder.append(", readOnly=");
+            builder.append(readOnly);
+            builder.append(", writeOnly=");
+            builder.append(writeOnly);
             builder.append("]");
             return builder.toString();
         }
@@ -584,7 +588,7 @@ public class Generator {
                 Cls current = stack.peek();
                 final String fullClassName;
                 boolean readOnly = Boolean.TRUE.equals(schema.getReadOnly()) && names.applyReadOnly();
-                boolean writeOnly = Boolean.TRUE.equals(schema.getWriteOnly());
+                boolean writeOnly = false; // TODO implement write
                 if (Util.isPrimitive(schema)) {
                     Class<?> c = Util.toClass(Util.getTypeOrThrow(schema), schema.getFormat(), schema.getExtensions(),
                             names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());

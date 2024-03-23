@@ -599,9 +599,6 @@ public final class SchemasCodeWriter {
                 out.println();
             }
             first.value = false;
-            if (f.writeOnly && f.readOnly) {
-                System.out.println("both set!");
-            }
             if (cls.classType != ClassType.ANY_OF_NON_DISCRIMINATED) {
                 if (f.isAdditionalProperties() && !f.isArray) {
                     out.line("@%s", JsonAnyGetter.class);
