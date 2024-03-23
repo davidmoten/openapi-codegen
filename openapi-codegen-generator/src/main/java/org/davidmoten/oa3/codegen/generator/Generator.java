@@ -374,14 +374,14 @@ public class Generator {
         public String resolvedTypePublicConstructor(Imports imports) {
             if (isOctets()) {
                 if (isArray) {
-                    if (required) {
+                    if (required && !readOnly) {
                         return String.format("%s<byte[]>", imports.add(List.class));
                     } else {
                         return String.format("%s<%s<byte[]>>",imports.add(Optional.class), imports.add(List.class));
                     }
                 } else if (!required && nullable) {
                     return String.format("%s<%s>", imports.add(JsonNullable.class), "byte[]");
-                } else if (!required || nullable) {
+                } else if (!required || nullable || readOnly) {
                     return String.format("%s<%s>", imports.add(Optional.class), "byte[]");
                 } else {
                     return "byte[]";
@@ -391,7 +391,7 @@ public class Generator {
                     return String.format("%s<%s<%s>>", imports.add(List.class), imports.add(JsonNullable.class),
                             imports.add(fullClassName));
                 } else {
-                    return toList(fullClassName, imports, !required);
+                    return toList(fullClassName, imports, !required || readOnly);
                 }
             } else if (nullable) {
                 if (required) {
@@ -399,7 +399,7 @@ public class Generator {
                 } else {
                     return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
                 }
-            } else if (required) {
+            } else if (required && !readOnly) {
                 return imports.add(Util.toPrimitive(fullClassName));
             } else {
                 return imports.add(Optional.class) + "<" + imports.add(fullClassName) + ">";

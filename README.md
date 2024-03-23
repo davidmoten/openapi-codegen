@@ -341,6 +341,15 @@ UploadPostRequestMultipartFormData upload = UploadPostRequestMultipartFormData
 client.uploadPost(upload);
 ```
 
+## readOnly
+Marking a property as readOnly has the following effects on generated code:
+* regardless of whether the property is required or not the field will be typed as Optional
+* if the property is required then 
+  * the constructor will allow Optional.empty to be passed 
+  * a custom deserializer will be used to fail if Optional.empty is passed 
+* the object can be built using the builder or the constructor with or without the readOnly field (
+it is only at deserialization time that we enforce a required property)
+
 ## Server side generation
 ### Ignoring paths for server side generation
 Just add an extension to the OpenAPI file to indicate to the generator not to generate a server side method for a path:

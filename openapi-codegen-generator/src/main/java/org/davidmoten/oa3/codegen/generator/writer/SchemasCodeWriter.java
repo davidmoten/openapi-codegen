@@ -833,7 +833,8 @@ public final class SchemasCodeWriter {
                         expressionFactory = Optional.empty();
                     }
                     return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        f.required && !f.isAdditionalProperties(), f.isArray, f.mapType, f.nullable, expressionFactory);})
+                        f.required && !f.isAdditionalProperties() && !f.readOnly, 
+                        f.isArray, f.mapType, f.nullable, expressionFactory);})
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
