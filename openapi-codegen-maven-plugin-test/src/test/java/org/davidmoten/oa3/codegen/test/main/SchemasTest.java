@@ -1245,7 +1245,7 @@ public class SchemasTest {
     @Test
     public void testReadOnly() throws JsonMappingException, JsonProcessingException {
         ReadOnly a = m.readValue("{\"name\":\"apple\",\"readOnly\":\"hi\",\"readOnlyOptional\": \"there\"}", ReadOnly.class);
-        assertEquals("hi", a.readOnly());
+        assertEquals("hi", a.readOnly().get());
         assertEquals("there", a.readOnlyOptional().get());
         assertEquals("{\"name\":\"apple\"}", m.writeValueAsString(a));
         assertThrows(ValueInstantiationException.class, () -> checkRoundTrip2(a),"readOnly cannot be null");

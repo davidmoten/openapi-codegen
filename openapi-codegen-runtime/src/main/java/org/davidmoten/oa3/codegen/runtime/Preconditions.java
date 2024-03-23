@@ -163,5 +163,11 @@ public final class Preconditions {
             throw new IllegalArgumentException("name was expected to be '" + expected + "' but was '" + o + "'");
         }
     }
+    
+    public static void checkPresent(Optional<?> s, String name) {
+        if (!s.isPresent()) {
+            throw new IllegalArgumentException(name + " must be present but was empty");
+        }
+    }
 
 }

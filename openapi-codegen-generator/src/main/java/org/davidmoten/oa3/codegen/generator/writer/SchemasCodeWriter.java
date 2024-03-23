@@ -608,7 +608,6 @@ public final class SchemasCodeWriter {
                 } else if (cls.unwrapSingleField()) {
                     writeJsonValueAnnotation(out);
                 } else if (f.readOnly) {
-                    System.out.println(f.fieldName + " readOnly");
                     out.line("@%s", JsonIgnore.class);
                 } else {
                     out.line("@%s(\"%s\")", JsonProperty.class, f.name);
@@ -862,33 +861,36 @@ public final class SchemasCodeWriter {
             return;
         }
         String raw = x.fieldName(cls);
+        if (x.required && x.readOnly) {
+            out.line("%s.checkPresent(%s, \"%s\");", Preconditions.class, raw, raw);
+        }
         if (x.minLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(),
-                    x.fieldName(cls));
+                    raw);
         }
         if (x.maxLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMaxLength(%s, %s, \"%s\");", Preconditions.class, raw, x.maxLength.get(),
-                    x.fieldName(cls));
+                    raw);
         }
         if (x.pattern.isPresent() && !x.isDateOrTime() && !x.isByteArray() && !x.isOctets()) {
             out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
-                    WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
+                    WriterUtil.escapePattern(x.pattern.get()), raw);
         }
         if (x.min.isPresent() && x.isNumber()) {
             out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(),
-                    x.fieldName(cls), x.exclusiveMin);
+                    raw, x.exclusiveMin);
         }
         if (x.max.isPresent() && x.isNumber()) {
             out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.max.get().toString(),
-                    x.fieldName(cls), x.exclusiveMax);
+                    raw, x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
-            out.line("%s.checkMinSize(%s, %s, \"%s\");", Preconditions.class, x.fieldName(cls), x.minItems.get(),
-                    x.fieldName(cls));
+            out.line("%s.checkMinSize(%s, %s, \"%s\");", Preconditions.class, raw, x.minItems.get(),
+                    raw);
         }
         if (x.isArray && x.maxItems.isPresent()) {
-            out.line("%s.checkMaxSize(%s, %s, \"%s\");", Preconditions.class, x.fieldName(cls), x.maxItems.get(),
-                    x.fieldName(cls));
+            out.line("%s.checkMaxSize(%s, %s, \"%s\");", Preconditions.class, raw, x.maxItems.get(),
+                    raw);
         }
     }
 
