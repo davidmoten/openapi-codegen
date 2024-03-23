@@ -861,9 +861,6 @@ public final class SchemasCodeWriter {
             return;
         }
         String raw = x.fieldName(cls);
-        if (x.required && x.readOnly) {
-            out.line("%s.checkPresent(%s, \"%s\");", Preconditions.class, raw, raw);
-        }
         if (x.minLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(),
                     raw);
