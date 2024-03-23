@@ -1253,6 +1253,8 @@ public class SchemasTest {
         assertThrows(ValueInstantiationException.class, () -> checkRoundTrip2(a), "readOnly cannot be null");
         // check can built ReadOnly without readOnly value (not possible with deserialization though)
         ReadOnly.builder().name("django").build();
+        assertThrows(ValueInstantiationException.class,() -> m.readValue("{\"name\":\"apple\",\"readOnly\":\"hi\",\"readOnlyOptional\": \"there\",\"readOnlyOctets\":null}",
+                ReadOnly.class));
     }
 
     private static void checkRoundTrip(Object o) {
