@@ -611,6 +611,7 @@ public final class SchemasCodeWriter {
                 } else if (cls.unwrapSingleField()) {
                     writeJsonValueAnnotation(out);
                 } else if (f.readOnly) {
+                    System.out.println(f.fieldName + " readOnly");
                     out.line("@%s", JsonIgnore.class);
                 } else {
                     out.line("@%s(\"%s\")", JsonProperty.class, f.name);

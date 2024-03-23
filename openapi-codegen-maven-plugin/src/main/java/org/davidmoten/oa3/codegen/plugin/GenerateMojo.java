@@ -70,6 +70,9 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "cacheDirectory", defaultValue = "${project.basedir}/.openapi-codegen/cache")
     private File cacheDirectory;
 
+    @Parameter(name = "applyReadOnly", defaultValue = "true")
+    private boolean applyReadOnly;
+    
     @Parameter(name = "skip", defaultValue = "false")
     private boolean skip;
 
@@ -107,9 +110,14 @@ public final class GenerateMojo extends AbstractMojo {
                 String definition = file.toURI().toURL().toExternalForm();
                 Packages packages = new Packages(basePackage);
                 Definition d = new Definition(definition, packages, outputDirectory, x -> x,
-                        Sets.newHashSet(orElse(includeSchemas, Collections.emptyList())),
-                        Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), mapIntegerToBigInteger,
-                        mapNumberToBigDecimal, failOnParseErrors, Optional.ofNullable(generator), generateService);
+                        Sets.newHashSet(orElse(includeSchemas, Collections.emptyList())), //
+                        Sets.newHashSet(orElse(excludeSchemas, Collections.emptyList())), //
+                        mapIntegerToBigInteger, //
+                        mapNumberToBigDecimal, //
+                        failOnParseErrors, //
+                        Optional.ofNullable(generator), //
+                        generateService, //
+                        applyReadOnly);
                 new Generator(d).generate();
                 if (generateService || generateClient) {
                     ClientServerGenerator g = new ClientServerGenerator(d);

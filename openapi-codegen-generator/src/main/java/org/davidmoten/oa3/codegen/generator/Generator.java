@@ -583,7 +583,7 @@ public class Generator {
                 }
                 Cls current = stack.peek();
                 final String fullClassName;
-                boolean readOnly = Boolean.TRUE.equals(schema.getReadOnly());
+                boolean readOnly = Boolean.TRUE.equals(schema.getReadOnly()) && names.applyReadOnly();
                 boolean writeOnly = Boolean.TRUE.equals(schema.getWriteOnly());
                 if (Util.isPrimitive(schema)) {
                     Class<?> c = Util.toClass(Util.getTypeOrThrow(schema), schema.getFormat(), schema.getExtensions(),
