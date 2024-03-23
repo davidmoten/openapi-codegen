@@ -44,6 +44,7 @@ import org.davidmoten.oa3.codegen.runtime.JsonNullableOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentConverter;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
@@ -702,6 +703,9 @@ public final class SchemasCodeWriter {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OctetsDeserializer.class));
                         }
+                    } else if (f.required && f.readOnly) {
+                        annotations += String.format("@%s(converter = %s.class) ", out.add(JsonDeserialize.class),
+                                out.add(OptionalMustBePresentConverter.class));
                     }
                     return String.format("\n%s%s%s %s", out.indent(), annotations, t, f.fieldName(cls));
                 }) //
