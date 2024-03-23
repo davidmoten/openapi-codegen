@@ -2277,5 +2277,9 @@ components:
         readOnlyOptional:
           type: string
           readOnly: true
-      required: [name, readOnly]
+        readOnlyOctets:
+          type: string
+          format: binary
+          readOnly: true
+      required: [name, readOnly, readOnlyOctets]
               

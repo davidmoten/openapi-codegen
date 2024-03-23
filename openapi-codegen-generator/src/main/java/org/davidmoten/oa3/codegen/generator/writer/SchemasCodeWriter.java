@@ -693,15 +693,19 @@ public final class SchemasCodeWriter {
                     String annotations = cls.unwrapSingleField() ? "" //
                             : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
                     if (f.isOctets()) {
+                        String extra = "";
+                        if (f.required && f.readOnly)  {
+                            extra = String.format(", converter = %s.class", out.add(OptionalMustBePresentConverter.class));
+                        }
                         if (!f.required && f.nullable) {
-                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
-                                    out.add(JsonNullableOctetsDeserializer.class));
-                        } else if (!f.required || f.nullable) {
-                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
-                                    out.add(OptionalOctetsDeserializer.class));
+                            annotations += String.format("@%s(using = %s.class%s) ", out.add(JsonDeserialize.class),
+                                    out.add(JsonNullableOctetsDeserializer.class), extra);
+                        } else if (!f.required || f.nullable || f.required && f.readOnly) {
+                            annotations += String.format("@%s(using = %s.class%s) ", out.add(JsonDeserialize.class),
+                                    out.add(OptionalOctetsDeserializer.class), extra);
                         } else {
-                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
-                                    out.add(OctetsDeserializer.class));
+                            annotations += String.format("@%s(using = %s.class%s) ", out.add(JsonDeserialize.class),
+                                    out.add(OctetsDeserializer.class), extra);
                         }
                     } else if (f.required && f.readOnly) {
                         annotations += String.format("@%s(converter = %s.class) ", out.add(JsonDeserialize.class),
