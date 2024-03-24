@@ -44,6 +44,7 @@ import org.davidmoten.oa3.codegen.runtime.JsonNullableOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalEmptyDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentConverter;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsSerializer;
@@ -690,7 +691,10 @@ public final class SchemasCodeWriter {
                     }
                     String annotations = cls.unwrapSingleField() ? "" //
                             : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
-                    if (f.isOctets()) {
+                    if (f.writeOnly) {
+                        annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                out.add(OptionalEmptyDeserializer.class));
+                    } else if (f.isOctets()) {
                         if (f.required && f.readOnly)  {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OptionalPresentOctetsDeserializer.class));

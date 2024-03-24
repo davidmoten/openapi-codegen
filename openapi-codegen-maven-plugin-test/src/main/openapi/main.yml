@@ -2282,4 +2282,20 @@ components:
           format: binary
           readOnly: true
       required: [name, readOnly, readOnlyOctets]
+      
+    WriteOnly:
+      properties:
+        name: 
+          type: string
+        writeOnly: 
+          type: string
+          writeOnly: true
+        writeOnlyOptional:
+          type: string
+          writeOnly: true
+        writeOnlyOctets:
+          type: string
+          format: binary
+          writeOnly: true
+      required: [name, writeOnly, writeOnlyOctets]
               
