@@ -548,4 +548,8 @@ public final class Names {
         return definition.applyReadOnly();
     }
 
+    public boolean applyWriteOnly() {
+        return definition.applyWriteOnly();
+    }
+
 }

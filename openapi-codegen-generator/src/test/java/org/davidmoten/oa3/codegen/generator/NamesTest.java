@@ -8,12 +8,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.v3.parser.util.DeserializationUtils;
 
 public class NamesTest {
 

@@ -73,6 +73,9 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "applyReadOnly", defaultValue = "true")
     private boolean applyReadOnly;
     
+    @Parameter(name = "applyWriteOnly", defaultValue = "true")
+    private boolean applyWriteOnly;
+    
     @Parameter(name = "skip", defaultValue = "false")
     private boolean skip;
 
@@ -117,7 +120,8 @@ public final class GenerateMojo extends AbstractMojo {
                         failOnParseErrors, //
                         Optional.ofNullable(generator), //
                         generateService, //
-                        applyReadOnly);
+                        applyReadOnly, //
+                        applyWriteOnly);
                 new Generator(d).generate();
                 if (generateService || generateClient) {
                     ClientServerGenerator g = new ClientServerGenerator(d);

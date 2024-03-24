@@ -19,11 +19,12 @@ public final class Definition {
     private final Optional<String> generator;
     private final boolean generateService;
     private final boolean applyReadOnly;
+    private final boolean applyWriteOnly;
 
     public Definition(String definition, Packages packages, File generatedSourceDirectory,
             Function<String, String> externalRefClassNames, Set<String> includeSchemas, Set<String> excludeSchemas,
             boolean mapIntegerToBigInteger, boolean mapNumberToBigDecimal, boolean failOnParseErrors, 
-            Optional<String> generator, boolean generateService, boolean applyReadOnly) {
+            Optional<String> generator, boolean generateService, boolean applyReadOnly, boolean applyWriteOnly) {
         this.definition = definition;
         this.packages = packages;
         this.generatedSourceDirectory = generatedSourceDirectory;
@@ -36,6 +37,7 @@ public final class Definition {
         this.generator = generator;
         this.generateService = generateService;
         this.applyReadOnly = applyReadOnly;
+        this.applyWriteOnly = applyWriteOnly;
     }
 
     public String definition() {
@@ -86,4 +88,7 @@ public final class Definition {
         return applyReadOnly;
     }
 
+    public boolean applyWriteOnly() {
+        return applyWriteOnly;
+    }
 }
