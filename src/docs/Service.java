@@ -15,7 +15,7 @@ import org.davidmoten.oa3.codegen.test.library.schema.UsersPage;
  * <p>Library Demo
  * <p>Library demonstration of some features of OpenAPI 3 and <em>openapi-codegen</em>
  */
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
 public interface Service extends ErrorHandler {
 
     Service DEFAULT = new Service() {};
@@ -23,7 +23,7 @@ public interface Service extends ErrorHandler {
     /**
      * <p>List users page by page, filtered by search if present
      * 
-     * <p>[status=200, application/json] --&gt; {@link UsersPage}
+     * <p>[status=200, application/json] --&gt; {@code UsersPage}
      * 
      * @param search
      *            <p>search
@@ -51,7 +51,7 @@ public interface Service extends ErrorHandler {
     /**
      * <p>Gets user details
      * 
-     * <p>[status=200, application/json] --&gt; {@link User}
+     * <p>[status=200, application/json] --&gt; {@code User}
      * 
      * @param id
      *            <p>id
@@ -90,7 +90,7 @@ public interface Service extends ErrorHandler {
     /**
      * <p>Gets item details
      * 
-     * <p>[status=200, application/json] --&gt; {@link Item}
+     * <p>[status=200, application/json] --&gt; {@code Item}
      * 
      * @param itemId
      *            <p>itemId

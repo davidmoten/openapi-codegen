@@ -12,6 +12,7 @@ cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Pet
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Pet3.java ../src/docs/Pet3.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Cat3.java ../src/docs/Cat3.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/Dog3.java ../src/docs/Dog3.java
+cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/main/schema/ReadOnly.java ../src/docs/ReadOnly.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/client/Client.java ../src/docs/Client.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/Service.java ../src/docs/Service.java
 cp target/generated-sources/java/org/davidmoten/oa3/codegen/test/library/service/ServiceController.java ../src/docs/ServiceController.java

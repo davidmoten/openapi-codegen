@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
 public class ServiceController implements ControllerExceptionHandler {
 
     private final Service service;
@@ -35,7 +35,7 @@ public class ServiceController implements ControllerExceptionHandler {
     /**
      * <p>List users page by page, filtered by search if present
      * 
-     * <p>[status=200, application/json] --&gt; {@link UsersPage}
+     * <p>[status=200, application/json] --&gt; {@code UsersPage}
      * 
      * @param search
      *            <p>search
@@ -85,7 +85,7 @@ public class ServiceController implements ControllerExceptionHandler {
     /**
      * <p>Gets user details
      * 
-     * <p>[status=200, application/json] --&gt; {@link User}
+     * <p>[status=200, application/json] --&gt; {@code User}
      * 
      * @param id
      *            <p>id
@@ -158,7 +158,7 @@ public class ServiceController implements ControllerExceptionHandler {
     /**
      * <p>Gets item details
      * 
-     * <p>[status=200, application/json] --&gt; {@link Item}
+     * <p>[status=200, application/json] --&gt; {@code Item}
      * 
      * @param itemId
      *            <p>itemId

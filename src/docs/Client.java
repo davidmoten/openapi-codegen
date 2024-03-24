@@ -24,7 +24,7 @@ import org.davidmoten.oa3.codegen.test.library.schema.UsersPage;
  * <p>Library Demo
  * <p>Library demonstration of some features of OpenAPI 3 and <em>openapi-codegen</em>
  */
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.15-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
 public class Client {
 
     private final Serializer serializer;
@@ -43,6 +43,25 @@ public class Client {
         return new ClientBuilder<>(b -> new Client(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), Globals.config(), basePath);
     }
 
+    public static ClientBuilder<Client> basePath(Server server) {
+        return new ClientBuilder<>(b -> new Client(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), Globals.config(), server.url());
+    }
+
+    public enum Server {
+
+        SERVER1("/");
+
+        private String url;
+
+        Server(String url) {
+            this.url = url;
+        }
+
+        public String url() {
+            return url;
+        }
+    }
+
     private Builder http(HttpMethod method, String path) {
         return Http
                 .method(method)
@@ -56,7 +75,7 @@ public class Client {
     /**
      * <p>List users page by page, filtered by search if present
      * 
-     * <p>[status=200, application/json] --&gt; {@link UsersPage}
+     * <p>[status=200, application/json] --&gt; {@code UsersPage}
      * 
      * @param search
      *            <p>search
@@ -95,7 +114,7 @@ public class Client {
     /**
      * <p>Gets user details
      * 
-     * <p>[status=200, application/json] --&gt; {@link User}
+     * <p>[status=200, application/json] --&gt; {@code User}
      * 
      * @param id
      *            <p>id
@@ -148,7 +167,7 @@ public class Client {
     /**
      * <p>Gets item details
      * 
-     * <p>[status=200, application/json] --&gt; {@link Item}
+     * <p>[status=200, application/json] --&gt; {@code Item}
      * 
      * @param itemId
      *            <p>itemId
