@@ -44,8 +44,10 @@ import org.davidmoten.oa3.codegen.runtime.JsonNullableOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentConverter;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalPresentOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
@@ -58,6 +60,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -89,9 +92,6 @@ public final class SchemasCodeWriter {
             return;
         }
         CodePrintWriter out = CodePrintWriter.create(cls.fullClassName, names.simpleNameInPackage(cls.fullClassName));
-        if (cls.fullClassName.equals("test.schema.StoredValueBalanceMergeRequest")) {
-            System.out.println("here");
-        }
         SchemasCodeWriter.writeClass(out, cls, fullClassNameInterfaces, names);
         WriterUtil.writeContent(names, out);
     }
@@ -606,14 +606,16 @@ public final class SchemasCodeWriter {
                     out.line("@%s", JsonUnwrapped.class);
                 } else if (cls.unwrapSingleField()) {
                     writeJsonValueAnnotation(out);
+                } else if (f.readOnly) {
+                    out.line("@%s", JsonIgnore.class);
                 } else {
                     out.line("@%s(\"%s\")", JsonProperty.class, f.name);
                 }
             }
-            if (f.required && f.nullable) {
+            if (f.required && f.nullable && !f.readOnly) {
                 out.line("@%s(%s.ALWAYS)", JsonInclude.class, JsonInclude.Include.class);
             }
-            if (f.isOctets()) {
+            if (f.isOctets() && !f.readOnly) {
                 // TODO handle f.isArray (more serializers?)
                 if (!f.required && f.nullable) {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, JsonNullableOctetsSerializer.class);
@@ -689,16 +691,22 @@ public final class SchemasCodeWriter {
                     String annotations = cls.unwrapSingleField() ? "" //
                             : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
                     if (f.isOctets()) {
-                        if (!f.required && f.nullable) {
+                        if (f.required && f.readOnly)  {
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(OptionalPresentOctetsDeserializer.class));
+                        } else if (!f.required && f.nullable) {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(JsonNullableOctetsDeserializer.class));
-                        } else if (!f.required || f.nullable) {
+                        } else if (!f.required || f.nullable || f.required && f.readOnly) {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OptionalOctetsDeserializer.class));
                         } else {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OctetsDeserializer.class));
                         }
+                    } else if (f.required && f.readOnly) {
+                        annotations += String.format("@%s(converter = %s.class) ", out.add(JsonDeserialize.class),
+                                out.add(OptionalMustBePresentConverter.class));
                     }
                     return String.format("\n%s%s%s %s", out.indent(), annotations, t, f.fieldName(cls));
                 }) //
@@ -829,7 +837,8 @@ public final class SchemasCodeWriter {
                         expressionFactory = Optional.empty();
                     }
                     return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        f.required && !f.isAdditionalProperties(), f.isArray, f.mapType, f.nullable, expressionFactory);})
+                        f.required && !f.isAdditionalProperties() && !f.readOnly, 
+                        f.isArray, f.mapType, f.nullable, expressionFactory);})
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
@@ -859,31 +868,31 @@ public final class SchemasCodeWriter {
         String raw = x.fieldName(cls);
         if (x.minLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(),
-                    x.fieldName(cls));
+                    raw);
         }
         if (x.maxLength.isPresent() && !x.isDateOrTime()) {
             out.line("%s.checkMaxLength(%s, %s, \"%s\");", Preconditions.class, raw, x.maxLength.get(),
-                    x.fieldName(cls));
+                    raw);
         }
         if (x.pattern.isPresent() && !x.isDateOrTime() && !x.isByteArray() && !x.isOctets()) {
             out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
-                    WriterUtil.escapePattern(x.pattern.get()), x.fieldName(cls));
+                    WriterUtil.escapePattern(x.pattern.get()), raw);
         }
         if (x.min.isPresent() && x.isNumber()) {
             out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(),
-                    x.fieldName(cls), x.exclusiveMin);
+                    raw, x.exclusiveMin);
         }
         if (x.max.isPresent() && x.isNumber()) {
             out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.max.get().toString(),
-                    x.fieldName(cls), x.exclusiveMax);
+                    raw, x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
-            out.line("%s.checkMinSize(%s, %s, \"%s\");", Preconditions.class, x.fieldName(cls), x.minItems.get(),
-                    x.fieldName(cls));
+            out.line("%s.checkMinSize(%s, %s, \"%s\");", Preconditions.class, raw, x.minItems.get(),
+                    raw);
         }
         if (x.isArray && x.maxItems.isPresent()) {
-            out.line("%s.checkMaxSize(%s, %s, \"%s\");", Preconditions.class, x.fieldName(cls), x.maxItems.get(),
-                    x.fieldName(cls));
+            out.line("%s.checkMaxSize(%s, %s, \"%s\");", Preconditions.class, raw, x.maxItems.get(),
+                    raw);
         }
     }
 

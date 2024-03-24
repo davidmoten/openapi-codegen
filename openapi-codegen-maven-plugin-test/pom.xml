@@ -129,6 +129,7 @@
                                     <include>main.yml</include>
                                 </includes>
                             </sources>
+                            <applyReadOnly>true</applyReadOnly>
                         </configuration>
                     </execution>
                     <execution>

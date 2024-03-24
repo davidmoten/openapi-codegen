@@ -544,4 +544,8 @@ public final class Names {
         return Optional.ofNullable(classes.get(fullClassName));
     }
 
+    public boolean applyReadOnly() {
+        return definition.applyReadOnly();
+    }
+
 }

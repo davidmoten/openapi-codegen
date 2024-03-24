@@ -156,19 +156,26 @@ public class Generator {
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
+                Optional<MapType> mapType, boolean nullable, boolean readOnly, boolean writeOnly) {
+            addField(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(), Optional.empty(),
+                    Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false, false,
+                    Encoding.DEFAULT, mapType, nullable, readOnly, writeOnly);
+        }
+        
+        void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
                 Optional<MapType> mapType, boolean nullable) {
             addField(fullType, name, fieldName, required, isArray, Optional.empty(), Optional.empty(), Optional.empty(),
                     Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false, false,
-                    Encoding.DEFAULT, mapType, nullable);
+                    Encoding.DEFAULT, mapType, nullable, false, false);
         }
 
         void addField(String fullType, String name, String fieldName, boolean required, boolean isArray,
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
-                Optional<MapType> mapType, boolean nullable) {
+                Optional<MapType> mapType, boolean nullable, boolean readOnly, boolean writeOnly) {
             fields.add(new Field(fullType, name, fieldName, required, isArray, minItems, maxItems, minLength, maxLength,
-                    pattern, min, max, exclusiveMin, exclusiveMax, encoding, mapType, nullable));
+                    pattern, min, max, exclusiveMin, exclusiveMax, encoding, mapType, nullable, readOnly, writeOnly));
 //            if (WriterUtil.DEBUG && mapType.isPresent()) {
 //                System.err.println(fullClassName);
 //                System.err.println(fields.get(fields.size() - 1));
@@ -302,6 +309,8 @@ public class Generator {
         public final Optional<Integer> minItems;
         public final Optional<Integer> maxItems;
         public final Optional<MapType> mapType;
+        public final boolean readOnly;
+        public final boolean writeOnly;
 
         // note that when isArray is true, nullable refers to the array item
         public final boolean nullable;
@@ -310,7 +319,7 @@ public class Generator {
                 Optional<Integer> minItems, Optional<Integer> maxItems, Optional<Integer> minLength,
                 Optional<Integer> maxLength, Optional<String> pattern, Optional<BigDecimal> min,
                 Optional<BigDecimal> max, boolean exclusiveMin, boolean exclusiveMax, Encoding encoding,
-                Optional<MapType> mapType, boolean nullable) {
+                Optional<MapType> mapType, boolean nullable, boolean readOnly, boolean writeOnly) {
             this.fullClassName = fullClassName;
             this.name = name;
             this.fieldName = fieldName;
@@ -328,6 +337,8 @@ public class Generator {
             this.max = max;
             this.mapType = mapType;
             this.nullable = nullable;
+            this.readOnly = readOnly;
+            this.writeOnly = writeOnly;
         }
 
         public String fieldName(Cls cls) {
@@ -363,14 +374,14 @@ public class Generator {
         public String resolvedTypePublicConstructor(Imports imports) {
             if (isOctets()) {
                 if (isArray) {
-                    if (required) {
+                    if (required && !readOnly) {
                         return String.format("%s<byte[]>", imports.add(List.class));
                     } else {
                         return String.format("%s<%s<byte[]>>",imports.add(Optional.class), imports.add(List.class));
                     }
                 } else if (!required && nullable) {
                     return String.format("%s<%s>", imports.add(JsonNullable.class), "byte[]");
-                } else if (!required || nullable) {
+                } else if (!required || nullable || readOnly) {
                     return String.format("%s<%s>", imports.add(Optional.class), "byte[]");
                 } else {
                     return "byte[]";
@@ -380,7 +391,7 @@ public class Generator {
                     return String.format("%s<%s<%s>>", imports.add(List.class), imports.add(JsonNullable.class),
                             imports.add(fullClassName));
                 } else {
-                    return toList(fullClassName, imports, !required);
+                    return toList(fullClassName, imports, !required || readOnly);
                 }
             } else if (nullable) {
                 if (required) {
@@ -388,7 +399,7 @@ public class Generator {
                 } else {
                     return String.format("%s<%s>", imports.add(JsonNullable.class), imports.add(fullClassName));
                 }
-            } else if (required) {
+            } else if (required && !readOnly) {
                 return imports.add(Util.toPrimitive(fullClassName));
             } else {
                 return imports.add(Optional.class) + "<" + imports.add(fullClassName) + ">";
@@ -474,6 +485,10 @@ public class Generator {
             builder.append(mapType);
             builder.append(", nullable=");
             builder.append(nullable);
+            builder.append(", readOnly=");
+            builder.append(readOnly);
+            builder.append(", writeOnly=");
+            builder.append(writeOnly);
             builder.append("]");
             return builder.toString();
         }
@@ -572,6 +587,8 @@ public class Generator {
                 }
                 Cls current = stack.peek();
                 final String fullClassName;
+                boolean readOnly = Boolean.TRUE.equals(schema.getReadOnly()) && names.applyReadOnly();
+                boolean writeOnly = false; // TODO implement write
                 if (Util.isPrimitive(schema)) {
                     Class<?> c = Util.toClass(Util.getTypeOrThrow(schema), schema.getFormat(), schema.getExtensions(),
                             names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());
@@ -597,7 +614,7 @@ public class Generator {
                     boolean exclusiveMax = orElse(schema.getExclusiveMaximum(), false);
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             minLength, maxLength, pattern, min, max, exclusiveMin, exclusiveMax, encoding,
-                            mapType(schemaPath), isNullable(schema));
+                            mapType(schemaPath), isNullable(schema), readOnly, writeOnly);
                 } else if (Util.isRef(schema)) {
                     fullClassName = names.refToFullClassName(schema.get$ref());
                     final String fieldNameCandidate = orElse(last.name, Names.simpleClassName(fullClassName));
@@ -606,7 +623,7 @@ public class Generator {
                     // TODO pick up other constraints
                     current.addField(fullClassName, last.name, fieldName, required, isArray, minItems, maxItems,
                             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                            false, false, Encoding.DEFAULT, mapType(schemaPath), isNullable(schema));
+                            false, false, Encoding.DEFAULT, mapType(schemaPath), isNullable(schema), false, false);
                 } else {
                     // any object
                     String fieldName = current.nextFieldName(last.name, schema);

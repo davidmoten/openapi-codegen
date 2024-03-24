@@ -2266,3 +2266,20 @@ components:
           required:
             - object
           type: object
+
+    ReadOnly:
+      properties:
+        name: 
+          type: string
+        readOnly: 
+          type: string
+          readOnly: true
+        readOnlyOptional:
+          type: string
+          readOnly: true
+        readOnlyOctets:
+          type: string
+          format: binary
+          readOnly: true
+      required: [name, readOnly, readOnlyOctets]
+              
