@@ -47,5 +47,4 @@ public class OptionalPresentOctetsDeserializer extends StdDeserializer<Optional<
             throw new UncheckedIOException(e);
         }
     }
-
 }

@@ -2,7 +2,7 @@ package org.davidmoten.oa3.codegen.runtime;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -12,11 +12,12 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-public class OptionalOctetsSerializationTest {
+public class OptionalPresentOctetsDeserializerTest {
 
     private static final byte[] HI_THERE = "hi there".getBytes(StandardCharsets.UTF_8);
 
@@ -28,7 +29,7 @@ public class OptionalOctetsSerializationTest {
 
         @JsonCreator
         public Thing(
-                @JsonDeserialize(using = OptionalOctetsDeserializer.class) @JsonProperty("bytes") Optional<byte[]> bytes) {
+                @JsonDeserialize(using = OptionalPresentOctetsDeserializer.class) @JsonProperty("bytes") Optional<byte[]> bytes) {
             this.bytes = bytes;
         }
     }
@@ -45,9 +46,9 @@ public class OptionalOctetsSerializationTest {
     @Test
     public void testOptionalEmpty() throws JsonProcessingException {
         ObjectMapper m = Config.builder().build().mapper();
-        Thing a = new Thing(Optional.empty());
-        String json = m.writeValueAsString(a);
-        assertFalse(m.readValue(json, Thing.class).bytes.isPresent());
+        assertThrows(JsonMappingException.class, () -> m.readValue("{}", Thing.class));
+        assertThrows(JsonMappingException.class, () -> m.readValue("{\"bytes\":null}", Thing.class));
     }
 
+    
 }
