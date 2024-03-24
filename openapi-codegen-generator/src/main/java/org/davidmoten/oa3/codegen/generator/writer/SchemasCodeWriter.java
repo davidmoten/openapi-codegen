@@ -47,6 +47,7 @@ import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentConverter;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalPresentOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
@@ -693,19 +694,18 @@ public final class SchemasCodeWriter {
                     String annotations = cls.unwrapSingleField() ? "" //
                             : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
                     if (f.isOctets()) {
-                        String extra = "";
                         if (f.required && f.readOnly)  {
-                            extra = String.format(", converter = %s.class", out.add(OptionalMustBePresentConverter.class));
-                        }
-                        if (!f.required && f.nullable) {
-                            annotations += String.format("@%s(using = %s.class%s) ", out.add(JsonDeserialize.class),
-                                    out.add(JsonNullableOctetsDeserializer.class), extra);
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(OptionalPresentOctetsDeserializer.class));
+                        } else if (!f.required && f.nullable) {
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(JsonNullableOctetsDeserializer.class));
                         } else if (!f.required || f.nullable || f.required && f.readOnly) {
-                            annotations += String.format("@%s(using = %s.class%s) ", out.add(JsonDeserialize.class),
-                                    out.add(OptionalOctetsDeserializer.class), extra);
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(OptionalOctetsDeserializer.class));
                         } else {
-                            annotations += String.format("@%s(using = %s.class%s) ", out.add(JsonDeserialize.class),
-                                    out.add(OctetsDeserializer.class), extra);
+                            annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                    out.add(OctetsDeserializer.class));
                         }
                     } else if (f.required && f.readOnly) {
                         annotations += String.format("@%s(converter = %s.class) ", out.add(JsonDeserialize.class),
