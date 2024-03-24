@@ -391,7 +391,7 @@ public class Generator {
                     return String.format("%s<%s<%s>>", imports.add(List.class), imports.add(JsonNullable.class),
                             imports.add(fullClassName));
                 } else {
-                    return toList(fullClassName, imports, !required || readOnly);
+                    return toList(fullClassName, imports, !required || readOnly|| writeOnly);
                 }
             } else if (nullable) {
                 if (required) {

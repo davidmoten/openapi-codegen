@@ -177,6 +177,23 @@
                             </sources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>adhoc</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generator>spring2</generator>
+                            <generateService>false</generateService>
+                            <generateClient>true</generateClient>
+                            <basePackage>org.davidmoten.oa3.codegen.test.adhoc</basePackage>
+                            <sources>
+                                <includes>
+                                    <include>adhoc.yml</include>
+                                </includes>
+                            </sources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

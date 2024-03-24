@@ -82,12 +82,13 @@ public final class GenerateMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException {
         if (skip) {
-            System.out.println("[INFO] skipping");
+            getLog().info("skipping generation");
             return;
         }
         if (downloadList != null) {
             DownloadExtras.run(downloadList, cacheDirectory);
         }
+        long t = System.currentTimeMillis();
         File defaultSourceDirectory = new File(//
                 project.getBasedir(), //
                 "src" + File.separator //
@@ -137,6 +138,7 @@ public final class GenerateMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage());
         }
+        getLog().info("generated in " + (System.currentTimeMillis() - t) + "ms");
     }
 
     private static String commaSeparate(List<String> list) {
