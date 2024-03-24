@@ -342,13 +342,21 @@ client.uploadPost(upload);
 ```
 
 ## readOnly
+Sometimes you want to indicate that parts of an object are used only in a response or only in a request (but the core parts of the object might be used in both). That's where `readOnly` and `writeOnly` keywords come in.
+
+If a field is marked readOnly
+* it should not be transmitted over the wire in a request
+* the object containing the field should still be constructable without that field so that the object can be used in a request
+
 Marking a property as readOnly has the following effects on generated code:
-* regardless of whether the property is required or not the field will be typed as Optional
+* regardless of whether the property is required or not the field will be typed as `Optional`
 * if the property is required then 
-  * the constructor will allow Optional.empty to be passed 
-  * a custom deserializer will be used to fail if Optional.empty is passed 
+  * the constructor will allow `Optional.empty` to be passed 
+  * a custom deserializer will be used to fail if `Optional.empty` (null or absent) is passed 
 * the object can be built using the builder or the constructor with or without the readOnly field (
 it is only at deserialization time that we enforce a required property)
+
+Here's an example of generated code with readOnly fields: [ReadOnly.java](src/docs/ReadOnly.java).
 
 ## Server side generation
 ### Ignoring paths for server side generation
