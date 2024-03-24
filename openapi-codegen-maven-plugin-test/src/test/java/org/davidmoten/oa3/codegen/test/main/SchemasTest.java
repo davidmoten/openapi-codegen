@@ -1259,6 +1259,11 @@ public class SchemasTest {
                 "{\"name\":\"apple\",\"readOnly\":\"hi\",\"readOnlyOptional\": \"there\",\"readOnlyOctets\":null}",
                 ReadOnly.class));
     }
+    
+    @Test
+    public void testWriteOnly() {
+        //TODO
+    }
 
     private static void checkRoundTrip(Object o) {
         try {
