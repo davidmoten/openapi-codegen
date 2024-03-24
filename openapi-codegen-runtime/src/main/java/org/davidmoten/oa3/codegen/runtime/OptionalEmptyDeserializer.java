@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 public final class OptionalEmptyDeserializer<T> extends StdDeserializer<Optional<T>> {
@@ -18,6 +19,21 @@ public final class OptionalEmptyDeserializer<T> extends StdDeserializer<Optional
 
     @Override
     public Optional<T> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<T> getNullValue(DeserializationContext ctxt) throws JsonMappingException {
+        return Optional.empty();
+    }
+
+    @Override
+    public Object getAbsentValue(DeserializationContext ctxt) throws JsonMappingException {
+        return Optional.empty();
+    }
+
+    @Override
+    public Object getEmptyValue(DeserializationContext ctxt) throws JsonMappingException {
         return Optional.empty();
     }
 }

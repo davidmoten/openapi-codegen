@@ -130,6 +130,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.Table.TableItem;
 import org.davidmoten.oa3.codegen.test.main.schema.TwoMaps;
 import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
 import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
+import org.davidmoten.oa3.codegen.test.main.schema.WriteOnly;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -1261,8 +1262,31 @@ public class SchemasTest {
     }
     
     @Test
-    public void testWriteOnly() {
-        //TODO
+    public void testWriteOnly() throws JsonProcessingException {
+        {
+            WriteOnly a = WriteOnly.builder().name("fred").build();
+            // required field must be present at serialization time
+            assertThrows(JsonMappingException.class, () -> m.writeValueAsString(a));
+        }
+        {
+            WriteOnly a = WriteOnly.builder().name("fred").writeOnly("blah").build();
+            // required field must be present at serialization time
+            assertThrows(JsonMappingException.class, () -> m.writeValueAsString(a));
+        }
+        {
+            String json = "{\"name\":\"fred\",\"writeOnly\":\"blah\",\"writeOnlyOctets\":\"616263\"}";
+            WriteOnly a = WriteOnly.builder() //
+                    .name("fred") //
+                    .writeOnly("blah") //
+                    .writeOnlyOctets("abc".getBytes(StandardCharsets.UTF_8)) //
+                    .build();
+            // required field must be present at serialization time
+            assertEquals(json,  m.writeValueAsString(a));
+            WriteOnly b = m.readValue(json, WriteOnly.class);
+            assertFalse(b.writeOnly().isPresent());
+            assertFalse(b.writeOnlyOptional().isPresent());
+            assertFalse(b.writeOnlyOctets().isPresent());
+        }
     }
 
     private static void checkRoundTrip(Object o) {
