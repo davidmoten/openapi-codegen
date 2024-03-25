@@ -43,7 +43,7 @@ public final class ProjectGenerator {
         File generatedSourceDirectory = new File(directory, "src/main/java");
         generatedSourceDirectory.mkdirs();
         Definition definition = new Definition(openapiFilename, new Packages(basePackage), generatedSourceDirectory,
-                x -> x, Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), generateServer, true);
+                x -> x, Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), generateServer, true, true);
         Generator g = new Generator(definition);
         g.generate();
 

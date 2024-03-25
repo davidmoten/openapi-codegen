@@ -44,9 +44,11 @@ import org.davidmoten.oa3.codegen.runtime.JsonNullableOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.NullEnumDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalEmptyDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentConverter;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsSerializer;
+import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalPresentOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
@@ -617,13 +619,17 @@ public final class SchemasCodeWriter {
             }
             if (f.isOctets() && !f.readOnly) {
                 // TODO handle f.isArray (more serializers?)
-                if (!f.required && f.nullable) {
+                if (f.required && f.writeOnly) {
+                    out.line("@%s(using = %s.class)", JsonSerialize.class, OptionalMustBePresentOctetsSerializer.class);
+                } else if (!f.required && f.nullable) {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, JsonNullableOctetsSerializer.class);
                 } else if (!f.required || f.nullable) {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, OptionalOctetsSerializer.class);
                 } else {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, OctetsSerializer.class);
                 }
+            } else if (f.required && f.writeOnly ) {
+                out.line("@%s(converter = %s.class)", JsonSerialize.class, OptionalMustBePresentConverter.class);
             }
             final String fieldType;
             if (cls.classType == ClassType.ENUM && cls.enumValueFullType.equals(Map.class.getCanonicalName())) {
@@ -690,7 +696,10 @@ public final class SchemasCodeWriter {
                     }
                     String annotations = cls.unwrapSingleField() ? "" //
                             : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
-                    if (f.isOctets()) {
+                    if (f.writeOnly) {
+                        annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
+                                out.add(OptionalEmptyDeserializer.class));
+                    } else if (f.isOctets()) {
                         if (f.required && f.readOnly)  {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OptionalPresentOctetsDeserializer.class));
@@ -837,7 +846,7 @@ public final class SchemasCodeWriter {
                         expressionFactory = Optional.empty();
                     }
                     return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        f.required && !f.isAdditionalProperties() && !f.readOnly, 
+                        f.required && !f.isAdditionalProperties() && !f.readOnly && !f.writeOnly, 
                         f.isArray, f.mapType, f.nullable, expressionFactory);})
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());

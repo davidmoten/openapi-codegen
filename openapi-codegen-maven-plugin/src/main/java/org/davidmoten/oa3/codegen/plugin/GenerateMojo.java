@@ -73,18 +73,22 @@ public final class GenerateMojo extends AbstractMojo {
     @Parameter(name = "applyReadOnly", defaultValue = "true")
     private boolean applyReadOnly;
     
+    @Parameter(name = "applyWriteOnly", defaultValue = "true")
+    private boolean applyWriteOnly;
+    
     @Parameter(name = "skip", defaultValue = "false")
     private boolean skip;
 
     @Override
     public void execute() throws MojoExecutionException {
         if (skip) {
-            System.out.println("[INFO] skipping");
+            getLog().info("skipping generation");
             return;
         }
         if (downloadList != null) {
             DownloadExtras.run(downloadList, cacheDirectory);
         }
+        long t = System.currentTimeMillis();
         File defaultSourceDirectory = new File(//
                 project.getBasedir(), //
                 "src" + File.separator //
@@ -117,7 +121,8 @@ public final class GenerateMojo extends AbstractMojo {
                         failOnParseErrors, //
                         Optional.ofNullable(generator), //
                         generateService, //
-                        applyReadOnly);
+                        applyReadOnly, //
+                        applyWriteOnly);
                 new Generator(d).generate();
                 if (generateService || generateClient) {
                     ClientServerGenerator g = new ClientServerGenerator(d);
@@ -133,6 +138,7 @@ public final class GenerateMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException(e.getMessage());
         }
+        getLog().info("generated in " + (System.currentTimeMillis() - t) + "ms");
     }
 
     private static String commaSeparate(List<String> list) {
