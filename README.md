@@ -370,11 +370,11 @@ Marking a property as `writeOnly` has the following effects on generated code:
 * the object can be built using the builder or the constructor with or without the `writeOnly` field (
 it is only at serialization time that we enforce a required property)
 
+Here's an example of generated code with `writeOnly` fields: [WriteOnly.java](src/docs/WriteOnly.java).
+
 ## Server side generation
 ### Ignoring paths for server side generation
 Just add an extension to the OpenAPI file to indicate to the generator not to generate a server side method for a path:
-
-Here's an example of generated code with `writeOnly` fields: [WriteOnly.java](src/docs/WriteOnly.java).
 
 ```yaml
 paths:
