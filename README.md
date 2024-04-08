@@ -126,11 +126,12 @@ Here's an example showing more configuration options:
 
 ## General advice
 * As much as possible make sure you put your types in the `#/components/schemas` section of your openapi yaml/json file (use `$ref`!). The same goes for responses, pathItems, and anything else that can be referred to with a `$ref`. Don't use anonymous types, it makes for an ugly experience with generated code.
+* where possible avoid using passing complex parameters, use json request bodies instead (Spring Boot for example doesn't have annotation support for many parameter strategies)
 * Specify `format: int32` on integers to ensure you end up with `int/integer` types in generated code
 * Be sure to specify the properties that are mandatory (using `required:`)
 * Set an `operationId` field for every path entry to ensure you get sensible generated method names (in client and server)
 * always specify `mapping` and `propertyName` fields for discriminated `oneOf`
-* use OpenAPI 3.0 not 3.1 (the world is still working on tool support for 3.0 and is not ready for 3.1) 
+* use OpenAPI 3.0 not 3.1 (the world is still working on tool support for 3.0 and is not ready for 3.1)
 
 ## Generated code examples
 Some examples follow. Note the following:
