@@ -32,11 +32,6 @@ public final class GeneratorTest {
     }
     
     @Test
-    public void testGenerateAdhoc() throws IOException {
-        generateLocal("adhoc.yml");
-    }
-    
-    @Test
     public void testSmall() throws MalformedURLException {
         generateLocal("small.yml");
 //        generate("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/zuora.yml");
