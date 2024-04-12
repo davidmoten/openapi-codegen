@@ -501,7 +501,6 @@ paths:
       security: 
       - bearer: []
       
-
     ###############################################
     ## Send an MSI
     ###############################################      
@@ -588,6 +587,16 @@ paths:
           $ref: '#/components/responses/ServerError'
       security: 
       - bearer: []
+      
+ ## check for name clash with MyPathRequest
+ /myPath:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MyPathRequest"
+        required: true        
                                      
 components:
   securitySchemes:
@@ -2298,4 +2307,10 @@ components:
           format: binary
           writeOnly: true
       required: [name, writeOnly, writeOnlyOctets]
+      
+    MyPathRequest:
+      properties:
+        name: 
+          type: string
+      required: [name]     
               
