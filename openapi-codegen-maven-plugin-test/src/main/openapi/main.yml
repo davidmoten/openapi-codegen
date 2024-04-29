@@ -2324,7 +2324,7 @@ components:
         score:
           type: number
           nullable: true
-          readOnly: true
+          writeOnly: true
       required:
       - vector_string
       - score            
