@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 set -x
-OPTS="-Dspotbugs.skip=true -Dpmd.skip=true -Dmaven.javadoc.skip=true"
+OPTS="-Dspotbugs.skip=true -Dpmd.skip=true -Dcpd.skip=true -Dmaven.javadoc.skip=true"
 MAVEN_OPTS="-Xmx3g"
 mvnd clean install -P extras $OPTS 
 rm -rf /tmp/extras && cp -pr *test/target /tmp/extras
