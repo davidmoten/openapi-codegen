@@ -1230,6 +1230,15 @@ public class SchemasTest {
     }
     
     @Test
+    public void testRequiredReadOnlyNullablePresent() throws JsonMappingException, JsonProcessingException {
+        RequiredReadOnlyNullable a = m.readValue("{\"vector_string\":\"hi\",\"score\":10.0}", RequiredReadOnlyNullable.class);
+        assertEquals("hi", a.vector_string().get());
+        assertEquals(10.0, a.score().get());
+        String json = json(a);
+        assertEquals("{\"vector_string\":\"hi\"}", json);
+    }
+    
+    @Test
     public void testRequiredReadOnlyNullableIsNull() throws JsonMappingException, JsonProcessingException {
         m.readValue("{\"vector_string\":null,\"score\":null}", RequiredReadOnlyNullable.class);
     }
