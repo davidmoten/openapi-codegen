@@ -628,7 +628,7 @@ public final class SchemasCodeWriter {
                 } else {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, OctetsSerializer.class);
                 }
-            } else if (f.required && f.writeOnly ) {
+            } else if (f.required && f.writeOnly && !f.nullable) {
                 out.line("@%s(converter = %s.class)", JsonSerialize.class, OptionalMustBePresentConverter.class);
             }
             final String fieldType;

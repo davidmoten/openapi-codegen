@@ -101,6 +101,7 @@ import org.davidmoten.oa3.codegen.test.main.schema.PropertyRef;
 import org.davidmoten.oa3.codegen.test.main.schema.PropertyRefOptional;
 import org.davidmoten.oa3.codegen.test.main.schema.ReadOnly;
 import org.davidmoten.oa3.codegen.test.main.schema.Ref;
+import org.davidmoten.oa3.codegen.test.main.schema.RequiredWriteOnlyNullable;
 import org.davidmoten.oa3.codegen.test.main.schema.Shape;
 import org.davidmoten.oa3.codegen.test.main.schema.Shape2;
 import org.davidmoten.oa3.codegen.test.main.schema.Shape3;
@@ -1287,6 +1288,31 @@ public class SchemasTest {
             assertFalse(b.writeOnlyOptional().isPresent());
             assertFalse(b.writeOnlyOctets().isPresent());
         }
+    }
+    
+    @Test
+    public void testRequiredWriteOnlyNullablePresent() throws JsonProcessingException {
+        RequiredWriteOnlyNullable a = RequiredWriteOnlyNullable //
+                .builder() //
+                .vector_string("hi") //
+                .score(10.0) //
+                .build();
+        assertEquals("{\"vector_string\":\"hi\",\"score\":10.0}", json(a));
+        RequiredWriteOnlyNullable b = m.readValue(json(a),RequiredWriteOnlyNullable.class);
+        assertTrue(b.vector_string().isPresent());
+        assertFalse(b.score().isPresent());
+    }
+    
+    @Test
+    public void testRequiredWriteOnlyNullableNotPresent() throws JsonProcessingException {
+        RequiredWriteOnlyNullable a = RequiredWriteOnlyNullable //
+                .builder() //
+                .build();
+        assertEquals("{\"vector_string\":null,\"score\":null}", json(a));
+    }
+
+    private static String json(Object o) throws JsonProcessingException {
+        return m.writeValueAsString(o);
     }
 
     private static void checkRoundTrip(Object o) {
