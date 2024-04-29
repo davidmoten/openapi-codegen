@@ -845,9 +845,16 @@ public final class SchemasCodeWriter {
                     } else {
                         expressionFactory = Optional.empty();
                     }
+                    boolean required = f.required // 
+                            && !f.isAdditionalProperties() // 
+                            && (!f.readOnly || f.nullable) //
+                            && (!f.writeOnly || f.nullable); 
                     return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        f.required && !f.isAdditionalProperties() && !f.readOnly && !f.writeOnly, 
-                        f.isArray, f.mapType, f.nullable, expressionFactory);})
+                        required, //
+                        f.isArray, //
+                        f.mapType, //
+                        f.nullable, //
+                        expressionFactory);})
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
