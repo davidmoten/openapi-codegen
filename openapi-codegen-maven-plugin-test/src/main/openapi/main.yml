@@ -2298,4 +2298,34 @@ components:
           format: binary
           writeOnly: true
       required: [name, writeOnly, writeOnlyOctets]
+      
+    RequiredReadOnlyNullable:
+      type: object
+      nullable: true
+      properties:
+        vector_string:
+          type: string
+          nullable: true
+        score:
+          type: number
+          nullable: true
+          readOnly: true
+      required:
+      - vector_string
+      - score
+      
+    RequiredWriteOnlyNullable:
+      type: object
+      nullable: true
+      properties:
+        vector_string:
+          type: string
+          nullable: true
+        score:
+          type: number
+          nullable: true
+          writeOnly: true
+      required:
+      - vector_string
+      - score            
               

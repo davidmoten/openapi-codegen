@@ -628,7 +628,7 @@ public final class SchemasCodeWriter {
                 } else {
                     out.line("@%s(using = %s.class)", JsonSerialize.class, OctetsSerializer.class);
                 }
-            } else if (f.required && f.writeOnly ) {
+            } else if (f.required && f.writeOnly && !f.nullable) {
                 out.line("@%s(converter = %s.class)", JsonSerialize.class, OptionalMustBePresentConverter.class);
             }
             final String fieldType;
@@ -713,7 +713,7 @@ public final class SchemasCodeWriter {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OctetsDeserializer.class));
                         }
-                    } else if (f.required && f.readOnly) {
+                    } else if (f.required && f.readOnly && !f.nullable) {
                         annotations += String.format("@%s(converter = %s.class) ", out.add(JsonDeserialize.class),
                                 out.add(OptionalMustBePresentConverter.class));
                     }
@@ -845,9 +845,16 @@ public final class SchemasCodeWriter {
                     } else {
                         expressionFactory = Optional.empty();
                     }
+                    boolean required = f.required // 
+                            && !f.isAdditionalProperties() // 
+                            && (!f.readOnly || f.nullable) //
+                            && (!f.writeOnly || f.nullable); 
                     return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        f.required && !f.isAdditionalProperties() && !f.readOnly && !f.writeOnly, 
-                        f.isArray, f.mapType, f.nullable, expressionFactory);})
+                        required, //
+                        f.isArray, //
+                        f.mapType, //
+                        f.nullable, //
+                        expressionFactory);})
                 .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
