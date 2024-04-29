@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.lang.String;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -26,112 +27,15 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.davidmoten.oa3.codegen.runtime.Config;
-import org.davidmoten.oa3.codegen.test.main.schema.AdditionalProperties;
-import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNested;
-import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesNullable;
-import org.davidmoten.oa3.codegen.test.main.schema.AdditionalPropertiesTrue;
-import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty;
-import org.davidmoten.oa3.codegen.test.main.schema.AnyObjectProperty2;
-import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes;
-import org.davidmoten.oa3.codegen.test.main.schema.AnyOfConflictingTypes2;
-import org.davidmoten.oa3.codegen.test.main.schema.AnyOfObjectExtensions;
-import org.davidmoten.oa3.codegen.test.main.schema.AnyOfSimpleTypes;
-import org.davidmoten.oa3.codegen.test.main.schema.AnyOfWithNullableMembers;
-import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionInteger;
-import org.davidmoten.oa3.codegen.test.main.schema.ArbitraryPrecisionNumber;
-import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty;
+import org.davidmoten.oa3.codegen.test.main.schema.*;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayInProperty.Counts;
-import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfComplexType;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfComplexType.ArrayOfComplexTypeItem;
-import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfOneOf;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfOneOf.ArrayOfOneOfItem;
-import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfOneOfString;
 import org.davidmoten.oa3.codegen.test.main.schema.ArrayOfOneOfString.ArrayOfOneOfStringItem;
-import org.davidmoten.oa3.codegen.test.main.schema.Bike;
-import org.davidmoten.oa3.codegen.test.main.schema.BlankStringEnum;
-import org.davidmoten.oa3.codegen.test.main.schema.Breeding;
-import org.davidmoten.oa3.codegen.test.main.schema.Broadcast;
-import org.davidmoten.oa3.codegen.test.main.schema.Circle;
-import org.davidmoten.oa3.codegen.test.main.schema.Dog;
 import org.davidmoten.oa3.codegen.test.main.schema.Dog.Option1.Breed;
-import org.davidmoten.oa3.codegen.test.main.schema.Dog2;
-import org.davidmoten.oa3.codegen.test.main.schema.DogBreed;
-import org.davidmoten.oa3.codegen.test.main.schema.EnumCollision;
-import org.davidmoten.oa3.codegen.test.main.schema.EnumOfObjects;
-import org.davidmoten.oa3.codegen.test.main.schema.EnumOfObjectsNamed;
-import org.davidmoten.oa3.codegen.test.main.schema.EnumRepeated;
-import org.davidmoten.oa3.codegen.test.main.schema.EnumSubs;
-import org.davidmoten.oa3.codegen.test.main.schema.ExclusiveMinMaxInteger;
-import org.davidmoten.oa3.codegen.test.main.schema.External;
-import org.davidmoten.oa3.codegen.test.main.schema.Geometry;
-import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores;
 import org.davidmoten.oa3.codegen.test.main.schema.HasUnderscores.TheThing;
-import org.davidmoten.oa3.codegen.test.main.schema.LargeInt;
-import org.davidmoten.oa3.codegen.test.main.schema.Latitude;
-import org.davidmoten.oa3.codegen.test.main.schema.Longitude;
-import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcast;
-import org.davidmoten.oa3.codegen.test.main.schema.MetBroadcastArea;
-import org.davidmoten.oa3.codegen.test.main.schema.MinMaxDouble;
-import org.davidmoten.oa3.codegen.test.main.schema.MinMaxInteger;
-import org.davidmoten.oa3.codegen.test.main.schema.MinMaxItems;
-import org.davidmoten.oa3.codegen.test.main.schema.MinMaxItemsObjectRef;
-import org.davidmoten.oa3.codegen.test.main.schema.MinMaxLength;
-import org.davidmoten.oa3.codegen.test.main.schema.MixRequiredAndNotRequiredWithConstraint;
-import org.davidmoten.oa3.codegen.test.main.schema.Msi;
-import org.davidmoten.oa3.codegen.test.main.schema.MsiId;
-import org.davidmoten.oa3.codegen.test.main.schema.NameOverride;
-import org.davidmoten.oa3.codegen.test.main.schema.NamesWithSpaces;
-import org.davidmoten.oa3.codegen.test.main.schema.NonSARPriority;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableExample;
 import org.davidmoten.oa3.codegen.test.main.schema.NullableExample.B;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableIntegerEnum;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableMapProperty;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableMapPropertyReq;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnum;
-import org.davidmoten.oa3.codegen.test.main.schema.NullableStringEnumObject;
-import org.davidmoten.oa3.codegen.test.main.schema.ObjectAllOptionalFields;
-import org.davidmoten.oa3.codegen.test.main.schema.ObjectNoOptionalFields;
-import org.davidmoten.oa3.codegen.test.main.schema.OneOfUsesConstraints;
-import org.davidmoten.oa3.codegen.test.main.schema.Oval3;
-import org.davidmoten.oa3.codegen.test.main.schema.Payload;
-import org.davidmoten.oa3.codegen.test.main.schema.Pet;
-import org.davidmoten.oa3.codegen.test.main.schema.PropertyAnonymous;
-import org.davidmoten.oa3.codegen.test.main.schema.PropertyNotRequired;
-import org.davidmoten.oa3.codegen.test.main.schema.PropertyRef;
-import org.davidmoten.oa3.codegen.test.main.schema.PropertyRefOptional;
-import org.davidmoten.oa3.codegen.test.main.schema.ReadOnly;
-import org.davidmoten.oa3.codegen.test.main.schema.Ref;
-import org.davidmoten.oa3.codegen.test.main.schema.RequiredWriteOnlyNullable;
-import org.davidmoten.oa3.codegen.test.main.schema.Shape;
-import org.davidmoten.oa3.codegen.test.main.schema.Shape2;
-import org.davidmoten.oa3.codegen.test.main.schema.Shape3;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleBinary;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleBoolean;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleByteArray;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleDate;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleDateTime;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleDouble;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleEnum;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleFloat;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleInt;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleInteger;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleIntegerArray;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleLong;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleString;
-import org.davidmoten.oa3.codegen.test.main.schema.SimpleTime;
-import org.davidmoten.oa3.codegen.test.main.schema.SingleNotOptional;
-import org.davidmoten.oa3.codegen.test.main.schema.SingleOptional;
-import org.davidmoten.oa3.codegen.test.main.schema.SingletonEnum;
-import org.davidmoten.oa3.codegen.test.main.schema.SmallInt;
-import org.davidmoten.oa3.codegen.test.main.schema.Square;
-import org.davidmoten.oa3.codegen.test.main.schema.Square2;
-import org.davidmoten.oa3.codegen.test.main.schema.Status;
-import org.davidmoten.oa3.codegen.test.main.schema.Table;
 import org.davidmoten.oa3.codegen.test.main.schema.Table.TableItem;
-import org.davidmoten.oa3.codegen.test.main.schema.TwoMaps;
-import org.davidmoten.oa3.codegen.test.main.schema.UntypedObject;
-import org.davidmoten.oa3.codegen.test.main.schema.Vehicle;
-import org.davidmoten.oa3.codegen.test.main.schema.WriteOnly;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -1297,8 +1201,9 @@ public class SchemasTest {
                 .vector_string("hi") //
                 .score(10.0) //
                 .build();
-        assertEquals("{\"vector_string\":\"hi\",\"score\":10.0}", json(a));
-        RequiredWriteOnlyNullable b = m.readValue(json(a),RequiredWriteOnlyNullable.class);
+        String json = json(a);
+        assertEquals("{\"vector_string\":\"hi\",\"score\":10.0}", json);
+        RequiredWriteOnlyNullable b = m.readValue(json, RequiredWriteOnlyNullable.class);
         assertTrue(b.vector_string().isPresent());
         assertFalse(b.score().isPresent());
     }
@@ -1308,10 +1213,28 @@ public class SchemasTest {
         RequiredWriteOnlyNullable a = RequiredWriteOnlyNullable //
                 .builder() //
                 .build();
-        assertEquals("{\"vector_string\":null,\"score\":null}", json(a));
+        String json = json(a);
+        assertEquals("{\"vector_string\":null,\"score\":null}", json);
+        {
+            RequiredWriteOnlyNullable b = m.readValue(json, RequiredWriteOnlyNullable.class);
+            assertFalse(b.vector_string().isPresent());
+            assertFalse(b.score().isPresent());
+        }
+        {
+            // TODO could be stricter because both fields should be present in json
+            // as null
+            RequiredWriteOnlyNullable b = m.readValue("{}", RequiredWriteOnlyNullable.class);
+            assertFalse(b.vector_string().isPresent());
+            assertFalse(b.score().isPresent());
+        }
+    }
+    
+    @Test
+    public void testRequiredReadOnlyNullableIsNull() throws JsonMappingException, JsonProcessingException {
+        m.readValue("{\"vector_string\":null,\"score\":null}", RequiredReadOnlyNullable.class);
     }
 
-    private static String json(Object o) throws JsonProcessingException {
+    private static java.lang.String json(Object o) throws JsonProcessingException {
         return m.writeValueAsString(o);
     }
 

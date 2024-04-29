@@ -713,7 +713,7 @@ public final class SchemasCodeWriter {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OctetsDeserializer.class));
                         }
-                    } else if (f.required && f.readOnly) {
+                    } else if (f.required && f.readOnly && !f.nullable) {
                         annotations += String.format("@%s(converter = %s.class) ", out.add(JsonDeserialize.class),
                                 out.add(OptionalMustBePresentConverter.class));
                     }
