@@ -94,7 +94,7 @@ public final class SchemasCodeWriter {
             return;
         }
         CodePrintWriter out = CodePrintWriter.create(cls.fullClassName, names.simpleNameInPackage(cls.fullClassName));
-        SchemasCodeWriter.writeClass(out, cls, fullClassNameInterfaces, names);
+        writeClass(out, cls, fullClassNameInterfaces, names);
         WriterUtil.writeContent(names, out);
     }
 
@@ -786,7 +786,6 @@ public final class SchemasCodeWriter {
             } else {
                 out.line("this.%s = %s;", x.fieldName(cls), x.fieldName(cls));
             }
-            return;
         } else {
             Optional<Discriminator> disc = discriminator(interfaces, x);
             if (disc.isPresent()) {
@@ -977,9 +976,7 @@ public final class SchemasCodeWriter {
         out.left();
         b.close();
         String text = b.text();
-        if (text.isEmpty()) {
-            return;
-        } else {
+        if (!text.isEmpty()) {
             out.line("if (%s.config().validateInConstructor().test(%s.class)) {", out.add(names.globalsFullClassName()),
                     cls.simpleName());
             out.left();

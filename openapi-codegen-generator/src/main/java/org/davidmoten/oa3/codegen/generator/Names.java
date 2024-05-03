@@ -410,9 +410,9 @@ public final class Names {
     public static String toIdentifier(ImmutableList<String> list) {
         StringBuilder b = new StringBuilder();
         for (String s : list) {
-            b.append(Names.upperFirst(camelifyOnSeparatorCharacters(s)));
+            b.append(upperFirst(camelifyOnSeparatorCharacters(s)));
         }
-        return Names.toIdentifier(b.toString());
+        return toIdentifier(b.toString());
     }
 
     private static String camelifyOnSeparatorCharacters(String s) {

@@ -83,7 +83,7 @@ public final class WriterUtil {
                 .filter(Optional::isPresent) //
                 .map(Optional::get) //
                 .collect(Collectors.joining("\n\n"));
-        if (!Javadoc.printJavadoc(out, out.indent(), WriterUtil.markdownToHtml(text), true)) {
+        if (!Javadoc.printJavadoc(out, out.indent(), markdownToHtml(text), true)) {
             out.println();
         }
     }

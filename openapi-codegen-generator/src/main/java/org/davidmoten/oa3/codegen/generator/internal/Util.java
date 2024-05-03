@@ -51,7 +51,7 @@ public final class Util {
     }
 
     public static boolean isPrimitive(Schema<?> schema) {
-        String type = Util.getType(schema).orElse("object");
+        String type = getType(schema).orElse("object");
         return type != null && !"array".equals(type) && !"object".equals(type);
     }
 
@@ -64,7 +64,7 @@ public final class Util {
     }
 
     public static boolean isObject(Schema<?> schema) {
-        Optional<String> type = Util.getType(schema);
+        Optional<String> type = getType(schema);
         return !type.isPresent() && schema.getProperties() != null || "object".equals(type.orElse(""));
     }
 
