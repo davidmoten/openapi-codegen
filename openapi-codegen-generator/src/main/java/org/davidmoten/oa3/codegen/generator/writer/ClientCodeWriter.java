@@ -85,9 +85,15 @@ public class ClientCodeWriter {
             out.println();
             out.line("public enum Server {");
             out.println();
+            Set<String> enumNames = new HashSet<>();
             for (int i = 0; i < servers.size(); i++) {
                 Server server = servers.get(i);
-                String name = Names.enumNameToEnumConstant(server.description.orElse("server" + (i+1)));
+                String fallbackName = "server" + (i + 1);
+                String name = Names.enumNameToEnumConstant(server.description.orElse(fallbackName));
+                if (enumNames.contains(name)) {
+                    name = Names.enumNameToEnumConstant(fallbackName);
+                }
+                enumNames.add(name);
                 final String delimiter = i == servers.size() - 1 ? ";": ",";
                 out.line("%s(\"%s\")%s", name, server.url, delimiter);
             }
