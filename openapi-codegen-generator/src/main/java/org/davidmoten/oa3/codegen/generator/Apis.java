@@ -239,7 +239,9 @@ class Apis {
         } else if (schema.getNot() != null) {
             visitSchemas(category, schemaPath.add(new SchemaWithName("not", schema.getNot())), Maps.empty(), visitor);
         }
-        if (schema.getProperties() != null) {
+        if (schema.getProperties() != null && !(schema instanceof ArraySchema)) {
+            // note that doesn't make sense that an ArraySchema has properties but if provided 
+            // in openapi definition the swagger-parser doesn't ignore them unfortunately
             schema.getProperties().entrySet().forEach(
                     x -> {
                         final Schema<?> sch;
