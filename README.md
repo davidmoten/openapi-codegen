@@ -442,9 +442,11 @@ This script ensures that the code generated from the above large test apis compi
 If *openapi-directory* repository is cloned next to *openapi-codegen* in your workspace then this command will test code generation on every 3.0 definition (>1800) in that repository:
 
 ```bash
-cd openapi-generator
+cd openapi-codegen-generator
 ./analyse.sh | tee ~/od.log
 ```
+For convenience I add executables to `/usr/local/bin` with `./install-executables.sh`. That way I can run `codegen` or `codegenc` from anywhere.
+
 ## TODO
 * ~~`additionalProperties` (Dictionary) support~~, done
 * generate javadoc for fields
