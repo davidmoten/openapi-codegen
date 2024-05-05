@@ -439,7 +439,7 @@ To run tests on the above apis call this:
 This script ensures that the code generated from the above large test apis compiles and does so in many separate generation and compile steps because the apis generate so much code that the compilation step runs out of memory on my devices!
 
 ### openapi-directory testing
-If *openapi-directory* repository is cloned next to *openapi-codegen* in your workspace then this command will test code generation on every 3.0 definition (>1800) in that repository:
+If *openapi-directory* repository is cloned next to *openapi-codegen* in your workspace then the command below will test code generation on every 3.0 definition (>1800) in that repository. This command requires `mvnd` to be [installed](https://github.com/apache/maven-mvnd).
 
 ```bash
 cd openapi-codegen-generator
