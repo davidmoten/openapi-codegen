@@ -162,7 +162,7 @@ public final class Names {
     }
 
     public static String simpleClassName(String fullClassName) {
-        return stripGenerics(getLastItemInDotDelimitedString(fullClassName));
+        return getLastItemInDotDelimitedString(stripGenerics(fullClassName));
     }
 
     private static String stripGenerics(String name) {
