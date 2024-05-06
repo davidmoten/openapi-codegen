@@ -443,8 +443,10 @@ If *openapi-directory* repository is cloned next to *openapi-codegen* in your wo
 
 ```bash
 cd openapi-codegen-generator
-./analyse.sh | tee ~/od.log
+./analyse.sh 
 ```
+Output is written to `~/oc-TIMESTAMP.log`
+
 For convenience I add executables to `/usr/local/bin` with `./install-executables.sh`. That way I can run `codegen` or `codegenc` from anywhere.
 
 ## TODO
