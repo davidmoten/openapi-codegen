@@ -46,9 +46,9 @@ import org.davidmoten.oa3.codegen.runtime.OctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalEmptyDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentConverter;
+import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalOctetsSerializer;
-import org.davidmoten.oa3.codegen.runtime.OptionalMustBePresentOctetsSerializer;
 import org.davidmoten.oa3.codegen.runtime.OptionalPresentOctetsDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicDeserializer;
 import org.davidmoten.oa3.codegen.runtime.PolymorphicType;
@@ -126,7 +126,7 @@ public final class SchemasCodeWriter {
             out.line("package %s;", cls.pkg());
             out.println();
             out.format("%s", IMPORTS_HERE);
-        } 
+        }
         // reserve class names in Imports for member classes
         reserveMemberClassNamesInImports(out.imports(), cls);
         writeClassDeclaration(out, cls, fullClassNameInterfaces);
@@ -198,7 +198,8 @@ public final class SchemasCodeWriter {
             String nullValueMemberName = cls.enumMembers.stream().filter(x -> x.parameter == null).map(x -> x.name)
                     .findFirst().get();
             out.println();
-            out.line("public static class _Deserializer extends %s<%s> {", NullEnumDeserializer.class, cls.simpleName());
+            out.line("public static class _Deserializer extends %s<%s> {", NullEnumDeserializer.class,
+                    cls.simpleName());
             out.line("protected _Deserializer() {");
             out.line("super(%s.class, %s.class, %s);", cls.simpleName(), out.add(cls.enumValueFullType),
                     nullValueMemberName);
@@ -212,8 +213,9 @@ public final class SchemasCodeWriter {
         String modifier = classModifier(cls);
         Set<Cls> interfaces = fullClassNameInterfaces.get(cls.fullClassName);
         String implementsClause = implementsClause(out.imports(), interfaces, cls);
-        //TODO ensure contentType() and value() methods of HasEncoding are annotated with @Override
-        
+        // TODO ensure contentType() and value() methods of HasEncoding are annotated
+        // with @Override
+
         final boolean javadocExists;
         if (cls.description.isPresent()) {
             String html = WriterUtil.markdownToHtml(cls.description.get());
@@ -301,8 +303,9 @@ public final class SchemasCodeWriter {
             } else {
                 fieldImportedType = out.add(x.fullClassName);
             }
-            return String.format("\n%s@%s.Type(value = %s.class, name = \"%s\")", out.indent(), out.add(JsonSubTypes.class),
-                    fieldImportedType, cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName));
+            return String.format("\n%s@%s.Type(value = %s.class, name = \"%s\")", out.indent(),
+                    out.add(JsonSubTypes.class), fieldImportedType,
+                    cls.discriminator.discriminatorValueFromFullClassName(x.fullClassName));
         }).collect(Collectors.joining(", "));
         out.left().left();
         out.line("@%s({%s})", JsonSubTypes.class, types);
@@ -320,9 +323,9 @@ public final class SchemasCodeWriter {
         out.line("setterVisibility = %s.Visibility.ANY)", JsonAutoDetect.class);
         out.left().left();
     }
-    
+
     private final static ObjectMapper MAPPER = new ObjectMapper();
-    
+
     private static String escapedJson(ObjectNode node) {
         try {
             return MAPPER.writeValueAsString(node).replace("\n", "\\n").replace("\"", "\\\"");
@@ -338,7 +341,7 @@ public final class SchemasCodeWriter {
         } else {
             parameterFullClassName = "NotUsed";
         }
-        int[] index = new int[] {-1};
+        int[] index = new int[] { -1 };
         String text = cls.enumMembers.stream() //
                 .map(x -> {
                     index[0]++;
@@ -349,8 +352,8 @@ public final class SchemasCodeWriter {
                         memberName = x.name;
                     }
                     if (x.parameter instanceof ObjectNode) {
-                        return String.format("%s%s(%s.toMap(\"%s\"))", out.indent(), memberName, out.add(RuntimeUtil.class),
-                                escapedJson((ObjectNode) x.parameter));
+                        return String.format("%s%s(%s.toMap(\"%s\"))", out.indent(), memberName,
+                                out.add(RuntimeUtil.class), escapedJson((ObjectNode) x.parameter));
                     } else if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
                             || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
                         return String.format("%s%s(new %s(\"\"))", out.indent(), memberName,
@@ -358,8 +361,8 @@ public final class SchemasCodeWriter {
                     } else {
                         String delim = x.parameter instanceof String //
                                 || //
-                                cls.enumValueFullType.equals(String.class.getCanonicalName()) // 
-                                && x.parameter instanceof Boolean ? "\"" : "";
+                                cls.enumValueFullType.equals(String.class.getCanonicalName()) //
+                                        && x.parameter instanceof Boolean ? "\"" : "";
                         if (x.nullable) {
                             if (x.parameter == null) {
                                 return String.format("%s%s(%s.empty())", out.indent(), memberName,
@@ -399,20 +402,20 @@ public final class SchemasCodeWriter {
                 writeNonDiscriminatedBuilder(out, cls);
             } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 writeFields(out, cls);
-                
+
                 // write constructor
                 out.right().right();
                 final String parameters = cls.fields //
                         .stream() ///
-                        .map(x -> String.format("\n%s%s %s", out.indent(),
-                                x.resolvedType(out.imports()), x.fieldName(cls)))
+                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()),
+                                x.fieldName(cls)))
                         .collect(Collectors.joining(","));
                 out.left().left();
                 out.println();
                 out.line("private %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
                 ifValidate(cls, out, names, //
                         o -> cls.fields.stream().forEach(x -> {
-                                checkNotNull(cls, o, x);
+                            checkNotNull(cls, o, x);
                         }));
                 cls.fields.stream().forEach(x -> {
                     assignField(out, cls, x);
@@ -427,14 +430,13 @@ public final class SchemasCodeWriter {
                         out.add(names.globalsFullClassName()));
                 out.line("return $o;");
                 out.closeParen();
-                
+
                 // write getters
                 cls.fields.forEach(f -> {
                     out.println();
-                    writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls),
-                            f.fieldName(cls));
+                    writeGetter(out, f.resolvedType(out.imports()), f.fieldName(cls), f.fieldName(cls));
                 });
-                
+
                 writeAnyOfOrAllOfBuilder(out, cls, true);
             } else if (cls.classType == ClassType.ALL_OF) {
                 // allof
@@ -465,38 +467,52 @@ public final class SchemasCodeWriter {
                 out.closeParen();
 
                 // write getters for allOf members
-                cls.fields.forEach(f -> {
-                    out.println();
-                    writeGetter(out, f.resolvedType(out.imports()),
-                            "as" + Names.simpleClassName(f.resolvedType(out.imports())),
-                            f.fieldName(cls));
-                });
-                
+                {   
+                    // avoid name clashes
+                    Map<Field, String> getterNames = new HashMap<>();
+                    Set<String> usedNames = new HashSet<>(); 
+                    cls.fields.forEach(f -> {
+                        String name = "as" + Names.simpleClassName(f.resolvedType(out.imports()));
+                        int i = 0;
+                        String modifiedName = name;
+                        while (usedNames.contains(modifiedName)) {
+                            i++;
+                            modifiedName = name + i;
+                        }
+                        getterNames.put(f, modifiedName);
+                        usedNames.add(modifiedName);
+                    });
+                    cls.fields.forEach(f -> {
+                        out.println();
+                        writeGetter(out, f.resolvedType(out.imports()), getterNames.get(f), f.fieldName(cls));
+                    });
+                }
+
                 // write all field getters
                 Set<String> used = new HashSet<>();
                 cls.fields.forEach(field -> {
                     Optional<Cls> c = names.cls(field.fullClassName);
                     if (c.isPresent() && c.get().classType != ClassType.ONE_OF_NON_DISCRIMINATED) {
                         c.get().fields //
-                        .stream() //
-                        .filter(f -> !f.mapType.isPresent()) //
-                        .forEach(f -> {
-                            String fieldName = f.fieldName(c.get());
-                            if (!used.contains(fieldName)) {
-                                used.add(fieldName);
-                                String type = f.resolvedTypePublicConstructor(out.imports());
-                                out.println();
-                                out.line("public %s %s() {", type, fieldName);
-                                final String getter;
-                                if (c.get().classType == ClassType.ALL_OF) {
-                                    getter = "as" + Names.upperFirst(fieldName);
-                                } else {
-                                    getter = fieldName;
-                                }
-                                out.line("return %s.%s();", field.fieldName(cls), getter);
-                                out.closeParen();
-                            }
-                        });
+                                .stream() //
+                                .filter(f -> !f.mapType.isPresent()) //
+                                .forEach(f -> {
+                                    String fieldName = f.fieldName(c.get());
+                                    if (!used.contains(fieldName)) {
+                                        used.add(fieldName);
+                                        String type = f.resolvedTypePublicConstructor(out.imports());
+                                        out.println();
+                                        out.line("public %s %s() {", type, fieldName);
+                                        final String getter;
+                                        if (c.get().classType == ClassType.ALL_OF) {
+                                            getter = "as" + Names.upperFirst(fieldName);
+                                        } else {
+                                            getter = fieldName;
+                                        }
+                                        out.line("return %s.%s();", field.fieldName(cls), getter);
+                                        out.closeParen();
+                                    }
+                                });
                     }
                 });
                 // write allof builder
@@ -519,7 +535,7 @@ public final class SchemasCodeWriter {
                     .stream() //
                     .map(x -> out.add(toPrimitive(x.fullClassName)) + ".class") //
                     .collect(Collectors.joining(", "));
-            
+
             if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 // members is used with anyOf only
                 String members = cls.fields //
@@ -560,7 +576,7 @@ public final class SchemasCodeWriter {
                         .collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName(), useOf);
     }
-    
+
     private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Cls cls) {
         cls.fields.forEach(f -> {
             out.println();
@@ -700,7 +716,7 @@ public final class SchemasCodeWriter {
                         annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                 out.add(OptionalEmptyDeserializer.class));
                     } else if (f.isOctets()) {
-                        if (f.required && f.readOnly)  {
+                        if (f.required && f.readOnly) {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OptionalPresentOctetsDeserializer.class));
                         } else if (!f.required && f.nullable) {
@@ -725,7 +741,7 @@ public final class SchemasCodeWriter {
         final String modifier;
         if (cls.classType == ClassType.ENUM) {
             modifier = "";
-        } else if (hasDiscriminator||extraConstructor) {
+        } else if (hasDiscriminator || extraConstructor) {
             modifier = "private ";
         } else {
             modifier = "public ";
@@ -744,8 +760,8 @@ public final class SchemasCodeWriter {
     private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
         if (names.generateService()) {
             if (names.generatorType() == ServerGeneratorType.SPRING3) {
-                out.line("@%s", out
-                        .add(ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
+                out.line("@%s", out.add(
+                        ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
             } else {
                 out.line("@%s", ConstructorBinding.class);
             }
@@ -836,25 +852,23 @@ public final class SchemasCodeWriter {
                     if (disc.isPresent()) {
                         // write constant value for discriminator, if is enum then
                         // grab it's value using the DiscriminatorHelper
-                        String expression = String.format("%s.value(%s.class, \"%s\")", 
-                                out.add(DiscriminatorHelper.class), 
-                                out.add(f.fullClassName),
+                        String expression = String.format("%s.value(%s.class, \"%s\")",
+                                out.add(DiscriminatorHelper.class), out.add(f.fullClassName),
                                 disc.get().discriminatorValueFromFullClassName(cls.fullClassName));
                         expressionFactory = Optional.of(x -> expression);
                     } else {
                         expressionFactory = Optional.empty();
                     }
-                    boolean required = f.required // 
-                            && !f.isAdditionalProperties() // 
+                    boolean required = f.required //
+                            && !f.isAdditionalProperties() //
                             && (!f.readOnly || f.nullable) //
-                            && (!f.writeOnly || f.nullable); 
-                    return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName,
-                        required, //
-                        f.isArray, //
-                        f.mapType, //
-                        f.nullable, //
-                        expressionFactory);})
-                .collect(Collectors.toList());
+                            && (!f.writeOnly || f.nullable);
+                    return new BuilderWriter.Field(f.fieldName(cls), f.fullClassName, required, //
+                            f.isArray, //
+                            f.mapType, //
+                            f.nullable, //
+                            expressionFactory);
+                }).collect(Collectors.toList());
         BuilderWriter.write(out, fields, cls.simpleName());
     }
 
@@ -882,32 +896,28 @@ public final class SchemasCodeWriter {
         }
         String raw = x.fieldName(cls);
         if (x.minLength.isPresent() && !x.isDateOrTime()) {
-            out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(),
-                    raw);
+            out.line("%s.checkMinLength(%s, %s, \"%s\");", Preconditions.class, raw, x.minLength.get(), raw);
         }
         if (x.maxLength.isPresent() && !x.isDateOrTime()) {
-            out.line("%s.checkMaxLength(%s, %s, \"%s\");", Preconditions.class, raw, x.maxLength.get(),
-                    raw);
+            out.line("%s.checkMaxLength(%s, %s, \"%s\");", Preconditions.class, raw, x.maxLength.get(), raw);
         }
         if (x.pattern.isPresent() && !x.isDateOrTime() && !x.isByteArray() && !x.isOctets()) {
             out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", Preconditions.class, raw,
                     WriterUtil.escapePattern(x.pattern.get()), raw);
         }
         if (x.min.isPresent() && x.isNumber()) {
-            out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(),
-                    raw, x.exclusiveMin);
+            out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.min.get().toString(), raw,
+                    x.exclusiveMin);
         }
         if (x.max.isPresent() && x.isNumber()) {
-            out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.max.get().toString(),
-                    raw, x.exclusiveMax);
+            out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", Preconditions.class, raw, x.max.get().toString(), raw,
+                    x.exclusiveMax);
         }
         if (x.isArray && x.minItems.isPresent()) {
-            out.line("%s.checkMinSize(%s, %s, \"%s\");", Preconditions.class, raw, x.minItems.get(),
-                    raw);
+            out.line("%s.checkMinSize(%s, %s, \"%s\");", Preconditions.class, raw, x.minItems.get(), raw);
         }
         if (x.isArray && x.maxItems.isPresent()) {
-            out.line("%s.checkMaxSize(%s, %s, \"%s\");", Preconditions.class, raw, x.maxItems.get(),
-                    raw);
+            out.line("%s.checkMaxSize(%s, %s, \"%s\");", Preconditions.class, raw, x.maxItems.get(), raw);
         }
     }
 
@@ -921,12 +931,10 @@ public final class SchemasCodeWriter {
         out.line("return false;");
         out.closeParen();
         out.right();
-        String s = cls.fields
-                .stream() //
-                .map(x -> String.format("\n%s%s.deepEquals(this.%s, other.%s)", out.indent(),
-                        out.add(Objects.class), x.fieldName(cls), x.fieldName(cls)))
-                .distinct()
-                .collect(Collectors.joining(" && "));
+        String s = cls.fields.stream() //
+                .map(x -> String.format("\n%s%s.deepEquals(this.%s, other.%s)", out.indent(), out.add(Objects.class),
+                        x.fieldName(cls), x.fieldName(cls)))
+                .distinct().collect(Collectors.joining(" && "));
         out.left();
         if (!s.isEmpty()) {
             out.line("%s other = (%s) o;", cls.simpleName(), cls.simpleName());
@@ -1010,7 +1018,8 @@ public final class SchemasCodeWriter {
                 final String value = f.fieldName(cls);
                 final String returnType;
                 if (cls.classType == ClassType.ENUM && f.fullClassName.equals(Map.class.getCanonicalName())) {
-                    returnType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class), out.add(Object.class));
+                    returnType = String.format("%s<%s, %s>", out.add(Map.class), out.add(String.class),
+                            out.add(Object.class));
                 } else {
                     returnType = f.resolvedTypePublicConstructor(out.imports());
                 }
@@ -1023,13 +1032,14 @@ public final class SchemasCodeWriter {
     private static String discriminatorHelperExpression(CodePrintWriter out, String fieldExpression) {
         return String.format("%s.value(%s)", out.add(DiscriminatorHelper.class), fieldExpression);
     }
-    
+
     private static void writePropertiesMapGetter(CodePrintWriter out, Cls cls) {
         if (cls.fields.isEmpty() || cls.classType == ClassType.ENUM) {
             return;
         }
         Indent indent = out.indent().copy().right().right().right();
-        String puts = cls.fields.stream().map(f -> String.format("\n%s.put(\"%s\", (%s) %s)", indent, f.name, out.add(Object.class), cls.fieldName(f))).collect(Collectors.joining());
+        String puts = cls.fields.stream().map(f -> String.format("\n%s.put(\"%s\", (%s) %s)", indent, f.name,
+                out.add(Object.class), cls.fieldName(f))).collect(Collectors.joining());
         out.println();
         out.line("%s<%s, %s> _internal_properties() {", Map.class, String.class, Object.class);
         out.line("return %s%s\n%s.build();", Maps.class, puts, indent);
