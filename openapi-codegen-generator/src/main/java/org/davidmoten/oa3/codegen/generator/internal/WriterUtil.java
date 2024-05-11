@@ -22,6 +22,7 @@ import jakarta.annotation.Generated;
 
 public final class WriterUtil {
 
+    private static final String OPENAPI_CODEGEN_PROPERTIES = "/openapi-codegen.properties";
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("debug", "false"));
     public static final String IMPORTS_HERE = "IMPORTS_HERE";
 
@@ -29,7 +30,7 @@ public final class WriterUtil {
 
     private static String readMavenCoordinates() {
         Properties p = new Properties();
-        try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
+        try (InputStream in = Generator.class.getResourceAsStream(OPENAPI_CODEGEN_PROPERTIES)) {
             p.load(in);
             return p.get("groupId") + ":" + p.get("artifactId") + ":" + p.get("version");
         } catch (IOException e) {
@@ -39,7 +40,7 @@ public final class WriterUtil {
     
     public static String readVersion() {
         Properties p = new Properties();
-        try (InputStream in = Generator.class.getResourceAsStream("/application.properties")) {
+        try (InputStream in = Generator.class.getResourceAsStream(OPENAPI_CODEGEN_PROPERTIES)) {
             p.load(in);
             return String.valueOf(p.get("version"));
         } catch (IOException e) {
