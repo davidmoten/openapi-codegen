@@ -13,12 +13,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- serverStart -->
-        <spring.boot.version>2.7.15</spring.boot.version>
+        <spring.boot.version>2.7.18</spring.boot.version>
         <!-- serverEnd -->
         <openapi.codegen.version>${generator.version}</openapi.codegen.version>
-        <slf4j.version>1.7.36</slf4j.version>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <plantuml.plugin.version>0.2.9</plantuml.plugin.version>
+        <plantuml.plugin.version>0.2.12</plantuml.plugin.version>
     </properties>
 
     <dependencies>
@@ -28,7 +27,7 @@
             <artifactId>openapi-codegen-client-runtime</artifactId>
             <version>${openapi.codegen.version}</version>
         </dependency>
-        <!-- serverStart -->
+<!-- serverStart -->
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
@@ -61,22 +60,22 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
         </dependency>
-        <!-- serverEnd -->
+<!-- serverEnd -->
 
     </dependencies>
 
     <build>
         <plugins>
-            <!-- serverStart -->
+<!-- serverStart -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
             </plugin>
-            <!-- serverEnd -->
+<!-- serverEnd -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>${maven.compiler.target}</source>
                     <target>${maven.compiler.target}</target>
