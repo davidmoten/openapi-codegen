@@ -77,7 +77,11 @@ public final class ProjectGenerator {
                     } else if (i > j) {
                         throw new RuntimeException(START_SERVER + " marker not found, check does not have trailing spaces");
                     }
-                    pom = pom.substring(0, i) + pom.substring(j + END_SERVER.length());
+                    int k = i;
+                    while (k > 0 && pom.charAt(k - 1) == ' ') {
+                        k--;
+                    }
+                    pom = pom.substring(0, k) + pom.substring(j + END_SERVER.length());
                 }
             } else {
                 pom = pom //

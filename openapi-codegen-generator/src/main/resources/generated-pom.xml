@@ -27,7 +27,7 @@
             <artifactId>openapi-codegen-client-runtime</artifactId>
             <version>${openapi.codegen.version}</version>
         </dependency>
-<!-- serverStart -->
+        <!-- serverStart -->
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
@@ -60,19 +60,19 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
         </dependency>
-<!-- serverEnd -->
+        <!-- serverEnd -->
 
     </dependencies>
 
     <build>
         <plugins>
-<!-- serverStart -->
+            <!-- serverStart -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
             </plugin>
-<!-- serverEnd -->
+            <!-- serverEnd -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
