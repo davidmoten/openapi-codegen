@@ -1,5 +1,5 @@
 #!/bin/bash
-echo codegen $1
+echo codegen "$@" 
 codegen $1 &>/tmp/output 
 RETURN=$?
 if [ $RETURN -eq 0 ]
