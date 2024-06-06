@@ -3,7 +3,9 @@ package org.davidmoten.oa3.codegen.generator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -36,10 +38,10 @@ public class SchemaSearch {
         File f = new File("/home/dave/workspace/openapi-directory");
         List<File> files = new ArrayList<>();
         findFiles(f, files);
-        System.out.println(files.size());
+        System.out.println(files.size() + " definitions found");
         int erroredFiles = 0;
         AtomicLong found = new AtomicLong();
-        List<File> foundFiles = new ArrayList<>(); 
+        Set<File> foundFiles = new HashSet<>(); 
         int fileCount = 0;
         for (File file : files) {
             String uri = file.toPath().toUri().toString();
