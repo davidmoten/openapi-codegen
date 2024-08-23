@@ -30,7 +30,7 @@
         <scm.url>scm:git:https://github.com/davidmoten/openapi-codegen.git</scm.url>
         <javadoc.version>3.7.0</javadoc.version>
         <pmd.version>3.24.0</pmd.version>
-        <jxr.version>3.4.0</jxr.version>
+        <jxr.version>3.5.0</jxr.version>
         <nexus.staging.version>1.7.0</nexus.staging.version>
         <compiler.plugin.version>3.13.0</compiler.plugin.version>
         <slf4j.version>1.7.36</slf4j.version>
