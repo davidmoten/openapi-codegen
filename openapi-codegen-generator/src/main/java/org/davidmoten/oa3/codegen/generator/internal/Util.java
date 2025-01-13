@@ -193,4 +193,18 @@ public final class Util {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static Optional<String> extensionString(Schema<?> schema, String key) {
+        return (Optional<String>) (Optional<?>) extension(schema, key);
+    }
+    
+    public static Optional<Object> extension(Schema<?> schema, String key) {
+        Preconditions.checkNotNull(key);
+        Map<String, Object> map = schema.getExtensions();
+        if (map == null) {
+            return Optional.empty();
+        } else {
+            return Optional.ofNullable(map.get(key));
+        }
+    }
 }

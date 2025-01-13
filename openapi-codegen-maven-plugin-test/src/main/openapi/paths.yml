@@ -406,6 +406,15 @@ paths:
             type: integer
             format: int32
             default: 10
+        - in: query
+          name: fourth
+          schema:
+            type: string
+            enum: [one, other]
+        - in: query
+          name: fifth
+          schema:
+            $ref: '#/components/schemas/Fifth'
       responses:
         '203':    
           description: ok response
@@ -671,3 +680,8 @@ components:
         name:
           type: string
       required: [document]
+
+    Fifth:
+      type: string
+      enum: [fifth, quinto]
+      

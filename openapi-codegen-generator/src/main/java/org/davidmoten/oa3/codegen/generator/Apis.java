@@ -191,7 +191,7 @@ class Apis {
             Visitor visitor, OpenAPI api) {
         if (parameter != null) {
             parameter = resolveRefs(api, parameter);
-            if (parameter.getSchema() != null && !Util.isPrimitive(parameter.getSchema())) {
+            if (parameter.getSchema() != null && (!Util.isPrimitive(parameter.getSchema()) || Util.isEnum(parameter.getSchema()))) {
                 visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getSchema(), Maps.empty(), visitor);
             }
             visitSchemas(category, list.add("Parameter").add(parameter.getName()), parameter.getContent(), visitor);
