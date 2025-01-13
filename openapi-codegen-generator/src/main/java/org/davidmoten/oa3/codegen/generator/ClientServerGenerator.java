@@ -129,7 +129,7 @@ public class ClientServerGenerator {
                         }
                         parameterNames.add(parameterName);
                         final Param param;
-                        if (Util.isPrimitive(s)) {
+                        if (Util.isPrimitive(s) && !Util.isEnum(s)) {
                             // handle simple schemas
                             Class<?> c = Util.toClass(Util.getTypeOrThrow(s), s.getFormat(), s.getExtensions(),
                                     names.mapIntegerToBigInteger(), names.mapNumberToBigDecimal());

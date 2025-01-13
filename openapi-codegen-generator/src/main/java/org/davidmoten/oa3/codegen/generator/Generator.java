@@ -105,7 +105,7 @@ public class Generator {
         public boolean topLevel = false;
         public boolean hasProperties = false;
         public PolymorphicType polymorphicType;
-        public Optional<Cls> owner = Optional.empty(); // the owning heirarchy, we cannot name our class any one of
+        public Optional<Cls> owner = Optional.empty(); // the owning hierarchy, we cannot name our class any one of
         // these classes (disallowed by java)
         public Optional<String> name = Optional.empty();
         public Optional<Schema<?>> schema = Optional.empty();
@@ -119,7 +119,7 @@ public class Generator {
         private Set<String> fieldNames = new HashSet<>();
 
         public String nextFieldName(String name, Schema<?> schema) {
-            Optional<String> nameOverride = extensionString(schema, ExtensionKeys.NAME);
+            Optional<String> nameOverride = Util.extensionString(schema, ExtensionKeys.NAME);
             if (nameOverride.isPresent()) {
             	name = nameOverride.get();
             }
@@ -220,25 +220,11 @@ public class Generator {
         public boolean hasEncoding() {
             return schema.isPresent() //
                     && schema.get().getExtensions() != null //
-                    && Boolean.TRUE.equals(extension(schema.get(), ExtensionKeys.HAS_ENCODING).orElse(null));
+                    && Boolean.TRUE.equals(Util.extension(schema.get(), ExtensionKeys.HAS_ENCODING).orElse(null));
         }
     }
     
-    private static Optional<Object> extension(Schema<?> schema, String key) {
-    	Preconditions.checkNotNull(key);
-    	Map<String, Object> map = schema.getExtensions();
-    	if (map == null) {
-    		return Optional.empty();
-    	} else {
-    		return Optional.ofNullable(map.get(key));
-    	}
-    }
     
-    @SuppressWarnings("unchecked")
-	public static Optional<String> extensionString(Schema<?> schema, String key) {
-    	return (Optional<String>) (Optional<?>) extension(schema, key);
-    }
-
     public static class EnumMember {
         public final String name;
         public final Object parameter;

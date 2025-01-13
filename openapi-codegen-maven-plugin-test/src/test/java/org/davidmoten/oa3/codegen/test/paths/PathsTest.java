@@ -12,7 +12,9 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
+import org.davidmoten.oa3.codegen.test.paths.path.ParamsGetFourth;
 import org.davidmoten.oa3.codegen.test.paths.response.Response4;
+import org.davidmoten.oa3.codegen.test.paths.schema.Fifth;
 import org.davidmoten.oa3.codegen.test.paths.schema.RequestBody1;
 import org.davidmoten.oa3.codegen.test.paths.schema.RequestBody2;
 import org.davidmoten.oa3.codegen.test.paths.schema.Response1;
@@ -88,21 +90,24 @@ public class PathsTest {
 
     @Test
     public void testParams() throws ServiceException {
-        Response2 response = service.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45);
-        hasSignature(Service.class, "paramsGet", String.class, OffsetDateTime.class, Optional.class, int.class);
+        Response2 response = service.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45,
+                Optional.of(ParamsGetFourth.OTHER), 
+                Optional.of(Fifth.QUINTO));
+        hasSignature(Service.class, "paramsGet", String.class, OffsetDateTime.class, Optional.class, int.class,
+                Optional.class, Optional.class);
     }
 
     @Test
     public void testParamsResponseStatusCode() throws ServiceException {
         Service svc = new Service() {
             @Override
-            public Response2 paramsGet(String id, OffsetDateTime first, Optional<Long> second, int third)
+            public Response2 paramsGet(String id, OffsetDateTime first, Optional<Long> second, int third, Optional<ParamsGetFourth> fourth, Optional<Fifth> fifth)
                     throws ServiceException {
                 return new Response2("token123");
             }
         };
         ServiceController c = new ServiceController(svc);
-        ResponseEntity<?> r = c.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45);
+        ResponseEntity<?> r = c.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45,Optional.of(ParamsGetFourth.OTHER), Optional.of(Fifth.QUINTO));
         assertEquals(203, r.getStatusCodeValue());
     }
 

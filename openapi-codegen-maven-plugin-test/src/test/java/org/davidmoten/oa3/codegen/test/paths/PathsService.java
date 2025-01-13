@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.davidmoten.oa3.codegen.spring.runtime.ServiceException;
-import org.davidmoten.oa3.codegen.test.paths.path.QueryObjectGetIdParameterId;
+import org.davidmoten.oa3.codegen.test.paths.path.QueryObjectGetId;
 import org.davidmoten.oa3.codegen.test.paths.response.Response4;
 import org.davidmoten.oa3.codegen.test.paths.schema.Error;
 import org.davidmoten.oa3.codegen.test.paths.schema.Name;
@@ -42,7 +42,7 @@ public class PathsService implements Service {
     }
 
     @Override
-    public void queryObjectGet(QueryObjectGetIdParameterId id) throws ServiceException {
+    public void queryObjectGet(QueryObjectGetId id) throws ServiceException {
         System.out.println(id.first() + ", " + id.second().get());
     }
 
