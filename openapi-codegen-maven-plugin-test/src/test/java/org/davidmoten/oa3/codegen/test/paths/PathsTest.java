@@ -94,7 +94,7 @@ public class PathsTest {
                 Optional.of(ParamsGetFourthParameterFourth.OTHER), 
                 Optional.of(Fifth.QUINTO));
         hasSignature(Service.class, "paramsGet", String.class, OffsetDateTime.class, Optional.class, int.class,
-                Optional.class);
+                Optional.class, Optional.class);
     }
 
     @Test
