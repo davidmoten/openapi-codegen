@@ -41,7 +41,7 @@
         <jackson.version>2.18.2</jackson.version>
         <spring.boot.version>2.7.18</spring.boot.version>
         <spring.version>5.3.39</spring.version>
-        <httpclient5.version>5.4.1</httpclient5.version>
+        <httpclient5.version>5.4.2</httpclient5.version>
         <junit.version>5.11.4</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
         <jacoco.version>0.8.12</jacoco.version>
