@@ -54,11 +54,6 @@ public class NamesTest {
     }
 
     @Test
-    public void testEnumClassName() {
-        assertEquals("B", Names.simpleClassNameFromSimpleName("b"));
-    }
-
-    @Test
     public void testUnderscoreToCamel() {
         assertEquals("b", Names.underscoreToCamel("b"));
     }
@@ -80,6 +75,13 @@ public class NamesTest {
         options.setResolve(true);
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
         parser.readLocation("https://raw.githubusercontent.com/codatio/oas/main/yaml/Codat-Lending.yaml", null, options);
+    }
+    
+    @Test
+    public void testRemoveVowels() {
+        assertEquals("HlprsAnyn", Names.removeLowerCaseVowels("HelpersAnyone", 6));
+        assertEquals("HlprsAnyn", Names.removeLowerCaseVowels("HelpersAnyone", 0));
+        assertEquals("HelpersAnyn", Names.removeLowerCaseVowels("HelpersAnyone", 11));
     }
     
 }

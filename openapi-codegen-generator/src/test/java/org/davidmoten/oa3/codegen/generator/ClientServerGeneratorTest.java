@@ -28,7 +28,7 @@ public class ClientServerGeneratorTest {
     private void generate(String definition) {
         Packages packages = new Packages("test");
         Definition d = new Definition(definition, packages, new File("target/generated-source/java"), x -> x,
-                Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), true, true, true);
+                Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), true, true, true, 255);
         ClientServerGenerator generator = new ClientServerGenerator(d);
         generator.generateServer();
         generator.generateClient();
