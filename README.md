@@ -118,6 +118,8 @@ Here's an example showing more configuration options:
                 <generator>spring2</generator>
                 <generateService>true</generateService>
                 <generateClient>true</generateClient>
+                <!-- attempts to limit class names by removing lower case vowels only -->
+                <maxClassNameLength>100</maxClassNameLength>
             </configuration>
         </execution>
     </executions>
