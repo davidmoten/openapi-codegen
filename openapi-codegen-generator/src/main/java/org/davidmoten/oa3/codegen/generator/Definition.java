@@ -20,11 +20,12 @@ public final class Definition {
     private final boolean generateService;
     private final boolean applyReadOnly;
     private final boolean applyWriteOnly;
+    private final int maxClassNameLength;
 
     public Definition(String definition, Packages packages, File generatedSourceDirectory,
             Function<String, String> externalRefClassNames, Set<String> includeSchemas, Set<String> excludeSchemas,
             boolean mapIntegerToBigInteger, boolean mapNumberToBigDecimal, boolean failOnParseErrors, 
-            Optional<String> generator, boolean generateService, boolean applyReadOnly, boolean applyWriteOnly) {
+            Optional<String> generator, boolean generateService, boolean applyReadOnly, boolean applyWriteOnly, int maxClassNameLength) {
         this.definition = definition;
         this.packages = packages;
         this.generatedSourceDirectory = generatedSourceDirectory;
@@ -38,6 +39,7 @@ public final class Definition {
         this.generateService = generateService;
         this.applyReadOnly = applyReadOnly;
         this.applyWriteOnly = applyWriteOnly;
+        this.maxClassNameLength = maxClassNameLength;
     }
 
     public String definition() {
@@ -90,5 +92,9 @@ public final class Definition {
 
     public boolean applyWriteOnly() {
         return applyWriteOnly;
+    }
+    
+    public int maxClassNameLength() {
+        return maxClassNameLength;
     }
 }

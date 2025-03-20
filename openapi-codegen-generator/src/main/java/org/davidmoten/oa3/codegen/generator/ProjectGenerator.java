@@ -27,11 +27,11 @@ public final class ProjectGenerator {
     }
 
     public static void generateZipped(String openapiFilename, String groupId, String artifactId, String version,
-            String basePackage, boolean generateClient, boolean generateServer, OutputStream zip) {
+            String basePackage, boolean generateClient, boolean generateServer, OutputStream zip, int maxClassNameLength) {
         try {
             File directory = Files.createTempDirectory("openapi-codegen").toFile();
             generate(openapiFilename, groupId, artifactId, version, basePackage, generateClient, generateServer,
-                    directory);
+                    directory, maxClassNameLength);
             zipDirectory(directory, zip);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -39,11 +39,11 @@ public final class ProjectGenerator {
     }
 
     public static void generate(String openapiFilename, String groupId, String artifactId, String version,
-            String basePackage, boolean generateClient, boolean generateServer, File directory) throws IOException {
+            String basePackage, boolean generateClient, boolean generateServer, File directory, int maxClassNameLength) throws IOException {
         File generatedSourceDirectory = new File(directory, "src/main/java");
         generatedSourceDirectory.mkdirs();
         Definition definition = new Definition(openapiFilename, new Packages(basePackage), generatedSourceDirectory,
-                x -> x, Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), generateServer, true, true);
+                x -> x, Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), generateServer, true, true, maxClassNameLength);
         Generator g = new Generator(definition);
         g.generate();
 

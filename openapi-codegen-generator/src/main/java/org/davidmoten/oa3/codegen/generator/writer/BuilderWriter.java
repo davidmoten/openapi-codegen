@@ -91,7 +91,7 @@ public class BuilderWriter {
         for (Field f : sortedFields) {
             final String nextBuilderName;
             if (f.mandatory()) {
-                nextBuilderName = "BuilderWith" + Names.upperFirst(f.fieldName);
+                nextBuilderName = Names.removeLowerCaseVowels("BuilderWith" + Names.upperFirst(f.fieldName), 80);
             } else {
                 nextBuilderName = builderName;
             }

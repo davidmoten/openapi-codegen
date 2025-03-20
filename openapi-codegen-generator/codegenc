@@ -1,6 +1,6 @@
 #!/bin/bash
 echo codegen "$@" 
-codegen $1 &>/tmp/output 
+codegen $1 $2 $3 $4 $5 &>/tmp/output 
 RETURN=$?
 if [ $RETURN -eq 0 ]
 then

@@ -78,6 +78,9 @@ public final class GenerateMojo extends AbstractMojo {
     
     @Parameter(name = "skip", defaultValue = "false")
     private boolean skip;
+    
+    @Parameter(name="maxClassNameLength", defaultValue = "255")
+    private int maxClassNameLength;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -122,7 +125,8 @@ public final class GenerateMojo extends AbstractMojo {
                         Optional.ofNullable(generator), //
                         generateService, //
                         applyReadOnly, //
-                        applyWriteOnly);
+                        applyWriteOnly,
+                        maxClassNameLength);
                 new Generator(d).generate();
                 if (generateService || generateClient) {
                     ClientServerGenerator g = new ClientServerGenerator(d);

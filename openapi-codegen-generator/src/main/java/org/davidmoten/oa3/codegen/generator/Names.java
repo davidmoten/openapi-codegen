@@ -60,6 +60,8 @@ public final class Names {
 
     private final ServerGeneratorType generatorType;
 
+    private final int maxClassNameLength;
+
     Names(Definition definition) {
         StreamReadConstraints streamReadConstraints = StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE)
                 .build();
@@ -83,9 +85,9 @@ public final class Names {
             }
         }
         this.api = result.getOpenAPI();
+        this.maxClassNameLength = definition.maxClassNameLength();
         superSchemas(api);
         logSchemaFullClassNames(api);
-
     }
 
     private static void logSchemaFullClassNames(OpenAPI api) {
@@ -268,8 +270,29 @@ public final class Names {
         return lowerFirst(toIdentifier(name));
     }
 
-    public static String simpleClassNameFromSimpleName(String name) {
-        return fixReservedSimpleClassName(upperFirst(underscoreToCamel(toIdentifier(skipUnderscoresAtStart(name)))));
+    public String simpleClassNameFromSimpleName(String name) {
+        String s = upperFirst(underscoreToCamel(toIdentifier(skipUnderscoresAtStart(name))));
+        s = removeLowerCaseVowels(s, maxClassNameLength);
+        return fixReservedSimpleClassName(s);
+    }
+    
+    public static String removeLowerCaseVowels(String s, int maxLength) {
+        if (s.length() <= maxLength) {
+            return s;
+        }
+        StringBuilder b = new StringBuilder();
+        // trim lowercase vowels from right to left
+        for (int i = s.length() - 1; i >= 0; i--) {
+            char ch = s.charAt(i);
+            if (!isLowerCaseVowel(ch) || i + b.length() < maxLength) {
+                b.append(ch);
+            }
+        }
+        return b.reverse().toString();
+    }
+
+    private static boolean isLowerCaseVowel(char ch) {
+        return ch == 'a'|| ch == 'e'||ch=='i'||ch == 'o'|| ch == 'u';
     }
 
     private static String fixReservedSimpleClassName(String simpleClassName) {

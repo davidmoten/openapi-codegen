@@ -519,7 +519,7 @@ public class Generator {
                 if (previous.isPresent()) {
                     Optional<String> fieldName = Optional.of(previous.get().nextFieldName(last.name, schema));
                     String candidate = previous.get().fullClassName + "."
-                            + Names.simpleClassNameFromSimpleName(fieldName.get());
+                            + names.simpleClassNameFromSimpleName(fieldName.get());
                     cls.fullClassName = resolveCandidateFullClassName(cls, candidate);
                     boolean required = fieldIsRequired(schemaPath);
                     previous.ifPresent(p -> p.addField(cls.fullClassName, last.name, fieldName.get(), required,
@@ -548,7 +548,7 @@ public class Generator {
                     // Now get the wrapping class name using the field name and avoid collisions
                     // both with the owning class heirarchy and with siblings
                     String candidate = previous.get().fullClassName + "."
-                            + Names.simpleClassNameFromSimpleName(fieldName.get());
+                            + names.simpleClassNameFromSimpleName(fieldName.get());
                     String candidate2 = resolveCandidateFullClassName(cls, candidate);
                     cls.fullClassName = resolveCandidateFullClassName(cls.owner.get(), candidate2);
                 } else {

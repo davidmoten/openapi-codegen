@@ -13,6 +13,7 @@ public class ProjectGeneratorMain {
         String version = System.getProperty("version", "1.0");
         String file = System.getProperty("file", "openapi.yaml");
         String output = System.getProperty("output");
+        int maxClassNameLength = Integer.parseInt(System.getProperty("maxClassNameLength", "255"));
         if (output == null) {
             output = Files.createTempDirectory("client").toFile().getCanonicalPath();
         }
@@ -22,7 +23,7 @@ public class ProjectGeneratorMain {
         if (clean) {
             deleteContents(out);
         }
-        ProjectGenerator.generate(file, groupId, artifactId, version, basePackage, true, false, out);
+        ProjectGenerator.generate(file, groupId, artifactId, version, basePackage, true, false, out, maxClassNameLength);
         System.out.println(output);
     }
 
