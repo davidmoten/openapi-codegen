@@ -44,7 +44,7 @@
         <httpclient5.version>5.4.3</httpclient5.version>
         <junit.version>5.12.1</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <spotbugs.plugin.version>4.8.6.6</spotbugs.plugin.version>
         <bundle.plugin.version>6.0.0</bundle.plugin.version>
         <build.helper.version>3.6.0</build.helper.version>
