@@ -26,7 +26,7 @@ public class ProjectGeneratorTest {
         File zip = new File(zipFilename);
         zip.delete();
         try (OutputStream out = new FileOutputStream(zip)) {
-            ProjectGenerator.generateZipped(filename, "com.demo", "myapi", "1.0", "com.demo.myapi", true, generateService, out, 255);
+            ProjectGenerator.generateZipped(filename, "com.demo", "myapi", "1.0", "com.demo.myapi", true, generateService, out, 255, true);
         }
         System.out.println("zipFile length=" + zip.length());
         System.out.println(System.currentTimeMillis() - t + "ms");

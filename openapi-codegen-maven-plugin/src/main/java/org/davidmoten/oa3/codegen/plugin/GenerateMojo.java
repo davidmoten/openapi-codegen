@@ -81,7 +81,7 @@ public final class GenerateMojo extends AbstractMojo {
     
     @Parameter(name="maxClassNameLength", defaultValue = "255")
     private int maxClassNameLength;
-
+    
     @Override
     public void execute() throws MojoExecutionException {
         if (skip) {

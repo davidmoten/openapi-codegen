@@ -14,6 +14,7 @@ public class ProjectGeneratorMain {
         String file = System.getProperty("file", "openapi.yaml");
         String output = System.getProperty("output");
         int maxClassNameLength = Integer.parseInt(System.getProperty("maxClassNameLength", "255"));
+        boolean failOnParseErrors = System.getProperty("failOnParseErrors", "true").equalsIgnoreCase("true");
         if (output == null) {
             output = Files.createTempDirectory("client").toFile().getCanonicalPath();
         }
@@ -23,7 +24,7 @@ public class ProjectGeneratorMain {
         if (clean) {
             deleteContents(out);
         }
-        ProjectGenerator.generate(file, groupId, artifactId, version, basePackage, true, false, out, maxClassNameLength);
+        ProjectGenerator.generate(file, groupId, artifactId, version, basePackage, true, false, out, maxClassNameLength, failOnParseErrors);
         System.out.println(output);
     }
 

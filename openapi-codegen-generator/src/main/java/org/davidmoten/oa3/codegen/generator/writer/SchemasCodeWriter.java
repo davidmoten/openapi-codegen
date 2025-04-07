@@ -669,7 +669,7 @@ public final class SchemasCodeWriter {
 
         boolean hasAdditionalProperties = cls.fields.stream().anyMatch(Field::isAdditionalProperties);
         boolean hasDiscriminator = cls.fields.stream().anyMatch(x -> isDiscriminator(interfaces, x));
-        boolean extraConstructor = hasAdditionalProperties;
+        boolean extraConstructor = hasAdditionalProperties && cls.classType == ClassType.CLASS;
         if (extraConstructor) {
             // if has additionalProperties then we make the JsonCreator constructor private
             // (excluding properties) and make another public constructor that includes the

@@ -27,11 +27,11 @@ public final class ProjectGenerator {
     }
 
     public static void generateZipped(String openapiFilename, String groupId, String artifactId, String version,
-            String basePackage, boolean generateClient, boolean generateServer, OutputStream zip, int maxClassNameLength) {
+            String basePackage, boolean generateClient, boolean generateServer, OutputStream zip, int maxClassNameLength, boolean failOnParseErrors) {
         try {
             File directory = Files.createTempDirectory("openapi-codegen").toFile();
             generate(openapiFilename, groupId, artifactId, version, basePackage, generateClient, generateServer,
-                    directory, maxClassNameLength);
+                    directory, maxClassNameLength, failOnParseErrors);
             zipDirectory(directory, zip);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -39,11 +39,11 @@ public final class ProjectGenerator {
     }
 
     public static void generate(String openapiFilename, String groupId, String artifactId, String version,
-            String basePackage, boolean generateClient, boolean generateServer, File directory, int maxClassNameLength) throws IOException {
+            String basePackage, boolean generateClient, boolean generateServer, File directory, int maxClassNameLength, boolean failOnParseErrors) throws IOException {
         File generatedSourceDirectory = new File(directory, "src/main/java");
         generatedSourceDirectory.mkdirs();
         Definition definition = new Definition(openapiFilename, new Packages(basePackage), generatedSourceDirectory,
-                x -> x, Collections.emptySet(), Collections.emptySet(), false, false, true, Optional.empty(), generateServer, true, true, maxClassNameLength);
+                x -> x, Collections.emptySet(), Collections.emptySet(), false, false, failOnParseErrors, Optional.empty(), generateServer, true, true, maxClassNameLength);
         Generator g = new Generator(definition);
         g.generate();
 
