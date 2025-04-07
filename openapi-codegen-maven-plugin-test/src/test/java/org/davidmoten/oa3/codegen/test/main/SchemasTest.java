@@ -251,7 +251,7 @@ public class SchemasTest {
         assertEquals(123, a.value().get(1).value());
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(
-                new ArrayOfOneOf(Arrays.asList(new ArrayOfOneOfItem(true), new ArrayOfOneOfItem(123)))));
+                new ArrayOfOneOf(Arrays.asList(ArrayOfOneOfItem.of(true), ArrayOfOneOfItem.of(123)))));
     }
 
     @Test
@@ -262,7 +262,7 @@ public class SchemasTest {
         assertEquals(123, a.value().get(1).value());
         assertEquals(json, m.writeValueAsString(a));
         assertEquals(json, m.writeValueAsString(new ArrayOfOneOfString(
-                Arrays.asList(new ArrayOfOneOfStringItem("hello"), new ArrayOfOneOfStringItem(123)))));
+                Arrays.asList(ArrayOfOneOfStringItem.of("hello"), ArrayOfOneOfStringItem.of(123)))));
     }
 
     @Test
@@ -1272,5 +1272,12 @@ public class SchemasTest {
     private static void noPublicConstructors(Class<?> c) {
         assertEquals(0, c.getConstructors().length);
     }
-
+    
+    @Test
+    public void testOneOfTwoStringTypesWithConstraints() {
+        assertEquals("a", OfStrings.of("a").value());
+        assertEquals("b", OfStrings.of2("b").value());
+        assertThrows(IllegalArgumentException.class, () -> OfStrings.of("b"));
+        assertThrows(IllegalArgumentException.class, () -> OfStrings.of2("a"));
+    }
 }
