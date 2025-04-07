@@ -132,7 +132,7 @@ public final class SchemasCodeWriter {
         writeClassDeclaration(out, cls, fullClassNameInterfaces);
         writeEnumMembers(out, cls);
         if (isPolymorphic(cls)) {
-            writePolymorphicClassContent(out, cls, names);
+            writePolymorphicClassContent(out, cls, names, fullClassNameInterfaces);
         } else {
             writeFields(out, cls);
             writeConstructor(out, cls, fullClassNameInterfaces, names);
@@ -381,7 +381,7 @@ public final class SchemasCodeWriter {
         }
     }
 
-    private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names) {
+    private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names, Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.println();
             out.line("%s %s();", String.class, cls.discriminator.fieldName);
@@ -396,10 +396,11 @@ public final class SchemasCodeWriter {
                 // annotations so polymorphic stuff can't be used to bind to rest method
                 // parameters
                 writeOneOfAnyOfNonDiscriminatedObjectConstructor(out, cls);
-                cls.fields.forEach(f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, cls, f));
+                Set<String> used = new HashSet<>();
+                cls.fields.forEach(f -> writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(out, cls, f, used));
                 out.println();
                 writeGetter(out, out.add(Object.class), "value", "value");
-                writeNonDiscriminatedBuilder(out, cls);
+                writeNonDiscriminatedFactoryMethod(out, cls, names, fullClassNameInterfaces);
             } else if (cls.classType == ClassType.ANY_OF_NON_DISCRIMINATED) {
                 writeFields(out, cls);
 
@@ -577,20 +578,36 @@ public final class SchemasCodeWriter {
         BuilderWriter.write(out, fields, cls.simpleName(), useOf);
     }
 
-    private static void writeNonDiscriminatedBuilder(CodePrintWriter out, Cls cls) {
+    private static void writeNonDiscriminatedFactoryMethod(CodePrintWriter out, Cls cls, Names names, Map<String, Set<Cls>> fullClassNameInterfaces) {
+        Set<Cls> interfaces = interfaces(cls, fullClassNameInterfaces);
+        Set<String> used = new HashSet<>(); 
+        int[] count = new int[] {2};
         cls.fields.forEach(f -> {
             out.println();
-            out.line("public static %s of(%s value) {", cls.simpleName(), out.add(f.fullClassName));
+            final String methodName;
+            if (used.contains(f.fullClassName)) {
+                methodName = "of" + count[0];
+                count[0]++;
+            } else {
+                methodName = "of";
+            }
+            used.add(f.fullClassName);
+            out.line("public static %s %s(%s value) {", cls.simpleName(), methodName, out.add(f.fullClassName));
+            writeConstraintValidations(out, cls, names, interfaces, false, Collections.singletonList(f));
             out.line("return new %s(value);", cls.simpleName());
             out.closeParen();
         });
     }
 
     private static void writeOneOfAnyOfNonDiscriminatedMemberSpecificConstructor(CodePrintWriter out, Cls cls,
-            Field f) {
+            Field f, Set<String> used) {
+        if (used.contains(f.fullClassName)) {
+            return;
+        }
+        used.add(f.fullClassName);
         String className = toPrimitive(f.fullClassName);
         out.println();
-        out.line("public %s(%s value) {", cls.simpleName(), out.add(className));
+        out.line("private %s(%s value) {", cls.simpleName(), out.add(className));
         if (org.davidmoten.oa3.codegen.generator.internal.Util.isPrimitiveFullClassName(className)) {
             out.line("this.value = value;");
         } else {
@@ -771,8 +788,19 @@ public final class SchemasCodeWriter {
     private static void writeConstructorBody(CodePrintWriter out, Cls cls, Names names, Set<Cls> interfaces,
             boolean additionalPropertiesIsParameter) {
         // validate
+        writeConstraintValidations(out, cls, names, interfaces, additionalPropertiesIsParameter, cls.fields);
+        // assign
+        cls //
+                .fields //
+                .stream() //
+                .forEach(x -> writeConstructorBodyFieldAssignment(out, cls, interfaces, x,
+                        additionalPropertiesIsParameter));
+    }
+
+    private static void writeConstraintValidations(CodePrintWriter out, Cls cls, Names names, Set<Cls> interfaces,
+            boolean additionalPropertiesIsParameter, List<Field> fields) {
         ifValidate(cls, out, names, //
-                out2 -> cls.fields.stream() //
+                out2 -> fields.stream() //
                         .filter(x -> !x.isAdditionalProperties() || additionalPropertiesIsParameter) //
                         .forEach(x -> {
                             if (!isDiscriminator(interfaces, x)) {
@@ -782,12 +810,6 @@ public final class SchemasCodeWriter {
                                 validateMore(out2, cls, x);
                             }
                         }));
-        // assign
-        cls //
-                .fields //
-                .stream() //
-                .forEach(x -> writeConstructorBodyFieldAssignment(out, cls, interfaces, x,
-                        additionalPropertiesIsParameter));
     }
 
     private static void writeConstructorBodyFieldAssignment(CodePrintWriter out, Cls cls, Set<Cls> interfaces, Field x,
@@ -834,8 +856,7 @@ public final class SchemasCodeWriter {
     }
 
     private static Set<Cls> interfaces(Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
-        Set<Cls> interfaces = Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
-        return interfaces;
+        return Util.orElse(fullClassNameInterfaces.get(cls.fullClassName), Collections.emptySet());
     }
 
     private static void writeBuilder(CodePrintWriter out, Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
@@ -885,7 +906,7 @@ public final class SchemasCodeWriter {
     }
 
     private static Optional<Discriminator> discriminator(Set<Cls> interfaces, Field x) {
-        return interfaces.stream().filter(y -> x.name.equals(y.discriminator.propertyName)) //
+        return interfaces.stream().filter(y -> y.discriminator.propertyName.equals(x.name)) //
                 .map(y -> y.discriminator).findFirst();
     }
 

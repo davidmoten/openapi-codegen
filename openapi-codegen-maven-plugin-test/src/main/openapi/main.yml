@@ -1165,7 +1165,14 @@ components:
           oneOf:
           - type: string
           - type: integer
-            format: int32          
+            format: int32  
+            
+    OfStrings:
+        oneOf:
+        - type: string
+          pattern: 'a.*'
+        - type: string
+          pattern: 'b.*'        
 
     Simple:
       type: string
