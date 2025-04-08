@@ -85,6 +85,9 @@ public final class Names {
             }
         }
         this.api = result.getOpenAPI();
+        if (this.api == null) {
+            throw new IllegalStateException("OpenAPI object could not be parsed");
+        }
         this.maxClassNameLength = definition.maxClassNameLength();
         superSchemas(api);
         logSchemaFullClassNames(api);
