@@ -181,6 +181,7 @@ public final class Names {
     }
 
     public static String toIdentifier(String s) {
+        Preconditions.checkArgument(!s.isEmpty(), "string is empty");
         String candidate = lowerFirst(identifierCandidate(s));
         return adjustIfReservedWord(candidate);
     }

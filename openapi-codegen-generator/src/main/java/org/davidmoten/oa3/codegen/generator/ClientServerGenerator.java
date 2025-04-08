@@ -111,7 +111,13 @@ public class ClientServerGenerator {
                         Schema<?> s = p.getSchema();
                         if (s == null) {
                             // TODO do something with p.getContent() instead of schema
-                            System.out.println("[WARN] parameter not without schema not supported yet, skipping:\n" + p);
+                            System.out.println("[WARN] parameter skipped because without schema (not yet supported): " //
+                                    + operationName(pathName, method, operation));   
+                            return;
+                        }
+                        if (p.getName().isEmpty()) {
+                            System.out.println("[WARN] parameter skipped because name empty: " //
+                                    + operationName(pathName, method, operation));
                             return;
                         }
                         final Schema<?> resolvedOriginal = resolveRefs(s);
@@ -262,6 +268,11 @@ public class ClientServerGenerator {
                 Optional.ofNullable(operation.getDescription()), primaryStatusCode,
                 Optional.ofNullable(primaryMimeType.value), responseDescriptors, includeForServerGeneration);
         methods.add(m);
+    }
+
+    private static String operationName(String pathName, HttpMethod method, Operation operation) {
+        return pathName + " " + method
+                + Optional.ofNullable(operation.getOperationId()).map(x -> " [" + x + "]").orElse("");
     }
 
     private static ParamType toParamType(Parameter p) {
