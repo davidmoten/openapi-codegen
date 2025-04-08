@@ -149,6 +149,9 @@ class Apis {
 
     private static ApiResponse resolveRefs(OpenAPI api, ApiResponse response) {
         while (response.get$ref() != null) {
+            if (api.getComponents() == null || api.getComponents().getResponses() == null) {
+                throw new IllegalStateException("ref not found: " + response.get$ref());
+            }
             response = api.getComponents().getResponses().get(Names.lastComponent(response.get$ref()));
         }
         return response;
