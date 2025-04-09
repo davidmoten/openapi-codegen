@@ -124,7 +124,7 @@ public class Generator {
             	name = nameOverride.get();
             }
             final String next;
-            if (name == null) {
+            if (Util.isNullOrBlank(name)) {
             	next = nextAnonymousFieldName();
             } else {
                 String s = Names.toFieldName(name);

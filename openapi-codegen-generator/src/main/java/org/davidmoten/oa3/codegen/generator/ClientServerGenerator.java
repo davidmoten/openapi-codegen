@@ -88,10 +88,10 @@ public class ClientServerGenerator {
         pathItem.readOperationsMap() //
                 .forEach((method, operation) -> gatherMethods(pathName, method, operation, methods));
     }
-
+    
     private void gatherMethods(String pathName, HttpMethod method, Operation operation, List<Method> methods) {
         final String methodName;
-        if (operation.getOperationId() != null) {
+        if (!Util.isNullOrBlank(operation.getOperationId())) {
             methodName = Names.toIdentifier(operation.getOperationId());
         } else {
             methodName = Names.toIdentifier(ImmutableList.of(pathName, method.toString().toLowerCase(Locale.ENGLISH)));
