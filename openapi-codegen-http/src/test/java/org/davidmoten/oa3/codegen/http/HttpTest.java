@@ -87,4 +87,36 @@ public class HttpTest {
         }
     }
     
+    @Test
+    public void testContentTypeWhenNotPresent() {
+         assertEquals("application/octet-stream", Http.contentType(Headers.create()));
+    }
+    
+    @Test
+    public void testContentTypeWhenPresentCamelCased() {
+        assertEquals("text/plain", Http.contentType(Headers.create() //
+                .put("Content-Type", "text/plain")));
+    }
+
+    @Test
+    public void testContentTypeWhenPresentLowerCase() {
+        assertEquals("text/plain", Http.contentType(Headers.create() //
+                .put("content-type", "text/plain")));
+    }
+
+    @Test
+    public void testContentTypeWhenPresentTwice() {
+        assertEquals("text/plain",
+                Http.contentType(Headers.create() //
+                        .put("content-type", "text/plain") //
+                        .put("content-type", "text/plain")));
+    }
+    
+    @Test
+    public void testContentTypeReturnsLast() {
+        assertEquals("application/xml",
+                Http.contentType(Headers.create() //
+                        .put("content-type", "text/plain") //
+                        .put("Content-Type", "application/xml")));
+    }
 }
