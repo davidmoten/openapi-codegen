@@ -477,13 +477,19 @@ public final class Http {
         Response response = con.response();
         int statusCode = response.statusCode();
         Headers responseHeaders = Headers.create(response.headers());
-        String responseContentType = last(response.headers().get("Content-Type")).orElse("application/octet-stream");
-        Object data;
+        String responseContentType = contentType(responseHeaders);
         Optional<Class<?>> responseClass = responseCls.apply(statusCode, responseContentType);
         try (InputStream in = log(response.inputStream())) {
-            data = readResponse(serializer, responseClass, responseContentType, in);
+            Object data = readResponse(serializer, responseClass, responseContentType, in);
+            return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
         }
-        return new HttpResponse(statusCode, responseHeaders, Optional.of(data));
+    }
+    
+    @VisibleForTesting
+    static String contentType(Headers headers) {
+        return headers.get("Content-Type") //
+                .flatMap(Http::last) //
+                .orElse("application/octet-stream");
     }
 
     private static void write(OutputStream out, byte[] bytes) {
