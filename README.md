@@ -138,6 +138,7 @@ Here's an example showing more configuration options:
 ## Generated code examples
 Some examples follow. Note the following:
 
+* prefer yaml definitions to json, much easier to read and to hold comments
 * really clean code, formatted, sensible whitespacing, no long code lines 
 * minimal generated code (for example `toString`, `hashCode`, and oneOf Deserializer are one statement methods that pass off to non-generated runtime dependencies)
 * type safety
