@@ -267,7 +267,7 @@ public final class ServerCodeWriterSpringBoot {
                 .stream() //
                 .collect(Collectors.toMap(x -> x.identifier,
                         x -> WriterUtil.markdownToHtml(x.description.orElse(x.identifier))));
-        String html = m.description.map(x -> WriterUtil.markdownToHtml(x))
+        String html = m.description.map(WriterUtil::markdownToHtml)
                 .orElse("<p>Returns response from call to path <i>%s</i>.</p>");
         String more = m.responseDescriptors.stream() //
                 .map(rd -> {
@@ -306,34 +306,20 @@ public final class ServerCodeWriterSpringBoot {
             m.parameters.forEach(p -> {
                 Constraints x = p.constraints;
                 if (x.atLeastOnePresent()) {
-                    if (x.minLength.isPresent()) {
-                        out.line("%s.checkMinLength(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
-                                x.minLength.get(), p.identifier);
-                    }
-                    if (x.maxLength.isPresent()) {
-                        out.line("%s.checkMaxLength(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
-                                x.maxLength.get(), p.identifier);
-                    }
-                    if (x.pattern.isPresent()) {
-                        out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class,
-                                p.identifier, WriterUtil.escapePattern(x.pattern.get()), p.identifier);
-                    }
-                    if (x.min.isPresent()) {
-                        out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
-                                x.min.get().toString(), p.identifier, false);
-                    }
-                    if (x.max.isPresent()) {
-                        out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
-                                x.max.get().toString(), p.identifier, false);
-                    }
-                    if (x.minExclusive.isPresent()) {
-                        out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
-                                x.minExclusive.get().toString(), p.identifier, true);
-                    }
-                    if (x.maxExclusive.isPresent()) {
-                        out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
-                                x.maxExclusive.get().toString(), p.identifier, true);
-                    }
+                    x.minLength.ifPresent(integer -> out.line("%s.checkMinLength(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
+                            integer, p.identifier));
+                    x.maxLength.ifPresent(integer -> out.line("%s.checkMaxLength(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
+                            integer, p.identifier));
+                    x.pattern.ifPresent(s -> out.line("%s.checkMatchesPattern(%s, \"%s\", \"%s\");", RequestPreconditions.class,
+                            p.identifier, WriterUtil.escapePattern(s), p.identifier));
+                    x.min.ifPresent(bigDecimal -> out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            bigDecimal.toString(), p.identifier, false));
+                    x.max.ifPresent(bigDecimal -> out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            bigDecimal.toString(), p.identifier, false));
+                    x.minExclusive.ifPresent(bigDecimal -> out.line("%s.checkMinimum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            bigDecimal.toString(), p.identifier, true));
+                    x.maxExclusive.ifPresent(bigDecimal -> out.line("%s.checkMaximum(%s, \"%s\", \"%s\", %s);", RequestPreconditions.class, p.identifier,
+                            bigDecimal.toString(), p.identifier, true));
                     if (p.isArray && x.minItems.isPresent()) {
                         out.line("%s.checkMinSize(%s, %s, \"%s\");", RequestPreconditions.class, p.identifier,
                                 x.minItems.get(), p.identifier);

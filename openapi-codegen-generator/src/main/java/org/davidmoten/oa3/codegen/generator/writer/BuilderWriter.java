@@ -51,10 +51,21 @@ public class BuilderWriter {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append("Field [fieldName=").append(fieldName).append(", fullClassName=").append(fullClassName)
-                    .append(", required=").append(required).append(", isArray=").append(isArray).append(", mapType=")
-                    .append(mapType).append(", nullable=").append(nullable) //
-                    .append(", valueExpressionFactory=" + valueExpressionFactory.map(x -> "present").orElse("")).append("]");
+            builder.append("Field [fieldName=") //
+                    .append(fieldName) //
+                    .append(", fullClassName=") //
+                    .append(fullClassName) //
+                    .append(", required=") //
+                    .append(required) //
+                    .append(", isArray=") //
+                    .append(isArray) //
+                    .append(", mapType=") //
+                    .append(mapType) //
+                    .append(", nullable=") //
+                    .append(nullable) //
+                    .append(", valueExpressionFactory=") //
+                    .append(valueExpressionFactory.map(x -> "present").orElse("")) //
+                    .append("]");
             return builder.toString();
         }
         
@@ -194,12 +205,7 @@ public class BuilderWriter {
             out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
                     f.fieldName);
             if (f.mapType.isPresent()) {
-                if (f.isMapType(MapType.FIELD) && !f.required && !f.nullable) {
-                    out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
-//                    out.line("this%s.%s = %s.of(%s);", builderField, f.fieldName, Optional.class, f.fieldName);
-                } else {
-                    out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
-                }
+                out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else if (f.mandatory()) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else if (f.nullable && !f.required) {
@@ -261,7 +267,7 @@ public class BuilderWriter {
             previousWasMandatory = f.mandatory();
             out.flush();
         }
-        if (firstFieldStaticMethod.isPresent() && !firstFieldStaticMethod.get().isEmpty()) {
+        if (!firstFieldStaticMethod.get().isEmpty()) {
             out.println();
             out.print(firstFieldStaticMethod.get());
         }
@@ -281,7 +287,7 @@ public class BuilderWriter {
         
         String params = fields //
                 .stream() //
-                .map(x -> fieldExpression(x)) //
+                .map(BuilderWriter::fieldExpression) //
                 .collect(Collectors.joining(", "));
         out.line("return new %s(%s);", importedBuiltType, params);
         out.closeParen();
@@ -312,7 +318,7 @@ public class BuilderWriter {
         out.line("private static final %s INSTANCE = ", importedBuiltType);
         String params = fields //
                 .stream() //
-                .map(x -> fieldExpression(x))
+                .map(BuilderWriter::fieldExpression)
                 .collect(Collectors.joining(", "));
         out.right().right();
         out.line("new %s(%s);", importedBuiltType, params);

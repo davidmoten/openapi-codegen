@@ -224,8 +224,7 @@ public final class Names {
             }
             lastCh = ch;
         }
-        String candidate = b.toString();
-        return candidate;
+        return b.toString();
     }
 
     public static String propertyNameToClassSimpleName(String propertyName) {
@@ -370,11 +369,7 @@ public final class Names {
                 .map(x -> (ComposedSchema) x) //
                 .forEach(x -> {
                     for (Schema<?> sch : x.getOneOf()) {
-                        Set<Schema<?>> set = map.get(sch);
-                        if (set == null) {
-                            set = new HashSet<>();
-                            map.put(sch, set);
-                        }
+                        Set<Schema<?>> set = map.computeIfAbsent(sch, k -> new HashSet<>());
                         set.add(x);
                     }
                 });
@@ -549,11 +544,7 @@ public final class Names {
     private void registerFullClassName(String fullClassName) {
         String pkg = pkg(fullClassName);
         String simple = simpleClassName(fullClassName);
-        Set<String> set = packageSimpleClassNames.get(pkg);
-        if (set == null) {
-            set = new HashSet<>();
-            packageSimpleClassNames.put(pkg, set);
-        }
+        Set<String> set = packageSimpleClassNames.computeIfAbsent(pkg, k -> new HashSet<>());
         set.add(simple);
     }
 
@@ -564,7 +555,7 @@ public final class Names {
 
     private void registerTree(Cls cls) {
         classes.put(cls.fullClassName, cls);
-        cls.classes.forEach(c -> registerTree(c));
+        cls.classes.forEach(this::registerTree);
     }
 
     public Optional<Cls> cls(String fullClassName) {

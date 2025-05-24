@@ -285,7 +285,7 @@ public final class SchemasCodeWriter {
             Stream<String> c = Stream.of(HasStringValue.class.getCanonicalName()) //
                     .filter(x -> cls.hasEncoding() && cls.classType == ClassType.ENUM);
             implemented = " implements " + Stream.concat(a, Stream.concat(b, c)) //
-                    .map(x -> imports.add(x)) //
+                    .map(imports::add) //
                     .collect(Collectors.joining(", "));
         }
         return implemented;
@@ -357,7 +357,7 @@ public final class SchemasCodeWriter {
                     } else if (parameterFullClassName.equals(BigInteger.class.getCanonicalName())
                             || parameterFullClassName.equals(BigDecimal.class.getCanonicalName())) {
                         return String.format("%s%s(new %s(\"\"))", out.indent(), memberName,
-                                out.add(parameterFullClassName), x.parameter);
+                                out.add(parameterFullClassName));
                     } else {
                         String delim = x.parameter instanceof String //
                                 || //
@@ -366,7 +366,7 @@ public final class SchemasCodeWriter {
                         if (x.nullable) {
                             if (x.parameter == null) {
                                 return String.format("%s%s(%s.empty())", out.indent(), memberName,
-                                        out.add(Optional.class), delim, x.parameter, delim);
+                                        out.add(Optional.class));
                             } else {
                                 return String.format("%s%s(%s.of(%s%s%s))", out.indent(), memberName,
                                         out.add(Optional.class), delim, x.parameter, delim);
@@ -415,12 +415,10 @@ public final class SchemasCodeWriter {
                 out.println();
                 out.line("private %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
                 ifValidate(cls, out, names, //
-                        o -> cls.fields.stream().forEach(x -> {
+                        o -> cls.fields.forEach(x -> {
                             checkNotNull(cls, o, x);
                         }));
-                cls.fields.stream().forEach(x -> {
-                    assignField(out, cls, x);
-                });
+                cls.fields.forEach(x -> assignField(out, cls, x));
                 out.closeParen();
                 out.println();
                 out.line("public static %s of(%s) {", cls.simpleName(), parameters);
@@ -462,9 +460,7 @@ public final class SchemasCodeWriter {
                             }
                             validateMore(o, cls, x);
                         }));
-                cls.fields.stream().forEach(x -> {
-                    assignField(out, cls, x);
-                });
+                cls.fields.stream().forEach(x -> assignField(out, cls, x));
                 out.closeParen();
 
                 // write getters for allOf members
@@ -739,7 +735,7 @@ public final class SchemasCodeWriter {
                         } else if (!f.required && f.nullable) {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(JsonNullableOctetsDeserializer.class));
-                        } else if (!f.required || f.nullable || f.required && f.readOnly) {
+                        } else if (!f.required || f.nullable) {
                             annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
                                     out.add(OptionalOctetsDeserializer.class));
                         } else {

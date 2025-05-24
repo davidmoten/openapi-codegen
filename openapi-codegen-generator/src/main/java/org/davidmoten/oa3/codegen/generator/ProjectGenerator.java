@@ -104,7 +104,7 @@ public final class ProjectGenerator {
                         Files.copy(path, zs);
                         zs.closeEntry();
                     } catch (IOException e) {
-                        System.err.println(e);
+                        e.printStackTrace(System.err);
                     }
                 });
             }

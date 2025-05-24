@@ -37,8 +37,8 @@ public final class EnhancedOpenAPIV3Parser extends OpenAPIV3Parser {
     /**
      * Encoding of the resource content with OpenAPI spec to parse.
      */
-    private static String encoding = StandardCharsets.UTF_8.displayName();
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPIV3Parser.class);
+    private static final String encoding = StandardCharsets.UTF_8.displayName();
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedOpenAPIV3Parser.class);
 
     public EnhancedOpenAPIV3Parser() {
     }

@@ -81,11 +81,7 @@ public class Generator {
     private static void findFullClassNameInterfaces(Cls cls, Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             cls.fields.forEach(x -> {
-                Set<Cls> list = fullClassNameInterfaces.get(x.fullClassName);
-                if (list == null) {
-                    list = new HashSet<>();
-                    fullClassNameInterfaces.put(x.fullClassName, list);
-                }
+                Set<Cls> list = fullClassNameInterfaces.computeIfAbsent(x.fullClassName, k -> new HashSet<>());
                 list.add(cls);
             });
         }
@@ -96,10 +92,10 @@ public class Generator {
         public String fullClassName;
         public Optional<String> description = Optional.empty();
         public ClassType classType;
-        public List<Field> fields = new ArrayList<>();
+        public final List<Field> fields = new ArrayList<>();
         public List<EnumMember> enumMembers = new ArrayList<>();
         public List<String> enumNames = Collections.emptyList();
-        public List<Cls> classes = new ArrayList<>();
+        public final List<Cls> classes = new ArrayList<>();
         public Discriminator discriminator = null;
         public String enumValueFullType;
         public boolean topLevel = false;
@@ -116,7 +112,7 @@ public class Generator {
         }
 
         private int num = 0;
-        private Set<String> fieldNames = new HashSet<>();
+        private final Set<String> fieldNames = new HashSet<>();
 
         public String nextFieldName(String name, Schema<?> schema) {
             Optional<String> nameOverride = Util.extensionString(schema, ExtensionKeys.NAME);
@@ -261,7 +257,7 @@ public class Generator {
             "boolean", "short");
 
     public enum MapType {
-        ADDITIONAL_PROPERTIES, FIELD;
+        ADDITIONAL_PROPERTIES, FIELD
     }
 
     
@@ -686,7 +682,7 @@ public class Generator {
     }
 
     public enum Encoding {
-        DEFAULT, OCTET;
+        DEFAULT, OCTET
     }
 
     private static boolean isString(Schema<?> schema) {
@@ -732,7 +728,7 @@ public class Generator {
             final Map<String, String> map;
             if (discriminator.getMapping() != null) {
                 map = discriminator.getMapping().entrySet().stream()
-                        .collect(Collectors.toMap(x -> names.refToFullClassName(x.getValue()), x -> x.getKey()));
+                        .collect(Collectors.toMap(x -> names.refToFullClassName(x.getValue()), Map.Entry::getKey));
             } else {
                 map = Collections.emptyMap();
             }

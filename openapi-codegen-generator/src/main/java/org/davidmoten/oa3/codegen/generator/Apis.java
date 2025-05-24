@@ -245,38 +245,37 @@ class Apis {
         if (schema.getProperties() != null && !(schema instanceof ArraySchema)) {
             // note that doesn't make sense that an ArraySchema has properties but if provided 
             // in openapi definition the swagger-parser doesn't ignore them unfortunately
-            schema.getProperties().entrySet().forEach(
-                    x -> {
-                        final Schema<?> sch;
-                        if (propertyEncoding != null && propertyEncoding.containsKey(x.getKey())) {
-                            Encoding encoding = propertyEncoding.get(x.getKey());
-                            if (encoding.getContentType() != null) {
-                                List<String> contentTypes = Arrays.stream(encoding.getContentType() //
+            schema.getProperties().forEach((key, value) -> {
+                final Schema<?> sch;
+                if (propertyEncoding != null && propertyEncoding.containsKey(key)) {
+                    Encoding encoding = propertyEncoding.get(key);
+                    if (encoding.getContentType() != null) {
+                        List<String> contentTypes = Arrays.stream(encoding.getContentType() //
                                         .split(",")) //
-                                        .map(y -> y.trim()) //
-                                        .collect(Collectors.toList());
-                                Schema<String> contentTypeSchema = enumSchema(contentTypes);
-                                if (contentTypes.size() == 1) {
-                                    contentTypeSchema.setDefault(contentTypes.get(0));
-                                }
-                                contentTypeSchema.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
-                                ObjectSchema combined = new ObjectSchema();
-                                combined.setProperties(new LinkedHashMap<>());
-                                combined.getProperties().put("contentType", contentTypeSchema);
-                                combined.getProperties().put("value", x.getValue());
-                                combined.setRequired(Lists.of("value", "contentType"));
-                                combined.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
-                                
-                                sch = combined;
-                            } else {
-                                sch = x.getValue();
-                            }
-                        } else {
-                            sch = x.getValue();
+                                .map(String::trim) //
+                                .collect(Collectors.toList());
+                        Schema<String> contentTypeSchema = enumSchema(contentTypes);
+                        if (contentTypes.size() == 1) {
+                            contentTypeSchema.setDefault(contentTypes.get(0));
                         }
-                        visitSchemas(category, schemaPath.add(new SchemaWithName(x.getKey(), sch)),
-                                Maps.empty(), visitor);
-                    });
+                        contentTypeSchema.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
+                        ObjectSchema combined = new ObjectSchema();
+                        combined.setProperties(new LinkedHashMap<>());
+                        combined.getProperties().put("contentType", contentTypeSchema);
+                        combined.getProperties().put("value", value);
+                        combined.setRequired(Lists.of("value", "contentType"));
+                        combined.setExtensions(Maps.hashMap().put(ExtensionKeys.HAS_ENCODING, (Object) Boolean.TRUE).build());
+
+                        sch = combined;
+                    } else {
+                        sch = value;
+                    }
+                } else {
+                    sch = value;
+                }
+                visitSchemas(category, schemaPath.add(new SchemaWithName(key, sch)),
+                        Maps.empty(), visitor);
+            });
         }
         if (schema instanceof ArraySchema) {
             ArraySchema a = (ArraySchema) schema;
@@ -308,7 +307,7 @@ class Apis {
         return schema;
     }
 
-    static final boolean isComplexSchema(Schema<?> schema) {
+    static boolean isComplexSchema(Schema<?> schema) {
         for (Class<? extends Schema<?>> cls : COMPLEX_SCHEMA_CLASSES) {
             if (cls.isAssignableFrom(schema.getClass())) {
                 return true;
@@ -318,6 +317,6 @@ class Apis {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.of( //
+    private static final List<Class<? extends Schema<?>>> COMPLEX_SCHEMA_CLASSES = Lists.of( //
             ObjectSchema.class, MapSchema.class, ComposedSchema.class, ArraySchema.class);
 }

@@ -1,7 +1,6 @@
 package org.davidmoten.oa3.codegen.generator;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,7 +15,7 @@ public class DownloadExtras {
         try {
             cacheDirectory.mkdirs();
             Files.readAllLines(list.toPath()) //
-                    .stream().map(x -> x.trim()) //
+                    .stream().map(String::trim) //
                     .filter(x -> !x.isEmpty()) //
                     .map(x -> x.split(",")) //
                     .forEach(items -> download(items[0], items[1], cacheDirectory));
@@ -37,7 +36,7 @@ public class DownloadExtras {
             con.setRequestMethod("GET");
             con.setDoInput(true);
             File tmp = new File(cacheDirectory, toFilename + ".tmp");
-            try (InputStream in = con.getInputStream(); OutputStream out = new FileOutputStream(tmp)) {
+            try (InputStream in = con.getInputStream(); OutputStream out = Files.newOutputStream(tmp.toPath())) {
                 copy(in, out);
             }
             File destination = new File(cacheDirectory, toFilename);

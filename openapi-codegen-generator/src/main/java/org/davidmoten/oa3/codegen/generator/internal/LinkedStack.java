@@ -5,12 +5,10 @@ public final class LinkedStack<T> {
 
     public void push(T value) {
         LinkedStackNode<T> node = new LinkedStackNode<>(value);
-        if (last == null) {
-            last = node;
-        } else {
+        if (last != null) {
             node.previous = last;
-            last = node;
         }
+        last = node;
     }
 
     public T pop() {

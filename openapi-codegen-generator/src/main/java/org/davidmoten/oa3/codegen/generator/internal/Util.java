@@ -20,7 +20,7 @@ import io.swagger.v3.oas.models.media.Schema;
 
 public final class Util {
 
-    private static Set<String> PRIMITIVE_CLASS_NAMES = Sets.of("int", "double", "float", "long", "boolean", "byte",
+    private static final Set<String> PRIMITIVE_CLASS_NAMES = Sets.of("int", "double", "float", "long", "boolean", "byte",
             "short");
 
     public static String getTypeOrThrow(Schema<?> schema) {
@@ -52,7 +52,7 @@ public final class Util {
 
     public static boolean isPrimitive(Schema<?> schema) {
         String type = getType(schema).orElse("object");
-        return type != null && !"array".equals(type) && !"object".equals(type);
+        return !"array".equals(type) && !"object".equals(type);
     }
 
     public static boolean isEnum(Schema<?> schema) {
@@ -107,44 +107,45 @@ public final class Util {
     public static Class<?> toClass(String type, String format, Map<String, Object> extensions,
             boolean mapIntegerToBigInteger, boolean mapDoubleToBigDouble) {
         Preconditions.checkNotNull(type);
-        if ("string".equals(type)) {
-            if ("date-time".equals(format)) {
-                return OffsetDateTime.class;
-            } else if ("date".equals(format)) {
-                return LocalDate.class;
-            } else if ("time".equals(format)) {
-                return OffsetTime.class;
-            } else if ("byte".equals(format)) {
-                return byte[].class;
-            } else if ("binary".equals(format)) {
-                return byte[].class;
-            } else {
-                return String.class;
-            }
-        } else if ("boolean".equals(type)) {
-            return Boolean.class;
-        } else if ("integer".equals(type)) {
-            if ("int32".equals(format)) {
-                return Integer.class;
-            } else if ("int64".equals(format)) {
-                return Long.class;
-            } else {
-                return mapIntegerToBigInteger || isArbitraryPrecision(extensions) ? BigInteger.class : Long.class;
-            }
-        } else if ("number".equals(type)) {
-            if ("float".equals(format)) {
-                return Float.class;
-            } else if ("double".equals(format)) {
-                return Double.class;
-            } else {
-                return mapDoubleToBigDouble || isArbitraryPrecision(extensions) ? BigDecimal.class : Double.class;
-            }
-        } else if ("array".equals(type)) {
-            return List.class;
-        } else if ("object".equals(type)) {
-            return Map.class;
-        } else {
-            throw new RuntimeException("unexpected type and format: " + type + ", " + format);
+        switch (type) {
+            case "string":
+                if ("date-time".equals(format)) {
+                    return OffsetDateTime.class;
+                } else if ("date".equals(format)) {
+                    return LocalDate.class;
+                } else if ("time".equals(format)) {
+                    return OffsetTime.class;
+                } else if ("byte".equals(format)) {
+                    return byte[].class;
+                } else if ("binary".equals(format)) {
+                    return byte[].class;
+                } else {
+                    return String.class;
+                }
+            case "boolean":
+                return Boolean.class;
+            case "integer":
+                if ("int32".equals(format)) {
+                    return Integer.class;
+                } else if ("int64".equals(format)) {
+                    return Long.class;
+                } else {
+                    return mapIntegerToBigInteger || isArbitraryPrecision(extensions) ? BigInteger.class : Long.class;
+                }
+            case "number":
+                if ("float".equals(format)) {
+                    return Float.class;
+                } else if ("double".equals(format)) {
+                    return Double.class;
+                } else {
+                    return mapDoubleToBigDouble || isArbitraryPrecision(extensions) ? BigDecimal.class : Double.class;
+                }
+            case "array":
+                return List.class;
+            case "object":
+                return Map.class;
+            default:
+                throw new RuntimeException("unexpected type and format: " + type + ", " + format);
         }
     }
 
