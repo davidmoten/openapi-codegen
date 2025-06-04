@@ -9,7 +9,7 @@
     </parent>
     <artifactId>openapi-codegen-maven-plugin-test</artifactId>
     <name>${project.artifactId}</name>
-    <description />
+    <description>unit tests</description>
     <packaging>jar</packaging>
     <properties>
         <cache>${project.basedir}/.openapi-codegen/cache</cache>

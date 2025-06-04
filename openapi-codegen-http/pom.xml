@@ -9,7 +9,7 @@
     </parent>
     <artifactId>openapi-codegen-http</artifactId>
     <name>${project.artifactId}</name>
-    <description />
+    <description>http runtime</description>
     <packaging>jar</packaging>
 
     <dependencies>

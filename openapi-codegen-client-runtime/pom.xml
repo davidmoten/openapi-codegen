@@ -9,7 +9,7 @@
     </parent>
     <artifactId>openapi-codegen-client-runtime</artifactId>
     <name>${project.artifactId}</name>
-    <description />
+    <description>runtime library for openapi-codegen generated clients</description>
     <packaging>jar</packaging>
 
     <dependencies>

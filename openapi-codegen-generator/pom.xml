@@ -9,7 +9,7 @@
     </parent>
     <artifactId>openapi-codegen-generator</artifactId>
     <name>${project.artifactId}</name>
-    <description />
+    <description>Generator</description>
     <packaging>jar</packaging>
 
     <dependencies>

@@ -9,6 +9,7 @@
     </parent>
     <artifactId>openapi-codegen-spring-runtime</artifactId>
     <name>${project.artifactId}</name>
+    <description>server-side runtime</description>
     <packaging>jar</packaging>
 
     <dependencies>

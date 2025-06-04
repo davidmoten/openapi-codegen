@@ -9,6 +9,7 @@
     </parent>
     <artifactId>openapi-codegen-maven-example-pet-store-client</artifactId>
     <name>${project.artifactId}</name>
+    <description>pet-store generated client demonstration</description>
     
     <dependencies>
         <dependency>

@@ -7,6 +7,7 @@
     </parent>
     <artifactId>openapi-generator-demo</artifactId>
     <name>${project.artifactId}</name>
+    <description>demonstration project</description>
     <packaging>jar</packaging>
 
     <properties>

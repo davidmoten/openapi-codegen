@@ -4,8 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.davidmoten</groupId>
     <artifactId>swagger-codegen-demo</artifactId>
-    <name>${project.artifactId}</name>
     <version>0.1-SNAPSHOT</version>
+    <name>${project.artifactId}</name>
+    <description>swagger-codegen demonstration</description>
     <packaging>jar</packaging>
 
     <properties>
