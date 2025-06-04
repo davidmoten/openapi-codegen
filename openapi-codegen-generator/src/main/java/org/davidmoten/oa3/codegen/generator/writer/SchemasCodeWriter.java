@@ -415,9 +415,7 @@ public final class SchemasCodeWriter {
                 out.println();
                 out.line("private %s(%s) {", Names.simpleClassName(cls.fullClassName), parameters);
                 ifValidate(cls, out, names, //
-                        o -> cls.fields.forEach(x -> {
-                            checkNotNull(cls, o, x);
-                        }));
+                        o -> cls.fields.forEach(x -> checkNotNull(cls, o, x)));
                 cls.fields.forEach(x -> assignField(out, cls, x));
                 out.closeParen();
                 out.println();

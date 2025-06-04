@@ -76,9 +76,7 @@ public class ClientServerGenerator {
         // want a method per path, operation combo
         List<Method> methods = new ArrayList<>();
         if (names.api().getPaths() != null) {
-            names.api().getPaths().forEach((pathName, pathItem) -> {
-                gatherMethods(pathName, pathItem, methods);
-            });
+            names.api().getPaths().forEach((pathName, pathItem) -> gatherMethods(pathName, pathItem, methods));
         }
         return methods;
     }
