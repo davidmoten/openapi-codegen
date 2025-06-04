@@ -31,7 +31,6 @@
         <javadoc.version>3.11.2</javadoc.version>
         <pmd.version>3.26.0</pmd.version>
         <jxr.version>3.6.0</jxr.version>
-        <nexus.staging.version>1.7.0</nexus.staging.version>
         <compiler.plugin.version>3.14.0</compiler.plugin.version>
         <slf4j.version>1.7.36</slf4j.version>
         <deploy.version>3.1.4</deploy.version>
@@ -48,6 +47,7 @@
         <spotbugs.plugin.version>4.8.6.6</spotbugs.plugin.version>
         <bundle.plugin.version>6.0.0</bundle.plugin.version>
         <build.helper.version>3.6.0</build.helper.version>
+        <publishing.version>0.7.0</publishing.version>
     </properties>
 
     <licenses>

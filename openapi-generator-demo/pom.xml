@@ -115,9 +115,9 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${deploy.version}</version>
+                <groupId>org.sonatype.centralsync</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${publishing.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
