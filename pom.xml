@@ -46,7 +46,7 @@
         <jacoco.version>0.8.13</jacoco.version>
         <spotbugs.plugin.version>4.8.6.6</spotbugs.plugin.version>
         <bundle.plugin.version>6.0.0</bundle.plugin.version>
-        <build.helper.version>3.6.0</build.helper.version>
+        <build.helper.version>3.6.1</build.helper.version>
         <publishing.version>0.7.0</publishing.version>
     </properties>
 
