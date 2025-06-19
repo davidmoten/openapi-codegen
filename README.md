@@ -428,9 +428,11 @@ As a Scala user I came distinctly aware of the power of using `Option` everywher
 
 As a Java user I've always been frustrated having to dive into javadoc to decide if a parameter is nullable. Life is easier if it's written into the signature of the parameter, and I don't mind wrapping the odd parameter with `Optional.ofNullable` (for those parameters that aren't constant, dynamically determined).
 
-API interaction is a fundamentally IO limited activity (though networks are getting faster and localhost networking is well ahead of interhost networking). As such the use of Optional wrappers here and there is not the performance consideration that it might be if GC pressure (from object creation) was a limiting factor.
+HTTP API interaction is a fundamentally IO limited activity (though networks are getting faster and localhost networking is well ahead of interhost networking). As such the use of Optional wrappers here and there is not the performance consideration that it might be if GC pressure (from object creation) was a limiting factor.
 
 Builder use means that unwrapped non-null values can always be passed as parameters.
+
+IntelliJ IDEA detects and warns about use of Optional types in fields and method parameters. That's an unnecessary warning, I'd suppress it.
 
 ## Testing
 Lots of unit tests happening, always room for more.
