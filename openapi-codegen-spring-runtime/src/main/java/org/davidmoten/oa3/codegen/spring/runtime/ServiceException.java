@@ -28,7 +28,7 @@ public final class ServiceException extends Exception {
     }
 
     public ServiceException(ResponseEntity<?> response) {
-        this(response.getStatusCodeValue(), response.getStatusCode().toString(), Optional.of(response));
+        this(response.getStatusCode().value(), response.getStatusCode().toString(), Optional.of(response));
     }
 
     public int statusCode() {
