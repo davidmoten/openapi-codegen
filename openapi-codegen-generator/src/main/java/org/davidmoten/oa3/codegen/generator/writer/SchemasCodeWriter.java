@@ -56,7 +56,6 @@ import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.runtime.RuntimeUtil;
 import org.davidmoten.oa3.codegen.util.Util;
 import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -771,10 +770,11 @@ public final class SchemasCodeWriter {
     private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
         if (names.generateService()) {
             if (names.generatorType() == ServerGeneratorType.SPRING3) {
-                out.line("@%s", out.add(
-                        ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
+                String cls = "org.springframework.boot.context.properties.bind.ConstructorBinding";
+                out.line("@%s", out.add(cls));
             } else {
-                out.line("@%s", ConstructorBinding.class);
+                String cls = "org.springframework.boot.context.properties.ConstructorBinding";
+                out.line("@%s", out.add(cls));
             }
         }
     }

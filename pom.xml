@@ -22,9 +22,9 @@
     </prerequisites>
 
     <properties>
-        <java.version>8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <scm.url>scm:git:https://github.com/davidmoten/openapi-codegen.git</scm.url>
@@ -38,8 +38,8 @@
 
         <guava.mini.version>0.1.7</guava.mini.version>
         <jackson.version>2.18.2</jackson.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
-        <spring.version>5.3.39</spring.version>
+        <spring.boot.version>3.5.0</spring.boot.version>
+        <spring.version>6.2.8</spring.version>
         <httpclient5.version>5.5</httpclient5.version>
         <junit.version>5.13.1</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
