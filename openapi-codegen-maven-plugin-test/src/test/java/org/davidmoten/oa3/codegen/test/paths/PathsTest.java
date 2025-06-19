@@ -108,7 +108,7 @@ public class PathsTest {
         };
         ServiceController c = new ServiceController(svc);
         ResponseEntity<?> r = c.paramsGet("123abc", OffsetDateTime.now(), Optional.of(123L), 45,Optional.of(ParamsGetFourth.OTHER), Optional.of(Fifth.QUINTO));
-        assertEquals(203, r.getStatusCodeValue());
+        assertEquals(203, r.getStatusCode().value());
     }
 
     @Test
