@@ -434,6 +434,8 @@ Builder use means that unwrapped non-null values can always be passed as paramet
 
 IntelliJ IDEA detects and warns about use of Optional types in fields and method parameters. That's an unnecessary warning, I'd suppress it.
 
+An alternative to using Optional in a widespread fashion is to use `jakarta.annotation` `@Nullable` and `@Nonnull` annotations so that IDEs can provide some analysis of problematic null use. I chose not to do that but it's a valid approach too (both approaches have pros and cons).
+
 ## Testing
 Lots of unit tests happening, always room for more.
 
