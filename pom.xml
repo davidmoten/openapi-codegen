@@ -40,6 +40,8 @@
         <jackson.version>2.18.2</jackson.version>
         <spring.boot.version>2.7.18</spring.boot.version>
         <spring.version>5.3.39</spring.version>
+        <spring.boot3.version>3.5.3</spring.boot3.version>
+        <spring6.version>6.2.8</spring6.version>
         <httpclient5.version>5.5</httpclient5.version>
         <junit.version>5.13.1</junit.version>
         <junit.extras.version>0.4</junit.extras.version>
@@ -100,6 +102,7 @@
         <module>openapi-codegen-client-runtime</module>
         <module>openapi-codegen-maven-plugin</module>
         <module>openapi-codegen-maven-plugin-test</module>
+        <module>openapi-codegen-maven-plugin-sb3-test</module>
         <module>openapi-codegen-example-pet-store</module>
         <module>openapi-codegen-example-pet-store-client</module>
     </modules>

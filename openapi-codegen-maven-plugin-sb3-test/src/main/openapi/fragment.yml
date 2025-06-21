@@ -1,0 +1,6 @@
+components:
+  schemas:
+    Exter:
+      type: string
+      maxLength: 10
+  

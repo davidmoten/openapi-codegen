@@ -1,0 +1,687 @@
+openapi: 3.0.0
+info:
+    
+  title: path tests
+  version: 0.1
+
+servers:
+  - url: 'http://catalog.marketplace.{region}.amazonaws.com'
+    variables:
+      region:
+        description: The AWS region
+        enum:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+          - us-gov-west-1
+          - us-gov-east-1
+          - ca-central-1
+          - eu-north-1
+          - eu-west-1
+          - eu-west-2
+          - eu-west-3
+          - eu-central-1
+          - eu-south-1
+          - af-south-1
+          - ap-northeast-1
+          - ap-northeast-2
+          - ap-northeast-3
+          - ap-southeast-1
+          - ap-southeast-2
+          - ap-east-1
+          - ap-south-1
+          - sa-east-1
+          - me-south-1
+        default: us-east-1
+    description: The AWS Marketplace Catalog multi-region endpoint
+  - url: 'https://catalog.marketplace.{region}.amazonaws.com'
+    variables:
+      region:
+        description: The AWS region
+        enum:
+          - us-east-1
+          - us-east-2
+          - us-west-1
+          - us-west-2
+          - us-gov-west-1
+          - us-gov-east-1
+          - ca-central-1
+          - eu-north-1
+          - eu-west-1
+          - eu-west-2
+          - eu-west-3
+          - eu-central-1
+          - eu-south-1
+          - af-south-1
+          - ap-northeast-1
+          - ap-northeast-2
+          - ap-northeast-3
+          - ap-southeast-1
+          - ap-southeast-2
+          - ap-east-1
+          - ap-south-1
+          - sa-east-1
+          - me-south-1
+        default: us-east-1
+    description: The AWS Marketplace Catalog multi-region endpoint
+  - url: 'http://catalog.marketplace.{region}.amazonaws.com.cn'
+    variables:
+      region:
+        description: The AWS region
+        enum:
+          - cn-north-1
+          - cn-northwest-1
+        default: cn-north-1
+    description: The AWS Marketplace Catalog endpoint for China (Beijing) and China (Ningxia)
+  - url: 'https://catalog.marketplace.{region}.amazonaws.com.cn'
+    variables:
+      region:
+        description: The AWS region
+        enum:
+          - cn-north-1
+          - cn-northwest-1
+        default: cn-north-1
+    description: The AWS Marketplace Catalog endpoint for China (Beijing) and China (Ningxia)
+
+paths:
+
+  /requestBodyRequired:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody1'
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1' 
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /requestBodyNotRequired:
+    post:
+      requestBody:
+        required: false
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody2'
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'    
+          
+  /requestBodyRef:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/RequestBody1'
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1' 
+        default:    
+          $ref: '#/components/responses/Error'             
+
+  /responseMultiType:
+    get:
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+            default: 'application/json'   
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1'
+            application/octet-stream: {}
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /bytes:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/octet-stream:
+              schema: 
+                type: string
+                format: binary
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /upload:
+    post:
+      x-openapi-codegen-include-for-server-generation: false
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                point:
+                  $ref: '#/components/schemas/Point'
+                description:
+                  type: string
+                document:
+                  type: string
+                  format: binary  
+              required: [point, description, document]
+            encoding:
+              document:
+                contentType: application/pdf
+      responses:
+        200:
+          description: ok
+          content:
+            application/json: {}
+            
+  /submit:
+    post:
+      x-openapi-codegen-include-for-server-generation: false
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                count:
+                  type: integer
+                  format: int32
+              required: [name, count]
+      responses:
+        200:
+          description: ok
+          content:
+            application/json: {}            
+
+  /uploadImage:
+    post:
+      requestBody:
+        content:
+          image/png: {}
+      responses:
+        200:
+          description: ok
+          content:
+            application/json: {}
+
+  /defaultError:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1' 
+        default:    
+          $ref: '#/components/responses/Error'  
+                
+  /text:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            text/plain:
+              schema: 
+                type: string
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /jsonString:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Name'
+        default:    
+          $ref: '#/components/responses/Error'          
+          
+  /requestBodyMultiType:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              $ref: '#/components/schemas/RequestBody1'
+          application/octet-stream: 
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response1'
+        default:    
+          $ref: '#/components/responses/Error'
+            
+  /item:
+    get:
+      responses:
+        '200':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'
+          
+  /item201:
+    get:
+      responses:
+        '201':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'   
+  
+  /responseRef:
+    get:
+      responses:
+        '200':
+          $ref: '#/components/responses/Response3' 
+        default:    
+          $ref: '#/components/responses/Error' 
+        
+  /responseRef2:
+    get:
+      responses:
+        '200':
+          $ref: '#/components/responses/Response4' 
+        default:    
+          $ref: '#/components/responses/Error' 
+                  
+  /empty:
+    get:
+      responses:
+        default:    
+          $ref: '#/components/responses/Error'   
+          
+  /wildcardStatusCode:
+    get:
+      responses:
+        '2XX':
+          $ref: '#/components/responses/Response4' 
+        default:    
+          $ref: '#/components/responses/Error'           
+          
+  /params:
+    description: params test
+    parameters:
+     - in: query
+       name: id
+       description: |
+         ## heading
+         ### subheading
+         Here's a long identifier description that is *more* of an **essay** 
+         written in `markdown` and is expected to be converted to html at generation time
+         when appearing in javadoc and is > 80 chars with an illegal javadoc char
+         
+         And a *table*
+         
+         | Item Type  | Description                    |
+         | ---        | ---                            |
+         | vehicle    | car, truck, bike, motorbike    |
+         | aircraft   | monoplane, biplane, helicopter |
+         
+         ```
+         what happens to stuff like <this>?
+         ```
+         
+         Note that tables in commonMark are done with html not like with GitHub flavoured mark
+         down
+         
+         <table>
+           <thead>
+             <tr>
+               <th>Header</th>
+               <th>Another Header</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr>
+               <td>field 1</td>
+               <td>value one</td>
+             </tr>
+           </tbody>
+         </table>
+       required: true
+       schema:
+         type: string
+         minLength: 1
+    get:
+      parameters:
+        - in: query
+          name: first
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: second
+          schema:
+            type: integer
+        - in: query
+          name: third
+          schema:
+            type: integer
+            format: int32
+            default: 10
+        - in: query
+          name: fourth
+          schema:
+            type: string
+            enum: [one, other]
+        - in: query
+          name: fifth
+          schema:
+            $ref: '#/components/schemas/Fifth'
+      responses:
+        '203':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'                   
+
+  /params/{id}:
+    get:
+       parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: header
+          name: ApiKey
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: cookie
+          name: bickie
+          required: true
+          schema:
+            type: string
+            minLength: 1                                 
+       responses:
+         '200':    
+           description: ok response
+           content:
+             application/json:
+               schema: 
+                 $ref: '#/components/schemas/Response2' 
+         default:    
+           $ref: '#/components/responses/Error'          
+
+  /query-object:
+    get:
+      parameters:
+        - in: query
+          name: id
+          required: true
+          ## explode: true (is default)
+          schema:
+            type: object
+            properties:
+              first:
+                type: string
+              second:
+                type: integer
+            required: [first]
+      responses:
+        '200':    
+          description: ok response            
+
+  ## not supported by spring-boot 
+  /points:
+    get:
+      parameters:
+      - in: query
+        name: a
+        required: true
+        style: deepObject
+        schema:
+          $ref: '#/components/schemas/Point'
+      - in: query
+        name: b
+        required: true
+        style: deepObject
+        schema:
+          $ref: '#/components/schemas/Point'
+      responses:
+        '200':    
+          description: ok response            
+
+  /paramRef:
+    parameters:
+     - $ref: '#/components/parameters/Id1'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/Timestamp'
+      responses:
+        '203':    
+          description: ok response
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Response2' 
+        default:    
+          $ref: '#/components/responses/Error'   
+          
+  /parameterNameCollision:
+    get:
+      parameters:
+      - in: query
+        name: a
+        required: true
+        style: deepObject
+        schema:
+          type: string
+      - in: query
+        name: A
+        required: true
+        style: deepObject
+        schema:
+          type: string
+      responses:
+        '200':    
+          description: ok response            
+             
+components:
+
+  parameters:
+    Id1:
+      in: query
+      name: id
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    
+    Timestamp:
+      in: query
+      name: first
+      required: true
+      schema:
+        type: string
+        format: date-time        
+  
+  requestBodies:
+    RequestBody1:
+      required: true
+      content:
+        application/json: 
+          schema:
+            $ref: '#/components/schemas/RequestBody1'
+            
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'            
+            
+    Unauthorized:
+      description: Unauthorized (must authenticate)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+            
+    Forbidden:
+      description: Not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+                                    
+    ServerError:
+      description: Unexpected error on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Response3:
+      description: ok response
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/Response2' 
+
+    Response4:
+      description: another response
+      content:
+        application/json:
+          schema: 
+            type: string
+            minLength: 4 
+            
+    Error:
+      description: error response
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/Error'             
+                      
+  schemas:
+    Error:
+      description: an error message (response)
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        errorMessage: 
+          type: string
+
+    RequestBody1:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+      required: [username]
+        
+    Response1:
+      type: object
+      properties:
+        thing: 
+          type: string
+          minLength: 1
+      required: [thing]
+                      
+    RequestBody2:
+      type: object
+      properties:
+        identity:
+          type: string
+          minLength: 1
+      required: [identity]
+        
+    Response2:
+      type: object
+      properties:
+        token: 
+          type: string
+          minLength: 1
+      required: [token]
+      
+    Point:
+      type: object
+      properties:
+        lat: 
+          type: number
+          format: double
+        lon: 
+          type: number
+          format: double
+      required: [lat, lon]                      
+    
+    Name:
+      type: string
+      
+    BinaryMutator:
+      type: object
+      properties:
+        document:
+          type: string
+          format: binary
+        name:
+          type: string
+      required: [document]
+
+    Fifth:
+      type: string
+      enum: [fifth, quinto]
+      

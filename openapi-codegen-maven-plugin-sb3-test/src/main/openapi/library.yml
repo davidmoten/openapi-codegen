@@ -1,0 +1,303 @@
+openapi: 3.0.0
+info:
+
+  version: v1.0
+
+  title: Library Demo
+
+  description: Library demonstration of some features of OpenAPI 3 and *openapi-codegen*
+
+paths:
+  /user:
+
+    post:
+      operationId: createUser
+      description: Creates a new user
+      requestBody:
+        description: Defines a new user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: created
+        default:
+          $ref: '#/components/responses/Error'
+          
+    get:
+      operationId: getUsers
+      description: List users page by page, filtered by search if present
+      parameters:
+      - in: query
+        name: search
+        required: false
+        schema:
+          type: string
+          minLength: 2
+      - in: query
+        name: continuationToken
+        required: false
+        schema:
+          $ref: '#/components/schemas/ContinuationToken'       
+      responses:
+        '200':
+          description: list of users with token to use for next page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersPage'
+
+  /user/{id}:
+
+    parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        minLength: 1
+
+    get:
+      operationId: getUser
+      description: Gets user details
+      responses:
+        '200':
+          description: user details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/Error'
+
+    put:
+      operationId: updateUser
+      description: Updates a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '204':
+          description: updated
+        default:
+          $ref: '#/components/responses/Error'
+
+    delete:
+      operationId: deleteUser
+      description: Deletes a user (logically)
+      responses:
+        '204':
+          description: deleted
+        default:
+          $ref: '#/components/responses/Error'
+
+  /item/{itemId}:
+  
+    parameters:
+    - in: path
+      name: itemId
+      required: true
+      schema:
+        $ref: '#/components/schemas/ItemId'
+    get:
+      operationId: getItem
+      description: Gets item details
+      responses:
+        '200':
+          description: item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        default:
+          $ref: '#/components/responses/Error'
+
+components:
+
+  schemas:
+
+    User:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 3
+        mobile:
+          type: string
+          pattern: '[\+][0-9]+'
+      required:
+      - firstName
+      - lastName
+      - email
+      
+    UserId:
+      type: string
+      minLength: 1
+      maxLength: 255
+      
+    UserIdWrapped:
+      type: object
+      properties:
+        userId:
+          $ref: '#/components/schemas/UserId'
+      required: [userId] 
+        
+    ContinuationToken:
+      type: string
+      minLength: 1
+      maxLength: 1500      
+            
+    UserWithId:
+      allOf:
+      - $ref: '#/components/schemas/User'
+      ## must wrap UserId with an object to be a member of allOf
+      - $ref: '#/components/schemas/UserIdWrapped'
+      
+    UsersPage:
+      type: object
+      properties:
+        users: 
+          type: array
+          items:
+            $ref: '#/components/schemas/UserWithId'
+        continuationToken:
+          $ref: '#/components/schemas/ContinuationToken'
+      required: [users]
+      
+    Id:
+      type: string
+      minLength: 1
+      maxLength: 1500
+      
+    ISBN:
+      type: string
+      pattern: '[0-9]{13}'
+    
+    ISSN:
+      type: string
+      pattern: '[0-9]{8}'
+      
+    Year:
+      type: integer
+      format: int32
+      minimum: 0
+      maximum: 2200
+      
+    PersonName:
+      type: string
+      minLength: 1
+      maxLength: 512
+      
+    Abstract:
+      type: string
+      minLength: 1
+      maxLength: 16000
+      
+    Language:
+      type: string
+      minLength: 1
+      maxLength: 255
+      enum: [Chinese, Danish, Dutch, English, Esperanto, Finnish, French, German, Greek, Hungarian, Italian, Latin, Portuguese, Spanish, Swedish, Tagalog, Other]
+      
+    ItemId:
+      type: string
+      minLength: 1
+      maxLength: 255
+      
+    Book:
+      type: object
+      properties:
+        title:
+          type: string
+        author: 
+          $ref: '#/components/schemas/PersonName'
+        abstract:
+          $ref: '#/components/schemas/Abstract'
+        publishedYear:
+          $ref: '#/components/schemas/Year'
+        authorId:
+          $ref: '#/components/schemas/Id'
+        isbn:
+          $ref: '#/components/schemas/ISBN'
+        itemId: 
+          $ref: '#/components/schemas/ItemId'
+        language:
+          $ref: '#/components/schemas/Language'
+      required: [title, author, publishedYear, authorId, isbn, language, itemId]
+       
+    Audiobook:
+      type: object
+      properties: 
+        book: 
+          $ref: '#/components/schemas/Book'
+        voices: 
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonName'
+          minItems: 1
+        lengthMinutes:
+          type: number
+          format: double
+          minimum: 0
+      required: [book, voices]
+      
+    Serial:
+      type: object
+      properties:
+        title:
+          type: string
+        abstract:
+          $ref: '#/components/schemas/Abstract'
+        publishedDate:
+          type: string
+          format: date
+        publisherId:
+          $ref: '#/components/schemas/Id'
+        issn:
+          $ref: '#/components/schemas/ISSN'
+        itemId:
+          $ref: '#/components/schemas/ItemId'
+        language:
+          $ref: '#/components/schemas/Language'
+      required: [title, publishedDate, publisherId, authorId, issn, itemId, language]        
+  
+    Item:
+      oneOf:
+      - $ref: '#/components/schemas/Serial'
+      - $ref: '#/components/schemas/Book'
+      - $ref: '#/components/schemas/Audiobook'
+      
+    Loan:
+      type: object
+      properties:
+        userId: 
+          $ref: '#/components/schemas/UserId'
+        itemId:
+          $ref: '#/components/schemas/ItemId'
+        startDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        dateReturned:
+          type: string
+          format: date
+      required: [userId, itemId, startDate, dueDate]        
+
+  responses:
+
+    Error:
+      description: an error occurred, just the HTTP status code returned
+      
