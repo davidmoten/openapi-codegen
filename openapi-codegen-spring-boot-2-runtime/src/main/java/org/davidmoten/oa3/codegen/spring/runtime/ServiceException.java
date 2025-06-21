@@ -11,7 +11,7 @@ public final class ServiceException extends Exception {
     private final int statusCode;
     private final Optional<? extends ResponseEntity<?>> response;
 
-    private ServiceException(int statusCode, String message, Optional<? extends ResponseEntity<?>> response) {
+    public ServiceException(int statusCode, String message, Optional<? extends ResponseEntity<?>> response) {
         super(message);
         this.statusCode = statusCode;
         this.response = response;

@@ -1,5 +1,7 @@
 package org.davidmoten.oa3.codegen.spring.runtime;
 
+import java.util.Optional;
+
 import org.davidmoten.oa3.codegen.spring.runtime.internal.Util;
 import org.springframework.http.ResponseEntity;
 
@@ -17,7 +19,10 @@ public interface ErrorHandler {
     }
 
     default <T> T response(ResponseEntity<?> response) throws ServiceException {
-        throw new ServiceException(response);
+        throw new ServiceException( //
+                response.getStatusCode().value(), //
+                response.getStatusCode().toString(), //
+                Optional.of(response));
     }
 
     default Object errorResponseBody(int statusCode, Throwable e) {

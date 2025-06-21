@@ -11,7 +11,7 @@ public final class ServiceException extends Exception {
     private final int statusCode;
     private final Optional<? extends ResponseEntity<?>> response;
 
-    private ServiceException(int statusCode, String message, Optional<? extends ResponseEntity<?>> response) {
+    public ServiceException(int statusCode, String message, Optional<? extends ResponseEntity<?>> response) {
         super(message);
         this.statusCode = statusCode;
         this.response = response;
@@ -25,10 +25,6 @@ public final class ServiceException extends Exception {
         super(e);
         this.statusCode = statusCode;
         this.response = Optional.empty();
-    }
-
-    public ServiceException(ResponseEntity<?> response) {
-        this(response.getStatusCode().value(), response.getStatusCode().toString(), Optional.of(response));
     }
 
     public int statusCode() {
