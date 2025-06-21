@@ -31,7 +31,7 @@
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-spring-runtime</artifactId>
+            <artifactId>openapi-codegen-spring-boot-2-runtime</artifactId>
             <version>${openapi.codegen.version}</version>
         </dependency>
 
