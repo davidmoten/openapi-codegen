@@ -98,6 +98,7 @@
         <module>openapi-codegen-runtime</module>
         <module>openapi-codegen-generator</module>
         <module>openapi-codegen-spring-runtime</module>
+        <module>openapi-codegen-spring3-runtime</module>
         <module>openapi-codegen-http</module>
         <module>openapi-codegen-client-runtime</module>
         <module>openapi-codegen-maven-plugin</module>
