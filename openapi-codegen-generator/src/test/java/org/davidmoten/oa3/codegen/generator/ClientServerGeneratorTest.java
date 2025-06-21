@@ -11,14 +11,14 @@ public class ClientServerGeneratorTest {
 
     @Test
     public void test() throws MalformedURLException {
-        String definition = new File("../openapi-codegen-maven-plugin-test/src/main/openapi/paths.yml").toURI().toURL()
+        String definition = new File("../openapi-codegen-maven-plugin-sb2-test/src/main/openapi/paths.yml").toURI().toURL()
                 .toExternalForm();
         generate(definition);
     }
     
     @Test
     public void testCached() throws MalformedURLException {
-        File f = new File("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/stripe.yml");
+        File f = new File("../openapi-codegen-maven-plugin-sb2-test/.openapi-codegen/cache/stripe.yml");
         if (f.exists()) {
             String definition = f.toURI().toURL().toExternalForm();
             generate(definition);

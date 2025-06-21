@@ -22,7 +22,7 @@ public class ProjectGeneratorTest {
 
     private static void generate(boolean generateService, String zipFilename) throws IOException, FileNotFoundException {
         long t = System.currentTimeMillis();
-        String filename = "../openapi-codegen-maven-plugin-test/src/main/openapi/main.yml";
+        String filename = "../openapi-codegen-maven-plugin-sb2-test/src/main/openapi/main.yml";
         File zip = new File(zipFilename);
         zip.delete();
         try (OutputStream out = new FileOutputStream(zip)) {

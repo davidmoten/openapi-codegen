@@ -7,7 +7,7 @@
         <artifactId>openapi-codegen-parent</artifactId>
         <version>0.1.30-SNAPSHOT</version>
     </parent>
-    <artifactId>openapi-codegen-maven-plugin-test</artifactId>
+    <artifactId>openapi-codegen-maven-plugin-sb2-test</artifactId>
     <name>${project.artifactId}</name>
     <description>unit tests</description>
     <packaging>jar</packaging>

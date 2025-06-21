@@ -102,7 +102,7 @@
         <module>openapi-codegen-http</module>
         <module>openapi-codegen-client-runtime</module>
         <module>openapi-codegen-maven-plugin</module>
-        <module>openapi-codegen-maven-plugin-test</module>
+        <module>openapi-codegen-maven-plugin-sb2-test</module>
         <module>openapi-codegen-maven-plugin-sb3-test</module>
         <module>openapi-codegen-example-pet-store</module>
         <module>openapi-codegen-example-pet-store-client</module>
