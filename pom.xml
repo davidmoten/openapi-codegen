@@ -97,6 +97,7 @@
         <module>openapi-codegen-util</module>
         <module>openapi-codegen-runtime</module>
         <module>openapi-codegen-generator</module>
+        <module>openapi-codegen-spring-boot-core</module>
         <module>openapi-codegen-spring-boot-2-runtime</module>
         <module>openapi-codegen-spring-boot-3-runtime</module>
         <module>openapi-codegen-http</module>

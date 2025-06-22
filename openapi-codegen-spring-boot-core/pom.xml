@@ -7,12 +7,23 @@
         <artifactId>openapi-codegen-parent</artifactId>
         <version>0.1.30-SNAPSHOT</version>
     </parent>
-    <artifactId>openapi-codegen-spring-boot-2-runtime</artifactId>
+    <artifactId>openapi-codegen-spring-boot-core</artifactId>
     <name>${project.artifactId}</name>
     <description>server-side runtime</description>
     <packaging>jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.7</version>
+        </dependency>
+    
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
@@ -23,12 +34,6 @@
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>openapi-codegen-runtime</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-spring-boot-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -54,12 +59,6 @@
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
             <version>${jakarta.annotation.api.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
         </dependency>
 
         <dependency>

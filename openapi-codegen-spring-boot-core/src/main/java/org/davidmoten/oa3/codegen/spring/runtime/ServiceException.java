@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 
-public final class ServiceException extends Exception {
+public final class ServiceException extends Exception implements HasStatusCode {
 
     private static final long serialVersionUID = -4115693210890378905L;
 
@@ -25,10 +25,6 @@ public final class ServiceException extends Exception {
         super(e);
         this.statusCode = statusCode;
         this.response = Optional.empty();
-    }
-
-    public ServiceException(ResponseEntity<?> response) {
-        this(response.getStatusCode().value(), response.getStatusCode().toString(), Optional.of(response));
     }
 
     public int statusCode() {
