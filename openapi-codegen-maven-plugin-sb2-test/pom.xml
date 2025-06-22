@@ -42,7 +42,7 @@
             <artifactId>spring-web</artifactId>
             <version>${spring5.version}</version>
         </dependency>
-
+        
         <!-- required for Java 17 -->
         <dependency>
             <groupId>javax.annotation</groupId>
