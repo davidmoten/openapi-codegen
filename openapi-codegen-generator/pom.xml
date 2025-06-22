@@ -87,13 +87,6 @@
             <version>${junit.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>junit-extras</artifactId>
-            <version>${junit.extras.version}</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
