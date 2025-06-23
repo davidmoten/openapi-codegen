@@ -9,9 +9,10 @@
     </parent>
     <artifactId>openapi-codegen-maven-example-pet-store</artifactId>
     <name>${project.artifactId}</name>
-    <description>pet-store example</description>
+    <description>pet-store example using Spring Boot 3</description>
     
     <dependencies>
+    
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>openapi-codegen-spring-boot-3-runtime</artifactId>
@@ -36,6 +37,8 @@
             </exclusions>
         </dependency>
         
+        <!-- test -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -53,11 +56,7 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot3.version}</version>
-            </plugin>
+
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler.plugin.version}</version>
@@ -68,24 +67,11 @@
             </plugin>
 
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot3.version}</version>
             </plugin>
+
             <plugin>
                 <groupId>com.github.davidmoten</groupId>
                 <artifactId>openapi-codegen-maven-plugin</artifactId>
@@ -101,6 +87,7 @@
                     </execution>
                 </executions>
             </plugin>
+ 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -120,6 +107,27 @@
                     </execution>
                 </executions>
             </plugin>
+ 
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -128,7 +136,7 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            
         </plugins>
     </build>
-
 </project>
