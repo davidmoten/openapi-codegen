@@ -121,7 +121,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.centralsync</groupId>
+                <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <version>${publishing.version}</version>
                 <configuration>

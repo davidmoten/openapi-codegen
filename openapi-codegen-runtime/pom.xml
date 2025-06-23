@@ -80,23 +80,18 @@
         </resources>
         <plugins>
             <plugin>
-                <artifactId>
-                    maven-compiler-plugin</artifactId>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler.plugin.version}</version>
                 <configuration>
-                    <source>
-                        ${maven.compiler.target}</source>
-                    <target>
-                        ${maven.compiler.target}</target>
+                    <source>${maven.compiler.target}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
 
             <plugin>
-                <groupId>
-                    org.jacoco</groupId>
+                <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>
-                    ${jacoco.version}</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -104,8 +99,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>
-                            report</id>
+                        <id>report</id>
                         <phase>test</phase>
                         <goals>
                             <goal>report</goal>
@@ -114,31 +108,25 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>
-                    com.github.spotbugs</groupId>
+                <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>
-                    ${spotbugs.plugin.version}</version>
+                <version>${spotbugs.plugin.version}</version>
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
                     <xmlOutput>
                         true</xmlOutput>
-                    <excludeFilterFile>
-                        ${project.basedir}/src/main/spotbugs/filter.xml</excludeFilterFile>
+                    <excludeFilterFile>${project.basedir}/src/main/spotbugs/filter.xml</excludeFilterFile>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>
-                                check</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>
-                    org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>
                     ${pmd.version}</version>
