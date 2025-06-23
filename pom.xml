@@ -7,7 +7,6 @@
         <artifactId>sonatype-parent</artifactId>
         <version>0.2.4</version>
     </parent>
-    <groupId>com.github.davidmoten</groupId>
     <artifactId>openapi-codegen-parent</artifactId>
     <version>0.1.30-SNAPSHOT</version>
 
