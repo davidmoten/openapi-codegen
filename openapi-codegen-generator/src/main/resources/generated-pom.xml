@@ -17,7 +17,7 @@
         <!-- serverEnd -->
         <openapi.codegen.version>${generator.version}</openapi.codegen.version>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <plantuml.plugin.version>0.2.12</plantuml.plugin.version>
+        <plantuml.plugin.version>0.2.13</plantuml.plugin.version>
     </properties>
 
     <dependencies>
