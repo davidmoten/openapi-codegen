@@ -122,7 +122,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring2</generator>
+                            <generator>springboot2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.main</basePackage>
                             <sources>
                                 <includes>
@@ -138,7 +138,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring2</generator>
+                            <generator>springboot2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.paths</basePackage>
                             <sources>
                                 <includes>
@@ -153,7 +153,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring2</generator>
+                            <generator>springboot2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.library</basePackage>
                             <sources>
                                 <includes>
@@ -168,7 +168,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring2</generator>
+                            <generator>springboot2</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.small</basePackage>
                             <sources>
                                 <includes>
@@ -183,7 +183,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>spring2</generator>
+                            <generator>springboot2</generator>
                             <generateService>false</generateService>
                             <generateClient>true</generateClient>
                             <basePackage>org.davidmoten.oa3.codegen.test.adhoc</basePackage>
@@ -286,7 +286,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.cts</basePackage>
                                     <sources>
@@ -318,7 +318,7 @@
                                 </goals>
                                 <configuration>
                                     <skip>${skip}</skip>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.marqueta</basePackage>
                                     <sources>
@@ -334,7 +334,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.openflow</basePackage>
                                     <sources>
@@ -350,7 +350,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.jira</basePackage>
                                     <sources>
@@ -367,7 +367,7 @@
                                 </goals>
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.spotify</basePackage>
                                     <sources>
@@ -384,7 +384,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.fec</basePackage>
                                     <sources>
@@ -401,7 +401,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.chat</basePackage>
                                     <sources>
@@ -418,7 +418,7 @@
                                     <goal>generate</goal>
                                 </goals>
                                 <configuration>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.twitter</basePackage>
                                     <sources>
@@ -450,7 +450,7 @@
                                 </goals>
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.github</basePackage>
                                     <sources>
@@ -482,7 +482,7 @@
                                 </goals>
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.mailchimp</basePackage>
                                     <sources>
@@ -514,7 +514,7 @@
                                 </goals>
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.docusign</basePackage>
                                     <sources>
@@ -546,7 +546,7 @@
                                 </goals>
                                 <configuration>
                                     <downloadList>${downloadList}</downloadList>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.bitbucket</basePackage>
                                     <sources>
@@ -581,7 +581,7 @@
                                     <!-- has some dodgy default values in
                                     schemas -->
                                     <failOnParseErrors>false</failOnParseErrors>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.openai</basePackage>
                                     <sources>
@@ -616,7 +616,7 @@
                                     <!-- has some dodgy default values in
                                     schemas -->
                                     <failOnParseErrors>false</failOnParseErrors>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.zuora</basePackage>
                                     <sources>
@@ -651,7 +651,7 @@
                                     <!-- has some dodgy default values in
                                     schemas -->
                                     <failOnParseErrors>false</failOnParseErrors>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.unifiedto</basePackage>
                                     <sources>
@@ -686,7 +686,7 @@
                                     <!-- has some dodgy default values in
                                     schemas -->
                                     <failOnParseErrors>false</failOnParseErrors>
-                                    <generator>spring2</generator>
+                                    <generator>springboot2</generator>
                                     <basePackage>
                                         org.davidmoten.oa3.codegen.test.stripe</basePackage>
                                     <sources>
