@@ -56,8 +56,10 @@ public final class GenerateMojo extends AbstractMojo {
     private boolean failOnParseErrors;
 
     /**
-     * Allowed values: springboot2, springboot3, spring2, spring3. spring2 and
-     * spring3 are deprecated and are aliases for springboot2, springboot3.
+     * Allowed values: {@code springboot2}, {@code springboot3}, {@code spring2},
+     * {@code spring3}. {@code spring2} and {@code spring3} are deprecated and are
+     * aliases for {@code springboot2}, {@code springboot3}. Default is
+     * {@code springBoot2}.
      */
     @Parameter(name = "generator", defaultValue = "springBoot2")
     private String generator;
