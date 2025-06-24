@@ -9,7 +9,7 @@
     </parent>
     <artifactId>openapi-codegen-spring-boot-core</artifactId>
     <name>${project.artifactId}</name>
-    <description>server-side runtime</description>
+    <description>server-side runtime core</description>
     <packaging>jar</packaging>
 
     <dependencies>
