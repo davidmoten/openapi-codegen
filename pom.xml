@@ -41,8 +41,8 @@
         <spring5.version>5.3.39</spring5.version>
         <spring.boot3.version>3.5.3</spring.boot3.version>
         <spring6.version>6.2.8</spring6.version>
-        <httpclient5.version>5.5</httpclient5.version>
-        <junit.version>5.13.1</junit.version>
+        <httpclient5.version>5.5</httpclient>
+        <junit.version>5.13.2</junit.version>
         <jacoco.version>0.8.13</jacoco.version>
         <spotbugs.plugin.version>4.8.6.6</spotbugs.plugin.version>
         <bundle.plugin.version>6.0.0</bundle.plugin.version>
