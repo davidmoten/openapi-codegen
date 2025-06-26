@@ -7,7 +7,6 @@
         <artifactId>sonatype-parent</artifactId>
         <version>0.2.4</version>
     </parent>
-    <groupId>com.github.davidmoten</groupId>
     <artifactId>openapi-codegen-parent</artifactId>
     <version>0.1.30-SNAPSHOT</version>
 
@@ -32,22 +31,23 @@
         <pmd.version>3.26.0</pmd.version>
         <jxr.version>3.6.0</jxr.version>
         <compiler.plugin.version>3.14.0</compiler.plugin.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.version>2.0.7</slf4j.version>
         <deploy.version>3.1.4</deploy.version>
         <jakarta.annotation.api.version>2.1.1</jakarta.annotation.api.version>
 
         <guava.mini.version>0.1.7</guava.mini.version>
         <jackson.version>2.18.2</jackson.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
-        <spring.version>5.3.39</spring.version>
+        <spring.boot2.version>2.7.18</spring.boot2.version>
+        <spring5.version>5.3.39</spring5.version>
+        <spring.boot3.version>3.5.3</spring.boot3.version>
+        <spring6.version>6.2.8</spring6.version>
         <httpclient5.version>5.5</httpclient5.version>
         <junit.version>5.13.2</junit.version>
-        <junit.extras.version>0.4</junit.extras.version>
         <jacoco.version>0.8.13</jacoco.version>
         <spotbugs.plugin.version>4.8.6.6</spotbugs.plugin.version>
         <bundle.plugin.version>6.0.0</bundle.plugin.version>
         <build.helper.version>3.6.1</build.helper.version>
-        <publishing.version>0.7.0</publishing.version>
+        <publishing.version>0.8.0</publishing.version>
     </properties>
 
     <licenses>
@@ -95,11 +95,14 @@
         <module>openapi-codegen-util</module>
         <module>openapi-codegen-runtime</module>
         <module>openapi-codegen-generator</module>
-        <module>openapi-codegen-spring-runtime</module>
+        <module>openapi-codegen-spring-boot-core</module>
+        <module>openapi-codegen-spring-boot-2-runtime</module>
+        <module>openapi-codegen-spring-boot-3-runtime</module>
         <module>openapi-codegen-http</module>
         <module>openapi-codegen-client-runtime</module>
         <module>openapi-codegen-maven-plugin</module>
-        <module>openapi-codegen-maven-plugin-test</module>
+        <module>openapi-codegen-maven-plugin-sb2-test</module>
+        <module>openapi-codegen-maven-plugin-sb3-test</module>
         <module>openapi-codegen-example-pet-store</module>
         <module>openapi-codegen-example-pet-store-client</module>
     </modules>

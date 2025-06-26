@@ -34,7 +34,7 @@ public final class GeneratorTest {
     @Test
     public void testSmall() throws MalformedURLException {
         generateLocal("small.yml");
-//        generate("../openapi-codegen-maven-plugin-test/.openapi-codegen/cache/zuora.yml");
+//        generate("../openapi-codegen-maven-plugin-sb2-test/.openapi-codegen/cache/zuora.yml");
     }
     
     private static void generate(String name) throws MalformedURLException {
@@ -49,7 +49,7 @@ public final class GeneratorTest {
     }
 
     private static void generateLocal(String name) throws MalformedURLException {
-        generate("../openapi-codegen-maven-plugin-test/src/main/openapi/" + name);
+        generate("../openapi-codegen-maven-plugin-sb2-test/src/main/openapi/" + name);
     }
     
     public static void main(String[] args) throws MalformedURLException {

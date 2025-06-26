@@ -13,11 +13,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- serverStart -->
-        <spring.boot.version>2.7.18</spring.boot.version>
+        <spring.boot2.version>2.7.18</spring.boot2.version>
         <!-- serverEnd -->
         <openapi.codegen.version>${generator.version}</openapi.codegen.version>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <plantuml.plugin.version>0.2.12</plantuml.plugin.version>
+        <plantuml.plugin.version>0.2.13</plantuml.plugin.version>
     </properties>
 
     <dependencies>
@@ -31,14 +31,14 @@
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-spring-runtime</artifactId>
+            <artifactId>openapi-codegen-spring-boot-2-runtime</artifactId>
             <version>${openapi.codegen.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>${spring.boot2.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>${spring.boot2.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -70,7 +70,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring.boot2.version}</version>
             </plugin>
             <!-- serverEnd -->
             <plugin>

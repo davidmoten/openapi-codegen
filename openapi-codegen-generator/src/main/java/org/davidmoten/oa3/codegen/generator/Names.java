@@ -67,8 +67,8 @@ public final class Names {
                 .build();
         ObjectMapperFactory.createJson31().getFactory().setStreamReadConstraints(streamReadConstraints);
         this.definition = definition;
-        this.generatorType = definition.generator().map(x -> ServerGeneratorType.valueOf(x.toUpperCase(Locale.ENGLISH)))
-                .orElse(ServerGeneratorType.SPRING2);
+        this.generatorType = definition.generator().map(x -> ServerGeneratorType.from(x.toUpperCase(Locale.ENGLISH)))
+                .orElse(ServerGeneratorType.SPRING_BOOT_2);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
         // github api goes over snake yaml parser max code points for 3.0

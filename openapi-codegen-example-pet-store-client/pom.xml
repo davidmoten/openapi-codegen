@@ -29,6 +29,25 @@
                     <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
+<!--            <plugin>-->
+<!--                <groupId>com.github.davidmoten</groupId>-->
+<!--                <artifactId>openapi-to-plantuml-maven-plugin</artifactId>-->
+<!--                <version>0.1.33-SNAPSHOT</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>generate</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <style>SPLIT</style>-->
+<!--                            <input>../openapi-codegen-example-pet-store/src/main/openapi/openapi.yml</input>-->
+<!--                            <formats>-->
+<!--                                <format>PNG</format>-->
+<!--                            </formats>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>com.github.davidmoten</groupId>
                 <artifactId>openapi-codegen-maven-plugin</artifactId>

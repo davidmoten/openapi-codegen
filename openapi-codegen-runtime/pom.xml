@@ -21,59 +21,39 @@
         </dependency>
 
         <dependency>
-            <groupId>
-                com.github.davidmoten</groupId>
+            <groupId>com.github.davidmoten</groupId>
             <artifactId>openapi-codegen-util</artifactId>
-            <version>
-                ${project.parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>
-                com.fasterxml.jackson.core</groupId>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>
-                ${jackson.version}</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>
-                com.fasterxml.jackson.datatype</groupId>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
-            <version>
-                ${jackson.version}</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>
-                com.fasterxml.jackson.datatype</groupId>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>
-                ${jackson.version}</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>
-                jakarta.annotation</groupId>
+            <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
-            <version>
-                ${jakarta.annotation.api.version}</version>
+            <version>${jakarta.annotation.api.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>
-                junit-jupiter</artifactId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>
-                com.github.davidmoten</groupId>
-            <artifactId>junit-extras</artifactId>
-            <version>
-                ${junit.extras.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -82,30 +62,24 @@
     <build>
         <resources>
             <resource>
-                <directory>
-                    src/main/resources</directory>
+                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
         <plugins>
             <plugin>
-                <artifactId>
-                    maven-compiler-plugin</artifactId>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler.plugin.version}</version>
                 <configuration>
-                    <source>
-                        ${maven.compiler.target}</source>
-                    <target>
-                        ${maven.compiler.target}</target>
+                    <source>${maven.compiler.target}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
 
             <plugin>
-                <groupId>
-                    org.jacoco</groupId>
+                <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>
-                    ${jacoco.version}</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -113,8 +87,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>
-                            report</id>
+                        <id>report</id>
                         <phase>test</phase>
                         <goals>
                             <goal>report</goal>
@@ -123,34 +96,26 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>
-                    com.github.spotbugs</groupId>
+                <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>
-                    ${spotbugs.plugin.version}</version>
+                <version>${spotbugs.plugin.version}</version>
                 <configuration>
                     <effort>Max</effort>
                     <threshold>Low</threshold>
-                    <xmlOutput>
-                        true</xmlOutput>
-                    <excludeFilterFile>
-                        ${project.basedir}/src/main/spotbugs/filter.xml</excludeFilterFile>
+                    <xmlOutput>true</xmlOutput>
+                    <excludeFilterFile>${project.basedir}/src/main/spotbugs/filter.xml</excludeFilterFile>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>
-                                check</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>
-                    org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>
-                    ${pmd.version}</version>
+                <version>${pmd.version}</version>
                 <executions>
                     <execution>
                         <goals>

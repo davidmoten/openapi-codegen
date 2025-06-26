@@ -47,7 +47,7 @@
 
         <dependency>
             <groupId>com.github.davidmoten</groupId>
-            <artifactId>openapi-codegen-spring-runtime</artifactId>
+            <artifactId>openapi-codegen-spring-boot-2-runtime</artifactId>
             <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
@@ -85,13 +85,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>junit-extras</artifactId>
-            <version>${junit.extras.version}</version>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -160,7 +153,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>${spring.boot2.version}</version>
                 <executions>
                     <execution>
                         <goals>
