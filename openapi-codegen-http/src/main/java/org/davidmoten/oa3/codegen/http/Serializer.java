@@ -20,8 +20,8 @@ public interface Serializer {
      * expected deterministic way using Jackson serialization (i.e the object could be 
      * an annotated Jackson object or an instance of {@link JsonNode}).
      * 
-     * @param in input
-     * @return map
+     * @param o object to get properties from, if null then returns an empty map
+     * @param contentType content type of the object, cannot be null
      */
     Map<String, Object> properties(Object o, String contentType);
     
