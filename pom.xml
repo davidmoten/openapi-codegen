@@ -108,6 +108,25 @@
     </modules>
 
     <build>
+        <pluginManagement>
+        <plugins>
+           <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${javadoc.version}</version>
+                <configuration>
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                    <skippedModules>openapi-codegen-maven-plugin-sb2-test,openapi-codegen-plugin-sb3-test,openapi-codegen-example-pet-store,openapi-codegen-example-pet-store-client</skippedModules>
+                    <source>8</source>
+                    <failOnError>false</failOnError>
+                    <doclint>none</doclint>
+                    <quiet>true</quiet>
+                </configuration>
+            </plugin>        
+        </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -119,24 +138,6 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${javadoc.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <source>8</source>
-                            <additionalJOption>-Xdoclint:none</additionalJOption>
-                            <quiet>true</quiet>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -217,9 +218,14 @@
                 <version>${javadoc.version}</version>
                 <configuration>
                     <aggregate>true</aggregate>
-                    <additionalJOption>-Xdoclint:none</additionalJOption>
-                    <excludePackageNames>odata.msgraph.client.beta.*:odata.msgraph.client.*:microsoft.dynamics.crm.*:microsoft.vs.analytics.*</excludePackageNames>
-                    <skippedModules>openapi-codegen-maven-plugin-test,openapi-codegen-example-pet-store</skippedModules>
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                    <skippedModules>openapi-codegen-maven-plugin-sb2-test,openapi-codegen-plugin-sb3-test,openapi-codegen-example-pet-store,openapi-codegen-example-pet-store-client</skippedModules>
+                    <source>8</source>
+                    <failOnError>false</failOnError>
+                    <doclint>none</doclint>
+                    <quiet>true</quiet>
                 </configuration>
             </plugin>
         </plugins>
