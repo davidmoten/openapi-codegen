@@ -32,7 +32,7 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <!--- required for JDK 17 compat -->
+        <!-- required for JDK 17 compat -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
