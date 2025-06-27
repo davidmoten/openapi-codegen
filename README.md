@@ -42,6 +42,11 @@ Try it online [here](https://openapi-codegen.davidmoten.org/prod/site/index.html
 * security schemes not modelled (implement an `Interceptor` or use `BearerAuthenticator` or `BearerAuthenticator`)
 * json only (xml not supported)
 
+## How to build
+Requires JDK 17+ to build all modules.
+
+`mvn clean install`
+
 ## Getting started
 
 Working examples are at [openapi-codegen-example-pet-store](https://github.com/davidmoten/openapi-codegen/tree/master/openapi-codegen-example-pet-store) (client and server) and [openapi-codegen-example-pet-store](https://github.com/davidmoten/openapi-codegen/tree/master/openapi-codegen-example-pet-store-client) (client only).
