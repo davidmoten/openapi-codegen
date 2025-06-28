@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.davidmoten</groupId>
         <artifactId>openapi-codegen-parent</artifactId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>0.2.1</version>
     </parent>
     <artifactId>openapi-codegen-spring-boot-2-runtime</artifactId>
     <name>${project.artifactId}</name>
