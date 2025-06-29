@@ -441,6 +441,21 @@ IntelliJ IDEA detects and warns about use of Optional types in fields and method
 
 An alternative to using Optional in a widespread fashion is to use `jakarta.annotation` `@Nullable` and `@Nonnull` annotations so that IDEs can provide some analysis of problematic null use. I chose not to do that but it's a valid approach too (both approaches have pros and cons).
 
+Here are some more benefits of Optional use in parameters:
+
+**Explicitly handles optionality**
+
+Optional clearly signals that a parameter might be absent, forcing the developer to explicitly handle the case where the value is not provided. This reduces the likelihood of NullPointerExceptions compared to simply using a nullable type and performing manual null checks.
+
+**Cleaner code for null checks**
+Optional provides convenient methods like `isPresent()`, `orElse()`, `orElseThrow()`, and `ifPresent()` that can lead to more concise and readable code for handling the presence or absence of a parameter, eliminating verbose if (param != null) blocks.
+
+**Improved API clarity**
+By using Optional in the method signature, the API consumer immediately understands that the parameter is not strictly required, enhancing the clarity of the controller's contract.
+
+**Simplified default value handling**
+`Optional.orElse()` allows for easily providing a default value when the parameter is not present, streamlining the logic for optional inputs.
+
 ## Testing
 Lots of unit tests happening, always room for more.
 
