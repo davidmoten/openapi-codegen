@@ -139,7 +139,7 @@ Here's an example showing more configuration options:
 * Be sure to specify the properties that are mandatory (using `required:`)
 * Set an `operationId` field for every path entry to ensure you get sensible generated method names (in client and server)
 * always specify `mapping` and `propertyName` fields for discriminated `oneOf` (but prefer non-discriminated `oneOf`)
-* use OpenAPI 3.0 not 3.1 (the world is still working on tool support for 3.0 and is not ready for 3.1)
+* use OpenAPI 3.0 not 3.1, or at least prefer OpenAPI 3.0 features (the world is is not ready for the breadth of 3.1 in terms of tool support)
 
 ## Generated code examples
 Some examples follow. Note the following:
