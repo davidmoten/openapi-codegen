@@ -448,12 +448,15 @@ Here are some more benefits of Optional use in parameters:
 Optional clearly signals that a parameter might be absent, forcing the developer to explicitly handle the case where the value is not provided. This reduces the likelihood of NullPointerExceptions compared to simply using a nullable type and performing manual null checks.
 
 **Cleaner code for null checks**
+
 Optional provides convenient methods like `isPresent()`, `orElse()`, `orElseThrow()`, and `ifPresent()` that can lead to more concise and readable code for handling the presence or absence of a parameter, eliminating verbose if (param != null) blocks.
 
 **Improved API clarity**
+
 By using Optional in the method signature, the API consumer immediately understands that the parameter is not strictly required, enhancing the clarity of the controller's contract.
 
 **Simplified default value handling**
+
 `Optional.orElse()` allows for easily providing a default value when the parameter is not present, streamlining the logic for optional inputs.
 
 ## Testing
