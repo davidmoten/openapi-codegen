@@ -21,8 +21,11 @@ import org.davidmoten.oa3.codegen.http.Interceptor;
 import org.davidmoten.oa3.codegen.http.MediaType;
 import org.davidmoten.oa3.codegen.http.Serializer;
 import org.davidmoten.oa3.codegen.http.service.HttpService;
+import org.davidmoten.oa3.codegen.runtime.Preconditions;
 
 import com.github.davidmoten.guavamini.Maps;
+
+import jakarta.annotation.Nonnull;
 
 public class ClientCodeWriter {
 
@@ -67,8 +70,9 @@ public class ClientCodeWriter {
 
         // write builder
         out.println();
-        out.line("public static %s<%s> basePath(%s basePath) {", ClientBuilder.class, out.simpleClassName(),
+        out.line("public static @%s %s<%s> basePath(@%s %s basePath) {", Nonnull.class, ClientBuilder.class, out.simpleClassName(), Nonnull.class,
                 String.class);
+        out.line("%s.checkNotNull(basePath, \"basePath\");", Preconditions.class);
         out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), %s.config(), basePath);",
                 ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
         out.closeParen();
@@ -77,7 +81,8 @@ public class ClientCodeWriter {
         if (!servers.isEmpty()) {
             
             out.println();
-            out.line("public static %s<%s> basePath(Server server) {", ClientBuilder.class, out.simpleClassName());
+            out.line("public static @%s %s<%s> basePath(@%s Server server) {", Nonnull.class, ClientBuilder.class, out.simpleClassName(), Nonnull.class);
+            out.line("%s.checkNotNull(server, \"server\");", Preconditions.class);
             out.line("return new %s<>(b -> new %s(b.serializer(), b.interceptors(), b.basePath(), b.httpService()), %s.config(), server.url());",
                     ClientBuilder.class, out.simpleClassName(), out.add(names.globalsFullClassName()));
             out.closeParen();
@@ -134,7 +139,7 @@ public class ClientCodeWriter {
             out.right().right();
             String params = m.parameters //
                     .stream() //
-                    .map(p -> String.format("\n%s%s %s", out.indent(),
+                    .map(p -> String.format("\n%s@%s %s %s", out.indent(), out.add(Nonnull.class),
                             ServerCodeWriterSpringBoot.toImportedType(p, out.imports()), p.identifier)) //
                     .collect(Collectors.joining(", "));
             out.left().left();
@@ -149,7 +154,7 @@ public class ClientCodeWriter {
             boolean hasPrimaryResponse = m.primaryStatusCode.isPresent() && m.primaryMediaType.isPresent();
             ServerCodeWriterSpringBoot.writeMethodJavadoc(out, m,
                     Optional.of("call builder"), Maps.empty());
-            out.line("public %s<%s> %s(%s) {", RequestBuilder.class, importedReturnType, m.methodName, params);
+            out.line("public @%s %s<%s> %s(%s) {", Nonnull.class, RequestBuilder.class, importedReturnType, m.methodName, params);
             out.line("return http(%s.%s, \"%s\")", HttpMethod.class, m.httpMethod.name(), m.path);
             out.right().right();
             Set<String> used = new HashSet<>();
@@ -199,7 +204,7 @@ public class ClientCodeWriter {
     
     private static void writeCustomMethod(CodePrintWriter out) {
         out.println();
-        out.line("public %s _custom(%s method, %s path) {" , Http.Builder.class, HttpMethod.class, String.class);
+        out.line("public @%s %s _custom(%s method, %s path) {" , Nonnull.class, Http.Builder.class, HttpMethod.class, String.class);
         out.line("return %s", Http.class);
         out.right().right();
         out.line(".method(method)");

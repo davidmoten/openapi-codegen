@@ -18,6 +18,8 @@ import org.davidmoten.oa3.codegen.runtime.MapBuilder;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+import jakarta.annotation.Nonnull;
+
 public class BuilderWriter {
 
     public static final class Field {
@@ -109,7 +111,7 @@ public class BuilderWriter {
             if (previousWasMandatory) {
                 if (!passBuilderIntoConstructor) {
                     out.println();
-                    out.line("public static %s builder() {", builderName);
+                    out.line("public static @%s %s builder() {", Nonnull.class, builderName);
                     out.line("return new %s();", builderName);
                     out.closeParen();
                 }
@@ -187,23 +189,25 @@ public class BuilderWriter {
             String builderField = inFirstBuilder ? "" : ".b";
             out.println();
             if (f.mapType.isPresent() && f.mapType.get() == MapType.ADDITIONAL_PROPERTIES) {
-                out.line("public %s<%s, %s> addTo%s(%s key, %s value) {", MapBuilder.class, out.add(f.fullClassName),
-                        nextBuilderName, Names.upperFirst(f.fieldName), String.class, out.add(f.fullClassName));
+                out.line("public @%s %s<%s, %s> addTo%s(@%s %s key, @%s %s value) {", Nonnull.class, MapBuilder.class, out.add(f.fullClassName),
+                        nextBuilderName, Names.upperFirst(f.fieldName), Nonnull.class, String.class, Nonnull.class, out.add(f.fullClassName));
+                out.line("%s.checkNotNull(key, \"key\");", Preconditions.class);
                 out.line("%s.checkNotNull(value, \"value\");", Preconditions.class);
                 out.line("return new %s<%s, %s>(this, x -> this%s.%s = x).add(key, value);", MapBuilder.class,
                         out.add(f.fullClassName), nextBuilderName, builderField, f.fieldName);
                 out.closeParen();
                 out.println();
-                out.line("public %s<%s, %s> addAllTo%s(%s<%s, %s> map) {", MapBuilder.class, out.add(f.fullClassName),
-                        nextBuilderName, Names.upperFirst(f.fieldName), Map.class, String.class,
+                out.line("public @%s %s<%s, %s> addAllTo%s(@%s %s<%s, %s> map) {", Nonnull.class, MapBuilder.class, out.add(f.fullClassName),
+                        nextBuilderName, Names.upperFirst(f.fieldName), Nonnull.class, Map.class, String.class,
                         out.add(f.fullClassName));
+                out.line("%s.checkNotNull(map, \"map\");", Preconditions.class);
                 out.line("return new %s<%s, %s>(this, x -> this%s.%s = x).addAll(map);", MapBuilder.class,
                         out.add(f.fullClassName), nextBuilderName, builderField, f.fieldName);
                 out.closeParen();
                 out.println();
             }
-            out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, baseImportedType(f, out.imports()),
-                    f.fieldName);
+            out.line("public @%s %s %s(@%s %s %s) {", Nonnull.class, nextBuilderName, f.fieldName, //
+                    Nonnull.class, baseImportedType(f, out.imports()), f.fieldName);
             if (f.mapType.isPresent()) {
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
             } else if (f.mandatory()) {
@@ -222,8 +226,8 @@ public class BuilderWriter {
 
             if (!f.mandatory() && !f.mapType.isPresent()) {
                 out.println();
-                out.line("public %s %s(%s %s) {", nextBuilderName, f.fieldName, enhancedImportedType(f, out.imports()),
-                        f.fieldName);
+                out.line("public @%s %s %s(@%s %s %s) {", Nonnull.class, nextBuilderName, f.fieldName, 
+                        Nonnull.class, enhancedImportedType(f, out.imports()), f.fieldName);
                 out.line("this%s.%s = %s;", builderField, f.fieldName, f.fieldName);
                 out.line("return this;");
                 out.closeParen();
@@ -235,7 +239,8 @@ public class BuilderWriter {
                 // only do this if field is mandatory
                 if (f.mandatory()) {
                     Indent indent = out.indent().copy().left();
-                    String s = String.format("%spublic static %s %s(%s %s) {\n", indent, nextBuilderName, f.fieldName,
+                    String s = String.format("%spublic static @%s %s %s(@%s %s %s) {\n", indent, out.add(Nonnull.class),
+                                nextBuilderName, f.fieldName, out.add(Nonnull.class),
                             baseImportedType(f, out.imports()), f.fieldName) //
                             + String.format("%sreturn builder().%s(%s);\n", indent.right(), f.fieldName, f.fieldName) //
                             + String.format("%s}\n", indent.left());
@@ -282,8 +287,8 @@ public class BuilderWriter {
         }
         
         out.println();
-        out.line("public static %s %s(%s %s) {", importedBuiltType, methodName, 
-                enhancedImportedType(field, out.imports()), field.fieldName);
+        out.line("public static @%s %s %s(@%s %s %s) {", Nonnull.class, importedBuiltType, methodName, 
+                Nonnull.class, enhancedImportedType(field, out.imports()), field.fieldName);
         
         String params = fields //
                 .stream() //
@@ -295,8 +300,8 @@ public class BuilderWriter {
         if (!field.mandatory() //
                 && !field.mapType.isPresent() && !field.isArray) {
             out.println();
-            out.line("public static %s %s(%s %s) {", importedBuiltType, field.fieldName,
-                    baseImportedType(field, out.imports()), field.fieldName);
+            out.line("public static @%s %s %s(@%s %s %s) {", Nonnull.class, importedBuiltType, field.fieldName,
+                    Nonnull.class, baseImportedType(field, out.imports()), field.fieldName);
             Class<?> c = field.nullable && !field.required ? JsonNullable.class : Optional.class;
             String params2 = fields //
                     .stream() //
@@ -324,7 +329,7 @@ public class BuilderWriter {
         out.line("new %s(%s);", importedBuiltType, params);
         out.left().left();
         out.println();
-        out.line("public static %s instance() {", importedBuiltType);
+        out.line("public static @%s %s instance() {", Nonnull.class, importedBuiltType);
         out.line("return INSTANCE;");
         out.closeParen();
     }
@@ -332,7 +337,7 @@ public class BuilderWriter {
     private static void writeBuildMethod(CodePrintWriter out, List<Field> fields, String importedBuiltType,
             String builderField, boolean useOf) {
         out.println();
-        out.line("public %s build() {", importedBuiltType);
+        out.line("public @%s %s build() {", Nonnull.class, importedBuiltType);
         String params = fields //
                 .stream() //
                 .map(x -> fieldExpression(builderField, x))
