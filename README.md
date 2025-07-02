@@ -428,7 +428,9 @@ Java docs written at the release of Java 8 in 2014 state that
 
 When is null likely to cause errors? If the consumer of the method is a member of a small team that knows a domain well perhaps the answer is not often. The answer is *anytime* if the consumer of the method is an arbitrary member of the public, and that is the use case being supported by *openapi-codegen*.
 
-Though interesting to know the intent, the statement carries little argumentation so is not the basis for a decision about more widespread use (in constructor and method parameters).
+Though interesting to know the intent, the statement carries little argumentation so is not the basis for a decision about more widespread use (in constructor and method parameters). 
+
+I suspect that the JDK 8 authors were scared of an explosion of Optional adaption in the Java ecosystem that might adversely affect performance (due to allocation pressure). Our use case is dominated by IO delays not GC pressure so there is an opportunity to add more meaning to method and constructor signatures.
 
 As a Scala user I came distinctly aware of the power of using `Option` everywhere instead of `null`. There are no end of conversations out there on the web about the evils of `null`, the case is strong for the cost of unexpected `NullPointerException`s.
 
