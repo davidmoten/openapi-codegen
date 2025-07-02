@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -24,7 +25,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class Circle {
 
     @JsonProperty("lat")
@@ -38,9 +39,9 @@ public final class Circle {
 
     @JsonCreator
     public Circle(
-            @JsonProperty("lat") Latitude lat,
-            @JsonProperty("lon") Longitude lon,
-            @JsonProperty("radiusNm") float radiusNm) {
+            @Nonnull @JsonProperty("lat") Latitude lat,
+            @Nonnull @JsonProperty("lon") Longitude lon,
+            @Nonnull @JsonProperty("radiusNm") float radiusNm) {
         if (Globals.config().validateInConstructor().test(Circle.class)) {
             Preconditions.checkNotNull(lat, "lat");
             Preconditions.checkNotNull(lon, "lon");
@@ -51,15 +52,15 @@ public final class Circle {
         this.radiusNm = radiusNm;
     }
 
-    public Latitude lat() {
+    public @Nonnull Latitude lat() {
         return lat;
     }
 
-    public Longitude lon() {
+    public @Nonnull Longitude lon() {
         return lon;
     }
 
-    public float radiusNm() {
+    public @Nonnull float radiusNm() {
         return radiusNm;
     }
 
@@ -71,19 +72,19 @@ public final class Circle {
                 .build();
     }
 
-    public Circle withLat(Latitude lat) {
+    public @Nonnull Circle withLat(@Nonnull Latitude lat) {
         return new Circle(lat, lon, radiusNm);
     }
 
-    public Circle withLon(Longitude lon) {
+    public @Nonnull Circle withLon(@Nonnull Longitude lon) {
         return new Circle(lat, lon, radiusNm);
     }
 
-    public Circle withRadiusNm(float radiusNm) {
+    public @Nonnull Circle withRadiusNm(@Nonnull float radiusNm) {
         return new Circle(lat, lon, radiusNm);
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -96,7 +97,7 @@ public final class Circle {
         Builder() {
         }
 
-        public BuilderWithLat lat(Latitude lat) {
+        public @Nonnull BuilderWithLat lat(@Nonnull Latitude lat) {
             this.lat = lat;
             return new BuilderWithLat(this);
         }
@@ -110,7 +111,7 @@ public final class Circle {
             this.b = b;
         }
 
-        public BuilderWithLon lon(Longitude lon) {
+        public @Nonnull BuilderWithLon lon(@Nonnull Longitude lon) {
             this.b.lon = lon;
             return new BuilderWithLon(this.b);
         }
@@ -124,7 +125,7 @@ public final class Circle {
             this.b = b;
         }
 
-        public BuilderWithRadiusNm radiusNm(float radiusNm) {
+        public @Nonnull BuilderWithRadiusNm radiusNm(@Nonnull float radiusNm) {
             this.b.radiusNm = radiusNm;
             return new BuilderWithRadiusNm(this.b);
         }
@@ -138,12 +139,12 @@ public final class Circle {
             this.b = b;
         }
 
-        public Circle build() {
+        public @Nonnull Circle build() {
             return new Circle(this.b.lat, this.b.lon, this.b.radiusNm);
         }
     }
 
-    public static BuilderWithLat lat(Latitude lat) {
+    public static @Nonnull BuilderWithLat lat(@Nonnull Latitude lat) {
         return builder().lat(lat);
     }
 
@@ -168,7 +169,7 @@ public final class Circle {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Circle.class, "lat", lat, "lon", lon, "radiusNm", radiusNm);
     }
 }

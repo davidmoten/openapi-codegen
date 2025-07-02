@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -25,8 +26,8 @@ import org.springframework.boot.context.properties.ConstructorBinding;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
-public final class Car implements Vehicle, HasWheels {
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
+public final class Car implements HasWheels, Vehicle {
 
     @JsonProperty("vehicleType")
     private final String vehicleType;
@@ -37,8 +38,8 @@ public final class Car implements Vehicle, HasWheels {
     @ConstructorBinding
     @JsonCreator
     private Car(
-            @JsonProperty("vehicleType") String vehicleType,
-            @JsonProperty("wheelsType") String wheelsType) {
+            @Nonnull @JsonProperty("vehicleType") String vehicleType,
+            @Nonnull @JsonProperty("wheelsType") String wheelsType) {
         Preconditions.checkEquals(DiscriminatorHelper.value(String.class, "car"), vehicleType, "vehicleType");
         this.vehicleType = vehicleType;
         Preconditions.checkEquals(DiscriminatorHelper.value(String.class, "four"), wheelsType, "wheelsType");
@@ -47,13 +48,13 @@ public final class Car implements Vehicle, HasWheels {
 
 
     @Override
-    public String vehicleType() {
+    public @Nonnull String vehicleType() {
         return DiscriminatorHelper.value(vehicleType);
     }
 
 
     @Override
-    public String wheelsType() {
+    public @Nonnull String wheelsType() {
         return DiscriminatorHelper.value(wheelsType);
     }
 
@@ -67,7 +68,7 @@ public final class Car implements Vehicle, HasWheels {
     private static final Car INSTANCE = 
             new Car(DiscriminatorHelper.value(String.class, "car"), DiscriminatorHelper.value(String.class, "four"));
 
-    public static Car instance() {
+    public static @Nonnull Car instance() {
         return INSTANCE;
     }
 
@@ -91,7 +92,7 @@ public final class Car implements Vehicle, HasWheels {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Car.class, "vehicleType", vehicleType, "wheelsType", wheelsType);
     }
 }

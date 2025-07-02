@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -24,7 +25,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class Pet3 {
 
     @JsonProperty("petType")
@@ -32,14 +33,14 @@ public final class Pet3 {
 
     @JsonCreator
     public Pet3(
-            @JsonProperty("petType") String petType) {
+            @Nonnull @JsonProperty("petType") String petType) {
         if (Globals.config().validateInConstructor().test(Pet3.class)) {
             Preconditions.checkNotNull(petType, "petType");
         }
         this.petType = petType;
     }
 
-    public String petType() {
+    public @Nonnull String petType() {
         return petType;
     }
 
@@ -49,7 +50,7 @@ public final class Pet3 {
                 .build();
     }
 
-    public static Pet3 petType(String petType) {
+    public static @Nonnull Pet3 petType(@Nonnull String petType) {
         return new Pet3(petType);
     }
 
@@ -72,7 +73,7 @@ public final class Pet3 {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Pet3.class, "petType", petType);
     }
 }

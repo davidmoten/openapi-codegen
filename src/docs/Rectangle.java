@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -24,7 +25,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class Rectangle {
 
     @JsonProperty("minLat")
@@ -41,10 +42,10 @@ public final class Rectangle {
 
     @JsonCreator
     public Rectangle(
-            @JsonProperty("minLat") Latitude minLat,
-            @JsonProperty("leftLon") Longitude leftLon,
-            @JsonProperty("heightDegrees") float heightDegrees,
-            @JsonProperty("widthDegrees") float widthDegrees) {
+            @Nonnull @JsonProperty("minLat") Latitude minLat,
+            @Nonnull @JsonProperty("leftLon") Longitude leftLon,
+            @Nonnull @JsonProperty("heightDegrees") float heightDegrees,
+            @Nonnull @JsonProperty("widthDegrees") float widthDegrees) {
         if (Globals.config().validateInConstructor().test(Rectangle.class)) {
             Preconditions.checkNotNull(minLat, "minLat");
             Preconditions.checkNotNull(leftLon, "leftLon");
@@ -59,19 +60,19 @@ public final class Rectangle {
         this.widthDegrees = widthDegrees;
     }
 
-    public Latitude minLat() {
+    public @Nonnull Latitude minLat() {
         return minLat;
     }
 
-    public Longitude leftLon() {
+    public @Nonnull Longitude leftLon() {
         return leftLon;
     }
 
-    public float heightDegrees() {
+    public @Nonnull float heightDegrees() {
         return heightDegrees;
     }
 
-    public float widthDegrees() {
+    public @Nonnull float widthDegrees() {
         return widthDegrees;
     }
 
@@ -84,23 +85,23 @@ public final class Rectangle {
                 .build();
     }
 
-    public Rectangle withMinLat(Latitude minLat) {
+    public @Nonnull Rectangle withMinLat(@Nonnull Latitude minLat) {
         return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 
-    public Rectangle withLeftLon(Longitude leftLon) {
+    public @Nonnull Rectangle withLeftLon(@Nonnull Longitude leftLon) {
         return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 
-    public Rectangle withHeightDegrees(float heightDegrees) {
+    public @Nonnull Rectangle withHeightDegrees(@Nonnull float heightDegrees) {
         return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 
-    public Rectangle withWidthDegrees(float widthDegrees) {
+    public @Nonnull Rectangle withWidthDegrees(@Nonnull float widthDegrees) {
         return new Rectangle(minLat, leftLon, heightDegrees, widthDegrees);
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -114,7 +115,7 @@ public final class Rectangle {
         Builder() {
         }
 
-        public BuilderWithMinLat minLat(Latitude minLat) {
+        public @Nonnull BuilderWithMinLat minLat(@Nonnull Latitude minLat) {
             this.minLat = minLat;
             return new BuilderWithMinLat(this);
         }
@@ -128,7 +129,7 @@ public final class Rectangle {
             this.b = b;
         }
 
-        public BuilderWithLeftLon leftLon(Longitude leftLon) {
+        public @Nonnull BuilderWithLeftLon leftLon(@Nonnull Longitude leftLon) {
             this.b.leftLon = leftLon;
             return new BuilderWithLeftLon(this.b);
         }
@@ -142,7 +143,7 @@ public final class Rectangle {
             this.b = b;
         }
 
-        public BuilderWithHeightDegrees heightDegrees(float heightDegrees) {
+        public @Nonnull BuilderWithHeightDegrees heightDegrees(@Nonnull float heightDegrees) {
             this.b.heightDegrees = heightDegrees;
             return new BuilderWithHeightDegrees(this.b);
         }
@@ -156,7 +157,7 @@ public final class Rectangle {
             this.b = b;
         }
 
-        public BuilderWithWidthDegrees widthDegrees(float widthDegrees) {
+        public @Nonnull BuilderWithWidthDegrees widthDegrees(@Nonnull float widthDegrees) {
             this.b.widthDegrees = widthDegrees;
             return new BuilderWithWidthDegrees(this.b);
         }
@@ -170,12 +171,12 @@ public final class Rectangle {
             this.b = b;
         }
 
-        public Rectangle build() {
+        public @Nonnull Rectangle build() {
             return new Rectangle(this.b.minLat, this.b.leftLon, this.b.heightDegrees, this.b.widthDegrees);
         }
     }
 
-    public static BuilderWithMinLat minLat(Latitude minLat) {
+    public static @Nonnull BuilderWithMinLat minLat(@Nonnull Latitude minLat) {
         return builder().minLat(minLat);
     }
 
@@ -205,7 +206,7 @@ public final class Rectangle {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Rectangle.class,
                 "minLat", minLat,
                 "leftLon", leftLon,

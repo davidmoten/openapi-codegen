@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Boolean;
 import java.lang.IllegalArgumentException;
@@ -28,7 +29,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class PetByType {
 
     @JsonProperty("pet_type")
@@ -39,8 +40,8 @@ public final class PetByType {
 
     @JsonCreator
     public PetByType(
-            @JsonProperty("pet_type") PetType pet_type,
-            @JsonProperty("hunts") Optional<Boolean> hunts) {
+            @Nonnull @JsonProperty("pet_type") PetType pet_type,
+            @Nonnull @JsonProperty("hunts") Optional<Boolean> hunts) {
         if (Globals.config().validateInConstructor().test(PetByType.class)) {
             Preconditions.checkNotNull(pet_type, "pet_type");
             Preconditions.checkNotNull(hunts, "hunts");
@@ -49,11 +50,11 @@ public final class PetByType {
         this.hunts = hunts;
     }
 
-    public PetType pet_type() {
+    public @Nonnull PetType pet_type() {
         return pet_type;
     }
 
-    public Optional<Boolean> hunts() {
+    public @Nonnull Optional<Boolean> hunts() {
         return hunts;
     }
 
@@ -64,19 +65,19 @@ public final class PetByType {
                 .build();
     }
 
-    public PetByType withPet_type(PetType pet_type) {
+    public @Nonnull PetByType withPet_type(@Nonnull PetType pet_type) {
         return new PetByType(pet_type, hunts);
     }
 
-    public PetByType withHunts(Optional<Boolean> hunts) {
+    public @Nonnull PetByType withHunts(@Nonnull Optional<Boolean> hunts) {
         return new PetByType(pet_type, hunts);
     }
 
-    public PetByType withHunts(boolean hunts) {
+    public @Nonnull PetByType withHunts(@Nonnull boolean hunts) {
         return new PetByType(pet_type, Optional.of(hunts));
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -88,7 +89,7 @@ public final class PetByType {
         Builder() {
         }
 
-        public BuilderWithPet_type pet_type(PetType pet_type) {
+        public @Nonnull BuilderWithPet_type pet_type(@Nonnull PetType pet_type) {
             this.pet_type = pet_type;
             return new BuilderWithPet_type(this);
         }
@@ -102,22 +103,22 @@ public final class PetByType {
             this.b = b;
         }
 
-        public BuilderWithPet_type hunts(boolean hunts) {
+        public @Nonnull BuilderWithPet_type hunts(@Nonnull boolean hunts) {
             this.b.hunts = Optional.of(hunts);
             return this;
         }
 
-        public BuilderWithPet_type hunts(Optional<Boolean> hunts) {
+        public @Nonnull BuilderWithPet_type hunts(@Nonnull Optional<Boolean> hunts) {
             this.b.hunts = hunts;
             return this;
         }
 
-        public PetByType build() {
+        public @Nonnull PetByType build() {
             return new PetByType(this.b.pet_type, this.b.hunts);
         }
     }
 
-    public static BuilderWithPet_type pet_type(PetType pet_type) {
+    public static @Nonnull BuilderWithPet_type pet_type(@Nonnull PetType pet_type) {
         return builder().pet_type(pet_type);
     }
 
@@ -130,14 +131,14 @@ public final class PetByType {
         private final String value;
 
         PetType(
-                String value) {
+                @Nonnull String value) {
             if (Globals.config().validateInConstructor().test(PetType.class)) {
                 Preconditions.checkNotNull(value, "value");
             }
             this.value = value;
         }
 
-        public String value() {
+        public @Nonnull String value() {
             return value;
         }
 
@@ -172,7 +173,7 @@ public final class PetByType {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(PetByType.class, "pet_type", pet_type, "hunts", hunts);
     }
 }

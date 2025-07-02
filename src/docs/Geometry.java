@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -26,7 +27,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class Geometry {
 
     @JsonValue
@@ -36,23 +37,29 @@ public final class Geometry {
         this.value = Preconditions.checkNotNull(value, "value");
     }
 
-    public Geometry(Rectangle value) {
+    private Geometry(Rectangle value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
 
-    public Geometry(Circle value) {
+    private Geometry(Circle value) {
         this.value = Preconditions.checkNotNull(value, "value");
     }
 
-    public Object value() {
+    public @Nonnull Object value() {
         return value;
     }
 
-    public static Geometry of(Rectangle value) {
+    public static @Nonnull Geometry of(@Nonnull Rectangle value) {
+        if (Globals.config().validateInConstructor().test(Geometry.class)) {
+            Preconditions.checkNotNull(value, "value");
+        }
         return new Geometry(value);
     }
 
-    public static Geometry of(Circle value) {
+    public static @Nonnull Geometry of(@Nonnull Circle value) {
+        if (Globals.config().validateInConstructor().test(Geometry.class)) {
+            Preconditions.checkNotNull(value, "value");
+        }
         return new Geometry(value);
     }
 
@@ -83,7 +90,7 @@ public final class Geometry {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Geometry.class, "value", value, "value", value);
     }
 }

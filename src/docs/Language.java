@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.IllegalArgumentException;
 import java.lang.Object;
@@ -13,7 +14,7 @@ import java.util.Objects;
 import org.davidmoten.oa3.codegen.runtime.Preconditions;
 import org.davidmoten.oa3.codegen.test.library.Globals;
 
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public enum Language {
 
     CHINESE("Chinese"),
@@ -38,14 +39,14 @@ public enum Language {
     private final String value;
 
     Language(
-            String value) {
+            @Nonnull String value) {
         if (Globals.config().validateInConstructor().test(Language.class)) {
             Preconditions.checkNotNull(value, "value");
         }
         this.value = value;
     }
 
-    public String value() {
+    public @Nonnull String value() {
         return value;
     }
 
