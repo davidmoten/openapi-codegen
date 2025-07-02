@@ -275,7 +275,7 @@ preserved in json then pass `JsonNullable.of(null)`. If you want the entry to be
 For situations where `nullable` is false (the default) then pass `java.util.Optional`. The API itself will make this obvious.
 
 ## Null safety
-The choice has been made with *openapi-generator* that nulls should never be passed as parameters in methods or constructors (and empty is represented by `Optional.empty()` or by not specifying a field in a builder method. 
+The choice has been made with *openapi-codegen* that nulls should never be passed as parameters in methods or constructors (and empty is represented by `Optional.empty()` or by not specifying a field in a builder method. 
 
 Java docs written at the release of Java 8 in 2014 state that
 
