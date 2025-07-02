@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Boolean;
 import java.lang.IllegalArgumentException;
@@ -34,7 +35,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class Dog3 {
 
     @JsonUnwrapped
@@ -44,8 +45,8 @@ public final class Dog3 {
     private final Detail detail;
 
     public Dog3(
-            Pet3 pet3,
-            Detail detail) {
+            @Nonnull Pet3 pet3,
+            @Nonnull Detail detail) {
         if (Globals.config().validateInConstructor().test(Dog3.class)) {
             Preconditions.checkNotNull(pet3, "pet3");
             Preconditions.checkNotNull(detail, "detail");
@@ -54,27 +55,27 @@ public final class Dog3 {
         this.detail = detail;
     }
 
-    public Pet3 asPet3() {
+    public @Nonnull Pet3 asPet3() {
         return pet3;
     }
 
-    public Detail asDetail() {
+    public @Nonnull Detail asDetail() {
         return detail;
     }
 
-    public String petType() {
+    public @Nonnull String petType() {
         return pet3.petType();
     }
 
-    public Optional<Boolean> bark() {
+    public @Nonnull Optional<Boolean> bark() {
         return detail.bark();
     }
 
-    public Optional<Detail.Breed> breed() {
+    public @Nonnull Optional<Detail.Breed> breed() {
         return detail.breed();
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -86,7 +87,7 @@ public final class Dog3 {
         Builder() {
         }
 
-        public BuilderWithPet3 pet3(Pet3 pet3) {
+        public @Nonnull BuilderWithPet3 pet3(@Nonnull Pet3 pet3) {
             this.pet3 = pet3;
             return new BuilderWithPet3(this);
         }
@@ -100,7 +101,7 @@ public final class Dog3 {
             this.b = b;
         }
 
-        public BuilderWithDetail detail(Detail detail) {
+        public @Nonnull BuilderWithDetail detail(@Nonnull Detail detail) {
             this.b.detail = detail;
             return new BuilderWithDetail(this.b);
         }
@@ -114,12 +115,12 @@ public final class Dog3 {
             this.b = b;
         }
 
-        public Dog3 build() {
+        public @Nonnull Dog3 build() {
             return new Dog3(this.b.pet3, this.b.detail);
         }
     }
 
-    public static BuilderWithPet3 pet3(Pet3 pet3) {
+    public static @Nonnull BuilderWithPet3 pet3(@Nonnull Pet3 pet3) {
         return builder().pet3(pet3);
     }
 
@@ -146,8 +147,8 @@ public final class Dog3 {
 
         @JsonCreator
         public Detail(
-                @JsonProperty("bark") Optional<Boolean> bark,
-                @JsonProperty("breed") Optional<Detail.Breed> breed) {
+                @Nonnull @JsonProperty("bark") Optional<Boolean> bark,
+                @Nonnull @JsonProperty("breed") Optional<Detail.Breed> breed) {
             if (Globals.config().validateInConstructor().test(Detail.class)) {
                 Preconditions.checkNotNull(bark, "bark");
                 Preconditions.checkNotNull(breed, "breed");
@@ -156,11 +157,11 @@ public final class Dog3 {
             this.breed = breed;
         }
 
-        public Optional<Boolean> bark() {
+        public @Nonnull Optional<Boolean> bark() {
             return bark;
         }
 
-        public Optional<Detail.Breed> breed() {
+        public @Nonnull Optional<Detail.Breed> breed() {
             return breed;
         }
 
@@ -171,23 +172,23 @@ public final class Dog3 {
                     .build();
         }
 
-        public Detail withBark(Optional<Boolean> bark) {
+        public @Nonnull Detail withBark(@Nonnull Optional<Boolean> bark) {
             return new Detail(bark, breed);
         }
 
-        public Detail withBark(boolean bark) {
+        public @Nonnull Detail withBark(@Nonnull boolean bark) {
             return new Detail(Optional.of(bark), breed);
         }
 
-        public Detail withBreed(Optional<Detail.Breed> breed) {
+        public @Nonnull Detail withBreed(@Nonnull Optional<Detail.Breed> breed) {
             return new Detail(bark, breed);
         }
 
-        public Detail withBreed(Detail.Breed breed) {
+        public @Nonnull Detail withBreed(@Nonnull Detail.Breed breed) {
             return new Detail(bark, Optional.of(breed));
         }
 
-        public static Builder builder() {
+        public static @Nonnull Builder builder() {
             return new Builder();
         }
 
@@ -199,27 +200,27 @@ public final class Dog3 {
             Builder() {
             }
 
-            public Builder bark(boolean bark) {
+            public @Nonnull Builder bark(@Nonnull boolean bark) {
                 this.bark = Optional.of(bark);
                 return this;
             }
 
-            public Builder bark(Optional<Boolean> bark) {
+            public @Nonnull Builder bark(@Nonnull Optional<Boolean> bark) {
                 this.bark = bark;
                 return this;
             }
 
-            public Builder breed(Detail.Breed breed) {
+            public @Nonnull Builder breed(@Nonnull Detail.Breed breed) {
                 this.breed = Optional.of(breed);
                 return this;
             }
 
-            public Builder breed(Optional<Detail.Breed> breed) {
+            public @Nonnull Builder breed(@Nonnull Optional<Detail.Breed> breed) {
                 this.breed = breed;
                 return this;
             }
 
-            public Detail build() {
+            public @Nonnull Detail build() {
                 return new Detail(this.bark, this.breed);
             }
         }
@@ -235,14 +236,14 @@ public final class Dog3 {
             private final String value;
 
             Breed(
-                    String value) {
+                    @Nonnull String value) {
                 if (Globals.config().validateInConstructor().test(Breed.class)) {
                     Preconditions.checkNotNull(value, "value");
                 }
                 this.value = value;
             }
 
-            public String value() {
+            public @Nonnull String value() {
                 return value;
             }
 
@@ -277,7 +278,7 @@ public final class Dog3 {
         }
 
         @Override
-        public String toString() {
+        public @Nonnull String toString() {
             return Util.toString(Detail.class, "bark", bark, "breed", breed);
         }
     }
@@ -302,7 +303,7 @@ public final class Dog3 {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Dog3.class, "pet3", pet3, "detail", detail);
     }
 }

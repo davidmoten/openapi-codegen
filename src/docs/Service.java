@@ -15,7 +15,7 @@ import org.davidmoten.oa3.codegen.test.library.schema.UsersPage;
  * <p>Library Demo
  * <p>Library demonstration of some features of OpenAPI 3 and <em>openapi-codegen</em>
  */
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public interface Service extends ErrorHandler {
 
     Service DEFAULT = new Service() {};

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -29,7 +30,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class ReadOnly {
 
     @JsonProperty("name")
@@ -46,10 +47,10 @@ public final class ReadOnly {
 
     @JsonCreator
     public ReadOnly(
-            @JsonProperty("name") String name,
-            @JsonProperty("readOnly") @JsonDeserialize(converter = OptionalMustBePresentConverter.class) Optional<String> readOnly,
-            @JsonProperty("readOnlyOptional") Optional<String> readOnlyOptional,
-            @JsonProperty("readOnlyOctets") @JsonDeserialize(using = OptionalPresentOctetsDeserializer.class) Optional<byte[]> readOnlyOctets) {
+            @Nonnull @JsonProperty("name") String name,
+            @Nonnull @JsonProperty("readOnly") @JsonDeserialize(converter = OptionalMustBePresentConverter.class) Optional<String> readOnly,
+            @Nonnull @JsonProperty("readOnlyOptional") Optional<String> readOnlyOptional,
+            @Nonnull @JsonProperty("readOnlyOctets") @JsonDeserialize(using = OptionalPresentOctetsDeserializer.class) Optional<byte[]> readOnlyOctets) {
         if (Globals.config().validateInConstructor().test(ReadOnly.class)) {
             Preconditions.checkNotNull(name, "name");
             Preconditions.checkNotNull(readOnly, "readOnly");
@@ -62,19 +63,19 @@ public final class ReadOnly {
         this.readOnlyOctets = readOnlyOctets;
     }
 
-    public String name() {
+    public @Nonnull String name() {
         return name;
     }
 
-    public Optional<String> readOnly() {
+    public @Nonnull Optional<String> readOnly() {
         return readOnly;
     }
 
-    public Optional<String> readOnlyOptional() {
+    public @Nonnull Optional<String> readOnlyOptional() {
         return readOnlyOptional;
     }
 
-    public Optional<byte[]> readOnlyOctets() {
+    public @Nonnull Optional<byte[]> readOnlyOctets() {
         return readOnlyOctets;
     }
 
@@ -87,27 +88,27 @@ public final class ReadOnly {
                 .build();
     }
 
-    public ReadOnly withName(String name) {
+    public @Nonnull ReadOnly withName(@Nonnull String name) {
         return new ReadOnly(name, readOnly, readOnlyOptional, readOnlyOctets);
     }
 
-    public ReadOnly withReadOnly(Optional<String> readOnly) {
+    public @Nonnull ReadOnly withReadOnly(@Nonnull Optional<String> readOnly) {
         return new ReadOnly(name, readOnly, readOnlyOptional, readOnlyOctets);
     }
 
-    public ReadOnly withReadOnlyOptional(Optional<String> readOnlyOptional) {
+    public @Nonnull ReadOnly withReadOnlyOptional(@Nonnull Optional<String> readOnlyOptional) {
         return new ReadOnly(name, readOnly, readOnlyOptional, readOnlyOctets);
     }
 
-    public ReadOnly withReadOnlyOptional(String readOnlyOptional) {
+    public @Nonnull ReadOnly withReadOnlyOptional(@Nonnull String readOnlyOptional) {
         return new ReadOnly(name, readOnly, Optional.of(readOnlyOptional), readOnlyOctets);
     }
 
-    public ReadOnly withReadOnlyOctets(Optional<byte[]> readOnlyOctets) {
+    public @Nonnull ReadOnly withReadOnlyOctets(@Nonnull Optional<byte[]> readOnlyOctets) {
         return new ReadOnly(name, readOnly, readOnlyOptional, readOnlyOctets);
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -121,7 +122,7 @@ public final class ReadOnly {
         Builder() {
         }
 
-        public BuilderWithName name(String name) {
+        public @Nonnull BuilderWithName name(@Nonnull String name) {
             this.name = name;
             return new BuilderWithName(this);
         }
@@ -135,42 +136,42 @@ public final class ReadOnly {
             this.b = b;
         }
 
-        public BuilderWithName readOnly(String readOnly) {
+        public @Nonnull BuilderWithName readOnly(@Nonnull String readOnly) {
             this.b.readOnly = Optional.of(readOnly);
             return this;
         }
 
-        public BuilderWithName readOnly(Optional<String> readOnly) {
+        public @Nonnull BuilderWithName readOnly(@Nonnull Optional<String> readOnly) {
             this.b.readOnly = readOnly;
             return this;
         }
 
-        public BuilderWithName readOnlyOptional(String readOnlyOptional) {
+        public @Nonnull BuilderWithName readOnlyOptional(@Nonnull String readOnlyOptional) {
             this.b.readOnlyOptional = Optional.of(readOnlyOptional);
             return this;
         }
 
-        public BuilderWithName readOnlyOptional(Optional<String> readOnlyOptional) {
+        public @Nonnull BuilderWithName readOnlyOptional(@Nonnull Optional<String> readOnlyOptional) {
             this.b.readOnlyOptional = readOnlyOptional;
             return this;
         }
 
-        public BuilderWithName readOnlyOctets(byte[] readOnlyOctets) {
+        public @Nonnull BuilderWithName readOnlyOctets(@Nonnull byte[] readOnlyOctets) {
             this.b.readOnlyOctets = Optional.of(readOnlyOctets);
             return this;
         }
 
-        public BuilderWithName readOnlyOctets(Optional<byte[]> readOnlyOctets) {
+        public @Nonnull BuilderWithName readOnlyOctets(@Nonnull Optional<byte[]> readOnlyOctets) {
             this.b.readOnlyOctets = readOnlyOctets;
             return this;
         }
 
-        public ReadOnly build() {
+        public @Nonnull ReadOnly build() {
             return new ReadOnly(this.b.name, this.b.readOnly, this.b.readOnlyOptional, this.b.readOnlyOctets);
         }
     }
 
-    public static BuilderWithName name(String name) {
+    public static @Nonnull BuilderWithName name(@Nonnull String name) {
         return builder().name(name);
     }
 
@@ -200,7 +201,7 @@ public final class ReadOnly {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(ReadOnly.class,
                 "name", name,
                 "readOnly", readOnly,

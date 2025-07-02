@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -30,7 +31,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class WriteOnly {
 
     @JsonProperty("name")
@@ -49,10 +50,10 @@ public final class WriteOnly {
 
     @JsonCreator
     public WriteOnly(
-            @JsonProperty("name") String name,
-            @JsonProperty("writeOnly") @JsonDeserialize(using = OptionalEmptyDeserializer.class) Optional<String> writeOnly,
-            @JsonProperty("writeOnlyOptional") @JsonDeserialize(using = OptionalEmptyDeserializer.class) Optional<String> writeOnlyOptional,
-            @JsonProperty("writeOnlyOctets") @JsonDeserialize(using = OptionalEmptyDeserializer.class) Optional<byte[]> writeOnlyOctets) {
+            @Nonnull @JsonProperty("name") String name,
+            @Nonnull @JsonProperty("writeOnly") @JsonDeserialize(using = OptionalEmptyDeserializer.class) Optional<String> writeOnly,
+            @Nonnull @JsonProperty("writeOnlyOptional") @JsonDeserialize(using = OptionalEmptyDeserializer.class) Optional<String> writeOnlyOptional,
+            @Nonnull @JsonProperty("writeOnlyOctets") @JsonDeserialize(using = OptionalEmptyDeserializer.class) Optional<byte[]> writeOnlyOctets) {
         if (Globals.config().validateInConstructor().test(WriteOnly.class)) {
             Preconditions.checkNotNull(name, "name");
             Preconditions.checkNotNull(writeOnly, "writeOnly");
@@ -65,19 +66,19 @@ public final class WriteOnly {
         this.writeOnlyOctets = writeOnlyOctets;
     }
 
-    public String name() {
+    public @Nonnull String name() {
         return name;
     }
 
-    public Optional<String> writeOnly() {
+    public @Nonnull Optional<String> writeOnly() {
         return writeOnly;
     }
 
-    public Optional<String> writeOnlyOptional() {
+    public @Nonnull Optional<String> writeOnlyOptional() {
         return writeOnlyOptional;
     }
 
-    public Optional<byte[]> writeOnlyOctets() {
+    public @Nonnull Optional<byte[]> writeOnlyOctets() {
         return writeOnlyOctets;
     }
 
@@ -90,27 +91,27 @@ public final class WriteOnly {
                 .build();
     }
 
-    public WriteOnly withName(String name) {
+    public @Nonnull WriteOnly withName(@Nonnull String name) {
         return new WriteOnly(name, writeOnly, writeOnlyOptional, writeOnlyOctets);
     }
 
-    public WriteOnly withWriteOnly(Optional<String> writeOnly) {
+    public @Nonnull WriteOnly withWriteOnly(@Nonnull Optional<String> writeOnly) {
         return new WriteOnly(name, writeOnly, writeOnlyOptional, writeOnlyOctets);
     }
 
-    public WriteOnly withWriteOnlyOptional(Optional<String> writeOnlyOptional) {
+    public @Nonnull WriteOnly withWriteOnlyOptional(@Nonnull Optional<String> writeOnlyOptional) {
         return new WriteOnly(name, writeOnly, writeOnlyOptional, writeOnlyOctets);
     }
 
-    public WriteOnly withWriteOnlyOptional(String writeOnlyOptional) {
+    public @Nonnull WriteOnly withWriteOnlyOptional(@Nonnull String writeOnlyOptional) {
         return new WriteOnly(name, writeOnly, Optional.of(writeOnlyOptional), writeOnlyOctets);
     }
 
-    public WriteOnly withWriteOnlyOctets(Optional<byte[]> writeOnlyOctets) {
+    public @Nonnull WriteOnly withWriteOnlyOctets(@Nonnull Optional<byte[]> writeOnlyOctets) {
         return new WriteOnly(name, writeOnly, writeOnlyOptional, writeOnlyOctets);
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -124,7 +125,7 @@ public final class WriteOnly {
         Builder() {
         }
 
-        public BuilderWithName name(String name) {
+        public @Nonnull BuilderWithName name(@Nonnull String name) {
             this.name = name;
             return new BuilderWithName(this);
         }
@@ -138,42 +139,42 @@ public final class WriteOnly {
             this.b = b;
         }
 
-        public BuilderWithName writeOnly(String writeOnly) {
+        public @Nonnull BuilderWithName writeOnly(@Nonnull String writeOnly) {
             this.b.writeOnly = Optional.of(writeOnly);
             return this;
         }
 
-        public BuilderWithName writeOnly(Optional<String> writeOnly) {
+        public @Nonnull BuilderWithName writeOnly(@Nonnull Optional<String> writeOnly) {
             this.b.writeOnly = writeOnly;
             return this;
         }
 
-        public BuilderWithName writeOnlyOptional(String writeOnlyOptional) {
+        public @Nonnull BuilderWithName writeOnlyOptional(@Nonnull String writeOnlyOptional) {
             this.b.writeOnlyOptional = Optional.of(writeOnlyOptional);
             return this;
         }
 
-        public BuilderWithName writeOnlyOptional(Optional<String> writeOnlyOptional) {
+        public @Nonnull BuilderWithName writeOnlyOptional(@Nonnull Optional<String> writeOnlyOptional) {
             this.b.writeOnlyOptional = writeOnlyOptional;
             return this;
         }
 
-        public BuilderWithName writeOnlyOctets(byte[] writeOnlyOctets) {
+        public @Nonnull BuilderWithName writeOnlyOctets(@Nonnull byte[] writeOnlyOctets) {
             this.b.writeOnlyOctets = Optional.of(writeOnlyOctets);
             return this;
         }
 
-        public BuilderWithName writeOnlyOctets(Optional<byte[]> writeOnlyOctets) {
+        public @Nonnull BuilderWithName writeOnlyOctets(@Nonnull Optional<byte[]> writeOnlyOctets) {
             this.b.writeOnlyOctets = writeOnlyOctets;
             return this;
         }
 
-        public WriteOnly build() {
+        public @Nonnull WriteOnly build() {
             return new WriteOnly(this.b.name, this.b.writeOnly, this.b.writeOnlyOptional, this.b.writeOnlyOctets);
         }
     }
 
-    public static BuilderWithName name(String name) {
+    public static @Nonnull BuilderWithName name(@Nonnull String name) {
         return builder().name(name);
     }
 
@@ -203,7 +204,7 @@ public final class WriteOnly {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(WriteOnly.class,
                 "name", name,
                 "writeOnly", writeOnly,

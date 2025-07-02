@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.IllegalArgumentException;
 import java.lang.Object;
@@ -33,7 +34,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class UploadPostRequestMultipartFormData {
 
     @JsonProperty("point")
@@ -47,9 +48,9 @@ public final class UploadPostRequestMultipartFormData {
 
     @JsonCreator
     public UploadPostRequestMultipartFormData(
-            @JsonProperty("point") Point point,
-            @JsonProperty("description") String description,
-            @JsonProperty("document") Document document) {
+            @Nonnull @JsonProperty("point") Point point,
+            @Nonnull @JsonProperty("description") String description,
+            @Nonnull @JsonProperty("document") Document document) {
         if (Globals.config().validateInConstructor().test(UploadPostRequestMultipartFormData.class)) {
             Preconditions.checkNotNull(point, "point");
             Preconditions.checkNotNull(description, "description");
@@ -60,15 +61,15 @@ public final class UploadPostRequestMultipartFormData {
         this.document = document;
     }
 
-    public Point point() {
+    public @Nonnull Point point() {
         return point;
     }
 
-    public String description() {
+    public @Nonnull String description() {
         return description;
     }
 
-    public Document document() {
+    public @Nonnull Document document() {
         return document;
     }
 
@@ -80,19 +81,19 @@ public final class UploadPostRequestMultipartFormData {
                 .build();
     }
 
-    public UploadPostRequestMultipartFormData withPoint(Point point) {
+    public @Nonnull UploadPostRequestMultipartFormData withPoint(@Nonnull Point point) {
         return new UploadPostRequestMultipartFormData(point, description, document);
     }
 
-    public UploadPostRequestMultipartFormData withDescription(String description) {
+    public @Nonnull UploadPostRequestMultipartFormData withDescription(@Nonnull String description) {
         return new UploadPostRequestMultipartFormData(point, description, document);
     }
 
-    public UploadPostRequestMultipartFormData withDocument(Document document) {
+    public @Nonnull UploadPostRequestMultipartFormData withDocument(@Nonnull Document document) {
         return new UploadPostRequestMultipartFormData(point, description, document);
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -105,7 +106,7 @@ public final class UploadPostRequestMultipartFormData {
         Builder() {
         }
 
-        public BuilderWithPoint point(Point point) {
+        public @Nonnull BuilderWithPoint point(@Nonnull Point point) {
             this.point = point;
             return new BuilderWithPoint(this);
         }
@@ -119,7 +120,7 @@ public final class UploadPostRequestMultipartFormData {
             this.b = b;
         }
 
-        public BuilderWithDescription description(String description) {
+        public @Nonnull BuilderWithDescription description(@Nonnull String description) {
             this.b.description = description;
             return new BuilderWithDescription(this.b);
         }
@@ -133,7 +134,7 @@ public final class UploadPostRequestMultipartFormData {
             this.b = b;
         }
 
-        public BuilderWithDocument document(Document document) {
+        public @Nonnull BuilderWithDocument document(@Nonnull Document document) {
             this.b.document = document;
             return new BuilderWithDocument(this.b);
         }
@@ -147,12 +148,12 @@ public final class UploadPostRequestMultipartFormData {
             this.b = b;
         }
 
-        public UploadPostRequestMultipartFormData build() {
+        public @Nonnull UploadPostRequestMultipartFormData build() {
             return new UploadPostRequestMultipartFormData(this.b.point, this.b.description, this.b.document);
         }
     }
 
-    public static BuilderWithPoint point(Point point) {
+    public static @Nonnull BuilderWithPoint point(@Nonnull Point point) {
         return builder().point(point);
     }
 
@@ -172,8 +173,8 @@ public final class UploadPostRequestMultipartFormData {
 
         @JsonCreator
         public Document(
-                @JsonProperty("contentType") Document.ContentType contentType,
-                @JsonProperty("value") @JsonDeserialize(using = OctetsDeserializer.class) byte[] value) {
+                @Nonnull @JsonProperty("contentType") Document.ContentType contentType,
+                @Nonnull @JsonProperty("value") @JsonDeserialize(using = OctetsDeserializer.class) byte[] value) {
             if (Globals.config().validateInConstructor().test(Document.class)) {
                 Preconditions.checkNotNull(contentType, "contentType");
                 Preconditions.checkNotNull(value, "value");
@@ -182,11 +183,11 @@ public final class UploadPostRequestMultipartFormData {
             this.value = value;
         }
 
-        public Document.ContentType contentType() {
+        public @Nonnull Document.ContentType contentType() {
             return contentType;
         }
 
-        public byte[] value() {
+        public @Nonnull byte[] value() {
             return value;
         }
 
@@ -197,15 +198,15 @@ public final class UploadPostRequestMultipartFormData {
                     .build();
         }
 
-        public Document withContentType(Document.ContentType contentType) {
+        public @Nonnull Document withContentType(@Nonnull Document.ContentType contentType) {
             return new Document(contentType, value);
         }
 
-        public Document withValue(byte[] value) {
+        public @Nonnull Document withValue(@Nonnull byte[] value) {
             return new Document(contentType, value);
         }
 
-        public static Builder builder() {
+        public static @Nonnull Builder builder() {
             return new Builder();
         }
 
@@ -217,7 +218,7 @@ public final class UploadPostRequestMultipartFormData {
             Builder() {
             }
 
-            public BuilderWithContentType contentType(Document.ContentType contentType) {
+            public @Nonnull BuilderWithContentType contentType(@Nonnull Document.ContentType contentType) {
                 this.contentType = contentType;
                 return new BuilderWithContentType(this);
             }
@@ -231,7 +232,7 @@ public final class UploadPostRequestMultipartFormData {
                 this.b = b;
             }
 
-            public BuilderWithValue value(byte[] value) {
+            public @Nonnull BuilderWithValue value(@Nonnull byte[] value) {
                 this.b.value = value;
                 return new BuilderWithValue(this.b);
             }
@@ -245,12 +246,12 @@ public final class UploadPostRequestMultipartFormData {
                 this.b = b;
             }
 
-            public Document build() {
+            public @Nonnull Document build() {
                 return new Document(this.b.contentType, this.b.value);
             }
         }
 
-        public static BuilderWithContentType contentType(Document.ContentType contentType) {
+        public static @Nonnull BuilderWithContentType contentType(@Nonnull Document.ContentType contentType) {
             return builder().contentType(contentType);
         }
 
@@ -262,14 +263,14 @@ public final class UploadPostRequestMultipartFormData {
             private final String value;
 
             ContentType(
-                    String value) {
+                    @Nonnull String value) {
                 if (Globals.config().validateInConstructor().test(ContentType.class)) {
                     Preconditions.checkNotNull(value, "value");
                 }
                 this.value = value;
             }
 
-            public String value() {
+            public @Nonnull String value() {
                 return value;
             }
 
@@ -304,7 +305,7 @@ public final class UploadPostRequestMultipartFormData {
         }
 
         @Override
-        public String toString() {
+        public @Nonnull String toString() {
             return Util.toString(Document.class, "contentType", contentType, "value", value);
         }
     }
@@ -330,7 +331,7 @@ public final class UploadPostRequestMultipartFormData {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(UploadPostRequestMultipartFormData.class, "point", point, "description", description, "document", document);
     }
 }

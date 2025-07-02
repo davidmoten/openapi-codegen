@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -22,7 +23,7 @@ import org.davidmoten.oa3.codegen.util.Util;
 
 @JsonDeserialize(using = PetSearch._Deserializer.class)
 @JsonSerialize(using = PetSearch._Serializer.class)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class PetSearch {
 
     private final Optional<PetByAge> petByAge;
@@ -30,8 +31,8 @@ public final class PetSearch {
     private final Optional<PetByType> petByType;
 
     private PetSearch(
-            Optional<PetByAge> petByAge,
-            Optional<PetByType> petByType) {
+            @Nonnull Optional<PetByAge> petByAge,
+            @Nonnull Optional<PetByType> petByType) {
         if (Globals.config().validateInConstructor().test(PetSearch.class)) {
             Preconditions.checkNotNull(petByAge, "petByAge");
             Preconditions.checkNotNull(petByType, "petByType");
@@ -40,23 +41,23 @@ public final class PetSearch {
         this.petByType = petByType;
     }
 
-    public static PetSearch of(
-            Optional<PetByAge> petByAge,
-            Optional<PetByType> petByType) {
+    public static @Nonnull PetSearch of(
+            @Nonnull Optional<PetByAge> petByAge,
+            @Nonnull Optional<PetByType> petByType) {
         PetSearch $o = new PetSearch(petByAge, petByType);
         RuntimeUtil.checkCanSerialize(Globals.config(), $o);
         return $o;
     }
 
-    public Optional<PetByAge> petByAge() {
+    public @Nonnull Optional<PetByAge> petByAge() {
         return petByAge;
     }
 
-    public Optional<PetByType> petByType() {
+    public @Nonnull Optional<PetByType> petByType() {
         return petByType;
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -68,27 +69,27 @@ public final class PetSearch {
         Builder() {
         }
 
-        public Builder petByAge(PetByAge petByAge) {
+        public @Nonnull Builder petByAge(@Nonnull PetByAge petByAge) {
             this.petByAge = Optional.of(petByAge);
             return this;
         }
 
-        public Builder petByAge(Optional<PetByAge> petByAge) {
+        public @Nonnull Builder petByAge(@Nonnull Optional<PetByAge> petByAge) {
             this.petByAge = petByAge;
             return this;
         }
 
-        public Builder petByType(PetByType petByType) {
+        public @Nonnull Builder petByType(@Nonnull PetByType petByType) {
             this.petByType = Optional.of(petByType);
             return this;
         }
 
-        public Builder petByType(Optional<PetByType> petByType) {
+        public @Nonnull Builder petByType(@Nonnull Optional<PetByType> petByType) {
             this.petByType = petByType;
             return this;
         }
 
-        public PetSearch build() {
+        public @Nonnull PetSearch build() {
             return PetSearch.of(this.petByAge, this.petByType);
         }
     }
@@ -129,7 +130,7 @@ public final class PetSearch {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(PetSearch.class, "petByAge", petByAge, "petByType", petByType);
     }
 }

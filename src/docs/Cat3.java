@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Boolean;
 import java.lang.Long;
@@ -33,7 +34,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class Cat3 {
 
     @JsonUnwrapped
@@ -43,8 +44,8 @@ public final class Cat3 {
     private final Detail detail;
 
     public Cat3(
-            Pet3 pet3,
-            Detail detail) {
+            @Nonnull Pet3 pet3,
+            @Nonnull Detail detail) {
         if (Globals.config().validateInConstructor().test(Cat3.class)) {
             Preconditions.checkNotNull(pet3, "pet3");
             Preconditions.checkNotNull(detail, "detail");
@@ -53,27 +54,27 @@ public final class Cat3 {
         this.detail = detail;
     }
 
-    public Pet3 asPet3() {
+    public @Nonnull Pet3 asPet3() {
         return pet3;
     }
 
-    public Detail asDetail() {
+    public @Nonnull Detail asDetail() {
         return detail;
     }
 
-    public String petType() {
+    public @Nonnull String petType() {
         return pet3.petType();
     }
 
-    public Optional<Boolean> hunts() {
+    public @Nonnull Optional<Boolean> hunts() {
         return detail.hunts();
     }
 
-    public Optional<Long> age() {
+    public @Nonnull Optional<Long> age() {
         return detail.age();
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -85,7 +86,7 @@ public final class Cat3 {
         Builder() {
         }
 
-        public BuilderWithPet3 pet3(Pet3 pet3) {
+        public @Nonnull BuilderWithPet3 pet3(@Nonnull Pet3 pet3) {
             this.pet3 = pet3;
             return new BuilderWithPet3(this);
         }
@@ -99,7 +100,7 @@ public final class Cat3 {
             this.b = b;
         }
 
-        public BuilderWithDetail detail(Detail detail) {
+        public @Nonnull BuilderWithDetail detail(@Nonnull Detail detail) {
             this.b.detail = detail;
             return new BuilderWithDetail(this.b);
         }
@@ -113,12 +114,12 @@ public final class Cat3 {
             this.b = b;
         }
 
-        public Cat3 build() {
+        public @Nonnull Cat3 build() {
             return new Cat3(this.b.pet3, this.b.detail);
         }
     }
 
-    public static BuilderWithPet3 pet3(Pet3 pet3) {
+    public static @Nonnull BuilderWithPet3 pet3(@Nonnull Pet3 pet3) {
         return builder().pet3(pet3);
     }
 
@@ -145,8 +146,8 @@ public final class Cat3 {
 
         @JsonCreator
         public Detail(
-                @JsonProperty("hunts") Optional<Boolean> hunts,
-                @JsonProperty("age") Optional<Long> age) {
+                @Nonnull @JsonProperty("hunts") Optional<Boolean> hunts,
+                @Nonnull @JsonProperty("age") Optional<Long> age) {
             if (Globals.config().validateInConstructor().test(Detail.class)) {
                 Preconditions.checkNotNull(hunts, "hunts");
                 Preconditions.checkNotNull(age, "age");
@@ -155,11 +156,11 @@ public final class Cat3 {
             this.age = age;
         }
 
-        public Optional<Boolean> hunts() {
+        public @Nonnull Optional<Boolean> hunts() {
             return hunts;
         }
 
-        public Optional<Long> age() {
+        public @Nonnull Optional<Long> age() {
             return age;
         }
 
@@ -170,23 +171,23 @@ public final class Cat3 {
                     .build();
         }
 
-        public Detail withHunts(Optional<Boolean> hunts) {
+        public @Nonnull Detail withHunts(@Nonnull Optional<Boolean> hunts) {
             return new Detail(hunts, age);
         }
 
-        public Detail withHunts(boolean hunts) {
+        public @Nonnull Detail withHunts(@Nonnull boolean hunts) {
             return new Detail(Optional.of(hunts), age);
         }
 
-        public Detail withAge(Optional<Long> age) {
+        public @Nonnull Detail withAge(@Nonnull Optional<Long> age) {
             return new Detail(hunts, age);
         }
 
-        public Detail withAge(long age) {
+        public @Nonnull Detail withAge(@Nonnull long age) {
             return new Detail(hunts, Optional.of(age));
         }
 
-        public static Builder builder() {
+        public static @Nonnull Builder builder() {
             return new Builder();
         }
 
@@ -198,27 +199,27 @@ public final class Cat3 {
             Builder() {
             }
 
-            public Builder hunts(boolean hunts) {
+            public @Nonnull Builder hunts(@Nonnull boolean hunts) {
                 this.hunts = Optional.of(hunts);
                 return this;
             }
 
-            public Builder hunts(Optional<Boolean> hunts) {
+            public @Nonnull Builder hunts(@Nonnull Optional<Boolean> hunts) {
                 this.hunts = hunts;
                 return this;
             }
 
-            public Builder age(long age) {
+            public @Nonnull Builder age(@Nonnull long age) {
                 this.age = Optional.of(age);
                 return this;
             }
 
-            public Builder age(Optional<Long> age) {
+            public @Nonnull Builder age(@Nonnull Optional<Long> age) {
                 this.age = age;
                 return this;
             }
 
-            public Detail build() {
+            public @Nonnull Detail build() {
                 return new Detail(this.hunts, this.age);
             }
         }
@@ -243,7 +244,7 @@ public final class Cat3 {
         }
 
         @Override
-        public String toString() {
+        public @Nonnull String toString() {
             return Util.toString(Detail.class, "hunts", hunts, "age", age);
         }
     }
@@ -268,7 +269,7 @@ public final class Cat3 {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Cat3.class, "pet3", pet3, "detail", detail);
     }
 }

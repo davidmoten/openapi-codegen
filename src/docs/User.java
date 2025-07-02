@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -25,7 +26,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class User {
 
     @JsonProperty("firstName")
@@ -42,10 +43,10 @@ public final class User {
 
     @JsonCreator
     public User(
-            @JsonProperty("firstName") String firstName,
-            @JsonProperty("lastName") String lastName,
-            @JsonProperty("email") String email,
-            @JsonProperty("mobile") Optional<String> mobile) {
+            @Nonnull @JsonProperty("firstName") String firstName,
+            @Nonnull @JsonProperty("lastName") String lastName,
+            @Nonnull @JsonProperty("email") String email,
+            @Nonnull @JsonProperty("mobile") Optional<String> mobile) {
         if (Globals.config().validateInConstructor().test(User.class)) {
             Preconditions.checkNotNull(firstName, "firstName");
             Preconditions.checkMinLength(firstName, 1, "firstName");
@@ -62,19 +63,19 @@ public final class User {
         this.mobile = mobile;
     }
 
-    public String firstName() {
+    public @Nonnull String firstName() {
         return firstName;
     }
 
-    public String lastName() {
+    public @Nonnull String lastName() {
         return lastName;
     }
 
-    public String email() {
+    public @Nonnull String email() {
         return email;
     }
 
-    public Optional<String> mobile() {
+    public @Nonnull Optional<String> mobile() {
         return mobile;
     }
 
@@ -87,27 +88,27 @@ public final class User {
                 .build();
     }
 
-    public User withFirstName(String firstName) {
+    public @Nonnull User withFirstName(@Nonnull String firstName) {
         return new User(firstName, lastName, email, mobile);
     }
 
-    public User withLastName(String lastName) {
+    public @Nonnull User withLastName(@Nonnull String lastName) {
         return new User(firstName, lastName, email, mobile);
     }
 
-    public User withEmail(String email) {
+    public @Nonnull User withEmail(@Nonnull String email) {
         return new User(firstName, lastName, email, mobile);
     }
 
-    public User withMobile(Optional<String> mobile) {
+    public @Nonnull User withMobile(@Nonnull Optional<String> mobile) {
         return new User(firstName, lastName, email, mobile);
     }
 
-    public User withMobile(String mobile) {
+    public @Nonnull User withMobile(@Nonnull String mobile) {
         return new User(firstName, lastName, email, Optional.of(mobile));
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -121,7 +122,7 @@ public final class User {
         Builder() {
         }
 
-        public BuilderWithFirstName firstName(String firstName) {
+        public @Nonnull BuilderWithFirstName firstName(@Nonnull String firstName) {
             this.firstName = firstName;
             return new BuilderWithFirstName(this);
         }
@@ -135,7 +136,7 @@ public final class User {
             this.b = b;
         }
 
-        public BuilderWithLastName lastName(String lastName) {
+        public @Nonnull BuilderWithLastName lastName(@Nonnull String lastName) {
             this.b.lastName = lastName;
             return new BuilderWithLastName(this.b);
         }
@@ -149,7 +150,7 @@ public final class User {
             this.b = b;
         }
 
-        public BuilderWithEmail email(String email) {
+        public @Nonnull BuilderWithEmail email(@Nonnull String email) {
             this.b.email = email;
             return new BuilderWithEmail(this.b);
         }
@@ -163,22 +164,22 @@ public final class User {
             this.b = b;
         }
 
-        public BuilderWithEmail mobile(String mobile) {
+        public @Nonnull BuilderWithEmail mobile(@Nonnull String mobile) {
             this.b.mobile = Optional.of(mobile);
             return this;
         }
 
-        public BuilderWithEmail mobile(Optional<String> mobile) {
+        public @Nonnull BuilderWithEmail mobile(@Nonnull Optional<String> mobile) {
             this.b.mobile = mobile;
             return this;
         }
 
-        public User build() {
+        public @Nonnull User build() {
             return new User(this.b.firstName, this.b.lastName, this.b.email, this.b.mobile);
         }
     }
 
-    public static BuilderWithFirstName firstName(String firstName) {
+    public static @Nonnull BuilderWithFirstName firstName(@Nonnull String firstName) {
         return builder().firstName(firstName);
     }
 
@@ -208,7 +209,7 @@ public final class User {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(User.class,
                 "firstName", firstName,
                 "lastName", lastName,

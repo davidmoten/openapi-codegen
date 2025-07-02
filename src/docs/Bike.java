@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -26,8 +27,8 @@ import org.springframework.boot.context.properties.ConstructorBinding;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
-public final class Bike implements Vehicle, HasWheels {
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
+public final class Bike implements HasWheels, Vehicle {
 
     @JsonProperty("vehicleType")
     private final String vehicleType;
@@ -41,9 +42,9 @@ public final class Bike implements Vehicle, HasWheels {
     @ConstructorBinding
     @JsonCreator
     private Bike(
-            @JsonProperty("vehicleType") String vehicleType,
-            @JsonProperty("wheelsType") String wheelsType,
-            @JsonProperty("colour") String colour) {
+            @Nonnull @JsonProperty("vehicleType") String vehicleType,
+            @Nonnull @JsonProperty("wheelsType") String wheelsType,
+            @Nonnull @JsonProperty("colour") String colour) {
         if (Globals.config().validateInConstructor().test(Bike.class)) {
             Preconditions.checkNotNull(colour, "colour");
         }
@@ -56,17 +57,17 @@ public final class Bike implements Vehicle, HasWheels {
 
 
     @Override
-    public String vehicleType() {
+    public @Nonnull String vehicleType() {
         return DiscriminatorHelper.value(vehicleType);
     }
 
 
     @Override
-    public String wheelsType() {
+    public @Nonnull String wheelsType() {
         return DiscriminatorHelper.value(wheelsType);
     }
 
-    public String colour() {
+    public @Nonnull String colour() {
         return colour;
     }
 
@@ -78,11 +79,11 @@ public final class Bike implements Vehicle, HasWheels {
                 .build();
     }
 
-    public Bike withColour(String colour) {
+    public @Nonnull Bike withColour(@Nonnull String colour) {
         return new Bike(vehicleType, wheelsType, colour);
     }
 
-    public static Bike colour(String colour) {
+    public static @Nonnull Bike colour(@Nonnull String colour) {
         return new Bike(DiscriminatorHelper.value(String.class, "bike"), DiscriminatorHelper.value(String.class, "two"), colour);
     }
 
@@ -107,7 +108,7 @@ public final class Bike implements Vehicle, HasWheels {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Bike.class, "vehicleType", vehicleType, "wheelsType", wheelsType, "colour", colour);
     }
 }

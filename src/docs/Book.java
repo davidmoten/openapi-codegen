@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -25,7 +26,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class Book {
 
     @JsonProperty("title")
@@ -54,14 +55,14 @@ public final class Book {
 
     @JsonCreator
     public Book(
-            @JsonProperty("title") String title,
-            @JsonProperty("author") PersonName author,
-            @JsonProperty("abstract") Optional<Abstract> abstract_,
-            @JsonProperty("publishedYear") Year publishedYear,
-            @JsonProperty("authorId") Id authorId,
-            @JsonProperty("isbn") ISBN isbn,
-            @JsonProperty("itemId") ItemId itemId,
-            @JsonProperty("language") Language language) {
+            @Nonnull @JsonProperty("title") String title,
+            @Nonnull @JsonProperty("author") PersonName author,
+            @Nonnull @JsonProperty("abstract") Optional<Abstract> abstract_,
+            @Nonnull @JsonProperty("publishedYear") Year publishedYear,
+            @Nonnull @JsonProperty("authorId") Id authorId,
+            @Nonnull @JsonProperty("isbn") ISBN isbn,
+            @Nonnull @JsonProperty("itemId") ItemId itemId,
+            @Nonnull @JsonProperty("language") Language language) {
         if (Globals.config().validateInConstructor().test(Book.class)) {
             Preconditions.checkNotNull(title, "title");
             Preconditions.checkNotNull(author, "author");
@@ -82,35 +83,35 @@ public final class Book {
         this.language = language;
     }
 
-    public String title() {
+    public @Nonnull String title() {
         return title;
     }
 
-    public PersonName author() {
+    public @Nonnull PersonName author() {
         return author;
     }
 
-    public Optional<Abstract> abstract_() {
+    public @Nonnull Optional<Abstract> abstract_() {
         return abstract_;
     }
 
-    public Year publishedYear() {
+    public @Nonnull Year publishedYear() {
         return publishedYear;
     }
 
-    public Id authorId() {
+    public @Nonnull Id authorId() {
         return authorId;
     }
 
-    public ISBN isbn() {
+    public @Nonnull ISBN isbn() {
         return isbn;
     }
 
-    public ItemId itemId() {
+    public @Nonnull ItemId itemId() {
         return itemId;
     }
 
-    public Language language() {
+    public @Nonnull Language language() {
         return language;
     }
 
@@ -127,43 +128,43 @@ public final class Book {
                 .build();
     }
 
-    public Book withTitle(String title) {
+    public @Nonnull Book withTitle(@Nonnull String title) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAuthor(PersonName author) {
+    public @Nonnull Book withAuthor(@Nonnull PersonName author) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAbstract_(Optional<Abstract> abstract_) {
+    public @Nonnull Book withAbstract_(@Nonnull Optional<Abstract> abstract_) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAbstract_(Abstract abstract_) {
+    public @Nonnull Book withAbstract_(@Nonnull Abstract abstract_) {
         return new Book(title, author, Optional.of(abstract_), publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withPublishedYear(Year publishedYear) {
+    public @Nonnull Book withPublishedYear(@Nonnull Year publishedYear) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withAuthorId(Id authorId) {
+    public @Nonnull Book withAuthorId(@Nonnull Id authorId) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withIsbn(ISBN isbn) {
+    public @Nonnull Book withIsbn(@Nonnull ISBN isbn) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withItemId(ItemId itemId) {
+    public @Nonnull Book withItemId(@Nonnull ItemId itemId) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public Book withLanguage(Language language) {
+    public @Nonnull Book withLanguage(@Nonnull Language language) {
         return new Book(title, author, abstract_, publishedYear, authorId, isbn, itemId, language);
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -181,7 +182,7 @@ public final class Book {
         Builder() {
         }
 
-        public BuilderWithTitle title(String title) {
+        public @Nonnull BuilderWithTitle title(@Nonnull String title) {
             this.title = title;
             return new BuilderWithTitle(this);
         }
@@ -195,7 +196,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithAuthor author(PersonName author) {
+        public @Nonnull BuilderWithAuthor author(@Nonnull PersonName author) {
             this.b.author = author;
             return new BuilderWithAuthor(this.b);
         }
@@ -209,7 +210,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithPublishedYear publishedYear(Year publishedYear) {
+        public @Nonnull BuilderWithPublishedYear publishedYear(@Nonnull Year publishedYear) {
             this.b.publishedYear = publishedYear;
             return new BuilderWithPublishedYear(this.b);
         }
@@ -223,7 +224,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithAuthorId authorId(Id authorId) {
+        public @Nonnull BuilderWithAuthorId authorId(@Nonnull Id authorId) {
             this.b.authorId = authorId;
             return new BuilderWithAuthorId(this.b);
         }
@@ -237,7 +238,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithIsbn isbn(ISBN isbn) {
+        public @Nonnull BuilderWithIsbn isbn(@Nonnull ISBN isbn) {
             this.b.isbn = isbn;
             return new BuilderWithIsbn(this.b);
         }
@@ -251,7 +252,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithItemId itemId(ItemId itemId) {
+        public @Nonnull BuilderWithItemId itemId(@Nonnull ItemId itemId) {
             this.b.itemId = itemId;
             return new BuilderWithItemId(this.b);
         }
@@ -265,7 +266,7 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithLanguage language(Language language) {
+        public @Nonnull BuilderWithLanguage language(@Nonnull Language language) {
             this.b.language = language;
             return new BuilderWithLanguage(this.b);
         }
@@ -279,22 +280,22 @@ public final class Book {
             this.b = b;
         }
 
-        public BuilderWithLanguage abstract_(Abstract abstract_) {
+        public @Nonnull BuilderWithLanguage abstract_(@Nonnull Abstract abstract_) {
             this.b.abstract_ = Optional.of(abstract_);
             return this;
         }
 
-        public BuilderWithLanguage abstract_(Optional<Abstract> abstract_) {
+        public @Nonnull BuilderWithLanguage abstract_(@Nonnull Optional<Abstract> abstract_) {
             this.b.abstract_ = abstract_;
             return this;
         }
 
-        public Book build() {
+        public @Nonnull Book build() {
             return new Book(this.b.title, this.b.author, this.b.abstract_, this.b.publishedYear, this.b.authorId, this.b.isbn, this.b.itemId, this.b.language);
         }
     }
 
-    public static BuilderWithTitle title(String title) {
+    public static @Nonnull BuilderWithTitle title(@Nonnull String title) {
         return builder().title(title);
     }
 
@@ -332,7 +333,7 @@ public final class Book {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(Book.class,
                 "title", title,
                 "author", author,

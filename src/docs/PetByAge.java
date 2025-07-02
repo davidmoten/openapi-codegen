@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.davidmoten.guavamini.Maps;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.Object;
 import java.lang.Override;
@@ -25,7 +26,7 @@ import org.davidmoten.oa3.codegen.util.Util;
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         creatorVisibility = JsonAutoDetect.Visibility.ANY,
         setterVisibility = JsonAutoDetect.Visibility.ANY)
-@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.1.18-SNAPSHOT")
+@Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public final class PetByAge {
 
     @JsonProperty("age")
@@ -36,8 +37,8 @@ public final class PetByAge {
 
     @JsonCreator
     public PetByAge(
-            @JsonProperty("age") long age,
-            @JsonProperty("nickname") Optional<String> nickname) {
+            @Nonnull @JsonProperty("age") long age,
+            @Nonnull @JsonProperty("nickname") Optional<String> nickname) {
         if (Globals.config().validateInConstructor().test(PetByAge.class)) {
             Preconditions.checkNotNull(nickname, "nickname");
         }
@@ -45,11 +46,11 @@ public final class PetByAge {
         this.nickname = nickname;
     }
 
-    public long age() {
+    public @Nonnull long age() {
         return age;
     }
 
-    public Optional<String> nickname() {
+    public @Nonnull Optional<String> nickname() {
         return nickname;
     }
 
@@ -60,19 +61,19 @@ public final class PetByAge {
                 .build();
     }
 
-    public PetByAge withAge(long age) {
+    public @Nonnull PetByAge withAge(@Nonnull long age) {
         return new PetByAge(age, nickname);
     }
 
-    public PetByAge withNickname(Optional<String> nickname) {
+    public @Nonnull PetByAge withNickname(@Nonnull Optional<String> nickname) {
         return new PetByAge(age, nickname);
     }
 
-    public PetByAge withNickname(String nickname) {
+    public @Nonnull PetByAge withNickname(@Nonnull String nickname) {
         return new PetByAge(age, Optional.of(nickname));
     }
 
-    public static Builder builder() {
+    public static @Nonnull Builder builder() {
         return new Builder();
     }
 
@@ -84,7 +85,7 @@ public final class PetByAge {
         Builder() {
         }
 
-        public BuilderWithAge age(long age) {
+        public @Nonnull BuilderWithAge age(@Nonnull long age) {
             this.age = age;
             return new BuilderWithAge(this);
         }
@@ -98,22 +99,22 @@ public final class PetByAge {
             this.b = b;
         }
 
-        public BuilderWithAge nickname(String nickname) {
+        public @Nonnull BuilderWithAge nickname(@Nonnull String nickname) {
             this.b.nickname = Optional.of(nickname);
             return this;
         }
 
-        public BuilderWithAge nickname(Optional<String> nickname) {
+        public @Nonnull BuilderWithAge nickname(@Nonnull Optional<String> nickname) {
             this.b.nickname = nickname;
             return this;
         }
 
-        public PetByAge build() {
+        public @Nonnull PetByAge build() {
             return new PetByAge(this.b.age, this.b.nickname);
         }
     }
 
-    public static BuilderWithAge age(long age) {
+    public static @Nonnull BuilderWithAge age(@Nonnull long age) {
         return builder().age(age);
     }
 
@@ -137,7 +138,7 @@ public final class PetByAge {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return Util.toString(PetByAge.class, "age", age, "nickname", nickname);
     }
 }
