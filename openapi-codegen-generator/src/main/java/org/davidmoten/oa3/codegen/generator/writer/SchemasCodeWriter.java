@@ -79,6 +79,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.davidmoten.guavamini.Maps;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public final class SchemasCodeWriter {
 
     private SchemasCodeWriter() {
@@ -109,11 +112,12 @@ public final class SchemasCodeWriter {
         out.println();
         out.line("private static volatile %s config = %s.builder().build();", Config.class, Config.class);
         out.println();
-        out.line("public static void setConfig(%s configuration) {", Config.class);
+        out.line("public static void setConfig(@%s %s configuration) {", Nonnull.class, Config.class);
+        out.line("%s.checkNotNull(configuration, \"configuration\");", Preconditions.class);
         out.line("config = configuration;");
         out.closeParen();
         out.println();
-        out.line("public static %s config() {", Config.class);
+        out.line("public static @%s %s config() {", Nonnull.class, Config.class);
         out.line("return config;");
         out.closeParen();
         out.closeParen();
@@ -408,7 +412,7 @@ public final class SchemasCodeWriter {
                 out.right().right();
                 final String parameters = cls.fields //
                         .stream() ///
-                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()),
+                        .map(x -> String.format("\n%s@%s %s %s", out.indent(), out.add(Nonnull.class), x.resolvedType(out.imports()),
                                 x.fieldName(cls)))
                         .collect(Collectors.joining(","));
                 out.left().left();
@@ -419,7 +423,7 @@ public final class SchemasCodeWriter {
                 cls.fields.forEach(x -> assignField(out, cls, x));
                 out.closeParen();
                 out.println();
-                out.line("public static %s of(%s) {", cls.simpleName(), parameters);
+                out.line("public static @%s %s of(%s) {", Nonnull.class, cls.simpleName(), parameters);
                 String fields = cls.fields.stream().map(x -> x.fieldName).collect(Collectors.joining(", "));
                 out.line("%s $o = new %s(%s);", cls.simpleName(), cls.simpleName(), fields);
                 out.line("%s.checkCanSerialize(%s.config(), $o);", //
@@ -443,7 +447,7 @@ public final class SchemasCodeWriter {
                 final String parameters = cls //
                         .fields //
                         .stream() //
-                        .map(x -> String.format("\n%s%s %s", out.indent(), x.resolvedType(out.imports()),
+                        .map(x -> String.format("\n%s@%s %s %s", out.indent(), out.add(Nonnull.class), x.resolvedType(out.imports()),
                                 x.fieldName(cls))) //
                         .collect(Collectors.joining(","));
                 out.left().left();
@@ -497,7 +501,7 @@ public final class SchemasCodeWriter {
                                         used.add(fieldName);
                                         String type = f.resolvedTypePublicConstructor(out.imports());
                                         out.println();
-                                        out.line("public %s %s() {", type, fieldName);
+                                        out.line("public @%s %s %s() {", Nonnull.class, type, fieldName);
                                         final String getter;
                                         if (c.get().classType == ClassType.ALL_OF) {
                                             getter = "as" + Names.upperFirst(fieldName);
@@ -586,7 +590,8 @@ public final class SchemasCodeWriter {
                 methodName = "of";
             }
             used.add(f.fullClassName);
-            out.line("public static %s %s(%s value) {", cls.simpleName(), methodName, out.add(f.fullClassName));
+            out.line("public static @%s %s %s(@%s %s value) {", Nonnull.class, cls.simpleName(), // 
+                    methodName, Nonnull.class, out.add(f.fullClassName));
             writeConstraintValidations(out, cls, names, interfaces, false, Collections.singletonList(f));
             out.line("return new %s(value);", cls.simpleName());
             out.closeParen();
@@ -698,7 +703,7 @@ public final class SchemasCodeWriter {
                         } else {
                             t = x.resolvedTypePublicConstructor(out.imports());
                         }
-                        return String.format("\n%s%s %s", out.indent(), t, x.fieldName(cls));
+                        return String.format("\n%s@%s %s %s", out.indent(), out.add(Nonnull.class), t, x.fieldName(cls));
                     }) //
                     .collect(Collectors.joining(","));
             out.left().left();
@@ -721,7 +726,8 @@ public final class SchemasCodeWriter {
                     } else {
                         t = f.resolvedTypePublicConstructor(out.imports());
                     }
-                    String annotations = cls.unwrapSingleField() ? "" //
+                    String annotations = String.format("@%s ", out.add(Nonnull.class));
+                    annotations += cls.unwrapSingleField() ? "" //
                             : String.format("@%s(\"%s\") ", out.add(JsonProperty.class), f.name);
                     if (f.writeOnly) {
                         annotations += String.format("@%s(using = %s.class) ", out.add(JsonDeserialize.class),
@@ -987,7 +993,7 @@ public final class SchemasCodeWriter {
                     .collect(Collectors.joining(""));
         }
         addOverrideAnnotation(out);
-        out.line("public %s toString() {", String.class);
+        out.line("public @%s %s toString() {", Nonnull.class, String.class);
         out.line("return %s.toString(%s.class%s);", Util.class, cls.simpleName(), s);
         out.closeParen();
     }
@@ -1026,6 +1032,7 @@ public final class SchemasCodeWriter {
             } else if (f.mapType.isPresent()) {
                 if (!f.isArray && f.isAdditionalProperties()) {
                     writeJsonAnySetter(out, cls, f);
+                    out.println();
                 }
                 final String expression = f.fieldName(cls);
                 writeGetter(out, f.resolvedTypeMapPublic(out.imports()), f.fieldName(cls), expression);
@@ -1076,7 +1083,7 @@ public final class SchemasCodeWriter {
                     String t = x.mapType.isPresent() ? x.resolvedTypeMapPublic(out.imports())
                             : x.resolvedTypePublicConstructor(out.imports());
                     out.println();
-                    out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)), t,
+                    out.line("public @%s %s with%s(@%s %s %s) {", Nonnull.class, cls.simpleName(), Names.upperFirst(x.fieldName(cls)), Nonnull.class,t,
                             x.fieldName(cls));
                     {
                         String params = fields.stream() //
@@ -1089,8 +1096,8 @@ public final class SchemasCodeWriter {
                         Optional<String> tNonOptional = x.resolvedTypePublicConstructorNonOptional(out.imports());
                         if (tNonOptional.isPresent() && !tNonOptional.get().equals(t)) {
                             out.println();
-                            out.line("public %s with%s(%s %s) {", cls.simpleName(), Names.upperFirst(x.fieldName(cls)),
-                                    tNonOptional.get(), x.fieldName(cls));
+                            out.line("public @%s %s with%s(@%s %s %s) {", Nonnull.class, cls.simpleName(), Names.upperFirst(x.fieldName(cls)),
+                                   Nonnull.class, tNonOptional.get(), x.fieldName(cls));
                             String params = fields.stream() //
                                     .map(y -> {
                                         if (y.fieldName(cls).equals(x.fieldName(cls))) {
@@ -1113,7 +1120,6 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeJsonAnySetter(CodePrintWriter out, Cls cls, Field f) {
-        out.println();
         out.line("@%s", JsonAnySetter.class);
         if (f.nullable) {
             out.line("private void put(%s key, %s<%s> value) {", String.class, JsonNullable.class,
@@ -1126,7 +1132,7 @@ public final class SchemasCodeWriter {
     }
 
     private static void writeGetter(CodePrintWriter out, String returnImportedType, String fieldName, String value) {
-        out.line("public %s %s() {", returnImportedType, fieldName);
+        out.line("public @%s %s %s() {", Nonnull.class, returnImportedType, fieldName);
         out.line("return %s;", value);
         out.closeParen();
     }
