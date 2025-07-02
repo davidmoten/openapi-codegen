@@ -428,11 +428,11 @@ Java docs written at the release of Java 8 in 2014 state that
 
 When is null likely to cause errors? If the consumer of the method is a member of a small team that knows a domain well perhaps the answer is not often. The answer is *anytime* if the consumer of the method is an arbitrary member of the public, and that is the use case being supported by *openapi-codegen*.
 
-Though interesting to know the intent, the statement carries little argumentation so is not the basis for a decision about more widespread use.
+Though interesting to know the intent, the statement carries little argumentation so is not the basis for a decision about more widespread use (in constructor and method parameters).
 
 As a Scala user I came distinctly aware of the power of using `Option` everywhere instead of `null`. There are no end of conversations out there on the web about the evils of `null`, the case is strong for the cost of unexpected `NullPointerException`s.
 
-As a Java user I've always been frustrated having to dive into javadoc to decide if a parameter is nullable. Life is easier if it's written into the signature of the parameter, and I don't mind wrapping the odd parameter with `Optional.ofNullable` (for those parameters that aren't constant, dynamically determined).
+As a Java user I've always been frustrated having to dive into javadoc to decide if a parameter is nullable. Life is easier if it's written into the signature of the parameter, and I don't mind wrapping the odd parameter with `Optional.ofNullable` (only required for those parameters that aren't constant, dynamically determined).
 
 HTTP API interaction is a fundamentally IO limited activity (though networks are getting faster and localhost networking is well ahead of interhost networking). As such the use of Optional wrappers here and there is not the performance consideration that it might be if GC pressure (from object creation) was a limiting factor.
 
@@ -440,7 +440,7 @@ Builder use means that unwrapped non-null values can always be passed as paramet
 
 IntelliJ IDEA detects and warns about use of Optional types in fields and method parameters. That's an unnecessary warning, I'd suppress it.
 
-An alternative to using Optional in a widespread fashion is to use `jakarta.annotation` `@Nullable` and `@Nonnull` annotations so that IDEs can provide some analysis of problematic null use. I chose not to do that but it's a valid approach too (both approaches have pros and cons).
+An alternative to using Optional in a widespread fashion is to use `jakarta.annotation` `@Nullable` and `@Nonnull` annotations parameters so that IDEs can provide some analysis of problematic null use. I chose not to do that but it's a valid approach too (both approaches have pros and cons).
 
 Here are some more benefits of Optional use in parameters:
 
