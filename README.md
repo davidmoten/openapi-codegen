@@ -274,6 +274,49 @@ preserved in json then pass `JsonNullable.of(null)`. If you want the entry to be
 
 For situations where `nullable` is false (the default) then pass `java.util.Optional`. The API itself will make this obvious.
 
+## Null safety
+The choice has been made with *openapi-generator* that nulls should never be passed as parameters in methods or constructors (and empty is represented by `Optional.empty()` or by not specifying a field in a builder method. 
+
+Java docs written at the release of Java 8 in 2014 state that
+
+>Optional is primarily intended for use as a method return type where there is a clear need to represent "no result," and where using null is likely to cause errors.
+
+When is null likely to cause errors? If the consumer of the method is a member of a small team that knows a domain well perhaps the answer is not often. The answer is *anytime* if the consumer of the method is an arbitrary member of the public, and that is the use case being supported by *openapi-codegen*.
+
+Though interesting to know the intent, the statement carries little argumentation so is not the basis for a decision about more widespread use (in constructor and method parameters). 
+
+I suspect that the JDK 8 authors were scared of an explosion of Optional adaption in the Java ecosystem that might adversely affect performance (due to allocation pressure). Our use case is dominated by IO delays not GC pressure so there is an opportunity to add more meaning to method and constructor signatures.
+
+As a Scala user I came distinctly aware of the power of using `Option` everywhere instead of `null`. There are no end of conversations out there on the web about the evils of `null`, the case is strong for the cost of unexpected `NullPointerException`s.
+
+As a Java user I've always been frustrated having to dive into javadoc to decide if a parameter is nullable. Life is easier if it's written into the signature of the parameter, and I don't mind wrapping the odd parameter with `Optional.ofNullable` (only required for those parameters that aren't constant, dynamically determined).
+
+HTTP API interaction is a fundamentally IO limited activity (though networks are getting faster and localhost networking is well ahead of interhost networking). As such the use of Optional wrappers here and there is not the performance consideration that it might be if GC pressure (from object creation) was a limiting factor.
+
+Builder use means that unwrapped non-null values can always be passed as parameters.
+
+IntelliJ IDEA detects and warns about use of Optional types in fields and method parameters. That's an unnecessary warning, I'd suppress it.
+
+An alternative to using Optional in a widespread fashion is to use `jakarta.annotation` `@Nullable` and `@Nonnull` annotations parameters so that IDEs can provide some analysis of problematic null use. I chose not to do that but it's a valid approach too (both approaches have pros and cons).
+
+Here are some more benefits of Optional use in parameters:
+
+**Explicitly handles optionality**
+
+Optional clearly signals that a parameter might be absent, forcing the developer to explicitly handle the case where the value is not provided. This reduces the likelihood of NullPointerExceptions compared to simply using a nullable type and performing manual null checks.
+
+**Cleaner code for null checks**
+
+Optional provides convenient methods like `isPresent()`, `orElse()`, `orElseThrow()`, and `ifPresent()` that can lead to more concise and readable code for handling the presence or absence of a parameter, eliminating verbose if (param != null) blocks.
+
+**Improved API clarity**
+
+By using Optional in the method signature, the API consumer immediately understands that the parameter is not strictly required, enhancing the clarity of the controller's contract.
+
+**Simplified default value handling**
+
+`Optional.orElse()` allows for easily providing a default value when the parameter is not present, streamlining the logic for optional inputs.
+
 ## Logging
 `slf4j` is used for logging. Add the implementation of your choice. 
 
@@ -418,49 +461,6 @@ So what's missing and what can we do about it? Quite understandably there is a s
 * testing approach in the project lacks JSON serialization and deserialization tests at a unit level (as opposed to starting up servers and doing integration tests)
 * *import mapping* is very poor, doesn't handle related objects and doesn't update service classes (non-model classes)
 * a LOT of bugs (3,500 open issues is an indicator)
-
-## Null safety
-The choice has been made with *openapi-generator* that nulls should never be passed as parameters in methods or constructors (and empty is represented by `Optional.empty()` or by not specifying a field in a builder method. 
-
-Java docs written at the release of Java 8 in 2014 state that
-
->Optional is primarily intended for use as a method return type where there is a clear need to represent "no result," and where using null is likely to cause errors.
-
-When is null likely to cause errors? If the consumer of the method is a member of a small team that knows a domain well perhaps the answer is not often. The answer is *anytime* if the consumer of the method is an arbitrary member of the public, and that is the use case being supported by *openapi-codegen*.
-
-Though interesting to know the intent, the statement carries little argumentation so is not the basis for a decision about more widespread use (in constructor and method parameters). 
-
-I suspect that the JDK 8 authors were scared of an explosion of Optional adaption in the Java ecosystem that might adversely affect performance (due to allocation pressure). Our use case is dominated by IO delays not GC pressure so there is an opportunity to add more meaning to method and constructor signatures.
-
-As a Scala user I came distinctly aware of the power of using `Option` everywhere instead of `null`. There are no end of conversations out there on the web about the evils of `null`, the case is strong for the cost of unexpected `NullPointerException`s.
-
-As a Java user I've always been frustrated having to dive into javadoc to decide if a parameter is nullable. Life is easier if it's written into the signature of the parameter, and I don't mind wrapping the odd parameter with `Optional.ofNullable` (only required for those parameters that aren't constant, dynamically determined).
-
-HTTP API interaction is a fundamentally IO limited activity (though networks are getting faster and localhost networking is well ahead of interhost networking). As such the use of Optional wrappers here and there is not the performance consideration that it might be if GC pressure (from object creation) was a limiting factor.
-
-Builder use means that unwrapped non-null values can always be passed as parameters.
-
-IntelliJ IDEA detects and warns about use of Optional types in fields and method parameters. That's an unnecessary warning, I'd suppress it.
-
-An alternative to using Optional in a widespread fashion is to use `jakarta.annotation` `@Nullable` and `@Nonnull` annotations parameters so that IDEs can provide some analysis of problematic null use. I chose not to do that but it's a valid approach too (both approaches have pros and cons).
-
-Here are some more benefits of Optional use in parameters:
-
-**Explicitly handles optionality**
-
-Optional clearly signals that a parameter might be absent, forcing the developer to explicitly handle the case where the value is not provided. This reduces the likelihood of NullPointerExceptions compared to simply using a nullable type and performing manual null checks.
-
-**Cleaner code for null checks**
-
-Optional provides convenient methods like `isPresent()`, `orElse()`, `orElseThrow()`, and `ifPresent()` that can lead to more concise and readable code for handling the presence or absence of a parameter, eliminating verbose if (param != null) blocks.
-
-**Improved API clarity**
-
-By using Optional in the method signature, the API consumer immediately understands that the parameter is not strictly required, enhancing the clarity of the controller's contract.
-
-**Simplified default value handling**
-
-`Optional.orElse()` allows for easily providing a default value when the parameter is not present, streamlining the logic for optional inputs.
 
 ## Testing
 Lots of unit tests happening, always room for more.
