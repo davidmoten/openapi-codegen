@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
 
 import java.lang.String;
 
@@ -16,5 +17,5 @@ import java.lang.String;
 @Generated(value = "com.github.davidmoten:openapi-codegen-runtime:0.2.2-SNAPSHOT")
 public interface Vehicle {
 
-    String vehicleType();
+    @Nonnull String vehicleType();
 }

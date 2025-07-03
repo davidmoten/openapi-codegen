@@ -282,7 +282,8 @@ public final class SchemasCodeWriter {
         } else {
             Stream<String> a = interfaces //
                     .stream() //
-                    .map(x -> x.fullClassName);
+                    .map(x -> x.fullClassName) //
+                    .sorted(); // ensure deterministic order
             Stream<String> b = Stream.of(HasEncoding.class.getCanonicalName()) //
                     .filter(x -> cls.hasEncoding() && cls.classType != ClassType.ENUM);
             // for use with ContentType class
@@ -388,7 +389,7 @@ public final class SchemasCodeWriter {
     private static void writePolymorphicClassContent(CodePrintWriter out, Cls cls, Names names, Map<String, Set<Cls>> fullClassNameInterfaces) {
         if (cls.classType == ClassType.ONE_OR_ANY_OF_DISCRIMINATED) {
             out.println();
-            out.line("%s %s();", String.class, cls.discriminator.fieldName);
+            out.line("@%s %s %s();", Nonnull.class, String.class, cls.discriminator.fieldName);
         } else {
             if (cls.classType == ClassType.ONE_OF_NON_DISCRIMINATED) {
                 out.println();
