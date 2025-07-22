@@ -1,7 +1,7 @@
 # openapi-codegen
 <a href="https://github.com/davidmoten/openapi-codegen/actions/workflows/ci.yml"><img src="https://github.com/davidmoten/openapi-codegen/actions/workflows/ci.yml/badge.svg"/></a><br/>
 [![codecov](https://codecov.io/gh/davidmoten/openapi-codegen/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/openapi-codegen)<br/>
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.gov.amsa/openapi-codegen/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.gov.amsa/openapi-codegen)<br/>
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.davidmoten/openapi-codegen-maven-plugin)](https://central.sonatype.com/artifact/com.github.davidmoten/openapi-codegen-maven-plugin)<br/>
 
 Generates server-side and client-side Java classes of OpenAPI v3.0.3 (3.1 support coming bit-by-bit) using Jackson for serialization/deserialization, server-side targets Spring Boot. Born out of frustrations with [*openapi-generator*](https://github.com/OpenAPITools/openapi-generator) and can be used standalone or in partnership with that project.
 
