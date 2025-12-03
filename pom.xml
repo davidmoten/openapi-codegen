@@ -40,9 +40,12 @@
         <spring.boot2.version>2.7.18</spring.boot2.version>
         <spring5.version>5.3.39</spring5.version>
         <spring.boot3.version>3.5.3</spring.boot3.version>
+        <spring.boot4.version>4.0.0</spring.boot4.version>
         <spring6.version>6.2.8</spring6.version>
+        <spring7.version>7.0.1</spring7.version>
         <httpclient5.version>5.5.1</httpclient5.version>
         <junit.version>5.13.4</junit.version>
+        <junit6.version>6.0.1</junit6.version>
         <jacoco.version>0.8.13</jacoco.version>
         <spotbugs.plugin.version>4.8.6.7</spotbugs.plugin.version>
         <bundle.plugin.version>6.0.0</bundle.plugin.version>
@@ -98,11 +101,13 @@
         <module>openapi-codegen-spring-boot-core</module>
         <module>openapi-codegen-spring-boot-2-runtime</module>
         <module>openapi-codegen-spring-boot-3-runtime</module>
+        <module>openapi-codegen-spring-boot-4-runtime</module>
         <module>openapi-codegen-http</module>
         <module>openapi-codegen-client-runtime</module>
         <module>openapi-codegen-maven-plugin</module>
         <module>openapi-codegen-maven-plugin-sb2-test</module>
         <module>openapi-codegen-maven-plugin-sb3-test</module>
+        <module>openapi-codegen-maven-plugin-sb4-test</module>
         <module>openapi-codegen-example-pet-store</module>
         <module>openapi-codegen-example-pet-store-client</module>
     </modules>

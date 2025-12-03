@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FindBugsFilter>
+  <Bug pattern="SE_BAD_FIELD"/>
+  <Bug pattern="EI_EXPOSE_REP2"/>
+  <And>
+    <Class name="org.davidmoten.oa3.codegen.runtime.Config$Builder"/>
+    <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+  </And>
+</FindBugsFilter>
