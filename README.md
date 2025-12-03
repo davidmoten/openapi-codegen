@@ -12,7 +12,7 @@ Try it online [here](https://openapi-codegen.davidmoten.org/prod/site/index.html
 * Immutable generated schema classes (none of this mutable Java beans getters-and-setters rubbish)
 * Extensively unit tested (and easy to add more to either demonstrate problems or correctness)
 * Supports Java 8, 11, 17, 21 (CI)
-* Supports Spring Boot 2.x, 3.x server-side
+* Supports Spring Boot 2.x, 3.x, 4.x server-side
 * Supports `oneOf`(discriminated/non-discriminated), `anyOf` (non-discriminated), `allOf`
 * `oneOf` and `anyOf` validate on creation
 * `allOf` generates an uber object with all members properties and `asBlah()` methods to access the individual members in a typed fashion
@@ -44,7 +44,7 @@ Try it online [here](https://openapi-codegen.davidmoten.org/prod/site/index.html
 * json only (xml not supported)
 
 ## How to build
-Requires JDK 17+ to build all modules.
+Requires JDK 21+ to build all modules.
 
 `mvn clean install`
 
