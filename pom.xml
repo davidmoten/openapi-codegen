@@ -8,7 +8,7 @@
         <version>0.2.4</version>
     </parent>
     <artifactId>openapi-codegen-parent</artifactId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2.3</version>
 
     <name>${project.artifactId}</name>
     <description>Generates objects from OpenAPI schema v3</description>
@@ -90,7 +90,7 @@
         <connection>${scm.url}</connection>
         <developerConnection>${scm.url}</developerConnection>
         <url>${scm.url}</url>
-        <tag>0.1</tag>
+        <tag>0.2.3</tag>
     </scm>
 
 
