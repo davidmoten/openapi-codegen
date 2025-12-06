@@ -138,7 +138,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>springboot3</generator>
+                            <generator>springboot4</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.main</basePackage>
                             <sources>
                                 <directory>${definitions}</directory>
@@ -155,7 +155,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generator>springboot3</generator>
+                            <generator>springboot4</generator>
                             <basePackage>org.davidmoten.oa3.codegen.test.paths</basePackage>
                             <sources>
                                 <directory>${definitions}</directory>

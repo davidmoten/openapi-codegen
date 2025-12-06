@@ -777,7 +777,7 @@ public final class SchemasCodeWriter {
 
     private static void addConstructorBindingAnnotation(CodePrintWriter out, Names names) {
         if (names.generateService()) {
-            if (names.generatorType() == ServerGeneratorType.SPRING_BOOT_3) {
+            if (names.generatorType() != ServerGeneratorType.SPRING_BOOT_2) {
                 out.line("@%s", out.add(
                         ConstructorBinding.class.getName().replace("ConstructorBinding", "bind.ConstructorBinding")));
             } else {
