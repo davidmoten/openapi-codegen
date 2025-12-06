@@ -11,7 +11,7 @@ Try it online [here](https://openapi-codegen.davidmoten.org/prod/site/index.html
 * Very clean minimal generated code (reused logic is in runtime libraries (server or client))
 * Immutable generated schema classes (none of this mutable Java beans getters-and-setters rubbish)
 * Extensively unit tested (and easy to add more to either demonstrate problems or correctness)
-* Supports Java 8, 11, 17, 21 (CI)
+* Supports Java 8, 11, 17, 21, 25 (CI)
 * Supports Spring Boot 2.x, 3.x, 4.x server-side
 * Supports `oneOf`(discriminated/non-discriminated), `anyOf` (non-discriminated), `allOf`
 * `oneOf` and `anyOf` validate on creation
