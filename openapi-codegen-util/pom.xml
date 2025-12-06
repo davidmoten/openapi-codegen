@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.davidmoten</groupId>
         <artifactId>openapi-codegen-parent</artifactId>
-        <version>0.2.4</version>
+        <version>0.2.5-SNAPSHOT</version>
     </parent>
     <artifactId>openapi-codegen-util</artifactId>
     <name>${project.artifactId}</name>
